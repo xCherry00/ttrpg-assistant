@@ -1,0 +1,48 @@
+/* =========================================================
+   ACCOUNT TAB NAV — shared by Profile, Friends, Settings
+   ========================================================= */
+
+.accountTabNav {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0;
+}
+
+.accountTab {
+  padding: 10px 20px;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-2);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  transition: color 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+  cursor: pointer;
+}
+
+.accountTab:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.accountTab.is-active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  background: var(--primary-dim);
+}
+
+/* ─── LIGHT THEME ──────────────────────────────────── */
+
+:root[data-theme="light"] .accountTabNav {
+  border-bottom-color: rgba(80,58,20,0.14);
+}
+
+:root[data-theme="light"] .accountTab:hover {
+  background: rgba(208,138,30,0.06);
+}
+
+:root[data-theme="light"] .accountTab.is-active {
+  background: color-mix(in srgb, var(--primary) 8%, white 92%);
+}

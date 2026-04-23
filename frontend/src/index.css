@@ -1,0 +1,57 @@
+:root {
+  --bg: #0b0f19;
+  --panel: rgba(255,255,255,0.06);
+  --panel2: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.10);
+  --border2: rgba(255,255,255,0.08);
+  --text: #e7eaf0;
+  --muted: rgba(231,234,240,0.75);
+  --primary: #2b6cff;
+  --danger: rgba(255, 80, 80, 0.14);
+  --dangerBorder: rgba(255, 80, 80, 0.35);
+  --shadow: 0 18px 45px rgba(0,0,0,0.35);
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: radial-gradient(1000px 600px at 20% 10%, rgba(43,108,255,0.18), transparent 55%),
+              radial-gradient(900px 500px at 90% 30%, rgba(165,72,255,0.12), transparent 55%),
+              var(--bg);
+  color: var(--text);
+}
+
+a { color: inherit; }
+
+.container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 28px 16px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+
+.panel-soft {
+  background: var(--panel2);
+  border: 1px solid var(--border2);
+  border-radius: 18px;
+}
+
+.kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: rgba(231,234,240,0.9);
+}
+

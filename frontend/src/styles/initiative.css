@@ -1,0 +1,583 @@
+/* =========================================================
+   INITIATIVE (GRID VERSION) — stabilny layout, bez rozjazdów
+   + MODAL jako okienko (overlay)
+   ========================================================= */
+
+/* ===== Page ===== */
+.page.page--wide {
+  max-width: 1500px;
+  width: 100%;
+}
+
+/* ===== Toolbar ===== */
+.initToolbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+.initTurnButtons {
+  display: flex;
+  gap: 4px;
+  border-left: 1px solid var(--border);
+  padding-left: 8px;
+}
+
+.initTurnButtons .btn {
+  font-size: 12px;
+  padding: 8px 14px;
+}
+
+/* ===== Wrap ===== */
+.initTableWrap--wide { width: 100%; }
+
+.initTableWrap {
+  border-radius: 0;
+  border: 1px solid var(--border-warm);
+  background: transparent;
+  overflow: hidden;
+}
+
+/* Scroll pionowy */
+.initTableScroll {
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 68vh;
+}
+
+/* =========================================================
+   GRID
+   Kolumny: Uczestnik | Typ | Inicjatywa | AC | HP Max | HP | Notatka | Kosz
+   ========================================================= */
+.initGrid { width: 100%; }
+
+.initGridHeader,
+.initGridRow {
+  display: grid;
+  grid-template-columns:
+    minmax(240px, 25%)   /* Uczestnik */
+    minmax(120px, 12%)   /* Typ */
+    minmax(90px, 8%)     /* Inicjatywa */
+    minmax(60px, 6%)     /* AC */
+    minmax(80px, 7%)     /* HP Max */
+    minmax(260px, 22%)   /* HP */
+    minmax(180px, 14%)   /* Notatka */
+    56px;                /* Kosz */
+  align-items: center;
+  column-gap: 10px;
+}
+
+.initGridHeader {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 10px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--primary);
+  border-bottom: 1px solid var(--border-warm);
+  background: rgba(10, 12, 18, 0.96);
+  backdrop-filter: blur(10px);
+  text-align: center;
+}
+
+.initGridRow {
+  position: relative;
+  padding: 10px 10px;
+  border-bottom: 1px solid rgba(208,138,30,0.07);
+  min-width: 0;
+  transition: all 0.2s ease;
+  cursor: grab;
+}
+
+.initGridRow:active {
+  cursor: grabbing;
+}
+
+.initGridRow.is-dragging {
+  opacity: 0.5;
+  background: transparent;
+  cursor: grabbing;
+}
+
+.initGridRow.is-drag-over {
+  background: rgba(124, 92, 255, 0.15);
+  border-top: 2px solid rgba(124, 92, 255, 0.5);
+  border-bottom: 2px solid rgba(124, 92, 255, 0.5);
+}
+
+.initGridRow.is-active-turn {
+  background: rgba(232, 181, 88, 0.10);
+  border-left: 4px solid var(--primary);
+  padding-left: 6px;
+  box-shadow: inset 0 0 32px rgba(232, 181, 88, 0.06);
+}
+
+.initGridRow:nth-child(2n) { background: rgba(255, 255, 255, 0.012); }
+.initGridRow:nth-child(2n).is-drag-over { background: rgba(124, 92, 255, 0.15); }
+.initGridRow:hover { background: rgba(255, 255, 255, 0.03); }
+
+/* marker typu */
+.rowType::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  opacity: 0.95;
+}
+.rowType--player::before { background: rgba(124, 92, 255, 0.95); }
+.rowType--enemy::before  { background: rgba(255, 77, 109, 0.95); }
+.rowType--friendly::before { background: rgba(34, 197, 94, 0.95); }
+
+/* helpers */
+.cellCenter { display: flex; justify-content: center; }
+.cellRight  { display: flex; justify-content: flex-end; }
+.cellBox { min-width: 0; }
+
+/* ===== Uczestnik (centrowany) ===== */
+.nameCell {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.nameCell--center {
+  width: 100%;
+  justify-items: center;
+  text-align: center;
+  transform: translateY(2px);
+}
+
+/* input nazwy – jak tekst, ramka tylko na hover/focus */
+.nameInput {
+  width: min(420px, 100%);
+  height: 34px;
+
+  border-radius: 0;
+  border: 1px solid transparent;
+  background: transparent;
+
+  color: rgba(255,255,255,0.95);
+  outline: none;
+  padding: 6px 10px;
+
+  font-weight: 950;
+  text-align: center;
+  cursor: text;
+
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
+}
+
+.nameInput:hover {
+  border-color: rgba(255,255,255,0.14);
+  background: rgba(208,138,30,0.04);
+}
+
+.nameInput:focus {
+  border-color: rgba(124, 92, 255, 0.55);
+  background: rgba(208,138,30,0.07);
+  box-shadow: var(--ring);
+}
+
+.nameSub {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.65);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.muted { opacity: 0.75; }
+
+/* ===== Controls ===== */
+.cellInput,
+.cellSelect {
+  height: 30px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(208,138,30,0.04);
+  color: rgba(255, 255, 255, 0.92);
+  outline: none;
+  padding: 5px 8px;
+  width: 100%;
+  min-width: 0;
+  font-size: 13px;
+}
+
+.cellInput:focus,
+.cellSelect:focus { box-shadow: var(--ring); }
+
+.cellSelect { max-width: 180px; }
+
+.cellInput--tiny {
+  width: 58px;
+  text-align: center;
+}
+
+.cellInput--num {
+  width: 90px;
+  text-align: center;
+}
+
+.cellInput--note { width: 100%; }
+
+.cellInput--init {
+  width: 58px;
+  text-align: center;
+}
+
+.initInitiativeCell {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+.initRerollBtn {
+  padding: 6px 8px;
+  font-size: 13px;
+  border-radius: 0;
+}
+
+/* ===== Initiative pill ===== */
+.initPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  min-width: 52px;
+  padding: 0 10px;
+  border-radius: 0;
+  border: 1px solid var(--border-warm);
+  background: rgba(255, 255, 255, 0.03);
+  font-weight: 950;
+}
+
+/* ===== HP Max ===== */
+.hpMaxText {
+  height: 30px;
+  min-width: 62px;
+  padding: 0 10px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-warm);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 900;
+}
+
+/* ===== HP cell ===== */
+.hpCell { min-width: 0; }
+.hpTop { display: flex; justify-content: center; }
+
+.hpPill {
+  height: 30px;
+  border-radius: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(208,138,30,0.04);
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+  min-width: 70px;
+  justify-content: center;
+}
+
+.hpInput {
+  width: 52px;
+  text-align: center;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 950;
+  font-size: 13px;
+}
+
+/* DMG/HEAL */
+.hpMiniActions {
+  margin-top: 6px;
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.initGrid .btn { min-width: 0; white-space: nowrap; }
+
+.btn--tiny {
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+/* Kosz */
+.btn--icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 0;
+  display: grid;
+  place-items: center;
+  margin: 0 auto;
+}
+
+/* meta */
+.initMeta {
+  padding: 10px 12px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.65);
+  border-top: 1px solid rgba(208,138,30,0.07);
+  background: rgba(255, 255, 255, 0.015);
+}
+
+/* HP kolory */
+.hp--over   { border-color: rgba(56, 189, 248, 0.55); background: rgba(56, 189, 248, 0.18); }
+.hp--green  { border-color: rgba(34, 197, 94, 0.40);  background: rgba(34, 197, 94, 0.16); }
+.hp--yellow { border-color: rgba(234, 179, 8, 0.45);  background: rgba(234, 179, 8, 0.16); }
+.hp--orange { border-color: rgba(249, 115, 22, 0.45); background: rgba(249, 115, 22, 0.16); }
+.hp--red    { border-color: rgba(239, 68, 68, 0.45);  background: rgba(239, 68, 68, 0.16); }
+.hp--zero   { border-color: rgba(160, 160, 160, 0.35); background: rgba(160, 160, 160, 0.12); }
+.hp--na     { opacity: 0.75; }
+
+/* Dropdown optiony (dla czytelności listy) */
+.cellSelect option { color: #000; background: #fff; }
+
+/* =========================================================
+   MODAL — overlay + layout
+   ========================================================= */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.modalCard {
+  width: min(920px, 96vw);
+  max-height: min(86vh, 920px);
+  overflow: auto;
+
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(10, 12, 18, 0.96);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+}
+
+/* Header: tytuł wyśrodkowany */
+.modalTop {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 14px;
+
+  border-bottom: 1px solid var(--border-warm);
+  background: transparent;
+  backdrop-filter: blur(10px);
+}
+
+.modalTitle {
+  font-weight: 950;
+  font-size: 15px;
+  text-align: center;
+  width: 100%;
+}
+
+.modalBody { padding: 14px; }
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px;
+  border-top: 1px solid var(--border-warm);
+  background: transparent;
+}
+
+/* Sekcja potwora */
+.monsterBlock {
+  border: 1px solid var(--border-warm);
+  background: rgba(255,255,255,0.03);
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 14px;
+}
+
+.monsterBlockTop {
+  display: grid;
+  grid-template-columns: 1fr minmax(280px, 420px);
+  gap: 12px;
+  align-items: center;
+}
+
+.monsterSelect {
+  max-width: none;
+  width: 100%;
+  text-align: center;
+  text-align-last: center; /* ważne dla <select> */
+}
+
+.monsterSelect option { text-align: center; }
+
+.monsterHint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.70);
+}
+
+/* Układ: lewa kolumna (opis) + prawa (liczby) */
+.modalGrid2 {
+  display: grid;
+  grid-template-columns: 1.3fr 0.7fr;
+  gap: 14px;
+}
+
+.modalCol {
+  display: grid;
+  gap: 12px;
+}
+
+/* Prawa kolumna: 2x2 + większe odstępy (zielone zaznaczenie) */
+.modalCol--numbers {
+  border-left: 1px solid var(--border);
+  padding-left: 30px;
+
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 18px;
+  row-gap: 50px;       /* <- ten odstęp pionowy */
+  align-content: start;
+}
+
+.modalCol--numbers .cellInput--num {
+  width: 100%;
+  text-align: center;
+}
+
+.rangeLabel { margin-bottom: 8px; }
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 1100px) {
+  .initGridHeader,
+  .initGridRow {
+    grid-template-columns:
+      minmax(220px, 2.2fr)
+      minmax(110px, 1.1fr)
+      minmax(80px, 0.9fr)
+      minmax(60px, 0.7fr)
+      minmax(80px, 0.9fr)
+      minmax(240px, 2.2fr)
+      minmax(160px, 1.6fr)
+      56px;
+  }
+}
+
+@media (max-width: 860px) {
+  .monsterBlockTop { grid-template-columns: 1fr; }
+
+  .modalGrid2 { grid-template-columns: 1fr; }
+
+  .modalCol--numbers {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+
+    grid-template-columns: 1fr;
+    row-gap: 12px;
+    column-gap: 12px;
+  }
+}
+
+:root[data-theme="light"] .initTableWrap,
+:root[data-theme="light"] .monsterBlock,
+:root[data-theme="light"] .modalCard {
+  border-color: rgba(88, 69, 33, 0.14);
+  box-shadow: 0 14px 34px rgba(73, 53, 25, 0.1);
+}
+
+:root[data-theme="light"] .initTableWrap,
+:root[data-theme="light"] .monsterBlock {
+  background: color-mix(in srgb, var(--card-2) 96%, transparent 4%);
+}
+
+:root[data-theme="light"] .initGridHeader {
+  color: var(--text-2);
+  border-bottom-color: rgba(88, 69, 33, 0.14);
+  background: linear-gradient(180deg, rgba(255, 249, 241, 0.98), rgba(247, 239, 227, 0.96));
+}
+
+:root[data-theme="light"] .initGridRow {
+  border-bottom-color: rgba(88, 69, 33, 0.08);
+}
+
+:root[data-theme="light"] .initGridRow:nth-child(2n) {
+  background: rgba(143, 111, 55, 0.03);
+}
+
+:root[data-theme="light"] .initGridRow:hover,
+:root[data-theme="light"] .initGridRow.is-dragging {
+  background: rgba(143, 111, 55, 0.06);
+}
+
+:root[data-theme="light"] .nameInput,
+:root[data-theme="light"] .hpInput,
+:root[data-theme="light"] .modalTitle,
+:root[data-theme="light"] .rangeLabel {
+  color: var(--text);
+}
+
+:root[data-theme="light"] .nameInput:hover,
+:root[data-theme="light"] .nameInput:focus {
+  background: rgba(255, 248, 240, 0.94);
+}
+
+:root[data-theme="light"] .nameSub,
+:root[data-theme="light"] .initMeta,
+:root[data-theme="light"] .monsterHint {
+  color: var(--text-2);
+}
+
+:root[data-theme="light"] .cellInput,
+:root[data-theme="light"] .cellSelect,
+:root[data-theme="light"] .initPill,
+:root[data-theme="light"] .hpMaxText,
+:root[data-theme="light"] .hpPill,
+:root[data-theme="light"] .modalTop,
+:root[data-theme="light"] .modalActions {
+  border-color: rgba(88, 69, 33, 0.14);
+  background: rgba(255, 248, 239, 0.94);
+  color: var(--text);
+}
+
+:root[data-theme="light"] .modalCard {
+  background: linear-gradient(180deg, rgba(255, 251, 245, 0.98), rgba(246, 237, 224, 0.96));
+}
+
+:root[data-theme="light"] .modalTop,
+:root[data-theme="light"] .modalActions {
+  background: rgba(255, 249, 241, 0.94);
+}
+
+:root[data-theme="light"] .modalOverlay {
+  background: rgba(44, 30, 9, 0.22);
+}

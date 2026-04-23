@@ -1,0 +1,27 @@
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+infra/.env
+frontend/.env
+backend/.env
+
+# Local test payloads with credentials
+login.json
+req.json
+
+# Dependency and build outputs
+**/node_modules/
+**/dist/
+**/target/
+**/build/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Dev/AI helper files (not project code)
+CONTEXT.md
+**/styles_backup_*/

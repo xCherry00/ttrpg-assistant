@@ -1,0 +1,700 @@
+/* =========================================================
+   DICE PAGE
+   ========================================================= */
+
+.diceLayout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .diceLayout { grid-template-columns: 1fr; }
+}
+
+/* ─── PANELS ────────────────────────────────────── */
+
+.dicePanel {
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--card), var(--card-solid));
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.dicePanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dicePanel--results {
+  min-height: 320px;
+}
+
+.dicePanelTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+
+.diceFormula {
+  font-size: 13px;
+  color: var(--primary);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 8px 14px;
+  border-radius: 0;
+  border: 1px solid var(--border-accent);
+  background: var(--primary-dim);
+  width: fit-content;
+}
+
+/* ─── FORM ──────────────────────────────────────── */
+
+.diceGrid { display: grid; gap: 18px; }
+
+.diceField { display: grid; gap: 10px; }
+
+.diceFieldLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.diceFieldHint {
+  font-weight: 500;
+  color: var(--text-2);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ─── GROUPS ────────────────────────────────────── */
+
+.diceGroups { display: grid; gap: 10px; }
+
+.diceGroupCard {
+  border: 1px solid var(--border);
+  background: var(--card-2);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.diceGroupCard:hover { border-color: var(--border-accent); }
+
+.diceGroupCard.is-locked { opacity: 0.6; pointer-events: none; }
+
+.diceGroupTop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+/* ─── QTY CONTROL ────────────────────────────────── */
+
+.diceQtyControl {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  overflow: hidden;
+}
+
+.diceQtyStep {
+  width: 30px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.14s ease;
+}
+
+.diceQtyStep:hover:not(:disabled) { background: var(--card-2); }
+.diceQtyStep:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.diceQtyNum {
+  min-width: 34px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  line-height: 34px;
+}
+
+.diceGroupIndex {
+  width: 28px;
+  height: 28px;
+  border-radius: 0;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary);
+  border: 1px solid var(--border-accent);
+  background: var(--primary-dim);
+  flex-shrink: 0;
+}
+
+.diceQty {
+  width: 80px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  outline: none;
+  text-align: center;
+  transition: border-color 0.18s ease;
+}
+
+.diceQty:focus { border-color: var(--primary); box-shadow: var(--ring); }
+
+.diceRemoveBtn {
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 0;
+  border: 1px solid rgba(146,32,16,0.22);
+  background: rgba(146,32,16,0.10);
+  color: var(--blood-soft);
+  cursor: pointer;
+  font-size: 16px;
+  display: grid;
+  place-items: center;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.diceRemoveBtn:hover { background: rgba(146,32,16,0.18); border-color: rgba(146,32,16,0.45); }
+.diceRemoveBtn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* ─── DIE CHIPS ─────────────────────────────────── */
+
+.diceDieChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.diceDieChip {
+  height: 38px;
+  min-width: 48px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+.diceDieChip:hover {
+  border-color: var(--border-accent);
+  background: var(--card-2);
+  transform: translateY(-1px);
+}
+
+.diceDieChip.is-active {
+  border-color: var(--primary);
+  background: var(--primary-dim);
+  color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary-dim);
+}
+
+.diceDieChip:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+/* ─── ADD / MODIFIER ─────────────────────────────── */
+
+.diceAddBtn {
+  margin-top: 2px;
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--border-accent);
+  background: transparent;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s ease;
+  width: 100%;
+}
+
+.diceAddBtn:hover { background: var(--primary-dim); }
+
+.diceModInput {
+  width: 120px;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  outline: none;
+  text-align: center;
+  transition: border-color 0.18s ease;
+}
+
+.diceModInput:focus { border-color: var(--primary); box-shadow: var(--ring); }
+
+/* ─── MODE ───────────────────────────────────────── */
+
+.diceModeRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.diceModeChip {
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.diceModeChip:hover { border-color: var(--border-accent); background: var(--card-2); }
+
+.diceModeChip.is-active {
+  border-color: var(--primary);
+  background: var(--primary-dim);
+  color: var(--primary);
+}
+
+.diceAdvNote {
+  margin-top: 6px;
+  padding: 9px 13px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--card-2);
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+.diceAdvToggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--card-2);
+  margin-top: 6px;
+}
+
+.diceAdvLabel { font-size: 12px; font-weight: 700; color: var(--text-2); }
+.diceAdvValue { font-size: 13px; font-weight: 700; color: var(--text); }
+
+.diceToggle {
+  position: relative;
+  width: 44px; height: 24px;
+  border-radius: 0;
+  border: 1px solid var(--border);
+  background: var(--card);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.16s ease, border-color 0.16s ease;
+  flex-shrink: 0;
+}
+
+.diceToggleKnob {
+  position: absolute;
+  top: 50%; left: 4px;
+  transform: translateY(-50%);
+  width: 16px; height: 16px;
+  border-radius: 0;
+  background: var(--text-2);
+  transition: left 0.16s ease, background 0.16s ease;
+}
+
+.diceToggle.is-on { background: var(--primary-dim); border-color: var(--primary); }
+.diceToggle.is-on .diceToggleKnob { left: 24px; background: var(--primary); }
+
+/* ─── CTA ────────────────────────────────────────── */
+
+.diceActions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.diceRollBtn {
+  flex: 1;
+  padding: 13px 24px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--candle-bright) 50%, var(--primary) 100%);
+  background-size: 200% 100%;
+  color: #18100a;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(208,138,30,0.34);
+  transition: background-position 0.3s ease, box-shadow 0.3s ease, transform 0.15s ease;
+}
+
+.diceRollBtn:hover {
+  background-position: 100% 0;
+  box-shadow: 0 10px 30px rgba(208,138,30,0.50);
+  transform: translateY(-1px);
+}
+
+.diceRollBtn:active { transform: translateY(0); }
+
+.diceClearBtn {
+  padding: 13px 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--card-2);
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.diceClearBtn:hover { border-color: var(--border-accent); color: var(--text); }
+
+/* ─── RESULT (big number) ───────────────────────── */
+
+.diceResult {
+  text-align: center;
+  padding: 16px 0 8px;
+  animation: diceResultIn 0.25s var(--ease) both;
+}
+
+@keyframes diceResultIn {
+  from { opacity: 0; transform: scale(0.92) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.diceResultLabel {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+
+.diceResultNumber {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 8vw, 7rem);
+  font-weight: 700;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--text) 20%, var(--primary) 80%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+
+.diceResultNote {
+  font-size: 13px;
+  color: var(--text-2);
+  margin-bottom: 14px;
+}
+
+.diceResultBreakdown {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.diceResultGroup {
+  font-size: 12px;
+  color: var(--text-2);
+  padding: 4px 10px;
+  border-radius: 0;
+  border: 1px solid var(--border);
+  background: var(--card-2);
+}
+
+/* ─── ADV/DIS DICE DISPLAY ──────────────────────── */
+
+.diceAdvDice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 10px 0 6px;
+}
+
+.diceAdvDie {
+  width: 76px;
+  height: 76px;
+  border-radius: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  border: 2px solid var(--border);
+  background: var(--card-2);
+  color: var(--text-2);
+  transition: all 0.2s var(--ease);
+}
+
+.diceAdvDie.is-chosen {
+  border-color: var(--primary);
+  background: var(--primary-dim);
+  color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(208,138,30,0.12), 0 6px 20px rgba(208,138,30,0.20);
+  transform: translateY(-3px) scale(1.06);
+}
+
+.diceAdvDie.is-dropped {
+  opacity: 0.35;
+  transform: scale(0.94);
+}
+
+.diceAdvVs {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--text-2);
+  text-transform: uppercase;
+}
+
+/* ─── HISTORY ────────────────────────────────────── */
+
+.diceHistorySection { border-top: 1px solid var(--border); padding-top: 18px; }
+
+.diceHistoryTitle {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  margin-bottom: 12px;
+}
+
+.diceHistory { display: grid; gap: 8px; }
+
+.rollCard {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--card-2);
+  padding: 12px 14px;
+  transition: border-color 0.18s ease;
+}
+
+.rollCard:hover { border-color: var(--border-accent); }
+
+.rollTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.rollTitle { font-size: 13px; font-weight: 700; color: var(--text); }
+
+.rollTotal {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.rollNote {
+  font-size: 12px;
+  color: var(--text-2);
+  margin-top: 4px;
+}
+
+/* ─── EMPTY STATE ────────────────────────────────── */
+
+.diceEmptyState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.diceEmptyIcon {
+  width: 72px;
+  height: 72px;
+  border-radius: 0;
+  border: 1px solid var(--border-accent);
+  background: var(--primary-dim);
+  display: grid;
+  place-items: center;
+  color: var(--primary);
+}
+
+.diceEmptyIcon svg { width: 40px; height: 40px; }
+
+.diceEmptyTitle {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.diceEmptyText { font-size: 14px; color: var(--text-2); line-height: 1.6; }
+
+/* ─── PAGE HEADER CENTERING ──────────────────────────── */
+
+.dicePageHeader {
+  justify-content: center;
+  text-align: center;
+}
+
+.dicePageHeader .pageSubtitle {
+  margin: 10px auto 0;
+}
+
+/* ─── MOBILE — Touch-Friendly Redesign ───────────────── */
+
+@media (max-width: 600px) {
+  /* Panel — compact padding */
+  .dicePanel { padding: 14px; gap: 14px; }
+
+  /* Die chips — 4-column grid, bigger tap area */
+  .diceDieChips {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .diceDieChip {
+    height: 52px;
+    min-width: unset;
+    padding: 0;
+    font-size: 14px;
+    border-radius: 0;
+  }
+
+  /* Qty stepper — 44px minimum touch target */
+  .diceQtyStep {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+
+  .diceQtyNum {
+    min-width: 44px;
+    line-height: 44px;
+    font-size: 15px;
+  }
+
+  /* Remove button — bigger hit area */
+  .diceRemoveBtn {
+    width: 40px;
+    height: 40px;
+    border-radius: 0;
+    font-size: 20px;
+  }
+
+  /* Group index badge */
+  .diceGroupIndex {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+    border-radius: 0;
+  }
+
+  /* Mode chips — equal 3-column grid */
+  .diceModeRow {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .diceModeChip {
+    padding: 13px 4px;
+    font-size: 13px;
+    text-align: center;
+  }
+
+  /* Modifier input — full width, readable font size */
+  .diceModInput {
+    width: 100%;
+    height: 50px;
+    font-size: 16px;
+  }
+
+  /* Add dice type button */
+  .diceAddBtn {
+    padding: 14px 16px;
+    font-size: 14px;
+  }
+
+  /* Actions row — stack vertically */
+  .diceActions {
+    gap: 8px;
+    flex-direction: column;
+  }
+
+  /* Roll button — full width, prominent */
+  .diceRollBtn {
+    padding: 17px 24px;
+    font-size: 17px;
+    border-radius: 0;
+    letter-spacing: 0.03em;
+  }
+
+  /* Clear buttons — full width secondary */
+  .diceClearBtn {
+    flex: unset;
+    width: 100%;
+    padding: 13px 14px;
+    font-size: 13px;
+    border-radius: 0;
+  }
+
+  /* Panel header — stack vertically on small screens */
+  .dicePanelHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .diceFormula {
+    font-size: 12px;
+    align-self: stretch;
+    text-align: center;
+  }
+}
+
+/* ─── LIGHT THEME ────────────────────────────────── */
+
+:root[data-theme="light"] .dicePanel { box-shadow: 0 10px 26px rgba(73,53,25,0.08); }
+:root[data-theme="light"] .diceGroupCard { background: rgba(255,248,239,0.9); }
+:root[data-theme="light"] .diceQty,
+:root[data-theme="light"] .diceModInput { background: rgba(255,252,245,0.95); }
+:root[data-theme="light"] .diceDieChip,
+:root[data-theme="light"] .diceModeChip { background: rgba(255,250,242,0.95); }
+:root[data-theme="light"] .rollCard { background: rgba(255,249,240,0.9); }

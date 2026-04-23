@@ -1,0 +1,382 @@
+.friendsPage,
+.publicProfilePage {
+  display: grid;
+  gap: 18px;
+}
+
+.friendsHero {
+  padding: 22px;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(280px, 1.1fr);
+  gap: 18px;
+}
+
+.friendsHero__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.friendsHero__stat {
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--card-2) 84%, transparent 16%);
+  display: grid;
+  gap: 4px;
+}
+
+.friendsHero__stat strong {
+  font-family: var(--font-display);
+  font-size: 2rem;
+}
+
+.friendsHero__stat span,
+.friendsSearch__label,
+.socialCard__meta,
+.publicProfileCard__tag,
+.publicProfileCard__meta {
+  color: var(--text-2);
+}
+
+.friendsSearch {
+  display: grid;
+  gap: 10px;
+}
+
+.friendsSearch__label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 800;
+}
+
+.friendsSearch__input {
+  min-height: 50px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--card-2) 84%, transparent 16%);
+  color: var(--text);
+  padding: 12px 14px;
+  outline: none;
+}
+
+.friendsSearch__input:focus {
+  box-shadow: var(--ring);
+}
+
+.friendsTabs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.friendsTabs__button,
+.socialBtn {
+  min-height: 42px;
+  border-radius: 0;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--card-2) 84%, transparent 16%);
+  color: var(--text);
+  padding: 0 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.friendsTabs__button.is-active,
+.socialBtn {
+  border-color: color-mix(in srgb, var(--primary) 52%, var(--border) 48%);
+}
+
+.socialBtn {
+  background: linear-gradient(135deg, var(--primary), #e8c683);
+  color: #21170a;
+}
+
+.socialBtn--ghost {
+  background: color-mix(in srgb, var(--card-2) 84%, transparent 16%);
+  color: var(--text);
+}
+
+.socialBtn--danger {
+  background: rgba(244, 106, 127, 0.14);
+  border-color: rgba(244, 106, 127, 0.34);
+  color: #ffd0d7;
+}
+
+.socialBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 12px;
+  border-radius: 0;
+  border: 1px solid var(--border);
+  color: var(--text-2);
+}
+
+.friendsList,
+.friendsColumn {
+  display: grid;
+  gap: 12px;
+}
+
+.friendsColumns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.friendsColumn h2 {
+  margin: 0 0 2px;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+}
+
+.socialCard {
+  padding: 18px;
+  display: grid;
+  gap: 14px;
+}
+
+.socialCard__main,
+.publicProfileCard__top {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.socialCard__avatar,
+.publicProfileCard__avatar {
+  width: 62px;
+  height: 62px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  font-size: 1.45rem;
+  font-weight: 900;
+  border: 1px solid color-mix(in srgb, var(--primary) 38%, var(--border) 62%);
+  background: color-mix(in srgb, var(--primary) 16%, transparent 84%);
+}
+
+.socialCard__copy h3,
+.publicProfileCard__identity h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.socialCard__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.socialCard__copy p {
+  margin: 8px 0 0;
+  color: var(--text-2);
+  line-height: 1.65;
+}
+
+.socialCard__meta,
+.publicProfileCard__meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.socialCard__actions,
+.publicProfileCard__actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.friendsState {
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--card-2) 80%, transparent 20%);
+  color: var(--text-2);
+}
+
+.friendsState--error {
+  color: #ffd0d7;
+  border-color: rgba(244, 106, 127, 0.3);
+  background: rgba(244, 106, 127, 0.12);
+}
+
+/* ─── ПУБЛИЧНЫЙ ПРОФИЛЬ — centered card ──────────── */
+
+.publicProfilePage {
+  display: block;
+}
+
+.publicProfileBack {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-2);
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--card-2);
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+.publicProfileBack:hover {
+  color: var(--text);
+  border-color: var(--border-accent);
+  background: var(--card);
+}
+
+.publicProfileCard {
+  max-width: 540px;
+  margin: 0 auto;
+  padding: 40px 36px;
+  display: grid;
+  gap: 24px;
+  text-align: center;
+}
+
+.publicProfileHero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.publicProfileHeroAvatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 24px;
+  display: grid;
+  place-items: center;
+  font-size: 2.6rem;
+  font-weight: 900;
+  border: 2px solid color-mix(in srgb, var(--primary) 42%, var(--border) 58%);
+  background: color-mix(in srgb, var(--primary) 16%, transparent 84%);
+  color: var(--text);
+  box-shadow: 0 8px 24px rgba(208,138,30,0.16);
+}
+
+.publicProfileHeroName {
+  margin: 4px 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2rem);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.publicProfileHeroTag {
+  font-size: 13px;
+  color: var(--text-2);
+  font-weight: 500;
+}
+
+.publicProfileHeroBadges {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.publicProfileBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 0;
+  border: 1px solid var(--border-accent);
+  background: var(--primary-dim);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.publicProfileBadge--muted {
+  border-color: var(--border);
+  background: var(--card-2);
+  color: var(--text-2);
+}
+
+.publicProfileBio {
+  color: var(--text-2);
+  line-height: 1.75;
+  font-size: 14px;
+  margin: 0;
+  padding: 0 8px;
+}
+
+.publicProfileStats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.publicProfileStat {
+  padding: 14px 8px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--card-2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.publicProfileStat strong {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+
+.publicProfileStat span {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.publicProfileActions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ─── RESPONSIVE ─────────────────────────────────── */
+
+@media (max-width: 980px) {
+  .friendsHero,
+  .friendsColumns {
+    grid-template-columns: 1fr;
+  }
+
+  .friendsHero__stats {
+    grid-template-columns: 1fr;
+  }
+
+  .publicProfileStats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .publicProfileCard {
+    padding: 28px 20px;
+  }
+
+  .publicProfileStats {
+    grid-template-columns: 1fr 1fr;
+  }
+}

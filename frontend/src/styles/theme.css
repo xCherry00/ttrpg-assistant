@@ -1,0 +1,154 @@
+:root {
+  /* ── Backgrounds — Midnight Tavern ── */
+  --bg:         #1C1208;
+  --bg-2:       #211508;
+  --bg-3:       #321E0C;
+  --bg-surface: #261808;
+
+  /* ── Cards ── */
+  --card:       rgba(38, 24, 8, 0.92);
+  --card-2:     rgba(50, 30, 12, 0.97);
+  --card-solid: #261808;
+
+  /* ── Sidebar ── */
+  --void: #100A05;
+
+  /* ── Borders ── */
+  --border:        #3C2812;
+  --border-warm:   #5C3E1E;
+  --border-accent: #8A6828;
+  --border-gold:   #8A6828;
+  --border-strong: #C4981A;
+
+  /* ── Text — Warm Parchment ── */
+  --text:      #EDE0C8;
+  --text-2:    #C4A070;
+  --muted:     #9A7858;
+  --ink:       #EDE0C8;
+  --ink-muted: #C4A070;
+  --ink-faint: #9A7858;
+
+  /* ── Brand — Candlelight Amber ── */
+  --candle:        #D08A1E;
+  --candle-bright: #EAAE3C;
+  --candle-dim:    #8A5C18;
+  --primary:       #D08A1E;
+  --primary-2:     #8A5C18;
+  --primary-dim:   rgba(208, 138, 30, 0.12);
+  --primary-glow:  0 0 28px rgba(234, 174, 60, 0.32);
+  --accent:        #D08A1E;
+
+  /* ── Secondary — Flame Orange ── */
+  --flame:         #D4501A;
+  --flame-soft:    #E87840;
+  --secondary:     #E87840;
+  --secondary-dim: rgba(232, 120, 64, 0.12);
+
+  /* ── Status ── */
+  --blood:      #922010;
+  --blood-soft: #C84030;
+  --danger:     #C84030;
+  --ok:         #5A9E6A;
+  --warn:       #D08A1E;
+
+  /* ── Shadows ── */
+  --shadow-xl: 0 40px 100px rgba(0, 0, 0, 0.72);
+  --shadow-lg: 0 28px 72px rgba(0, 0, 0, 0.58);
+  --shadow-md: 0 16px 48px rgba(0, 0, 0, 0.44);
+  --shadow-sm: 0 6px 20px rgba(0, 0, 0, 0.32);
+
+  /* ── Radii — subtle rounded corners ── */
+  --radius-xl: 12px;
+  --radius-lg: 8px;
+  --radius-md: 6px;
+  --radius-sm: 4px;
+
+  /* ── Spacing ── */
+  --pad-1: 10px;
+  --pad-2: 14px;
+  --pad-3: 18px;
+  --pad-4: 24px;
+  --pad-5: 36px;
+
+  /* ── Layout ── */
+  --container: 1160px;
+
+  /* ── Typography ── */
+  --font:         'Crimson Pro', Georgia, serif;
+  --font-display: 'Cinzel Decorative', 'Cinzel', Georgia, serif;
+  --font-body:    'Crimson Pro', Georgia, serif;
+  --font-flavor:  'IM Fell English', Georgia, serif;
+  --mono:         'Consolas', 'Courier New', monospace;
+
+  /* ── Focus ring ── */
+  --ring: 0 0 0 3px rgba(208, 138, 30, 0.3);
+
+  /* ── Background glows ── */
+  --bg-glow-1:   rgba(208, 138, 30, 0.10);
+  --bg-glow-2:   rgba(212, 80, 26, 0.07);
+  --bg-glow-3:   rgba(146, 32, 16, 0.05);
+  --bg-base-end: #100A05;
+
+  /* ── Easing ── */
+  --ease:     cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in:  cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+}
+
+:root[data-theme="light"] {
+  --bg:         #f2eadc;
+  --bg-2:       #ebe0cf;
+  --bg-3:       #e2d4bf;
+  --bg-surface: #fdf8f2;
+
+  --card:       rgba(255, 252, 244, 0.94);
+  --card-2:     rgba(255, 250, 240, 0.98);
+  --card-solid: #fffbf3;
+
+  --void: #ebe0cf;
+
+  --border:        rgba(80, 58, 20, 0.18);
+  --border-warm:   rgba(80, 58, 20, 0.30);
+  --border-accent: rgba(160, 100, 20, 0.38);
+  --border-gold:   rgba(160, 100, 20, 0.38);
+  --border-strong: rgba(160, 100, 20, 0.60);
+
+  --text:      #1a120a;
+  --text-2:    rgba(26, 18, 10, 0.68);
+  --muted:     rgba(26, 18, 10, 0.44);
+  --ink:       #1a120a;
+  --ink-muted: rgba(26, 18, 10, 0.68);
+  --ink-faint: rgba(26, 18, 10, 0.44);
+
+  --candle:        #a06820;
+  --candle-bright: #c89030;
+  --candle-dim:    #7d5018;
+  --primary:       #a06820;
+  --primary-2:     #7d5018;
+  --primary-dim:   rgba(160, 104, 32, 0.10);
+  --primary-glow:  0 0 28px rgba(160, 104, 32, 0.20);
+  --accent:        #a06820;
+
+  --flame:         #b84020;
+  --flame-soft:    #d06030;
+  --secondary:     #237888;
+  --secondary-dim: rgba(35, 120, 136, 0.10);
+
+  --blood:      #7a1808;
+  --blood-soft: #c43050;
+  --danger:     #c43050;
+  --ok:         #1a7a5a;
+  --warn:       #c47818;
+
+  --shadow-xl: 0 36px 80px rgba(60, 40, 10, 0.18);
+  --shadow-lg: 0 24px 56px rgba(60, 40, 10, 0.14);
+  --shadow-md: 0 14px 32px rgba(60, 40, 10, 0.10);
+  --shadow-sm: 0 5px 16px rgba(60, 40, 10, 0.07);
+
+  --ring: 0 0 0 3px rgba(160, 104, 32, 0.22);
+
+  --bg-glow-1:   rgba(180, 120, 40, 0.16);
+  --bg-glow-2:   rgba(40, 120, 140, 0.10);
+  --bg-glow-3:   rgba(80, 60, 160, 0.06);
+  --bg-base-end: #ede2d2;
+}

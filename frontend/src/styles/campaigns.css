@@ -1,0 +1,323 @@
+.campaignsPage {
+  display: grid;
+  gap: 14px;
+}
+
+.campaignsPage--tiles {
+  max-width: 1240px;
+}
+
+.campaignToast {
+  border: 1px solid rgba(68, 223, 174, 0.4);
+  background: rgba(68, 223, 174, 0.12);
+  color: #d9fff0;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.campaignTiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.campaignTile {
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.28);
+}
+
+.campaignTile--add {
+  min-height: 260px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  color: var(--text);
+  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+.campaignTile--add:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-accent);
+  background: var(--primary-dim);
+}
+
+.campaignAddPlus {
+  width: 64px;
+  height: 64px;
+  border-radius: 0;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  display: grid;
+  place-items: center;
+  font-size: 38px;
+  line-height: 1;
+}
+
+.campaignAddText {
+  font-weight: 700;
+  color: var(--text-2);
+}
+
+.campaignTile--item {
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 150px auto auto;
+  cursor: pointer;
+  transition: transform 0.16s ease, border-color 0.16s ease;
+}
+
+.campaignTile--item:hover,
+.campaignTile--item:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--border-accent);
+  outline: none;
+}
+
+.campaignTileCover {
+  position: relative;
+  background-size: cover;
+  background-position: center;
+}
+
+.campaignTileCover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.34), rgba(0, 0, 0, 0.05));
+}
+
+.campaignTileRole {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  border: 1px solid rgba(255, 215, 122, 0.5);
+  background: rgba(255, 215, 122, 0.22);
+  color: #ffe8be;
+  border-radius: 0;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.campaignTileName {
+  padding: 10px 12px 6px;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.campaignTileActions {
+  padding: 0 12px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.campaignTileCode {
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.campaignTileCopy {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 0;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.campaignTileCopy:hover {
+  border-color: var(--border-strong);
+}
+
+.campaignState {
+  color: var(--text-2);
+}
+
+.campaignError {
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid rgba(255, 112, 112, 0.45);
+  background: rgba(255, 91, 91, 0.12);
+  color: #ffd4d4;
+}
+
+.campaignModalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.campaignModalCard {
+  width: min(760px, 96vw);
+  max-height: min(86vh, 920px);
+  overflow: auto;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(10, 12, 18, 0.96);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+}
+
+.campaignModalTop {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(10px);
+}
+
+.campaignModalTitle {
+  font-weight: 950;
+  font-size: 15px;
+  text-align: center;
+}
+
+.campaignModalBody {
+  padding: 14px;
+}
+
+.campaignChoiceGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.campaignChoiceCard {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 14px;
+  padding: 14px;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.campaignChoiceCard:hover {
+  border-color: var(--border-accent);
+  background: var(--primary-dim);
+}
+
+.campaignChoiceTitle {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.campaignChoiceText {
+  margin-top: 6px;
+  color: var(--text-2);
+  line-height: 1.45;
+}
+
+.campaignForm {
+  display: grid;
+  gap: 10px;
+}
+
+.campaignLabel {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.35px;
+  color: var(--text-2);
+}
+
+.campaignInput {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  padding: 10px 12px;
+  background: var(--card);
+  color: var(--text);
+}
+
+.campaignInput:focus {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.campaignTextarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+.campaignCoverPreviewWrap {
+  display: grid;
+  gap: 8px;
+}
+
+.campaignCoverPreview {
+  width: 100%;
+  height: 160px;
+  border-radius: 0;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid var(--border);
+}
+
+.campaignRemoveCoverBtn,
+.campaignGhostBtn,
+.campaignActionBtn {
+  border-radius: 10px;
+  padding: 9px 12px;
+  cursor: pointer;
+}
+
+.campaignRemoveCoverBtn,
+.campaignGhostBtn {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+}
+
+.campaignActionBtn {
+  border: 1px solid rgba(56, 154, 255, 0.45);
+  background: rgba(56, 154, 255, 0.18);
+  color: #d9eeff;
+  font-weight: 800;
+}
+
+.campaignActionBtnJoin {
+  border-color: rgba(45, 212, 191, 0.45);
+  background: rgba(45, 212, 191, 0.16);
+  color: #d8fff8;
+}
+
+.campaignActionBtn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.campaignModalActionsRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+@media (max-width: 760px) {
+  .campaignChoiceGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 540px) {
+  .campaignTileActions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

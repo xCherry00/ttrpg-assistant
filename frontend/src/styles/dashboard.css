@@ -1,0 +1,365 @@
+.dashboardPage {
+  display: grid;
+  gap: 16px;
+}
+
+/* ─── HERO ───────────────────────────────────────── */
+
+.dashHero {
+  padding: 36px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.dashHero::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--primary), rgba(212,80,26,0.3), transparent);
+}
+
+.dashHero::after {
+  content: "";
+  position: absolute;
+  top: -80px; right: -60px;
+  width: 340px; height: 340px;
+  border-radius: 0;
+  background: radial-gradient(circle, rgba(208,138,30,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.dashHeroCopy {
+  display: grid;
+  gap: 8px;
+  flex: 1;
+}
+
+.dashHeroTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  color: var(--text);
+}
+
+.dashHeroName {
+  background: linear-gradient(135deg, var(--primary), var(--candle-bright));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dashHeroSub {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.7;
+  max-width: 520px;
+}
+
+.dashHeroMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.dashMetaPill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 0;
+  border: 1px solid var(--border-accent);
+  background: var(--primary-dim);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.dashHeroActions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.dashLogoutBtn {
+  font-size: 13px;
+  padding: 9px 18px;
+}
+
+/* ─── STAT GRID ─────────────────────────────────── */
+
+.dashStatGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.dashStatCard {
+  padding: 22px 24px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.dashStatIcon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 0;
+  border: 1px solid var(--border-accent);
+  background: var(--primary-dim);
+  display: grid;
+  place-items: center;
+  color: var(--primary);
+}
+
+.dashStatIcon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.dashStatBody {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.dashStatLabel {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.dashStatValue {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+  font-weight: 600;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--text), var(--text-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dashStatValue--sm {
+  font-size: clamp(0.9rem, 1.4vw, 1.2rem);
+  word-break: break-all;
+}
+
+.dashStatError {
+  color: var(--blood-soft);
+  -webkit-text-fill-color: var(--blood-soft);
+}
+
+.dashStatText {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* ─── QUICK ACTIONS ─────────────────────────────── */
+
+.dashQuick { padding: 24px; }
+
+.dashSectionTitle {
+  margin: 0 0 16px;
+  font-size: 17px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+
+.dashQuickGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.dashQuickAction {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--card);
+  text-decoration: none;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s var(--ease), box-shadow 0.2s ease;
+}
+
+.dashQuickAction:hover {
+  border-color: var(--border-accent);
+  background: var(--card-2);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.dashQuickIcon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 0;
+  border: 1px solid var(--border-accent);
+  background: var(--primary-dim);
+  display: grid;
+  place-items: center;
+  color: var(--primary);
+  transition: background 0.2s ease;
+}
+
+.dashQuickAction:hover .dashQuickIcon {
+  background: rgba(232, 181, 88, 0.18);
+}
+
+.dashQuickIcon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.dashQuickBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.dashQuickTitle {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 3px;
+}
+
+.dashQuickDesc {
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.dashQuickArrow {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--primary);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.dashQuickAction:hover .dashQuickArrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ─── LAST GENERATION ───────────────────────────── */
+
+.dashLastGen {
+  padding: 22px 24px;
+  display: grid;
+  gap: 14px;
+}
+
+.dashLastGenHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dashPreviewTime {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.dashLastGenBody {
+  display: grid;
+  gap: 6px;
+}
+
+.dashLastGenRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: rgba(208,138,30,0.03);
+}
+
+.dashLastGenKey {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.dashLastGenVal {
+  font-weight: 600;
+  font-size: 13px;
+  text-align: right;
+  max-width: 60%;
+  word-break: break-word;
+}
+
+.dashInlineLink {
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 13px;
+  width: fit-content;
+  transition: color 0.15s ease;
+  text-decoration: none;
+}
+
+.dashInlineLink:hover {
+  color: color-mix(in srgb, var(--primary) 70%, white 30%);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ─── ERROR ──────────────────────────────────────── */
+
+.dashError {
+  border: 1px solid rgba(146,32,16,0.35);
+  background: rgba(146,32,16,0.10);
+  color: var(--blood-soft);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  font-size: 13px;
+}
+
+/* ─── RESPONSIVE ────────────────────────────────── */
+
+@media (max-width: 1100px) {
+  .dashQuickGrid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 860px) {
+  .dashHero { flex-direction: column; align-items: flex-start; padding: 28px; }
+  .dashHeroActions { flex-direction: row; width: 100%; }
+  .dashStatGrid { grid-template-columns: repeat(2, 1fr); }
+  .dashStatCard--account { grid-column: 1 / -1; }
+}
+
+@media (max-width: 580px) {
+  .dashHero { padding: 22px; }
+  .dashHeroTitle { font-size: 1.7rem; }
+  .dashStatGrid { grid-template-columns: 1fr; }
+  .dashStatCard--account { grid-column: auto; }
+  .dashQuickGrid { grid-template-columns: 1fr; }
+}

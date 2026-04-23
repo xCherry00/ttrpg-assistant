@@ -1,0 +1,42 @@
+package pl.ttrpgassistant.backend.character.dto;
+
+import java.time.Instant;
+
+public record PlayerCharacterDetailsResponse(
+        Long id,
+        String systemCode,
+        String name,
+        String status,
+        String portraitUrl,
+        String raceName,
+        String subraceName,
+        String className,
+        String subclassName,
+        String backgroundName,
+        String alignment,
+        Integer level,
+        Integer experiencePoints,
+        String abilityMode,
+        Integer strength,
+        Integer dexterity,
+        Integer constitution,
+        Integer intelligence,
+        Integer wisdom,
+        Integer charisma,
+        Integer maxHp,
+        Integer currentHp,
+        Integer tempHp,
+        Integer armorClass,
+        Integer initiativeBonus,
+        Integer speed,
+        Integer proficiencyBonus,
+        String hitDice,
+        String skillNotes,
+        String savingThrowNotes,
+        String equipmentNotes,
+        String featureNotes,
+        String personalityNotes,
+        String privateNotes,
+        Instant createdAt,
+        Instant updatedAt
+) {}

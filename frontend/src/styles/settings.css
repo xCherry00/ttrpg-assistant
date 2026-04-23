@@ -1,0 +1,336 @@
+.settingsPage {
+  display: block;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+/* ─── LAYOUT ─────────────────────────────── */
+
+.settingsLayout {
+  display: grid;
+  gap: 16px;
+}
+
+.settingsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ─── CARD ───────────────────────────────── */
+
+.settingsCard {
+  padding: 22px 24px;
+  border-radius: 18px;
+  display: grid;
+  gap: 12px;
+  border: 1px solid color-mix(in srgb, var(--border) 90%, transparent 10%);
+  background: linear-gradient(180deg, var(--card-2), color-mix(in srgb, var(--card) 80%, transparent 20%));
+}
+
+.settingsCard--wide {
+  /* spans full width — already the case in a single-column grid row */
+}
+
+.settingsCard--danger {
+  border-color: rgba(255, 80, 80, 0.32);
+  background: rgba(255, 80, 80, 0.06);
+}
+
+/* ─── CARD HEAD ──────────────────────────── */
+
+.settingsCardHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 2px;
+}
+
+.settingsCardIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--primary) 18%, transparent 82%);
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.settingsCardTitle {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+/* ─── TWO-COLUMN APPEARANCE GRID ─────────── */
+
+.settingsTwoCol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+/* ─── FORM ELEMENTS ─────────────────────── */
+
+.settingsHint {
+  margin: 0 0 6px;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.settingsLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-2);
+}
+
+.settingsInput {
+  width: 100%;
+  min-height: 42px;
+  border-radius: 0;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  padding: 10px 12px;
+  outline: none;
+  font-size: 14px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.settingsInput:focus {
+  border-color: var(--primary);
+  box-shadow: var(--ring);
+}
+
+.settingsInput:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+/* ─── BUTTONS ────────────────────────────── */
+
+.settingsBtn {
+  margin-top: 4px;
+  min-height: 42px;
+  border-radius: 0;
+  border: 1px solid color-mix(in srgb, var(--primary) 65%, transparent 35%);
+  background: linear-gradient(135deg, var(--primary), #f0c86a);
+  color: #18100a;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  transition: filter 0.16s ease;
+}
+
+.settingsBtn:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.settingsBtn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.settingsBtnGhost {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.settingsBtnGhost:hover:not(:disabled) {
+  border-color: var(--border-accent);
+  filter: none;
+  background: color-mix(in srgb, var(--card) 80%, transparent 20%);
+}
+
+.settingsBtnInline {
+  margin-top: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: auto;
+  padding: 0 16px;
+  font-size: 13px;
+}
+
+.settingsBtnDanger {
+  background: rgba(214, 58, 79, 0.92);
+  border-color: rgba(255, 120, 140, 0.45);
+  color: #fff;
+}
+
+.settingsBtnDanger:hover:not(:disabled) {
+  background: rgba(214, 58, 79, 1);
+  filter: none;
+}
+
+/* ─── MESSAGES ───────────────────────────── */
+
+.settingsMsg {
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.settingsMsg--error {
+  background: rgba(255, 80, 80, 0.14);
+  border: 1px solid rgba(255, 80, 80, 0.36);
+  color: #ffb3bc;
+}
+
+.settingsMsg--success {
+  background: rgba(45, 212, 191, 0.16);
+  border: 1px solid rgba(45, 212, 191, 0.4);
+  color: #7ffff0;
+}
+
+.settingsInfo {
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* ─── DANGER ROW ─────────────────────────── */
+
+.settingsDangerRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.settingsDangerRow .settingsInput {
+  flex: 1;
+  margin: 0;
+}
+
+.settingsDangerRow .settingsBtn {
+  margin-top: 0;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ─── DIVIDER ────────────────────────────── */
+
+.settingsDivider {
+  height: 1px;
+  background: color-mix(in srgb, var(--border) 80%, transparent 20%);
+  margin: 4px 0;
+}
+
+/* ─── THEME SWITCHER ─────────────────────── */
+
+.themeOptions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.themeBtn {
+  min-height: 42px;
+  border-radius: 0;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+
+.themeBtn:hover {
+  border-color: var(--border-accent);
+}
+
+.themeBtn.is-active {
+  border-color: color-mix(in srgb, var(--primary) 60%, transparent 40%);
+  background: color-mix(in srgb, var(--primary) 20%, transparent 80%);
+  color: var(--primary);
+}
+
+/* ─── CHAT NICK COLOR ────────────────────── */
+
+.chatColorPreviewRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.chatColorPreview {
+  font-size: 17px;
+}
+
+.chatColorGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.chatColorSwatch {
+  min-height: 36px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background: var(--swatch);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.chatColorSwatch:hover {
+  transform: scale(1.08);
+}
+
+.chatColorSwatch.is-active {
+  border-color: color-mix(in srgb, var(--text) 85%, transparent 15%);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent 78%);
+}
+
+.chatColorCustomRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chatColorCustomRow .settingsInput {
+  flex: 1;
+}
+
+.chatColorCustomRow .settingsBtn {
+  margin-top: 0;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding: 0 16px;
+}
+
+/* ─── RESPONSIVE ─────────────────────────── */
+
+@media (max-width: 860px) {
+  .settingsRow {
+    grid-template-columns: 1fr;
+  }
+
+  .settingsTwoCol {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 540px) {
+  .settingsCard {
+    padding: 18px 16px;
+  }
+
+  .settingsDangerRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .settingsDangerRow .settingsBtn {
+    width: 100%;
+  }
+}
