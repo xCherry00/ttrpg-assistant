@@ -8,5 +8,12 @@ public record GeneratorDefinitionResponse(
         String description,
         String category,
         String icon,
+        String categoryCode,
+        String typeCode,
+        List<String> genreTags,
+        List<String> systemTags,
+        List<String> toneTags,
+        int displayOrder,
+        String iconKey,
         List<GeneratorVariantResponse> variants
 ) {}

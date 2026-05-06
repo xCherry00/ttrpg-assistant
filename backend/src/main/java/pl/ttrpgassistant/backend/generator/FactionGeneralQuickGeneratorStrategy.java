@@ -45,8 +45,14 @@ public class FactionGeneralQuickGeneratorStrategy implements GeneratorStrategy {
                 section("Cel", pick(asList(pool.get("goals"))) + "."),
                 section("Lider", pick(asList(pool.get("leaders"))) + "."),
                 section("Zasoby", pick(asList(pool.get("resources"))) + "."),
+                section("Metody dzialania", pick(List.of(
+                        "Kupuje dlugi i przyslugi, zanim zacznie grozic.",
+                        "Dziala przez posrednikow, ktorzy nie znaja calego planu.",
+                        "Buduje reputacje dobroczynnosci, a brudna robote zleca na zewnatrz."
+                ))),
                 section("Sekret", pick(asList(pool.get("secrets"))) + "."),
-                section("Relacje", pick(asList(pool.get("relations"))) + ".")
+                section("Relacje", pick(asList(pool.get("relations"))) + "."),
+                section("Konflikt dla graczy", "Frakcja powinna oferowac cos uzytecznego, ale jej pomoc zawsze zostawia slad polityczny albo moralny.")
         );
 
         return new GeneratorStructuredResultResponse(
@@ -54,7 +60,7 @@ public class FactionGeneralQuickGeneratorStrategy implements GeneratorStrategy {
                 "faction",
                 "general.quick",
                 name,
-                scale + " | " + type,
+                scale + " - " + type,
                 sections,
                 "seed",
                 OffsetDateTime.now()
@@ -89,7 +95,7 @@ public class FactionGeneralQuickGeneratorStrategy implements GeneratorStrategy {
     private String pick(List<?> list) {
         if (list == null || list.isEmpty()) return "";
         Object picked = list.get(random.nextInt(list.size()));
-        return picked == null ? "" : String.valueOf(picked);
+        return GeneratorTextSanitizer.clean(picked);
     }
 
     private List<Object> asList(Object value) {

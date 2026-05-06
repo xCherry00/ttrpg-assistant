@@ -1,7 +1,12 @@
 import { http } from "./http";
 
-export async function getGeneratorDefinitions(token) {
-  return http("/api/generators", {
+export async function getGeneratorDefinitions(token, filters = {}) {
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value && value !== "all") params.set(key, value);
+  });
+  const query = params.toString();
+  return http(`/api/generators${query ? `?${query}` : ""}`, {
     method: "GET",
     token,
   });

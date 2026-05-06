@@ -7,4 +7,8 @@ public interface GeneratorStrategy {
     boolean supports(String generatorCode, String variantCode);
 
     GeneratorStructuredResultResponse generate(GeneratorRequest request);
+
+    default GeneratorStructuredResultResponse generate(String generatorCode, String variantCode, GeneratorRequest request) {
+        return generate(request);
+    }
 }

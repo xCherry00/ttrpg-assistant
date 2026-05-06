@@ -36,17 +36,19 @@ public class TrapGeneralQuickGeneratorStrategy implements GeneratorStrategy {
         Map<String, Object> params = request == null || request.params() == null ? Map.of() : request.params();
         Map<String, Object> pool = readPool();
         String requestedType = stringParam(params, "trapType", "Losowa");
-        String danger = stringParam(params, "danger", "Średnie");
+        String danger = stringParam(params, "danger", "Srednie");
         String type = randomChoice(requestedType) ? pick(asList(pool.get("types"))) : requestedType;
         String name = pick(asList(pool.get("names")));
 
         List<GeneratorOutputSection> sections = List.of(
                 section("Typ", type),
+                section("Poziom zagrozenia", danger),
                 section("Wyzwalacz", pick(asList(pool.get("triggers"))) + "."),
                 section("Wykrycie", pick(asList(pool.get("detections"))) + "."),
                 section("Efekt", pick(asList(pool.get("effects"))) + "."),
                 section("Rozbrojenie", pick(asList(pool.get("disarms"))) + "."),
-                section("Konsekwencja", pick(asList(pool.get("consequences"))) + ".")
+                section("Konsekwencja", pick(asList(pool.get("consequences"))) + "."),
+                section("Fair play dla MG", "Pokaz co najmniej jeden znak ostrzegawczy przed aktywacja. Pulapka ma tworzyc decyzje, nie tylko odejmowac HP.")
         );
 
         return new GeneratorStructuredResultResponse(
@@ -54,7 +56,7 @@ public class TrapGeneralQuickGeneratorStrategy implements GeneratorStrategy {
                 "trap",
                 "general.quick",
                 name,
-                type + " | zagrożenie: " + danger,
+                type + " - zagrozenie: " + danger,
                 sections,
                 "seed",
                 OffsetDateTime.now()
@@ -89,7 +91,7 @@ public class TrapGeneralQuickGeneratorStrategy implements GeneratorStrategy {
     private String pick(List<?> list) {
         if (list == null || list.isEmpty()) return "";
         Object picked = list.get(random.nextInt(list.size()));
-        return picked == null ? "" : String.valueOf(picked);
+        return GeneratorTextSanitizer.clean(picked);
     }
 
     private List<Object> asList(Object value) {

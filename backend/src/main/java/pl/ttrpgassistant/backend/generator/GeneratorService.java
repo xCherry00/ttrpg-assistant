@@ -102,13 +102,29 @@ public class GeneratorService {
     }
 
     public List<GeneratorDefinitionResponse> definitions() {
+        return definitions(null, null, null, null);
+    }
+
+    public List<GeneratorDefinitionResponse> definitions(String category, String system, String type, String tone) {
         return definitionRepository.findByActiveTrueOrderByNameAsc().stream()
+                .filter(definition -> matchesCategory(definition, category))
+                .filter(definition -> matchesType(definition, type))
+                .filter(definition -> matchesSystem(definition, system))
+                .filter(definition -> matchesTone(definition, tone))
+                .sorted((left, right) -> Integer.compare(left.getDisplayOrder(), right.getDisplayOrder()))
                 .map(definition -> new GeneratorDefinitionResponse(
                         definition.getCode(),
                         definition.getName(),
                         definition.getDescription(),
                         definition.getCategory(),
                         definition.getIcon(),
+                        valueOrFallback(definition.getCategoryCode(), definition.getCategory()),
+                        definition.getTypeCode(),
+                        definition.getGenreTags(),
+                        definition.getSystemTags(),
+                        definition.getToneTags(),
+                        definition.getDisplayOrder(),
+                        valueOrFallback(definition.getIconKey(), definition.getIcon()),
                         variants(definition.getCode())
                 ))
                 .toList();
@@ -159,7 +175,7 @@ public class GeneratorService {
 
         GeneratorStructuredResultResponse generated = strategy == null
                 ? legacyVariant(normalizedGenerator, normalizedVariant, request)
-                : strategy.generate(request);
+                : strategy.generate(normalizedGenerator, normalizedVariant, request);
         GeneratorResultEntity saved = new GeneratorResultEntity();
         saved.setCampaignId(request == null ? null : request.campaignId());
         saved.setGeneratorCode(normalizedGenerator);
@@ -552,10 +568,68 @@ public class GeneratorService {
                 variant.getVariantCode(),
                 variant.getSystemCode(),
                 variant.getSettingCode(),
+                valueOrFallback(variant.getCategoryCode(), variant.getGeneratorDefinition().getCategoryCode()),
+                variant.getToneScope(),
                 variant.getMode(),
                 variant.getName(),
                 variant.getDescription()
         );
+    }
+
+    private boolean matchesCategory(GeneratorDefinitionEntity definition, String category) {
+        if (isBlankOrAll(category)) return true;
+        String wanted = normalizeFilter(category);
+        return normalizeFilter(valueOrFallback(definition.getCategoryCode(), definition.getCategory())).equals(wanted)
+                || definition.getGenreTags().stream().map(this::normalizeFilter).anyMatch(wanted::equals);
+    }
+
+    private boolean matchesType(GeneratorDefinitionEntity definition, String type) {
+        if (isBlankOrAll(type)) return true;
+        return normalizeFilter(definition.getTypeCode()).equals(normalizeFilter(type));
+    }
+
+    private boolean matchesSystem(GeneratorDefinitionEntity definition, String system) {
+        if (isBlankOrAll(system)) return true;
+        String wanted = normalizeSystemFilter(system);
+        if (definition.getSystemTags().stream().map(this::normalizeSystemFilter).anyMatch(tag -> tag.equals(wanted) || "system_agnostic".equals(tag) || "any".equals(tag))) {
+            return true;
+        }
+        return variantRepository.findByGeneratorDefinition_CodeAndActiveTrueOrderByNameAsc(definition.getCode()).stream()
+                .map(GeneratorVariantEntity::getSystemCode)
+                .map(this::normalizeSystemFilter)
+                .anyMatch(code -> code.equals(wanted) || "system_agnostic".equals(code) || "any".equals(code));
+    }
+
+    private boolean matchesTone(GeneratorDefinitionEntity definition, String tone) {
+        if (isBlankOrAll(tone)) return true;
+        String wanted = normalizeFilter(tone);
+        return definition.getToneTags().stream().map(this::normalizeFilter).anyMatch(wanted::equals);
+    }
+
+    private boolean isBlankOrAll(String value) {
+        if (value == null || value.isBlank()) return true;
+        String normalized = normalizeFilter(value);
+        return "all".equals(normalized) || "wszystkie".equals(normalized) || "wszystko".equals(normalized);
+    }
+
+    private String normalizeFilter(String value) {
+        return value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private String normalizeSystemFilter(String value) {
+        String normalized = normalizeFilter(value);
+        return switch (normalized) {
+            case "dnd", "dnd5e", "d&d 5e" -> "dnd";
+            case "pf2", "pf2e", "pathfinder2e" -> "pf2e";
+            case "coc", "coc7e", "call_of_cthulhu" -> "coc7e";
+            case "wfrp", "wfrp4", "wfrp4e", "warhammer4e" -> "wfrp4e";
+            case "mork_borg" -> "morkborg";
+            default -> normalized;
+        };
+    }
+
+    private String valueOrFallback(String value, String fallback) {
+        return value == null || value.isBlank() ? fallback : value;
     }
 
     private GeneratorVariantEntity findVariant(String generatorCode, String variantCode) {

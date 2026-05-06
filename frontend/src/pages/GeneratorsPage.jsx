@@ -140,6 +140,78 @@ const CARD_META = {
     icon: "type",
     order: 90,
   },
+  tavern: {
+    title: "Tawerna",
+    tag: "Lokacja",
+    description: "Tawerna z wlascicielem, plotka, problemem i lokalnym klimatem.",
+    tone: "gold",
+    icon: "castle",
+    order: 100,
+  },
+  shop_fantasy: {
+    title: "Sklep fantasy",
+    tag: "Przedmioty i handel",
+    description: "Sklep, wlasciciel, towary, nietypowy przedmiot i problem.",
+    tone: "gold",
+    icon: "chest",
+    order: 110,
+  },
+  settlement_fantasy: {
+    title: "Osada fantasy",
+    tag: "Miejsce",
+    description: "Osada, wazne miejsce, problem, sekret i zaczepka przygodowa.",
+    tone: "teal",
+    icon: "castle",
+    order: 120,
+  },
+  district_fantasy: {
+    title: "Dzielnica fantasy",
+    tag: "Miasto",
+    description: "Dzielnica, dominujaca grupa, lokalny konflikt i sekret.",
+    tone: "teal",
+    icon: "castle",
+    order: 130,
+  },
+  dungeon_concept: {
+    title: "Koncept lochu",
+    tag: "Loch / ruiny",
+    description: "Historia miejsca, obecny stan, glowne zagrozenie i sekret.",
+    tone: "purple",
+    icon: "gear",
+    order: 140,
+  },
+  dungeon_room: {
+    title: "Pomieszczenie lochu",
+    tag: "Pokoj / komnata",
+    description: "Pojedyncza scena eksploracji z zawartoscia i zagrozeniem.",
+    tone: "purple",
+    icon: "gear",
+    order: 150,
+  },
+  monster_variant: {
+    title: "Wariant potwora",
+    tag: "Stworzenie",
+    description: "Wariant przeciwnika z wygladem, zachowaniem i slaboscia.",
+    tone: "red",
+    icon: "swords",
+    order: 160,
+  },
+  magic_item: {
+    title: "Magiczny przedmiot",
+    tag: "Artefakt",
+    description: "Przedmiot magiczny lub przeklety z efektem, wada i historia.",
+    tone: "gold",
+    icon: "chest",
+    order: 170,
+  },
+  quest_fantasy: {
+    title: "Quest fantasy",
+    tag: "Misja",
+    description: "Zleceniodawca, problem, komplikacja, przeciwnik i nagroda.",
+    tone: "green",
+    icon: "scroll",
+    order: 180,
+  },
 };
 
 const DEFAULT_META = {
@@ -163,10 +235,78 @@ const CANONICAL_GENERATOR_TYPES = [
   "name",
 ];
 
-const TAB_GENERATOR_TYPES = {
-  general: ["npc", "hook", "weather", "name"],
-  world: ["location", "loot", "faction"],
-  system: ["encounter", "loot", "trap", "npc"],
+const GENERATOR_CATEGORIES = [
+  { code: "FANTASY", label: "Fantasy", icon: "swords" },
+  { code: "HORROR", label: "Horror", icon: "eye" },
+  { code: "POSTAPO", label: "Postapo", icon: "biohazard" },
+  { code: "SCIFI", label: "Sci-Fi", icon: "rocket" },
+];
+
+const SYSTEM_FILTERS = [
+  { value: "all", label: "Wszystkie" },
+  { value: "dnd", label: "D&D 5E" },
+  { value: "pf2e", label: "Pathfinder 2E" },
+  { value: "wfrp4e", label: "Warhammer 4E" },
+  { value: "morkborg", label: "Mork Borg" },
+  { value: "coc7e", label: "CoC 7E" },
+  { value: "alien", label: "Alien" },
+];
+
+const TYPE_FILTERS = [
+  { value: "all", label: "Wszystkie" },
+  { value: "npc", label: "NPC" },
+  { value: "location", label: "Lokacje" },
+  { value: "settlement", label: "Osady" },
+  { value: "encounter", label: "Spotkania" },
+  { value: "item", label: "Przedmioty" },
+  { value: "creature", label: "Stworzenia" },
+  { value: "document", label: "Dokumenty / tropy" },
+  { value: "faction", label: "Frakcje" },
+  { value: "story", label: "Fabuła" },
+  { value: "quest", label: "Questy" },
+  { value: "threat", label: "Zagrożenia" },
+  { value: "environment", label: "Środowisko" },
+  { value: "name", label: "Imiona" },
+];
+
+const TONE_OPTIONS_BY_CATEGORY = {
+  FANTASY: [
+    { value: "all", label: "Wszystkie" },
+    { value: "high_fantasy", label: "High fantasy" },
+    { value: "low_fantasy", label: "Low fantasy" },
+    { value: "dark_fantasy", label: "Dark fantasy" },
+    { value: "grimdark", label: "Grimdark" },
+    { value: "heroic_fantasy", label: "Heroic fantasy" },
+    { value: "sword_and_sorcery", label: "Sword & sorcery" },
+  ],
+  HORROR: [
+    { value: "all", label: "Wszystkie" },
+    { value: "cosmic_horror", label: "Cosmic horror" },
+    { value: "occult_horror", label: "Occult horror" },
+    { value: "folk_horror", label: "Folk horror" },
+    { value: "body_horror", label: "Body horror" },
+    { value: "psychological_horror", label: "Psychological horror" },
+    { value: "investigation_horror", label: "Investigation horror" },
+    { value: "survival_horror", label: "Survival horror" },
+  ],
+  POSTAPO: [
+    { value: "all", label: "Wszystkie" },
+    { value: "zombie_apocalypse", label: "Zombie apocalypse" },
+    { value: "survival_drama", label: "Survival drama" },
+    { value: "wasteland", label: "Wasteland" },
+    { value: "ruined_city", label: "Ruined city" },
+    { value: "road_survival", label: "Road survival" },
+    { value: "plague_apocalypse", label: "Plague apocalypse" },
+  ],
+  SCIFI: [
+    { value: "all", label: "Wszystkie" },
+    { value: "space_opera", label: "Space opera" },
+    { value: "hard_scifi", label: "Hard sci-fi" },
+    { value: "cyberpunk", label: "Cyberpunk" },
+    { value: "space_horror", label: "Space horror" },
+    { value: "dystopia", label: "Dystopia" },
+    { value: "corporate_scifi", label: "Corporate sci-fi" },
+  ],
 };
 
 function buildKey(item) {
@@ -195,6 +335,13 @@ function flattenDefinitions(definitions) {
       variantCode: variant.variantCode,
       type: definition.code,
       system: variant.systemCode || "any",
+      categoryCode: definition.categoryCode || definition.category,
+      typeCode: definition.typeCode || definition.code,
+      genreTags: definition.genreTags || [],
+      systemTags: definition.systemTags || [],
+      toneTags: definition.toneTags || [],
+      displayOrder: definition.displayOrder,
+      iconKey: definition.iconKey,
       label: variant.name || definition.name,
       description: variant.description || definition.description,
       source: "strategy/seed",
@@ -215,18 +362,17 @@ function variantRank(item) {
 
 function decorateCatalog(items) {
   const decorated = items
-    .filter((item) => CANONICAL_GENERATOR_TYPES.includes(item.type))
     .map((item) => {
     const meta = CARD_META[item.type] || DEFAULT_META;
     return {
       ...item,
-      title: meta.title,
-      label: meta.title,
-      cardTag: meta.tag,
-      cardDescription: meta.description,
+      title: CARD_META[item.type] ? meta.title : item.label,
+      label: CARD_META[item.type] ? meta.title : item.label,
+      cardTag: CARD_META[item.type] ? meta.tag : item.typeCode || meta.tag,
+      cardDescription: CARD_META[item.type] ? meta.description : item.description || meta.description,
       tone: meta.tone,
-      icon: meta.icon,
-      order: meta.order,
+      icon: item.iconKey || meta.icon,
+      order: item.displayOrder || meta.order,
     };
   });
 
@@ -238,9 +384,7 @@ function decorateCatalog(items) {
     }
   }
 
-  return CANONICAL_GENERATOR_TYPES
-    .map((type) => byType.get(type))
-    .filter(Boolean)
+  return Array.from(byType.values())
     .sort((a, b) => (a.order || 999) - (b.order || 999));
 }
 
@@ -381,6 +525,34 @@ function GeneratorIcon({ name }) {
       </IconBase>
     );
   }
+  if (name === "eye") {
+    return (
+      <IconBase>
+        <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+        <circle cx="12" cy="12" r="3" />
+      </IconBase>
+    );
+  }
+  if (name === "biohazard") {
+    return (
+      <IconBase>
+        <circle cx="12" cy="12" r="2" />
+        <path d="M12 10V4a4 4 0 0 1 3.4 6" />
+        <path d="m10.3 13-5.2 3a4 4 0 0 1 3.5-5.9" />
+        <path d="m13.7 13 5.2 3a4 4 0 0 0-3.5-5.9" />
+      </IconBase>
+    );
+  }
+  if (name === "rocket") {
+    return (
+      <IconBase>
+        <path d="M5 15c-1 1.2-1.5 2.8-1.5 5 2.2 0 3.8-.5 5-1.5" />
+        <path d="M15 3c3 0 5 0 6 1-1 5-4 9-8 12l-5-5c3-4 7-7 12-8Z" />
+        <path d="M9 15H5v-4" />
+        <circle cx="15" cy="9" r="1.5" />
+      </IconBase>
+    );
+  }
   return (
     <IconBase>
       <path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8Z" />
@@ -453,8 +625,10 @@ export default function GeneratorsPage() {
   const [resultIsNew, setResultIsNew] = useState(false);
   const [campaigns, setCampaigns] = useState([]);
   const [selectedCampaignId, setSelectedCampaignId] = useState("");
-  const [activeTab, setActiveTab] = useState("general");
-  const [selectedSystem, setSelectedSystem] = useState("dnd");
+  const [activeCategory, setActiveCategory] = useState("FANTASY");
+  const [selectedSystem, setSelectedSystem] = useState("all");
+  const [selectedType, setSelectedType] = useState("all");
+  const [selectedTone, setSelectedTone] = useState("all");
   const [loading, setLoading] = useState(false);
   const [addingToCampaign, setAddingToCampaign] = useState(false);
   const [catalogLoading, setCatalogLoading] = useState(true);
@@ -467,11 +641,16 @@ export default function GeneratorsPage() {
     async function loadCatalog() {
       setCatalogLoading(true);
       try {
-        const definitions = await getGeneratorDefinitions(token);
+        const definitions = await getGeneratorDefinitions(token, {
+          category: activeCategory,
+          system: selectedSystem,
+          type: selectedType,
+          tone: selectedTone,
+        });
         const nextCatalog = decorateCatalog(flattenDefinitions(definitions));
         if (cancelled) return;
         setCatalog(nextCatalog);
-        setActiveKey((previous) => nextCatalog.some((item) => buildKey(item) === previous) ? previous : buildKey(nextCatalog[0]));
+        setActiveKey((previous) => nextCatalog.some((item) => buildKey(item) === previous) ? previous : nextCatalog[0] ? buildKey(nextCatalog[0]) : "");
         setForms((previous) => {
           const next = { ...previous };
           for (const item of nextCatalog) {
@@ -491,7 +670,7 @@ export default function GeneratorsPage() {
     return () => {
       cancelled = true;
     };
-  }, [token]);
+  }, [token, activeCategory, selectedSystem, selectedType, selectedTone]);
 
   useEffect(() => {
     let cancelled = false;
@@ -524,10 +703,15 @@ export default function GeneratorsPage() {
     [activeKey, catalog]
   );
   const activeValues = forms[activeKey] || buildInitialParams(activeDefinition);
-  const visibleCatalog = useMemo(() => {
-    const allowedTypes = TAB_GENERATOR_TYPES[activeTab] || CANONICAL_GENERATOR_TYPES;
-    return catalog.filter((item) => allowedTypes.includes(item.type));
-  }, [activeTab, catalog]);
+  const visibleCatalog = catalog;
+
+  const toneOptions = TONE_OPTIONS_BY_CATEGORY[activeCategory] || [{ value: "all", label: "Wszystkie" }];
+
+  function handleCategoryChange(category) {
+    setActiveCategory(category);
+    setSelectedTone("all");
+    setResult(null);
+  }
 
   useEffect(() => {
     if (!generatorCode || !catalog.length) return;
@@ -804,12 +988,8 @@ export default function GeneratorsPage() {
 
       <section className="generatorsCommandBar" aria-label="Filtry generatorów">
         <div className="generatorsTabs">
-          {[
-            ["general", "Ogólne", "grid"],
-            ["world", "Świat", "shield"],
-            ["system", "System", "gear"],
-          ].map(([key, label, icon]) => (
-            <button key={key} type="button" className={activeTab === key ? "is-active" : ""} onClick={() => setActiveTab(key)}>
+          {GENERATOR_CATEGORIES.map(({ code, label, icon }) => (
+            <button key={code} type="button" className={activeCategory === code ? "is-active" : ""} onClick={() => handleCategoryChange(code)}>
               <GeneratorIcon name={icon} />
               <span>{label}</span>
             </button>
@@ -818,7 +998,25 @@ export default function GeneratorsPage() {
         <label className="generatorsSystemSelect">
           <span>System:</span>
           <select value={selectedSystem} onChange={(event) => setSelectedSystem(event.target.value)}>
-            <option value="dnd">D&D 5E</option>
+            {SYSTEM_FILTERS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+        </label>
+        <label className="generatorsSystemSelect">
+          <span>Typ:</span>
+          <select value={selectedType} onChange={(event) => setSelectedType(event.target.value)}>
+            {TYPE_FILTERS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+        </label>
+        <label className="generatorsSystemSelect">
+          <span>Klimat:</span>
+          <select value={selectedTone} onChange={(event) => setSelectedTone(event.target.value)}>
+            {toneOptions.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
           </select>
         </label>
       </section>
@@ -855,6 +1053,10 @@ export default function GeneratorsPage() {
                     <span className="generatorTileTitle">{generator.label}</span>
                     <span className="generatorTileTag">{generator.cardTag}</span>
                     <span className="generatorTileDescription">{generator.cardDescription}</span>
+                    <span className="generatorTileMeta">
+                      <span>{generator.categoryCode || activeCategory}</span>
+                      <span>{generator.typeCode || generator.type}</span>
+                    </span>
                   </button>
                   <button
                     type="button"
@@ -870,6 +1072,11 @@ export default function GeneratorsPage() {
                 </article>
               );
             })}
+            {!catalogLoading && visibleCatalog.length === 0 && (
+              <div className="generatorCatalogEmpty">
+                Brak generatorów dla wybranych filtrów. Ta kategoria będzie uzupełniana w kolejnych etapach.
+              </div>
+            )}
           </section>
         </main>
 

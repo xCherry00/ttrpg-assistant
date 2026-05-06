@@ -1,6 +1,10 @@
 package pl.ttrpgassistant.backend.generator;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.util.List;
 
 @Entity
 @Table(
@@ -24,6 +28,13 @@ public class GeneratorVariantEntity {
 
     @Column(name = "setting_code", nullable = false, length = 48)
     private String settingCode;
+
+    @Column(name = "category_code", length = 50)
+    private String categoryCode;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "tone_scope", columnDefinition = "jsonb")
+    private List<String> toneScope = List.of();
 
     @Column(nullable = false, length = 32)
     private String mode;
@@ -55,6 +66,14 @@ public class GeneratorVariantEntity {
 
     public String getSettingCode() {
         return settingCode;
+    }
+
+    public String getCategoryCode() {
+        return categoryCode;
+    }
+
+    public List<String> getToneScope() {
+        return toneScope == null ? List.of() : toneScope;
     }
 
     public String getMode() {

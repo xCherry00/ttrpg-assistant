@@ -27,8 +27,13 @@ public class GeneratorController {
     }
 
     @GetMapping
-    public List<GeneratorDefinitionResponse> definitions() {
-        return service.definitions();
+    public List<GeneratorDefinitionResponse> definitions(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String system,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String tone
+    ) {
+        return service.definitions(category, system, type, tone);
     }
 
     @GetMapping("/{generatorCode}/variants")

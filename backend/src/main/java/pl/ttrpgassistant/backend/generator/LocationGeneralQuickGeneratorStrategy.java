@@ -41,13 +41,14 @@ public class LocationGeneralQuickGeneratorStrategy implements GeneratorStrategy 
         String name = pick(asList(pool.get("namePrefixes"))) + " " + pick(asList(pool.get("nameNouns")));
 
         List<GeneratorOutputSection> sections = List.of(
-                section("Opis zewnętrzny", type + ": " + pick(asList(pool.get("exteriors"))) + "."),
-                section("Opis wnętrza", pick(asList(pool.get("interiors"))) + "."),
+                section("Opis zewnetrzny", type + ": " + pick(asList(pool.get("exteriors"))) + "."),
+                section("Opis wnetrza", pick(asList(pool.get("interiors"))) + "."),
                 section("Atmosfera", (randomChoice(tone) ? pick(asList(pool.get("atmospheres"))) : tone) + "."),
                 section("NPC obecny", pick(asList(pool.get("npcs"))) + "."),
                 section("Sekret", pick(asList(pool.get("secrets"))) + "."),
                 section("Haczyk", pick(asList(pool.get("hooks"))) + "."),
-                section("Możliwe zagrożenie", pick(asList(pool.get("hazards"))) + ".")
+                section("Mozliwe zagrozenie", pick(asList(pool.get("hazards"))) + "."),
+                section("Jak uzyc na sesji", "Najpierw pokaz jeden silny detal miejsca, potem NPC, ktory reaguje na obecnosc druzyny. Sekret zostaw jako nagrode za pytania albo eksploracje.")
         );
 
         return new GeneratorStructuredResultResponse(
@@ -55,7 +56,7 @@ public class LocationGeneralQuickGeneratorStrategy implements GeneratorStrategy 
                 "location",
                 "general.quick",
                 name,
-                type + " | lokacja fantasy",
+                type + " - lokacja fantasy",
                 sections,
                 "seed",
                 OffsetDateTime.now()
@@ -90,7 +91,7 @@ public class LocationGeneralQuickGeneratorStrategy implements GeneratorStrategy 
     private String pick(List<?> list) {
         if (list == null || list.isEmpty()) return "";
         Object picked = list.get(random.nextInt(list.size()));
-        return picked == null ? "" : String.valueOf(picked);
+        return GeneratorTextSanitizer.clean(picked);
     }
 
     private List<Object> asList(Object value) {
