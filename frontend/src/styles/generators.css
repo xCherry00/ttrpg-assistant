@@ -337,10 +337,6 @@
   cursor: wait;
 }
 
-.generatorTile.is-planned .generatorTileAction {
-  cursor: pointer;
-}
-
 .generatorWorkbench {
   --workbench-accent: var(--gen-purple);
   border-radius: 16px;

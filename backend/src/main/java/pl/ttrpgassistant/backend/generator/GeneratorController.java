@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import pl.ttrpgassistant.backend.generator.dto.GeneratorCatalogItem;
 import pl.ttrpgassistant.backend.generator.dto.GeneratorDefinitionResponse;
 import pl.ttrpgassistant.backend.generator.dto.GeneratorFormResponse;
 import pl.ttrpgassistant.backend.generator.dto.GeneratorPoolResponse;
@@ -25,11 +24,6 @@ public class GeneratorController {
 
     public GeneratorController(GeneratorService service) {
         this.service = service;
-    }
-
-    @GetMapping("/catalog")
-    public List<GeneratorCatalogItem> catalog() {
-        return service.catalog();
     }
 
     @GetMapping

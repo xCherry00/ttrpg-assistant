@@ -4,19 +4,15 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import pl.ttrpgassistant.backend.common.error.ResourceNotFoundException;
-import pl.ttrpgassistant.backend.generator.dto.GeneratorCatalogItem;
 import pl.ttrpgassistant.backend.generator.dto.GeneratorDefinitionResponse;
 import pl.ttrpgassistant.backend.generator.dto.GeneratorFormFieldResponse;
 import pl.ttrpgassistant.backend.generator.dto.GeneratorFormResponse;
 import pl.ttrpgassistant.backend.generator.dto.GeneratorOutputSection;
-import pl.ttrpgassistant.backend.generator.dto.GeneratorParamDefinition;
 import pl.ttrpgassistant.backend.generator.dto.GeneratorPoolResponse;
 import pl.ttrpgassistant.backend.generator.dto.GeneratorRecentResultResponse;
 import pl.ttrpgassistant.backend.generator.dto.GeneratorRequest;
 import pl.ttrpgassistant.backend.generator.dto.GeneratorResultResponse;
 import pl.ttrpgassistant.backend.generator.dto.GeneratorStructuredResultResponse;
-import pl.ttrpgassistant.backend.generator.dto.CreateGeneratorTemplateRequest;
-import pl.ttrpgassistant.backend.generator.dto.GeneratorTemplateResponse;
 import pl.ttrpgassistant.backend.generator.dto.GeneratorVariantResponse;
 import pl.ttrpgassistant.backend.system.SystemCodeRegistry;
 
@@ -83,7 +79,6 @@ public class GeneratorService {
     private final GeneratorVariantRepository variantRepository;
     private final GeneratorFieldDefinitionRepository fieldRepository;
     private final GeneratorResultRepository resultRepository;
-    private final GeneratorTemplateRepository templateRepository;
     private final List<GeneratorStrategy> strategies;
     private final ObjectMapper objectMapper;
     private final Random random = new Random();
@@ -94,7 +89,6 @@ public class GeneratorService {
             GeneratorVariantRepository variantRepository,
             GeneratorFieldDefinitionRepository fieldRepository,
             GeneratorResultRepository resultRepository,
-            GeneratorTemplateRepository templateRepository,
             List<GeneratorStrategy> strategies,
             ObjectMapper objectMapper
     ) {
@@ -103,55 +97,8 @@ public class GeneratorService {
         this.variantRepository = variantRepository;
         this.fieldRepository = fieldRepository;
         this.resultRepository = resultRepository;
-        this.templateRepository = templateRepository;
         this.strategies = strategies;
         this.objectMapper = objectMapper;
-    }
-
-    public List<GeneratorCatalogItem> catalog() {
-        return List.of(
-                catalogItem("name", "any", "Imiona", "Imiona i nazwiska z pul seed.", List.of(
-                        select("culture", "Kultura", List.of("Losowa", "Słowiańska", "Nordycka", "Arabska", "Japońska", "Elficka", "Krasnoludzka", "Orcza", "Fantastyczna"), "Losowa"),
-                        select("gender", "Płeć", List.of("Losowa", "Męska", "Żeńska", "Neutralna"), "Losowa"),
-                        number("count", "Liczba wyników", 1, 10, 3)
-                )),
-                catalogItem("npc", "dnd", "NPC D&D 5E", "Postać z wyglądem, osobowością, sekretem, motywacją i uproszczonym stat blockiem.", List.of(
-                        select("race", "Rasa", List.of("Losowa", "Człowiek", "Elf", "Krasnolud", "Niziołek", "Gnom", "Półelf", "Półork", "Tiefling", "Dragonborn"), "Losowa"),
-                        select("profession", "Profesja/Klasa", List.of("Losowa", "Strażnik", "Kupiec", "Wiedźma", "Złodziej", "Kapłan", "Szlachcic", "Chłop", "Żołnierz", "Magik", "Łowca nagród", "Skryba", "Alchemik"), "Losowa"),
-                        select("role", "Rola fabularna", List.of("Losowa", "Villain", "Quest Giver", "Ally", "Contact", "Neutral", "Rival", "Informant"), "Losowa"),
-                        select("alignment", "Charakter", List.of("Losowy", "Lawful Good", "Neutral Good", "Chaotic Good", "Lawful Neutral", "True Neutral", "Chaotic Neutral", "Lawful Evil", "Neutral Evil", "Chaotic Evil"), "Losowy"),
-                        number("level", "Poziom", 1, 20, 5)
-                )),
-                catalogItem("encounter", "dnd", "Encounter D&D 5E", "Budżet XP i propozycja potworów z puli SRD.", List.of(
-                        number("partyLevel", "Poziom drużyny", 1, 20, 5),
-                        number("partySize", "Liczba graczy", 2, 8, 4),
-                        select("difficulty", "Trudność", List.of("Easy", "Medium", "Hard", "Deadly"), "Medium")
-                )),
-                catalogItem("loot", "dnd", "Skarb D&D 5E", "Skarb w stylu Donjon/Kassoon: monety, kosztowności, przedmioty, magia i miejsce ukrycia.", List.of(
-                        select("treasureType", "Typ skarbu", List.of("Individual Loot", "Treasure Hoard"), "Treasure Hoard"),
-                        select("crBand", "CR / poziom skarbca", List.of("0-4", "5-10", "11-16", "17+"), "0-4"),
-                        select("contents", "Zawartość", List.of("Wszystko", "Monety", "Kosztowności", "Magiczne"), "Wszystko"),
-                        select("theme", "Motyw", List.of("Podziemie", "Szlachta", "Religijny", "Dzicz", "Arkana"), "Podziemie")
-                )),
-                catalogItem("twist", "any", "Twist", "Szybki zwrot do sceny.", List.of(
-                        select("scene", "Scena", List.of("Losowa", "Walka", "Negocjacje", "Śledztwo", "Podróż"), "Losowa")
-                )),
-                catalogItem("hook", "any", "Haczyk sesji", "Start sceny lub sesji.", List.of(
-                        select("mood", "Klimat", List.of("Losowy", "Tajemnica", "Przygodowy", "Horror"), "Losowy")
-                )),
-                catalogItem("weather", "any", "Pogoda", "Opis pogody z drobnym efektem.", List.of(
-                        select("climate", "Klimat", List.of("Losowy", "Umiarkowany", "Górski", "Tropikalny"), "Losowy")
-                )),
-                catalogItem("complication", "any", "Komplikacja", "Jedno kliknięcie, jeden problem.", List.of()),
-                catalogItem("encounter", "pf2e", "Encounter PF2E", "Budżet XP PF2E na start.", List.of(
-                        number("partyLevel", "Poziom drużyny", 1, 20, 3),
-                        number("partySize", "Liczba graczy", 2, 6, 4),
-                        select("difficulty", "Trudność", List.of("Trivial", "Low", "Moderate", "Severe", "Extreme"), "Moderate")
-                )),
-                catalogItem("scvm", "morkborg", "Scvm Mork Borg", "Brudna, szybka postać startowa.", List.of(
-                        select("className", "Klasa", List.of("Losowa", "Classless", "Gutterborn Scum", "Fanged Deserter", "Heretical Priest"), "Losowa")
-                ))
-        );
     }
 
     public List<GeneratorDefinitionResponse> definitions() {
@@ -247,41 +194,6 @@ public class GeneratorService {
                         result.getCreatedAt()
                 ))
                 .toList();
-    }
-
-    public List<GeneratorTemplateResponse> templates(Long userId) {
-        return templateRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
-                .map(this::templateResponse)
-                .toList();
-    }
-
-    public GeneratorTemplateResponse createTemplate(Long userId, CreateGeneratorTemplateRequest request) {
-        if (request == null || request.name() == null || request.name().isBlank()) {
-            throw new IllegalArgumentException("Template name is required");
-        }
-        String generatorCode = normalize(request.generatorCode());
-        String variantCode = normalizeVariant(request.variantCode());
-        findVariant(generatorCode, variantCode);
-
-        GeneratorTemplateEntity entity = new GeneratorTemplateEntity();
-        entity.setUserId(userId);
-        entity.setName(request.name().trim());
-        entity.setGeneratorCode(generatorCode);
-        entity.setVariantCode(variantCode);
-        entity.setConfigJson(writeJson(request.config() == null ? Map.of() : request.config()));
-        entity.setCreatedAt(OffsetDateTime.now());
-        return templateResponse(templateRepository.save(entity));
-    }
-
-    private GeneratorTemplateResponse templateResponse(GeneratorTemplateEntity entity) {
-        return new GeneratorTemplateResponse(
-                entity.getId(),
-                entity.getName(),
-                entity.getGeneratorCode(),
-                entity.getVariantCode(),
-                readJsonMap(entity.getConfigJson()),
-                entity.getCreatedAt()
-        );
     }
 
     private GeneratorStructuredResultResponse legacyVariant(String generatorCode, String variantCode, GeneratorRequest request) {
@@ -718,23 +630,6 @@ public class GeneratorService {
     private GeneratorResultResponse result(String type, String system, String title, Map<String, Object> payload, String source) {
         return new GeneratorResultResponse(type, system, title, payload, source, OffsetDateTime.now());
     }
-
-    private GeneratorCatalogItem catalogItem(String type, String system, String label, String description, List<GeneratorParamDefinition> params) {
-        return new GeneratorCatalogItem(type, system, label, description, params, "seed/algorithm");
-    }
-
-    private GeneratorParamDefinition select(String key, String label, List<String> options, Object defaultValue) {
-        return new GeneratorParamDefinition(key, label, "select", options, null, null, defaultValue);
-    }
-
-    private GeneratorParamDefinition number(String key, String label, int min, int max, Object defaultValue) {
-        return new GeneratorParamDefinition(key, label, "number", List.of(), min, max, defaultValue);
-    }
-
-    private GeneratorParamDefinition text(String key, String label, Object defaultValue) {
-        return new GeneratorParamDefinition(key, label, "text", List.of(), null, null, defaultValue);
-    }
-
     private String normalize(String value) {
         return value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
     }

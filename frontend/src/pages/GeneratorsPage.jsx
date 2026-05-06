@@ -5,12 +5,9 @@ import { createCampaignMaterial, listCampaigns } from "../api/campaigns";
 import {
   generateContent,
   generateVariantContent,
-  getGeneratorCatalog,
   getGeneratorDefinitions,
   getGeneratorForm,
 } from "../api/generators";
-
-const RECENT_GENERATIONS_KEY = "ttrpg_assistant_recent_generations_v2";
 
 const FALLBACK_CATALOG = [
   {
@@ -78,7 +75,6 @@ const CARD_META = {
     tone: "red",
     icon: "swords",
     order: 20,
-    planned: true,
   },
   location: {
     title: "Lokacja",
@@ -174,7 +170,6 @@ const TAB_GENERATOR_TYPES = {
 };
 
 function buildKey(item) {
-  if (item.kind === "planned") return `planned:${item.type}`;
   if (item.kind === "variant") return `variant:${item.generatorCode}:${item.variantCode}`;
   return `${item.system}:${item.type}`;
 }
@@ -208,17 +203,7 @@ function flattenDefinitions(definitions) {
   );
 }
 
-function mergeCatalog(dynamicItems, legacyItems) {
-  const seen = new Set(dynamicItems.map(buildKey));
-  const promoted = new Set(dynamicItems.map((item) => `${item.system}:${item.type}`));
-  return [
-    ...dynamicItems,
-    ...legacyItems.filter((item) => !seen.has(buildKey(item)) && !promoted.has(`${item.system}:${item.type}`)),
-  ];
-}
-
 function variantRank(item) {
-  if (item.kind === "planned") return 1000;
   if (item.kind === "variant") {
     if (item.variantCode === "dnd.quick" || item.variantCode === "general.quick") return 0;
     if (String(item.variantCode || "").includes("quick")) return 1;
@@ -244,19 +229,6 @@ function decorateCatalog(items) {
       order: meta.order,
     };
   });
-
-  if (!decorated.some((item) => item.type === "encounter")) {
-    decorated.push({
-      kind: "planned",
-      type: "encounter",
-      system: "dnd",
-      params: [],
-      ...CARD_META.encounter,
-      label: CARD_META.encounter.title,
-      cardTag: CARD_META.encounter.tag,
-      cardDescription: CARD_META.encounter.description,
-    });
-  }
 
   const byType = new Map();
   for (const item of decorated) {
@@ -317,18 +289,6 @@ function materialTypeFor(generatorCode) {
 function trimForApi(value, max) {
   const text = String(value || "").trim();
   return text.length > max ? `${text.slice(0, max - 3)}...` : text;
-}
-
-function saveRecentGeneration(entry) {
-  if (typeof window === "undefined") return;
-  try {
-    const raw = window.localStorage.getItem(RECENT_GENERATIONS_KEY);
-    const parsed = JSON.parse(raw || "[]");
-    const list = Array.isArray(parsed) ? parsed : [];
-    window.localStorage.setItem(RECENT_GENERATIONS_KEY, JSON.stringify([entry, ...list].slice(0, 10)));
-  } catch {
-    // Local recent history is only a convenience.
-  }
 }
 
 function IconBase({ children }) {
@@ -507,17 +467,11 @@ export default function GeneratorsPage() {
     async function loadCatalog() {
       setCatalogLoading(true);
       try {
-        const [definitions, legacyCatalog] = await Promise.all([
-          getGeneratorDefinitions(token).catch(() => []),
-          getGeneratorCatalog(token).catch(() => FALLBACK_CATALOG),
-        ]);
-        const nextCatalog = decorateCatalog(mergeCatalog(
-          flattenDefinitions(definitions),
-          Array.isArray(legacyCatalog) && legacyCatalog.length ? legacyCatalog : FALLBACK_CATALOG
-        ));
+        const definitions = await getGeneratorDefinitions(token);
+        const nextCatalog = decorateCatalog(flattenDefinitions(definitions));
         if (cancelled) return;
         setCatalog(nextCatalog);
-        setActiveKey((previous) => nextCatalog.some((item) => buildKey(item) === previous && item.kind !== "planned") ? previous : buildKey(nextCatalog.find((item) => item.kind !== "planned") || nextCatalog[0]));
+        setActiveKey((previous) => nextCatalog.some((item) => buildKey(item) === previous) ? previous : buildKey(nextCatalog[0]));
         setForms((previous) => {
           const next = { ...previous };
           for (const item of nextCatalog) {
@@ -566,7 +520,7 @@ export default function GeneratorsPage() {
   }, [token]);
 
   const activeDefinition = useMemo(
-    () => catalog.find((item) => buildKey(item) === activeKey && item.kind !== "planned") || catalog.find((item) => item.kind !== "planned") || catalog[0],
+    () => catalog.find((item) => buildKey(item) === activeKey) || catalog[0],
     [activeKey, catalog]
   );
   const activeValues = forms[activeKey] || buildInitialParams(activeDefinition);
@@ -668,9 +622,8 @@ export default function GeneratorsPage() {
   }
 
   async function handleGenerate(target = activeDefinition) {
-    if (!target || target.kind === "planned") {
-      setActiveKey(buildKey(target));
-      setError("Ten generator jest jeszcze w przygotowaniu po stronie backendu.");
+    if (!target) {
+      setError("Nie znaleziono generatora.");
       return;
     }
 
@@ -689,12 +642,6 @@ export default function GeneratorsPage() {
       setResult(generated);
       setResultIsNew(true);
       setTimeout(() => setResultIsNew(false), 600);
-      saveRecentGeneration({
-        id: key,
-        title: generated.title,
-        payload: generated.payload,
-        createdAt: generated.generatedAt || new Date().toISOString(),
-      });
     } catch (e) {
       setError(e?.message || "Nie udało się wygenerować treści.");
     } finally {
@@ -716,7 +663,7 @@ export default function GeneratorsPage() {
       <div className={`page generatorsPage generatorsDashboard generatorWindowPage generatorWindowPage--${activeDefinition?.tone || "purple"}`}>
         <header className="generatorWindowHero">
           <button type="button" className="generatorBackButton" onClick={() => navigate("/generators")}>
-            ← Generatory
+            {"← Generatory"}
           </button>
           <div className="generatorWindowTitle">
             <div className="generatorsHeroIcon" aria-hidden="true">
@@ -744,13 +691,6 @@ export default function GeneratorsPage() {
                     <small>Podstawowe informacje</small>
                   </span>
                 </button>
-                <button type="button">
-                  <GeneratorIcon name="gear" />
-                  <span>
-                    <strong>Rozbudowany</strong>
-                    <small>Szczegółowy profil i staty</small>
-                  </span>
-                </button>
               </div>
             </div>
 
@@ -771,7 +711,7 @@ export default function GeneratorsPage() {
               <GeneratorIcon name="spark" />
               <span>{loading ? "Generowanie..." : `Generuj ${activeDefinition?.label || ""}`}</span>
             </button>
-            <button className="generatorAdvancedButton" type="button">Opcje zaawansowane⌄</button>
+            <button className="generatorAdvancedButton" type="button" disabled>Opcje zaawansowane</button>
           </aside>
 
           <main className="generatorOutputPanel">
@@ -832,7 +772,7 @@ export default function GeneratorsPage() {
 
                 <div className="generatorWindowBottomActions">
                   <button type="button" onClick={() => handleGenerate(activeDefinition)} disabled={loading}>Generuj ponownie</button>
-                  <button type="button" className="is-primary">Edytuj i rozwiń</button>
+                  <button type="button" className="is-primary" disabled>Edytuj i rozwiń</button>
                 </div>
               </section>
             ) : (
@@ -879,8 +819,6 @@ export default function GeneratorsPage() {
           <span>System:</span>
           <select value={selectedSystem} onChange={(event) => setSelectedSystem(event.target.value)}>
             <option value="dnd">D&D 5E</option>
-            <option value="pf2e">Pathfinder 2E</option>
-            <option value="coc7e">Call of Cthulhu 7E</option>
           </select>
         </label>
       </section>
@@ -890,29 +828,24 @@ export default function GeneratorsPage() {
           <section className="generatorCardsGrid" aria-busy={catalogLoading}>
             {visibleCatalog.map((generator) => {
               const isActive = buildKey(generator) === activeKey;
-              const isPlanned = generator.kind === "planned";
               return (
-                <article key={buildKey(generator)} className={`generatorTile generatorTile--${generator.tone}${isActive ? " is-active" : ""}${isPlanned ? " is-planned" : ""}`}>
+                <article key={buildKey(generator)} className={`generatorTile generatorTile--${generator.tone}${isActive ? " is-active" : ""}`}>
                   <button
                     type="button"
                     className="generatorTileStar"
                     title="Oznacz jako ulubiony"
                     aria-label="Oznacz jako ulubiony"
                     onClick={() => {
-                      if (!isPlanned) navigate(generatorPath(generator));
+                      navigate(generatorPath(generator));
                       setResult(null);
                     }}
                   >
-                    ☆
+                    {"☆"}
                   </button>
                   <button
                     type="button"
                     className="generatorTileBody"
                     onClick={() => {
-                      if (isPlanned) {
-                        setError("Ten generator jest jeszcze w przygotowaniu po stronie backendu.");
-                        return;
-                      }
                       navigate(generatorPath(generator));
                     }}
                   >
@@ -928,115 +861,15 @@ export default function GeneratorsPage() {
                     className="generatorTileAction"
                     disabled={loading && isActive}
                     onClick={() => {
-                      if (isPlanned) {
-                        setError("Ten generator jest jeszcze w przygotowaniu po stronie backendu.");
-                        return;
-                      }
                       navigate(generatorPath(generator));
                     }}
                   >
-                    <span>{isPlanned ? "W przygotowaniu" : "Otwórz"}</span>
-                    <span aria-hidden="true">→</span>
+                    <span>Otwórz</span>
+                    <span aria-hidden="true">{"→"}</span>
                   </button>
                 </article>
               );
             })}
-          </section>
-
-          <section className={`generatorWorkbench generatorWorkbench--${activeDefinition?.tone || "purple"}`}>
-            <div className="generatorWorkbenchHeader">
-              <div>
-                <span className="generatorWorkbenchKicker">Aktywny generator</span>
-                <h2>{activeDefinition?.label || "Generator"}</h2>
-                <p>{activeDefinition?.description || activeDefinition?.cardDescription}</p>
-              </div>
-              <div className="generatorWorkbenchIcon" aria-hidden="true">
-                <GeneratorIcon name={activeDefinition?.icon || "spark"} />
-              </div>
-            </div>
-
-            <div className="generatorWorkbenchGrid">
-              <div className="generatorFormPanel">
-                {activeDefinition?.params?.length ? (
-                  <div className="generatorGrid">
-                    {activeDefinition.params.map((param) => (
-                      <Field key={param.key} param={param} value={activeValues[param.key]} onChange={setFieldValue} />
-                    ))}
-                  </div>
-                ) : (
-                  <p className="generatorCatalogEmpty">Ten generator nie wymaga parametrów albo formularz jest wczytywany.</p>
-                )}
-
-                {error && <div className="generatorError">{error}</div>}
-                {notice && <div className="generatorNotice">{notice}</div>}
-
-                <div className="generatorFormActions">
-                  <button className="generatorActionButton" type="button" onClick={() => handleGenerate(activeDefinition)} disabled={loading || catalogLoading}>
-                    {loading ? "Generowanie..." : "Generuj"}
-                  </button>
-                </div>
-              </div>
-
-              {result ? (
-                <section className={`generatorResultCard${resultIsNew ? " is-new" : ""}`}>
-                  <div className="generatorResultHeader">
-                    <div>
-                      <h3 className="generatorResultTitle">{result.title}</h3>
-                      <span className="generatorResultSystem">
-                        {result.subtitle || SYSTEM_LABELS[result.system] || result.system} · {result.source}
-                      </span>
-                    </div>
-                    <div className="generatorResultActions">
-                      <button className="generatorResultCopyBtn" type="button" onClick={copyResultToClipboard}>Kopiuj</button>
-                      {campaigns.length > 0 && (
-                        <select className="generatorCampaignSelect" value={selectedCampaignId} onChange={(event) => setSelectedCampaignId(event.target.value)}>
-                          {campaigns.map((campaign) => (
-                            <option key={campaign.id} value={campaign.id}>{campaign.title || campaign.name}</option>
-                          ))}
-                        </select>
-                      )}
-                      <button className="generatorResultCopyBtn" type="button" onClick={handleAddToCampaign} disabled={addingToCampaign || !campaigns.length}>
-                        {addingToCampaign ? "Dodawanie..." : "Do kampanii"}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="generatorResultList">
-                    {Array.isArray(result.sections) ? (
-                      result.sections.map((section, index) => (
-                        <div key={`${section.title}-${index}`} className="generatorResultRow">
-                          <div className="generatorResultKey">{section.title}</div>
-                          {section.content && <div className="generatorResultValue">{section.content}</div>}
-                          {Array.isArray(section.items) && section.items.length > 0 && (
-                            <div className="generatorResultStats">
-                              {section.items.map((item) => (
-                                <span key={item.label} className="generatorResultStat">
-                                  <strong>{item.label}</strong>
-                                  <span>{renderValue(item.value)}</span>
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      ))
-                    ) : (
-                      Object.entries(result.payload || {}).map(([key, value]) => (
-                        <div key={key} className="generatorResultRow">
-                          <div className="generatorResultKey">{key}</div>
-                          <div className="generatorResultValue">{renderValue(value)}</div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </section>
-              ) : (
-                <div className="generatorResultEmpty">
-                  <GeneratorIcon name="spark" />
-                  <strong>Wynik pojawi się tutaj</strong>
-                  <span>Wybierz kartę i kliknij “Generuj”, żeby odpalić backendowy generator.</span>
-                </div>
-              )}
-            </div>
           </section>
         </main>
 

@@ -82,16 +82,16 @@ public class EncounterDndQuickGeneratorStrategy implements GeneratorStrategy {
         double multiplier = multiplier(enemyCount);
         int adjustedXp = (int) Math.round(baseXp * multiplier);
         String rating = rating(adjustedXp, baseBudget);
-        String envFeature = includeEnvironmentFeature ? environmentFeature(pool, environment) : "Brak dodatkowego elementu srodowiska.";
+        String envFeature = includeEnvironmentFeature ? environmentFeature(pool, environment) : "Brak dodatkowego elementu środowiska.";
         String twist = includeTwist ? pick(asList(pool.get("twists"))) : "Brak twistu.";
         String objective = pick(asList(pool.get("objectives")));
 
         List<Map<String, Object>> summary = List.of(
                 item("Tryb", "Combat"),
-                item("Trudnosc", difficulty),
-                item("Poziom druzyny", partyLevel),
+                item("Trudność", difficulty),
+                item("Poziom drużyny", partyLevel),
                 item("Liczba postaci", partySize),
-                item("Budzet XP", baseBudget),
+                item("Budżet XP", baseBudget),
                 item("XP bazowe", baseXp),
                 item("XP skorygowane", adjustedXp),
                 item("Dopasowanie", rating)
@@ -111,7 +111,7 @@ public class EncounterDndQuickGeneratorStrategy implements GeneratorStrategy {
         List<GeneratorOutputSection> sections = List.of(
                 new GeneratorOutputSection("stats", "Podsumowanie", null, summary),
                 new GeneratorOutputSection("table", "Przeciwnicy", null, enemyItems),
-                section("Element srodowiska", envFeature),
+                section("Element środowiska", envFeature),
                 section("Cel encountera", objective),
                 section("Twist", twist)
         );
@@ -139,21 +139,21 @@ public class EncounterDndQuickGeneratorStrategy implements GeneratorStrategy {
         String solution = pick(asList(pool.get("solutions")));
         String consequence = pick(asList(pool.get("failureConsequences")));
         String skillChallenge = pick(asList(pool.get("skillChallenges")));
-        String envFeature = includeEnvironmentFeature ? environmentFeature(pool, environment) : "Brak dodatkowego elementu srodowiska.";
+        String envFeature = includeEnvironmentFeature ? environmentFeature(pool, environment) : "Brak dodatkowego elementu środowiska.";
         String twist = includeTwist ? pick(asList(pool.get("twists"))) : "Brak twistu.";
 
         List<GeneratorOutputSection> sections = List.of(
                 new GeneratorOutputSection("stats", "Podsumowanie", null, List.of(
                         item("Tryb", "Non-combat"),
-                        item("Trudnosc", difficulty),
+                        item("Trudność", difficulty),
                         item("Typ sceny", encounterType),
-                        item("Srodowisko", environment)
+                        item("Środowisko", environment)
                 )),
                 section("Konflikt", conflict),
-                section("Mozliwe rozwiazania", solution),
-                section("Konsekwencja porazki", consequence),
+                section("Możliwe rozwiązania", solution),
+                section("Konsekwencja porażki", consequence),
                 section("Test / skill challenge", skillChallenge),
-                section("Element srodowiska", envFeature),
+                section("Element środowiska", envFeature),
                 section("Twist", twist)
         );
 
@@ -233,7 +233,7 @@ public class EncounterDndQuickGeneratorStrategy implements GeneratorStrategy {
             options = features.values().stream().findFirst().map(this::asList).orElse(List.of());
         }
         String picked = pick(options);
-        return picked.isBlank() ? "Teren nie daje wyraznej przewagi zadnej stronie." : picked + ".";
+        return picked.isBlank() ? "Teren nie daje wyraźnej przewagi żadnej stronie." : picked + ".";
     }
 
     private int difficultyIndex(String difficulty) {
@@ -256,7 +256,7 @@ public class EncounterDndQuickGeneratorStrategy implements GeneratorStrategy {
 
     private String rating(int adjustedXp, int budget) {
         double ratio = budget <= 0 ? 1 : adjustedXp / (double) budget;
-        if (ratio < 0.75) return "ponizej budzetu";
+        if (ratio < 0.75) return "poniżej budżetu";
         if (ratio <= 1.25) return "dobrze dopasowane";
         if (ratio <= 1.6) return "ryzykownie wysokie";
         return "bardzo niebezpieczne";
@@ -280,9 +280,9 @@ public class EncounterDndQuickGeneratorStrategy implements GeneratorStrategy {
     private String environmentLocative(String environment) {
         return switch (environment.toLowerCase(Locale.ROOT)) {
             case "las" -> "w lesie";
-            case "miasto" -> "w miescie";
+            case "miasto" -> "w mieście";
             case "ruiny" -> "w ruinach";
-            case "gory" -> "w gorach";
+            case "góry", "gory" -> "w górach";
             case "bagna" -> "na bagnach";
             case "podziemia" -> "w podziemiach";
             case "lochy" -> "w lochach";
