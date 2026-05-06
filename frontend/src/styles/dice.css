@@ -1,0 +1,1011 @@
+/* ── Dice page tokens ── */
+.dicePage {
+  --dice-bg: radial-gradient(circle at 14% 0%, color-mix(in srgb, var(--primary) 16%, transparent) 0%, transparent 58%);
+  --dice-card: linear-gradient(170deg, color-mix(in srgb, var(--card-2) 96%, transparent), color-mix(in srgb, var(--card-solid) 94%, transparent));
+  --dice-line: color-mix(in srgb, var(--primary) 34%, transparent);
+  --dice-line-soft: var(--border);
+  --dice-text: var(--text);
+  --dice-muted: var(--text-2);
+  --dice-accent: var(--primary);
+  --dice-accent-2: var(--secondary);
+  --dice-success: var(--ok);
+  --dice-fail: var(--danger);
+  --dice-gold: var(--warn);
+  padding-bottom: 24px;
+}
+
+/* ── Page header ── */
+.dicePageHeader {
+  margin-bottom: 16px;
+  align-items: flex-end;
+}
+
+.dicePageTitle {
+  color: var(--dice-text);
+  margin: 0;
+}
+
+.dicePageControlRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-self: flex-end;
+}
+
+/* ── Tabs ── */
+.diceTabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--dice-line-soft);
+}
+
+.diceTab {
+  padding: 8px 18px;
+  border: 0;
+  background: transparent;
+  color: var(--dice-muted);
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.diceTab:hover { color: #d0d8f8; }
+
+.diceTab.is-active {
+  color: var(--dice-text);
+  border-bottom-color: var(--dice-accent);
+}
+
+/* ── Header tools ── */
+.diceHeaderTools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.diceMgToggleWrap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--dice-muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+}
+
+.diceToggleSwitch {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: 99px;
+  border: 0;
+  background: rgba(130,145,180,0.25);
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.diceToggleSwitch.is-on {
+  background: var(--dice-accent);
+}
+
+.diceToggleThumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+
+.diceToggleSwitch.is-on .diceToggleThumb {
+  transform: translateX(18px);
+}
+
+.diceManageBtn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 14px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--dice-line);
+  background: rgba(10,14,28,0.85);
+  color: #d0d8f8;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.diceManageBtn:hover {
+  border-color: var(--dice-accent);
+  background: var(--primary-dim);
+}
+
+/* ── Card base ── */
+.diceCard {
+  border-radius: 16px;
+  border: 1px solid var(--dice-line-soft);
+  background: var(--dice-card);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02), 0 20px 42px rgba(0,0,0,0.38);
+  color: var(--dice-text);
+  position: relative;
+  overflow: hidden;
+}
+
+.diceCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--dice-bg);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.diceCard > * { position: relative; z-index: 1; }
+
+/* ── Workbench ── */
+.diceWorkbench {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+/* ── Arena (left) ── */
+.diceArena { padding: 18px; }
+
+.diceArenaTop {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.diceArenaFormula {
+  flex: 1;
+  border: 1px solid var(--dice-line-soft);
+  border-radius: 10px;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #f0eaff;
+  background: rgba(7,11,22,0.54);
+}
+
+.diceGhostBtn {
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid var(--dice-line-soft);
+  background: rgba(8,12,22,0.72);
+  color: var(--dice-muted);
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.diceGhostBtn:hover { border-color: var(--dice-line); color: #d7dcf5; }
+
+.diceArenaModTag {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 99px;
+  border: 1px solid var(--dice-line);
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+  font-size: 0.85rem;
+  color: var(--dice-muted);
+}
+
+.diceArenaModTag strong { color: var(--dice-accent-2); }
+
+/* ── Dice visual zone ── */
+.diceVisualZone {
+  margin-top: 14px;
+  min-height: 168px;
+  border: 1px solid var(--dice-line-soft);
+  border-radius: 14px;
+  background: rgba(6,10,18,0.54);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+}
+
+.diceVisualDiceRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Individual die */
+.diceArenaDie {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.diceArenaDieSvg {
+  width: clamp(88px, 12vw, 130px);
+  height: clamp(88px, 12vw, 130px);
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--primary) 34%, transparent));
+}
+
+.diceArenaDiePath {
+  stroke: color-mix(in srgb, var(--primary) 62%, transparent);
+  stroke-width: 1.5;
+}
+
+.diceArenaDieTxt {
+  font-size: 32px;
+  font-weight: 800;
+  fill: #d8baff;
+  letter-spacing: -0.5px;
+}
+
+.diceArenaDieType {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--dice-muted);
+}
+
+/* Modifier badge next to dice */
+.diceArenaModBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.diceArenaModVal {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 800;
+  color: var(--dice-accent-2);
+  line-height: 1;
+}
+
+.diceArenaModLbl {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--dice-muted);
+}
+
+/* Placeholder */
+.diceVisualEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--dice-muted);
+  font-size: 0.9rem;
+}
+
+.diceVisualPlaceholderSvg {
+  width: 60px;
+  height: 60px;
+  opacity: 0.25;
+}
+
+.diceVisualPlaceholderSvg path {
+  fill: none;
+  stroke: var(--dice-text);
+  stroke-width: 2;
+}
+
+/* ── Result ── */
+.diceFinalWrap {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.diceFinalLabel {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--dice-muted);
+}
+
+.diceFinalValue {
+  font-size: clamp(2.4rem, 4vw, 3.6rem);
+  font-weight: 800;
+  color: #bf8fff;
+  line-height: 1;
+}
+
+.diceFinalHint {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-top: 2px;
+}
+
+.diceFinalHint.is-success { color: var(--dice-success); }
+.diceFinalHint.is-critical { color: var(--dice-gold); }
+.diceFinalHint.is-fail { color: var(--dice-fail); }
+
+/* ── Main actions ── */
+.diceMainActions {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+}
+
+.dicePrimaryBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  border-radius: 10px;
+  border: 0;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f7efff;
+  background: linear-gradient(135deg, var(--primary-2), var(--primary) 55%, var(--secondary));
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--primary) 36%, transparent);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.dicePrimaryBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px color-mix(in srgb, var(--primary) 46%, transparent);
+}
+
+.diceSecondaryBtn {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--dice-line);
+  background: rgba(10,14,26,0.78);
+  color: #dbceff;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.88rem;
+  white-space: nowrap;
+  transition: border-color 0.15s;
+}
+
+.diceSecondaryBtn:hover { border-color: #9f75ff; }
+
+.diceIconBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid var(--dice-line-soft);
+  background: rgba(10,14,26,0.78);
+  color: var(--dice-muted);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.diceIconBtn:hover { border-color: var(--dice-accent); color: var(--text); }
+
+/* ── Quick rolls ── */
+.diceQuickSection { margin-top: 16px; }
+
+.diceQuickLabel {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--dice-muted);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.diceQuickRow {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.diceQuickBtn {
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 9px;
+  border: 1px solid var(--dice-line-soft);
+  background: rgba(7,11,20,0.76);
+  color: var(--dice-muted);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.diceQuickBtn:hover { border-color: var(--border-strong); color: var(--text); }
+
+.diceQuickBtn.is-active {
+  border-color: var(--dice-accent);
+  color: var(--text);
+  background: var(--primary-dim);
+}
+
+.diceQuickAddBtn {
+  height: 34px;
+  width: 34px;
+  border-radius: 9px;
+  border: 1px dashed var(--dice-line);
+  background: transparent;
+  color: var(--primary);
+  font-weight: 800;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.15s;
+}
+
+.diceQuickAddBtn:hover { background: var(--primary-dim); }
+
+/* ── Config panel (middle) ── */
+.diceConfig { padding: 18px; }
+
+.diceColumnHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.diceColumnTitle { font-size: 1.2rem; font-weight: 700; }
+
+.diceCollapseIcon { color: var(--dice-muted); cursor: pointer; }
+
+/* Die type chip grid */
+.diceDieChipGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.diceDieChip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--dice-line-soft);
+  background: rgba(8,11,20,0.85);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.diceDieChip:hover { border-color: #8f64ff; }
+
+.diceDieChip.is-active {
+  border-color: var(--dice-accent);
+  background: var(--primary-dim);
+}
+
+.diceDieChipSvg {
+  width: 34px;
+  height: 34px;
+}
+
+.diceDieChipSvg path,
+.diceDieChipSvg rect,
+.diceDieChipSvg circle {
+  fill: none;
+  stroke: #8fa0cc;
+  stroke-width: 4;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.diceDieChip.is-active .diceDieChipSvg path,
+.diceDieChip.is-active .diceDieChipSvg rect,
+.diceDieChip.is-active .diceDieChipSvg circle {
+  stroke: var(--primary);
+}
+
+.diceDieChipLabel {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #8fa0cc;
+  letter-spacing: 0.04em;
+}
+
+.diceDieChip.is-active .diceDieChipLabel { color: #e0d0ff; }
+
+/* Config rows */
+.diceConfigRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.diceConfigLabel {
+  font-size: 0.84rem;
+  color: var(--dice-muted);
+  font-weight: 500;
+}
+
+.diceOptional {
+  font-size: 0.76rem;
+  opacity: 0.7;
+}
+
+.diceConfigField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+/* Qty stepper */
+.diceQtyControl {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--dice-line-soft);
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(7,10,18,0.88);
+}
+
+.diceQtyStep {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: transparent;
+  color: var(--dice-text);
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.diceQtyStep:hover:not(:disabled) { background: rgba(145,116,255,0.22); }
+.diceQtyStep:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.diceQtyNum {
+  min-width: 40px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #d7e0ff;
+  border-inline: 1px solid var(--dice-line-soft);
+  line-height: 36px;
+}
+
+/* Select */
+.diceSelect {
+  width: 100%;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--dice-line-soft);
+  background: rgba(8,11,20,0.88);
+  color: var(--dice-text);
+  padding: 0 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2391a0c4' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+.diceSelect--sm { height: 34px; font-size: 0.84rem; width: auto; min-width: 110px; }
+
+/* Input / textarea */
+.diceInput {
+  width: 100%;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--dice-line-soft);
+  background: rgba(8,11,20,0.88);
+  color: var(--dice-text);
+  padding: 0 12px;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+.diceInput:focus, .diceSelect:focus, .diceTextarea:focus {
+  outline: none;
+  border-color: var(--border-strong);
+}
+
+.diceTextarea {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--dice-line-soft);
+  background: rgba(8,11,20,0.88);
+  color: var(--dice-text);
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  resize: vertical;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.diceTextarea::placeholder, .diceInput::placeholder { color: rgba(145,160,196,0.5); }
+
+/* Checkbox */
+.diceCheckboxRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: var(--dice-muted);
+  margin-top: 4px;
+}
+
+.diceCheckbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--dice-accent);
+  cursor: pointer;
+}
+
+/* ── History panel (right) ── */
+.diceHistoryCard {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+.diceHistoryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.diceHistoryTitle {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.diceHistoryList {
+  flex: 1;
+  display: grid;
+  gap: 8px;
+  overflow-y: auto;
+  max-height: 480px;
+  padding-right: 2px;
+}
+
+.diceHistoryEmpty {
+  border: 1px dashed var(--dice-line-soft);
+  border-radius: 10px;
+  min-height: 68px;
+  display: grid;
+  place-items: center;
+  color: var(--dice-muted);
+  font-size: 0.86rem;
+  text-align: center;
+  padding: 12px;
+}
+
+.diceHistoryItem {
+  border: 1px solid var(--dice-line-soft);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: rgba(7,11,20,0.72);
+}
+
+.diceHistoryTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.diceHistoryFormula { font-size: 0.95rem; font-weight: 700; }
+
+.diceHistoryTotal {
+  color: var(--primary);
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.diceHistoryMeta {
+  color: var(--dice-muted);
+  font-size: 0.76rem;
+  margin-top: 2px;
+}
+
+.diceHistoryBreakdown {
+  color: #b5c0df;
+  font-size: 0.82rem;
+  margin-top: 4px;
+}
+
+.diceHistoryBadge {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 2px 9px;
+  border-radius: 99px;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.diceHistoryBadge.is-success { color: var(--dice-success); background: rgba(54,220,138,0.12); }
+.diceHistoryBadge.is-critical { color: var(--dice-gold); background: rgba(245,197,24,0.12); }
+.diceHistoryBadge.is-fail { color: var(--dice-fail); background: rgba(255,92,122,0.12); }
+
+/* ── Presets section inside history card ── */
+.dicePresetsSection {
+  border-top: 1px solid var(--dice-line-soft);
+  margin-top: 14px;
+  padding-top: 14px;
+  flex-shrink: 0;
+}
+
+.dicePresetsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.diceLinkBtn {
+  border: 0;
+  background: transparent;
+  color: var(--dice-accent);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.diceLinkBtn:hover { text-decoration: underline; }
+
+.dicePresetList { display: grid; gap: 6px; }
+
+.dicePresetCard {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--dice-line-soft);
+  border-radius: 9px;
+  background: rgba(8,12,22,0.76);
+  overflow: hidden;
+}
+
+.dicePresetUse {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.dicePresetUse:hover { background: rgba(130,84,242,0.14); }
+
+.dicePresetLabel { color: var(--text); font-size: 0.9rem; font-weight: 600; }
+
+.dicePresetDelete {
+  width: 36px;
+  border: 0;
+  border-left: 1px solid var(--dice-line-soft);
+  background: rgba(255,70,106,0.12);
+  color: #ffacc0;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.dicePresetDelete:hover { background: rgba(255,70,106,0.24); }
+
+.diceAddPresetBtn {
+  width: 100%;
+  margin-top: 8px;
+  height: 36px;
+  border-radius: 9px;
+  border: 1px solid rgba(54,220,138,0.35);
+  background: rgba(54,220,138,0.06);
+  color: var(--dice-success);
+  font-weight: 700;
+  font-size: 0.86rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.diceAddPresetBtn:hover { background: rgba(54,220,138,0.12); }
+
+/* ── Bottom grid ── */
+.diceBottomGrid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ── Stats card ── */
+.diceStatsCard, .diceChartCard { padding: 18px; }
+
+.diceStatsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.diceStatFormula {
+  font-size: 0.84rem;
+  color: var(--dice-muted);
+  border: 1px solid var(--dice-line-soft);
+  border-radius: 7px;
+  padding: 4px 10px;
+  background: rgba(8,12,22,0.7);
+  cursor: pointer;
+}
+
+.diceMetrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.diceMetricBox {
+  border: 1px solid var(--dice-line-soft);
+  border-radius: 10px;
+  padding: 10px;
+  background: rgba(8,12,22,0.72);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.diceMetricLabel {
+  color: var(--dice-muted);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.diceMetricValue {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #f1e8ff;
+}
+
+.diceMetricBox.is-high .diceMetricValue { color: var(--dice-success); }
+.diceMetricBox.is-low .diceMetricValue { color: var(--dice-fail); }
+
+/* Success/fail bars */
+.diceSuccessBars { display: grid; gap: 10px; }
+
+.diceSuccessRow {
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.diceSuccessLabel { font-size: 0.84rem; color: var(--dice-muted); }
+
+.diceSuccessTrack {
+  height: 12px;
+  border-radius: 99px;
+  background: rgba(133,152,204,0.18);
+  overflow: hidden;
+}
+
+.diceSuccessBar {
+  height: 100%;
+  border-radius: inherit;
+  transition: width 0.4s ease;
+}
+
+.diceSuccessBar.is-success { background: linear-gradient(90deg, #2acb7f, #60f6a6); }
+.diceSuccessBar.is-fail { background: linear-gradient(90deg, #e04060, #ff6080); }
+
+.diceSuccessPct { font-size: 0.8rem; color: var(--dice-muted); white-space: nowrap; }
+
+/* ── Chart card ── */
+.diceBarChart {
+  min-height: 140px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.diceBarChartInner {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  width: 100%;
+  height: 140px;
+}
+
+.diceBarCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+}
+
+.diceBarCount {
+  font-size: 0.72rem;
+  color: var(--dice-muted);
+  line-height: 1;
+}
+
+.diceBarTrack {
+  flex: 1;
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  background: rgba(146,167,218,0.12);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.diceBarFill {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(180deg, var(--primary), var(--secondary));
+  transition: height 0.3s ease;
+}
+
+.diceBarLabel {
+  font-size: 0.7rem;
+  color: var(--dice-muted);
+  line-height: 1;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1240px) {
+  .diceWorkbench { grid-template-columns: 1fr 1fr; }
+  .diceHistoryCard { grid-column: 1 / -1; }
+  .diceHistoryList { max-height: 320px; }
+  .diceMetrics { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 840px) {
+  .diceWorkbench { grid-template-columns: 1fr; }
+  .diceBottomGrid { grid-template-columns: 1fr; }
+  .diceArenaFormula { font-size: 1.3rem; }
+  .diceMainActions { grid-template-columns: 1fr auto auto; }
+  .dicePageControlRow { flex-direction: column; align-items: flex-start; }
+  .diceTabs { overflow-x: auto; }
+  .diceMetrics { grid-template-columns: repeat(2, 1fr); }
+}

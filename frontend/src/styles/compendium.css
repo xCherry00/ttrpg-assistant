@@ -1,0 +1,300 @@
+.compendiumPage {
+  --comp-accent: #9b5cff;
+  --comp-border: rgba(161, 173, 204, 0.15);
+  --comp-muted: rgba(226, 232, 255, 0.66);
+  display: grid;
+  gap: 18px;
+  color: #f8f6ff;
+}
+
+.compendiumHero {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-right: 128px;
+}
+
+.compendiumHeroIcon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(155, 92, 255, 0.42);
+  border-radius: 16px;
+  color: #d8c7ff;
+  background: linear-gradient(135deg, rgba(155, 92, 255, 0.56), rgba(82, 44, 160, 0.78));
+  box-shadow: 0 0 28px rgba(155, 92, 255, 0.26);
+}
+
+.compendiumHeroIcon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.compendiumHero h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3vw, 2.55rem);
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.compendiumHero p {
+  max-width: 800px;
+  margin: 8px 0 0;
+  color: var(--comp-muted);
+  font-weight: 700;
+}
+
+.compendiumToolbar,
+.compendiumCategories,
+.compendiumTablePanel,
+.compendiumDetailPanel {
+  border: 1px solid var(--comp-border);
+  background:
+    linear-gradient(180deg, rgba(17, 25, 44, 0.78), rgba(7, 12, 23, 0.78)),
+    rgba(10, 16, 30, 0.66);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 20px 50px rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(18px);
+}
+
+.compendiumToolbar {
+  display: grid;
+  grid-template-columns: 240px minmax(240px, 1fr);
+  gap: 14px;
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.compendiumToolbar label {
+  display: grid;
+  gap: 7px;
+}
+
+.compendiumToolbar span {
+  color: var(--comp-muted);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.compendiumToolbar select,
+.compendiumToolbar input {
+  min-height: 44px;
+  border: 1px solid rgba(161, 173, 204, 0.13);
+  border-radius: 12px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.055);
+  padding: 0 12px;
+}
+
+.compendiumLayout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr) 380px;
+  gap: 18px;
+  align-items: start;
+}
+
+.compendiumCategories,
+.compendiumTablePanel,
+.compendiumDetailPanel {
+  border-radius: 16px;
+}
+
+.compendiumCategories {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  position: sticky;
+  top: 22px;
+}
+
+.compendiumCategories button {
+  display: grid;
+  gap: 5px;
+  border: 1px solid rgba(161, 173, 204, 0.11);
+  border-radius: 12px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.compendiumCategories button:hover,
+.compendiumCategories button.is-active {
+  border-color: rgba(155, 92, 255, 0.5);
+  background: rgba(155, 92, 255, 0.12);
+}
+
+.compendiumCategories span {
+  color: var(--comp-muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.compendiumTablePanel,
+.compendiumDetailPanel {
+  min-height: 620px;
+  padding: 16px;
+}
+
+.compendiumPanelHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.compendiumPanelHeader h2,
+.compendiumDetailTitle h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: 0;
+}
+
+.compendiumPanelHeader p {
+  margin: 6px 0 0;
+  color: var(--comp-muted);
+}
+
+.compendiumPanelHeader a {
+  color: #b994ff;
+  font-weight: 900;
+}
+
+.compendiumTableWrap {
+  max-height: 560px;
+  overflow: auto;
+  border: 1px solid rgba(161, 173, 204, 0.1);
+  border-radius: 12px;
+}
+
+.compendiumTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.compendiumTable th,
+.compendiumTable td {
+  border-bottom: 1px solid rgba(161, 173, 204, 0.09);
+  padding: 11px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.compendiumTable th {
+  position: sticky;
+  top: 0;
+  color: var(--comp-muted);
+  background: rgba(7, 12, 23, 0.96);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.compendiumTable tr {
+  cursor: pointer;
+}
+
+.compendiumTable tr:hover,
+.compendiumTable tr.is-active {
+  background: rgba(155, 92, 255, 0.1);
+}
+
+.compendiumTable td:first-child {
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.compendiumTable td:not(:first-child) {
+  color: var(--comp-muted);
+  font-size: 13px;
+}
+
+.compendiumDetailTitle {
+  border-bottom: 1px solid rgba(161, 173, 204, 0.12);
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+}
+
+.compendiumDetailTitle span {
+  color: #b994ff;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.compendiumDetailRows {
+  display: grid;
+  gap: 10px;
+  max-height: 540px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.compendiumDetailRows div {
+  display: grid;
+  gap: 5px;
+  border: 1px solid rgba(161, 173, 204, 0.1);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 10px;
+}
+
+.compendiumDetailRows strong {
+  color: var(--comp-muted);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.compendiumDetailRows span {
+  color: #ffffff;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.compendiumError {
+  border: 1px solid rgba(255, 93, 99, 0.24);
+  border-radius: 12px;
+  color: #ff9ba7;
+  background: rgba(255, 93, 99, 0.08);
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.compendiumEmpty {
+  min-height: 160px;
+  display: grid;
+  place-items: center;
+  color: var(--comp-muted);
+  text-align: center;
+}
+
+@media (max-width: 1320px) {
+  .compendiumLayout {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+
+  .compendiumDetailPanel {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 860px) {
+  .compendiumToolbar,
+  .compendiumLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .compendiumCategories {
+    position: static;
+  }
+}
