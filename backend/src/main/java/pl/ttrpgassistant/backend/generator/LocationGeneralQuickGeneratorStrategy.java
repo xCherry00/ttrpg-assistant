@@ -41,6 +41,7 @@ public class LocationGeneralQuickGeneratorStrategy implements GeneratorStrategy 
 
         List<GeneratorOutputSection> sections = List.of(
                 section("Opis", descriptionFor(setting, type, name, pool)),
+                section("Wygląd", appearanceFor(setting, type, name, pool)),
                 section("Atmosfera", atmosphereFor(setting, type, pool)),
                 section("Problem", problemFor(setting, type)),
                 section("Sekret", secretFor(setting, type)),
@@ -218,6 +219,62 @@ public class LocationGeneralQuickGeneratorStrategy implements GeneratorStrategy 
             case "realistyczny" -> name + " to " + lower(type) + " z codziennym ruchem, słabym punktem i czyimś sekretem.";
             default -> type + ": " + pick(asList(pool.get("exteriors"))) + ".";
         };
+    }
+
+    private String appearanceFor(String setting, String type, String name, Map<String, Object> pool) {
+        String typeKey = looseKey(type);
+        return switch (normalize(setting)) {
+            case "sci-fi", "scifi" -> pick(List.of(
+                    "Na pierwszy plan wychodzą panele serwisowe, zimne światło i oznaczenia, które ktoś nadpisywał wiele razy",
+                    "Czyste powierzchnie są przełamane prowizorycznymi naprawami, kablami i śladami po pośpiechu",
+                    "Miejsce wygląda technicznie i użytkowo, ale jeden sektor jest wyraźnie bardziej pilnowany niż reszta",
+                    "Przez szkło, metal i ostrzegawcze pasy przebija zużycie, którego nie widać w oficjalnych raportach"
+            )) + ".";
+            case "postapo" -> pick(List.of(
+                    "Z zewnątrz widać łaty z blachy, barykady i ślady wielu napraw robionych bez planu",
+                    "Najważniejsze przejścia są oznaczone farbą, sznurkiem albo przedmiotami zostawionymi jako ostrzeżenie",
+                    "Miejsce jest brudne, praktyczne i zbyt ciche; każdy element wygląda, jakby miał drugie zastosowanie",
+                    "Widać stare zniszczenia, świeże ślady bytowania i jeden punkt, którego wszyscy wyraźnie unikają"
+            )) + ".";
+            case "horror" -> pick(List.of(
+                    "Najpierw wygląda zwyczajnie, dopiero po chwili widać, że proporcje, ślady albo światło nie zgadzają się ze sobą",
+                    "Kurz i wilgoć układają się tak, jakby ktoś niedawno przesuwał rzeczy, których nie powinno tu być",
+                    "Jeden detal przyciąga wzrok za każdym razem: plama, rysa, zasłonięte drzwi albo przedmiot odłożony zbyt równo",
+                    "Miejsce ma twarz normalności, ale kąty, lustra i przejścia psują to wrażenie"
+            )) + ".";
+            case "realistyczny" -> pick(List.of(
+                    "Widać codzienne zużycie, przypadkowe drobiazgi i drobną niekonsekwencję, która zdradza ukryty problem",
+                    "Układ jest praktyczny, ale ktoś przestawił kilka rzeczy tak, żeby utrudnić patrzenie w jedno miejsce",
+                    "Meble, światło i ślady ludzi tworzą zwykły obraz, dopóki nie zauważy się świeżo zamkniętego przejścia",
+                    "To miejsce wygląda jak setki podobnych, z wyjątkiem jednego punktu pilnowanego wzrokiem przez obecnych"
+            )) + ".";
+            default -> fantasyAppearance(typeKey, name, pool);
+        };
+    }
+
+    private String fantasyAppearance(String typeKey, String name, Map<String, Object> pool) {
+        if ("tawerna".equals(typeKey)) {
+            return pick(List.of("Niski strop, dym z paleniska i stoły porysowane nożami sprawiają, że " + name + " wygląda na miejsce pełne starych rozmów", "Nad kontuarem wiszą pamiątki po gościach, a najciemniejszy kąt jest zbyt wygodny, by był przypadkowy")) + ".";
+        }
+        if ("sklep".equals(typeKey)) {
+            return pick(List.of("Półki stoją gęsto, towary opisano nierównym pismem, a pod ladą widać zamkniętą szufladę z lepszym zamkiem", "Wystawa jest skromna, lecz zapach ziół, metalu i starego papieru obiecuje rzeczy spoza oficjalnego cennika")) + ".";
+        }
+        if ("swiatynia".equals(typeKey)) {
+            return pick(List.of("Kamień jest wypolerowany kolanami wiernych, ale najświętszy symbol ma świeżą rysę", "Świece palą się równo, choć przeciąg porusza chorągwiami przy wejściu")) + ".";
+        }
+        if ("biblioteka".equals(typeKey)) {
+            return pick(List.of("Regały tworzą wąskie przejścia, a część ksiąg spięto łańcuchami nowszymi niż same zamki", "Kurz leży grubo poza jednym stołem, przy którym ktoś pracował tej nocy")) + ".";
+        }
+        if ("port".equals(typeKey)) {
+            return pick(List.of("Mokre deski, liny i latarnie tworzą gęsty chaos, w którym łatwo zgubić ślad albo człowieka", "Sól zjadła farbę z szyldów, lecz jeden magazyn wygląda podejrzanie świeżo")) + ".";
+        }
+        if ("las".equals(typeKey)) {
+            return pick(List.of("Drzewa rosną zbyt równo, a ścieżka znika tam, gdzie powinna być najbardziej uczęszczana", "Korzenie, mech i cisza układają się jak naturalna brama do czegoś starszego")) + ".";
+        }
+        if ("ruiny".equals(typeKey) || "zamek".equals(typeKey) || "kopalnia".equals(typeKey)) {
+            return pick(List.of("Spękane mury, ciemne otwory i świeże ślady na kamieniu mówią, że to miejsce nie jest tak martwe, jak wygląda", "Stara konstrukcja trzyma się uporem, a najnowsze ślady prowadzą dokładnie tam, gdzie powinno być najniebezpieczniej")) + ".";
+        }
+        return pick(asList(pool.get("exteriors"))) + " W środku albo przy wejściu widać jeden detal, który od razu sugeruje obecny konflikt.";
     }
 
     private String atmosphereFor(String setting, String type, Map<String, Object> pool) {

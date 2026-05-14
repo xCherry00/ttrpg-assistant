@@ -168,13 +168,11 @@ export default function CompendiumPage() {
 
   return (
     <div className="page compendiumPage">
-      <header className="compendiumHero">
-        <div className="compendiumHeroIcon" aria-hidden="true">
-          <CompendiumIcon />
-        </div>
+      <header className="pageHeader compendiumHero">
         <div>
-          <h1>Kompendium</h1>
-          <p>Baza referencyjna systemow RPG: potwory, zaklecia, przedmioty, stany i zasady z legalnych zrodel SRD.</p>
+          <span className="pageEyebrow">baza wiedzy</span>
+          <h1 className="pageTitle">Kompendium</h1>
+          <p className="pageSubtitle">Baza referencyjna systemow RPG: potwory, zaklecia, przedmioty, stany i zasady z legalnych zrodel SRD.</p>
         </div>
       </header>
 

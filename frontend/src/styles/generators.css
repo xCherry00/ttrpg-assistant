@@ -14,15 +14,14 @@
   display: grid;
   gap: 16px;
   color: var(--gen-text);
-  padding-right: 4px;
 }
 
 .generatorsCatalogPage {
-  min-height: 100vh;
+  min-height: auto;
   display: grid;
   align-content: start;
-  gap: 24px;
-  padding: 28px;
+  gap: 0;
+  padding: 0;
   background:
     radial-gradient(circle at 18% 0%, rgba(124, 58, 237, 0.16), transparent 34%),
     radial-gradient(circle at 88% 12%, rgba(14, 165, 233, 0.08), transparent 32%),
@@ -35,6 +34,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 24px;
+  margin-bottom: 24px;
 }
 
 .generatorsCatalogBrand {
@@ -45,6 +45,7 @@
 }
 
 .generatorsCatalogBrand .generatorsHeroIcon {
+  display: none;
   width: 56px;
   height: 56px;
   border-radius: 14px;
@@ -57,7 +58,7 @@
   height: 30px;
 }
 
-.generatorsCatalogBrand h1 {
+.generatorsCatalogBrand h1:not(.pageTitle) {
   margin: 0;
   color: #f9fafb;
   font-size: 23px;
@@ -65,7 +66,7 @@
   letter-spacing: 0;
 }
 
-.generatorsCatalogBrand p {
+.generatorsCatalogBrand p:not(.pageSubtitle) {
   margin: 8px 0 0;
   color: rgba(229, 231, 235, 0.72);
   font-size: 14px;
@@ -151,6 +152,43 @@
   grid-template-columns: 262px minmax(0, 1fr);
   gap: 20px;
   align-items: start;
+}
+
+.generatorCatalogWarning {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid rgba(245, 158, 11, 0.34);
+  border-radius: 14px;
+  background: rgba(120, 53, 15, 0.24);
+  padding: 14px 16px;
+}
+
+.generatorCatalogWarning div {
+  display: grid;
+  gap: 4px;
+}
+
+.generatorCatalogWarning strong {
+  color: #fde68a;
+  font-size: 14px;
+}
+
+.generatorCatalogWarning span {
+  color: rgba(254, 243, 199, 0.78);
+  font-size: 13px;
+}
+
+.generatorCatalogWarning button {
+  min-height: 36px;
+  border: 1px solid rgba(253, 230, 138, 0.32);
+  border-radius: 10px;
+  color: #fff7ed;
+  background: rgba(245, 158, 11, 0.16);
+  padding: 0 13px;
+  font-weight: 900;
+  cursor: pointer;
 }
 
 .generatorsSidebar,
@@ -1383,7 +1421,7 @@
 
 .generatorWindowPage {
   --window-accent: var(--gen-purple);
-  gap: 18px;
+  gap: 0;
 }
 
 .generatorWindowPage--red {
@@ -1404,11 +1442,11 @@
 }
 
 .weatherGeneratorPage {
-  min-height: 100vh;
+  min-height: auto;
   display: grid;
   align-content: start;
-  gap: 18px;
-  padding: 18px;
+  gap: 0;
+  padding: 0;
   background:
     radial-gradient(circle at 14% 8%, rgba(124, 58, 237, 0.22), transparent 32%),
     radial-gradient(circle at 78% 0%, rgba(14, 165, 233, 0.12), transparent 30%),
@@ -1416,7 +1454,6 @@
   color: #f8fafc;
 }
 
-.weatherGeneratorHeader,
 .weatherSettingsCard,
 .weatherResultPanel {
   border: 1px solid rgba(148, 163, 184, 0.16);
@@ -1429,12 +1466,7 @@
 }
 
 .weatherGeneratorHeader {
-  min-height: 96px;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 18px;
-  padding: 18px 24px;
+  margin-bottom: 24px;
 }
 
 .weatherBackButton {
@@ -1455,9 +1487,9 @@
 }
 
 .weatherHeaderIcon {
+  display: none;
   width: 58px;
   height: 58px;
-  display: grid;
   place-items: center;
   border-radius: 16px;
   color: #dbeafe;
@@ -1470,7 +1502,7 @@
   height: 30px;
 }
 
-.weatherHeaderIdentity h1 {
+.weatherHeaderIdentity h1:not(.pageTitle) {
   margin: 0;
   color: #ffffff;
   font-size: clamp(2rem, 3vw, 2.9rem);
@@ -1478,7 +1510,7 @@
   letter-spacing: 0;
 }
 
-.weatherHeaderIdentity p {
+.weatherHeaderIdentity p:not(.pageSubtitle) {
   margin: 8px 0 0;
   color: rgba(203, 213, 225, 0.76);
   font-size: 16px;
@@ -1834,9 +1866,7 @@
 }
 
 .generatorWindowHero {
-  display: grid;
-  gap: 14px;
-  padding-right: 128px;
+  margin-bottom: 24px;
 }
 
 .generatorBackButton {
@@ -1864,7 +1894,11 @@
   gap: 16px;
 }
 
-.generatorWindowTitle h1 {
+.generatorWindowTitle > .generatorsHeroIcon {
+  display: none;
+}
+
+.generatorWindowTitle h1:not(.pageTitle) {
   margin: 0;
   color: #ffffff;
   font-size: clamp(2rem, 2.8vw, 2.75rem);
@@ -1872,7 +1906,7 @@
   letter-spacing: 0;
 }
 
-.generatorWindowTitle p {
+.generatorWindowTitle p:not(.pageSubtitle) {
   margin: 8px 0 0;
   color: var(--gen-muted);
   font-weight: 700;
@@ -2176,6 +2210,48 @@
   gap: 12px;
 }
 
+.generatorWindowSections article.is-table,
+.generatorWindowSections article.is-list,
+.generatorWindowSections article.is-stats {
+  grid-column: span 1;
+}
+
+.generatorResultActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.generatorResultActions button {
+  min-height: 34px;
+  border: 1px solid rgba(161, 173, 204, 0.14);
+  border-radius: 8px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.045);
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.generatorResultActions button:hover {
+  border-color: color-mix(in srgb, var(--window-accent) 48%, transparent 52%);
+  background: color-mix(in srgb, var(--window-accent) 14%, transparent 86%);
+}
+
+.generatorResultActions button:disabled {
+  opacity: 0.54;
+  cursor: not-allowed;
+}
+
+.generatorResultActions span {
+  color: var(--gen-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .dungeonFloorTabs {
   display: flex;
   flex-wrap: wrap;
@@ -2252,6 +2328,106 @@
 .generatorWindowStats strong {
   color: #ffffff;
   font-size: 14px;
+}
+
+.generatorSectionTable,
+.generatorSectionList {
+  display: grid;
+  gap: 7px;
+}
+
+.generatorSectionTableRow {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 10px;
+  align-items: start;
+  border-bottom: 1px solid rgba(161, 173, 204, 0.08);
+  padding: 7px 0;
+}
+
+.generatorSectionTableRow:last-child {
+  border-bottom: 0;
+}
+
+.generatorSectionTableRow span,
+.generatorSectionList strong {
+  color: var(--gen-muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.generatorSectionTableRow strong,
+.generatorSectionList span {
+  color: rgba(244, 247, 255, 0.9);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.generatorSectionList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.generatorSectionList li {
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(161, 173, 204, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.035);
+  padding: 8px;
+}
+
+.generatorRecentResults {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid rgba(161, 173, 204, 0.1);
+  margin-top: 14px;
+  padding-top: 14px;
+}
+
+.generatorRecentResults h3 {
+  margin: 0;
+  color: color-mix(in srgb, var(--window-accent) 72%, white 28%);
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.generatorRecentList {
+  display: grid;
+  gap: 8px;
+}
+
+.generatorRecentList button {
+  display: grid;
+  gap: 3px;
+  border: 1px solid rgba(161, 173, 204, 0.1);
+  border-radius: 8px;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.035);
+  padding: 9px 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.generatorRecentList button:hover {
+  border-color: color-mix(in srgb, var(--window-accent) 42%, transparent 58%);
+  background: color-mix(in srgb, var(--window-accent) 12%, transparent 88%);
+}
+
+.generatorRecentList span,
+.generatorRecentList small {
+  color: var(--gen-muted);
+  font-size: 12px;
+}
+
+.generatorRecentList strong {
+  overflow: hidden;
+  color: #fff;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .dungeonMapBlock {
@@ -2478,7 +2654,6 @@
     grid-column: span 1;
   }
 
-  .weatherGeneratorHeader,
   .weatherResultTop {
     align-items: stretch;
     grid-template-columns: 1fr;
@@ -2505,7 +2680,7 @@
 
 @media (max-width: 860px) {
   .generatorsCatalogPage {
-    padding: 18px;
+    padding: 0;
   }
 
   .generatorsCatalogHeader {
@@ -2555,10 +2730,9 @@
   }
 
   .weatherGeneratorPage {
-    padding: 12px;
+    padding: 0;
   }
 
-  .weatherGeneratorHeader,
   .weatherSettingsCard,
   .weatherResultPanel {
     padding: 16px;
@@ -2583,14 +2757,14 @@
 
 @media (max-width: 560px) {
   .generatorsCatalogPage {
-    padding: 14px;
+    padding: 0;
   }
 
   .generatorsCatalogBrand {
     align-items: flex-start;
   }
 
-  .generatorsCatalogBrand h1 {
+  .generatorsCatalogBrand h1:not(.pageTitle) {
     font-size: 21px;
   }
 

@@ -216,6 +216,7 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
         String theme = dungeonTheme(params, setting);
         DungeonFrame frame = dungeonFrame(setting, theme);
         DungeonMapData map = dungeonMapData(theme, 5, 34, 22, true);
+        addEntranceMarker(map);
         List<DungeonRoom> rooms = dungeonRooms(setting, theme);
         return List.of(
                 new GeneratorOutputSection("stats", "Plan lochu", null, List.of(
@@ -224,6 +225,7 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
                         item("Cel wyprawy", frame.goal()),
                         item("Główne zagrożenie", frame.threat())
                 )),
+                section("Wejście", frame.entrance()),
                 section("Pokój #1", rooms.get(0).description()),
                 section("Pokój #2", rooms.get(1).description()),
                 section("Pokój #3", rooms.get(2).description()),
@@ -264,7 +266,6 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
                     dungeonRooms(setting, theme, map.rooms().size())
             ));
         }
-        sections.add(section("Użycie przy stole", "Numery na mapie odpowiadają opisom poniżej. Traktuj je jako szybkie sceny eksploracji, nie pełny opis lokacji."));
         return sections;
     }
 
@@ -304,6 +305,14 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
             anchorX = up[0];
             anchorY = up[1];
         }
+    }
+
+    private void addEntranceMarker(DungeonMapData map) {
+        if (map.rooms().isEmpty()) {
+            return;
+        }
+        int[] entrance = markerEdgePoint(map.grid(), map.rooms().get(0), 0, 0);
+        markRoom(map.grid(), entrance, -1);
     }
 
     private void markRoom(int[][] grid, int[] point, int marker) {
@@ -902,7 +911,7 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
 
     private GeneratorOutputSection dungeonMapSection(DungeonMapData map) {
         return new GeneratorOutputSection("dungeon_map", "Mapa", map.gridText(), List.of(
-                item("Legenda", "Ciemne: ściany, szare: korytarze, jasne: pokoje, cyfry: numery pokoi"),
+                item("Legenda", "Ciemne: ściany, szare: korytarze, jasne: pokoje, cyfry: numery pokoi, E: wejście"),
                 item("Pokoje", map.rooms().size())
         ));
     }

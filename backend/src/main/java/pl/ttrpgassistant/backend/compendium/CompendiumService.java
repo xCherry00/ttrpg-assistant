@@ -16,7 +16,8 @@ import java.util.Map;
 
 @Service
 public class CompendiumService {
-    private static final String DND5E_API_BASE = "https://www.dnd5eapi.co/api/2014";
+    private static final String DND5E_API_BASE_HTTPS = "https://www.dnd5eapi.co/api/2014";
+    private static final String DND5E_API_BASE_HTTP = "http://www.dnd5eapi.co/api/2014";
     private static final List<Category> DND5E_CATEGORIES = List.of(
             new Category("monsters", "Potwory", "CR, XP, statystyki i akcje potworow SRD.", List.of("name", "challenge_rating", "xp", "type", "size", "alignment")),
             new Category("spells", "Zaklecia", "Poziom, szkola, komponenty, klasy i opis zaklec SRD.", List.of("name", "level", "school", "casting_time", "range", "duration")),
@@ -98,25 +99,36 @@ public class CompendiumService {
 
     private Map<String, Object> fetch(String path) {
         try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(DND5E_API_BASE + path))
-                    .timeout(Duration.ofSeconds(12))
-                    .header("Accept", "application/json")
-                    .GET()
-                    .build();
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() == 404) {
-                throw new ResourceNotFoundException("Compendium entry not found");
-            }
-            if (response.statusCode() < 200 || response.statusCode() >= 300) {
-                throw new IllegalStateException("Compendium source returned HTTP " + response.statusCode());
-            }
-            return objectMapper.readValue(response.body(), new TypeReference<>() {});
+            return fetchFromBase(DND5E_API_BASE_HTTPS, path);
         } catch (ResourceNotFoundException ex) {
             throw ex;
-        } catch (Exception ex) {
-            throw new IllegalStateException("Could not fetch compendium source");
+        } catch (Exception httpsException) {
+            try {
+                return fetchFromBase(DND5E_API_BASE_HTTP, path);
+            } catch (ResourceNotFoundException ex) {
+                throw ex;
+            } catch (Exception httpException) {
+                throw new IllegalStateException("Could not fetch compendium source");
+            }
         }
+    }
+
+    private Map<String, Object> fetchFromBase(String baseUrl, String path) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + path))
+                .timeout(Duration.ofSeconds(12))
+                .header("Accept", "application/json")
+                .header("User-Agent", "ttrpg-assistant/1.0")
+                .GET()
+                .build();
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() == 404) {
+            throw new ResourceNotFoundException("Compendium entry not found");
+        }
+        if (response.statusCode() < 200 || response.statusCode() >= 300) {
+            throw new IllegalStateException("Compendium source returned HTTP " + response.statusCode());
+        }
+        return objectMapper.readValue(response.body(), new TypeReference<>() {});
     }
 
     private void requireDnd5e(String systemCode) {

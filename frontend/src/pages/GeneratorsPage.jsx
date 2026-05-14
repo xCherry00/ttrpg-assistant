@@ -53,6 +53,8 @@ const SYSTEM_LABELS = {
 };
 
 const FAVORITES_STORAGE_KEY = "ttrpg.generatorFavorites";
+const GENERATOR_HISTORY_STORAGE_KEY = "ttrpg.generatorHistory";
+const GENERATOR_HISTORY_LIMIT = 10;
 
 const CARD_META = {
   npc: {
@@ -400,6 +402,22 @@ function writeFavoriteKeys(keys) {
   window.localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(Array.from(keys)));
 }
 
+function readGeneratorHistory() {
+  if (typeof window === "undefined") return [];
+  try {
+    const value = window.localStorage.getItem(GENERATOR_HISTORY_STORAGE_KEY);
+    const parsed = value ? JSON.parse(value) : [];
+    return Array.isArray(parsed) ? parsed.filter((item) => item?.result) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeGeneratorHistory(items) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(GENERATOR_HISTORY_STORAGE_KEY, JSON.stringify(items.slice(0, GENERATOR_HISTORY_LIMIT)));
+}
+
 function normalizedInputType(param) {
   return String(param.inputType || param.type || "text").toLowerCase();
 }
@@ -709,11 +727,27 @@ function generatorPath(item) {
 
 function resultSections(result) {
   if (!result) return [];
-  if (Array.isArray(result.sections)) return result.sections.filter(s => s.type !== 'stats');
+  if (Array.isArray(result.sections)) return result.sections;
   return Object.entries(result.payload || {}).map(([key, value]) => ({
     title: key,
     content: renderValue(value),
+    type: "text",
   }));
+}
+
+function resultToText(result) {
+  if (!result) return "";
+  const lines = [result.title, result.subtitle].filter(Boolean);
+  for (const section of resultSections(result)) {
+    lines.push("", section.title || "Sekcja");
+    if (section.content) lines.push(String(section.content));
+    if (Array.isArray(section.items)) {
+      for (const item of section.items) {
+        lines.push(`${item.label}: ${renderValue(item.value)}`);
+      }
+    }
+  }
+  return lines.join("\n").trim();
 }
 
 function sectionContent(sections, title) {
@@ -833,6 +867,40 @@ function renderSectionItems(section) {
   );
 }
 
+function renderGenericSection(section) {
+  const hasItems = Array.isArray(section.items) && section.items.length > 0;
+  if (section.type === "table" && hasItems) {
+    return (
+      <div className="generatorSectionTable">
+        {section.items.map((item) => (
+          <div key={item.label} className="generatorSectionTableRow">
+            <span>{item.label}</span>
+            <strong>{renderValue(item.value)}</strong>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  if (section.type === "list" && hasItems) {
+    return (
+      <ul className="generatorSectionList">
+        {section.items.map((item) => (
+          <li key={item.label}>
+            <strong>{item.label}</strong>
+            {item.value !== undefined && item.value !== null ? <span>{renderValue(item.value)}</span> : null}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+  return (
+    <>
+      {section.content && <p>{section.content}</p>}
+      {hasItems && renderSectionItems(section)}
+    </>
+  );
+}
+
 function DungeonFloorTabs({ floors, activeIndex, onChange }) {
   if (!floors.length) return null;
   const safeIndex = Math.min(activeIndex, floors.length - 1);
@@ -897,6 +965,11 @@ export default function GeneratorsPage() {
   const [loading, setLoading] = useState(false);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [error, setError] = useState("");
+  const [catalogFallback, setCatalogFallback] = useState(false);
+  const [catalogError, setCatalogError] = useState("");
+  const [catalogReloadKey, setCatalogReloadKey] = useState(0);
+  const [resultHistory, setResultHistory] = useState(readGeneratorHistory);
+  const [copyStatus, setCopyStatus] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -912,6 +985,8 @@ export default function GeneratorsPage() {
         });
         const nextCatalog = decorateCatalog(flattenDefinitions(definitions));
         if (cancelled) return;
+        setCatalogFallback(false);
+        setCatalogError("");
         setCatalog(nextCatalog);
         setActiveKey((previous) => nextCatalog.some((item) => buildKey(item) === previous) ? previous : nextCatalog[0] ? buildKey(nextCatalog[0]) : "");
         setForms((previous) => {
@@ -922,8 +997,14 @@ export default function GeneratorsPage() {
           }
           return next;
         });
-      } catch {
-        if (!cancelled) setCatalog(decorateCatalog(FALLBACK_CATALOG));
+      } catch (e) {
+        if (!cancelled) {
+          const fallback = decorateCatalog(FALLBACK_CATALOG);
+          setCatalogFallback(true);
+          setCatalogError(e?.message || "Nie udało się pobrać katalogu generatorów z API.");
+          setCatalog(fallback);
+          setActiveKey((previous) => fallback.some((item) => buildKey(item) === previous) ? previous : fallback[0] ? buildKey(fallback[0]) : "");
+        }
       } finally {
         if (!cancelled) setCatalogLoading(false);
       }
@@ -933,7 +1014,7 @@ export default function GeneratorsPage() {
     return () => {
       cancelled = true;
     };
-  }, [token, selectedType, selectedTone]);
+  }, [token, selectedType, selectedTone, catalogReloadKey]);
 
   const activeDefinition = useMemo(
     () => catalog.find((item) => buildKey(item) === activeKey) || catalog[0],
@@ -1069,6 +1150,53 @@ export default function GeneratorsPage() {
   function activeGeneratorCode() {
     return activeDefinition?.kind === "variant" ? activeDefinition.generatorCode : activeDefinition?.type;
   }
+
+  function rememberResult(target, generated, values) {
+    const entry = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      key: buildKey(target),
+      generatorCode: target.kind === "variant" ? target.generatorCode : target.type,
+      variantCode: target.variantCode || null,
+      label: target.label || target.title || target.type,
+      tone: target.tone,
+      icon: target.icon,
+      values,
+      result: generated,
+      createdAt: new Date().toISOString(),
+    };
+    setResultHistory((previous) => {
+      const next = [entry, ...previous].slice(0, GENERATOR_HISTORY_LIMIT);
+      writeGeneratorHistory(next);
+      return next;
+    });
+  }
+
+  function restoreHistoryItem(item) {
+    if (!item?.result) return;
+    setActiveKey(item.key);
+    setForms((previous) => ({
+      ...previous,
+      [item.key]: item.values || previous[item.key] || {},
+    }));
+    setResult(item.result);
+    setActiveDungeonFloor(0);
+    setError("");
+    if (!generatorCode && item.generatorCode) navigate(`/generators/${encodeURIComponent(item.generatorCode)}`);
+  }
+
+  async function copyResult() {
+    const text = resultToText(result);
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyStatus("Skopiowano");
+      setTimeout(() => setCopyStatus(""), 1400);
+    } catch {
+      setCopyStatus("Nie udało się skopiować");
+      setTimeout(() => setCopyStatus(""), 1800);
+    }
+  }
+
   async function handleGenerate(target = activeDefinition) {
     if (!target) {
       setError("Nie znaleziono generatora.");
@@ -1087,6 +1215,7 @@ export default function GeneratorsPage() {
         ? await generateVariantContent(token, target.generatorCode, target.variantCode, values)
         : await generateContent(token, target.system, target.type, values);
       setResult(generated);
+      rememberResult(target, generated, values);
       setActiveDungeonFloor(0);
       setResultIsNew(true);
       setTimeout(() => setResultIsNew(false), 600);
@@ -1128,19 +1257,20 @@ export default function GeneratorsPage() {
 
       return (
         <div className="page generatorsPage generatorsDashboard weatherGeneratorPage">
-          <header className="weatherGeneratorHeader">
-            <button type="button" className="weatherBackButton" onClick={() => navigate("/generators")}>
-              {"← Generatory"}
-            </button>
+          <header className="pageHeader weatherGeneratorHeader">
             <div className="weatherHeaderIdentity">
               <div className="weatherHeaderIcon" aria-hidden="true">
                 <GeneratorIcon name="storm" />
               </div>
               <div>
-                <h1>Generator Pogody</h1>
-                <p>Uniwersalny generator warunków pogodowych</p>
+                <span className="pageEyebrow">generatory</span>
+                <h1 className="pageTitle">Generator Pogody</h1>
+                <p className="pageSubtitle">Uniwersalny generator warunkow pogodowych</p>
               </div>
             </div>
+            <button type="button" className="weatherBackButton" onClick={() => navigate("/generators")}>
+              {"← Generatory"}
+            </button>
           </header>
 
           <div className="weatherGeneratorLayout">
@@ -1229,19 +1359,20 @@ export default function GeneratorsPage() {
 
     return (
       <div className={`page generatorsPage generatorsDashboard generatorWindowPage generatorWindowPage--${activeDefinition?.tone || "purple"}`}>
-        <header className="generatorWindowHero">
-          <button type="button" className="generatorBackButton" onClick={() => navigate("/generators")}>
-            {"← Generatory"}
-          </button>
+        <header className="pageHeader generatorWindowHero">
           <div className="generatorWindowTitle">
             <div className="generatorsHeroIcon" aria-hidden="true">
               <GeneratorIcon name={activeDefinition?.icon || "spark"} />
             </div>
             <div>
-              <h1>{activeDefinition?.label || "Generator"} Generator</h1>
-              <p>{activeDefinition?.cardDescription || activeDefinition?.description || "Wygeneruj element dopasowany do swoich potrzeb."}</p>
+              <span className="pageEyebrow">generatory</span>
+              <h1 className="pageTitle">{activeDefinition?.label || "Generator"} Generator</h1>
+              <p className="pageSubtitle">{activeDefinition?.cardDescription || activeDefinition?.description || "Wygeneruj element dopasowany do swoich potrzeb."}</p>
             </div>
           </div>
+          <button type="button" className="generatorBackButton" onClick={() => navigate("/generators")}>
+            {"← Generatory"}
+          </button>
         </header>
 
         <div className="generatorWindowWorkspace">
@@ -1270,6 +1401,15 @@ export default function GeneratorsPage() {
           <main className="generatorOutputPanel">
             <div className="generatorOutputTop">
               <div className="generatorPanelNumber">2. Wynik</div>
+              {result && (
+                <div className="generatorResultActions">
+                  <button type="button" onClick={copyResult}>Kopiuj wynik</button>
+                  <button type="button" onClick={() => handleGenerate(activeDefinition)} disabled={loading || catalogLoading}>
+                    {loading ? "Generowanie..." : "Regeneruj"}
+                  </button>
+                  {copyStatus && <span>{copyStatus}</span>}
+                </div>
+              )}
             </div>
 
             {result ? (
@@ -1294,16 +1434,16 @@ export default function GeneratorsPage() {
                     />
                   )}
                   {displayedSections.map((section, index) => {
-                    const isDungeonMap = section.type === "dungeon_map";
+                    const isDungeonMap = section.type === "dungeon_map" || section.type === "map";
                     const hasItems = Array.isArray(section.items) && section.items.length > 0;
+                    const sectionType = section.type === "map" ? "dungeon_map" : section.type;
                     return (
                       <article
                         key={`${section.title}-${index}`}
-                        className={[hasItems ? "has-items" : "", isDungeonMap ? "is-dungeon-map" : ""].filter(Boolean).join(" ")}
+                        className={[hasItems ? "has-items" : "", isDungeonMap ? "is-dungeon-map" : "", sectionType ? `is-${sectionType}` : ""].filter(Boolean).join(" ")}
                       >
                         <h3>{section.title}</h3>
-                        {isDungeonMap ? renderDungeonMap(section) : section.content && <p>{section.content}</p>}
-                        {!isDungeonMap && hasItems && renderSectionItems(section)}
+                        {isDungeonMap ? renderDungeonMap(section) : renderGenericSection(section)}
                       </article>
                     );
                   })}
@@ -1316,6 +1456,20 @@ export default function GeneratorsPage() {
                 <span>Ustaw parametry po lewej i uruchom generator.</span>
               </div>
             )}
+            {resultHistory.length > 0 && (
+              <section className="generatorRecentResults" aria-label="Ostatnio wygenerowane wyniki">
+                <h3>Ostatnio wygenerowane</h3>
+                <div className="generatorRecentList">
+                  {resultHistory.slice(0, 5).map((item) => (
+                    <button type="button" key={item.id} onClick={() => restoreHistoryItem(item)}>
+                      <span>{item.label}</span>
+                      <strong>{item.result?.title || "Wynik"}</strong>
+                      <small>{formatGeneratedAt(item.createdAt)}</small>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
           </main>
         </div>
 
@@ -1326,14 +1480,15 @@ export default function GeneratorsPage() {
 
   return (
     <div className="page generatorsPage generatorsDashboard generatorsCatalogPage">
-      <header className="generatorsCatalogHeader">
+      <header className="pageHeader generatorsCatalogHeader">
         <div className="generatorsCatalogBrand">
           <div className="generatorsHeroIcon" aria-hidden="true">
             <GeneratorIcon name="spark" />
           </div>
           <div>
-            <h1>Generator Losowego Kontentu</h1>
-            <p>Wybierz generator i stwórz coś niesamowitego do swojej sesji RPG</p>
+            <span className="pageEyebrow">narzedzia</span>
+            <h1 className="pageTitle">Generator Losowego Kontentu</h1>
+            <p className="pageSubtitle">Wybierz generator i stworz cos niesamowitego do swojej sesji RPG</p>
           </div>
         </div>
 
@@ -1358,6 +1513,18 @@ export default function GeneratorsPage() {
           </button>
         </div>
       </header>
+
+      {catalogFallback && (
+        <section className="generatorCatalogWarning" role="status">
+          <div>
+            <strong>Katalog generatorów działa w trybie awaryjnym.</strong>
+            <span>{catalogError || "Nie udało się pobrać pełnej listy generatorów z backendu."}</span>
+          </div>
+          <button type="button" onClick={() => setCatalogReloadKey((value) => value + 1)} disabled={catalogLoading}>
+            {catalogLoading ? "Sprawdzam..." : "Spróbuj ponownie"}
+          </button>
+        </section>
+      )}
 
       <div className="generatorsCatalogLayout">
         <aside className="generatorsSidebar" aria-label="Filtry generatorów">
