@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
-import { createCampaignMaterial, listCampaigns } from "../api/campaigns";
 import {
   generateContent,
   generateVariantContent,
@@ -13,7 +12,7 @@ const FALLBACK_CATALOG = [
   {
     type: "name",
     system: "any",
-    label: "Imiona / Nazwy",
+    label: "Imiona",
     description: "Imiona, nazwiska i nazwy z pul seed.",
     source: "seed",
     params: [
@@ -24,26 +23,24 @@ const FALLBACK_CATALOG = [
   },
   {
     type: "npc",
-    system: "dnd",
+    system: "any",
     label: "NPC",
     description: "Postać z wyglądem, osobowością, sekretem i motywacją.",
     source: "seed",
     params: [
       { key: "race", label: "Rasa", inputType: "select", options: ["Losowa", "Człowiek", "Elf", "Krasnolud", "Niziołek", "Gnom", "Półelf", "Półork", "Tiefling", "Dragonborn"], defaultValue: "Losowa" },
-      { key: "profession", label: "Profesja/Klasa", inputType: "select", options: ["Losowa", "Strażnik", "Kupiec", "Wiedźma", "Złodziej", "Kapłan", "Szlachcic", "Chłop", "Żołnierz", "Magik"], defaultValue: "Losowa" },
+      { key: "profession", label: "Profesja", inputType: "select", options: ["Losowa", "Strażnik", "Kupiec", "Wiedźma", "Złodziej", "Kapłan", "Szlachcic", "Chłop", "Żołnierz", "Magik"], defaultValue: "Losowa" },
       { key: "role", label: "Rola fabularna", inputType: "select", options: ["Losowa", "Villain", "Quest Giver", "Ally", "Contact", "Neutral", "Rival", "Informant"], defaultValue: "Losowa" },
-      { key: "level", label: "Poziom", inputType: "number", min: 1, max: 20, defaultValue: 5 },
     ],
   },
   {
     type: "loot",
-    system: "dnd",
-    label: "Skarb / Przedmiot",
+    system: "any",
+    label: "Skarb",
     description: "Monety, kosztowności, magiczne przedmioty i miejsce ukrycia.",
     source: "seed/algorithm",
     params: [
       { key: "treasureType", label: "Typ skarbu", inputType: "select", options: ["Individual Loot", "Treasure Hoard"], defaultValue: "Treasure Hoard" },
-      { key: "crBand", label: "CR / poziom skarbca", inputType: "select", options: ["0-4", "5-10", "11-16", "17+"], defaultValue: "0-4" },
       { key: "contents", label: "Zawartość", inputType: "select", options: ["Wszystko", "Monety", "Kosztowności", "Magiczne"], defaultValue: "Wszystko" },
       { key: "theme", label: "Motyw", inputType: "select", options: ["Podziemie", "Szlachta", "Religijny", "Dzicz", "Arkana"], defaultValue: "Podziemie" },
     ],
@@ -51,41 +48,39 @@ const FALLBACK_CATALOG = [
 ];
 
 const SYSTEM_LABELS = {
-  any: "Dowolny system",
-  dnd: "D&D 5E",
-  cthulhu: "Call of Cthulhu 7E",
-  wh4e: "Warhammer Fantasy 4E",
-  pf2e: "Pathfinder 2E",
-  morkborg: "Mork Borg",
+  any: "Ogólny",
+  system_agnostic: "Ogólny",
 };
+
+const FAVORITES_STORAGE_KEY = "ttrpg.generatorFavorites";
 
 const CARD_META = {
   npc: {
     title: "NPC",
-    tag: "Szybki / Szczegółowy",
-    description: "Generuj postacie niezależne, sojuszników, przeciwników i ważne osobistości.",
+    tag: "Setting",
+    description: "Jeden generator postaci z wyborem settingu, roli, sekretu i haczyka.",
     tone: "purple",
     icon: "hood",
     order: 10,
   },
   encounter: {
     title: "Encounter",
-    tag: "Walka / Non-combat",
-    description: "Twórz spotkania dopasowane do poziomu drużyny i wybranego systemu.",
+    tag: "Walka",
+    description: "Twórz spotkania opisowe dopasowane do poziomu zagrożenia i sytuacji przy stole.",
     tone: "red",
     icon: "swords",
     order: 20,
   },
   location: {
     title: "Lokacja",
-    tag: "Świat i miejsce",
-    description: "Generuj miejsca, budynki, miasta i lokacje dopasowane do klimatu.",
+    tag: "Setting",
+    description: "Jeden generator miejsc: wybierz setting i losowy albo konkretny typ lokacji.",
     tone: "teal",
     icon: "castle",
     order: 30,
   },
   loot: {
-    title: "Skarb / Przedmiot",
+    title: "Skarb",
     tag: "Wszystkie typy",
     description: "Skarby, przedmioty magiczne, artefakty, mikstury i wyposażenie sklepów.",
     tone: "gold",
@@ -93,23 +88,23 @@ const CARD_META = {
     order: 40,
   },
   hook: {
-    title: "Fabuła",
-    tag: "Hooki i misje",
-    description: "Hooki, misje, zwroty akcji, ploty i zalążki przygód.",
+    title: "Przygoda",
+    tag: "Setting",
+    description: "Krotki zalazek przygody z problemem, detalem, komplikacja i wskazowka.",
     tone: "green",
     icon: "scroll",
     order: 50,
   },
   weather: {
-    title: "Środowisko",
+    title: "Pogoda",
     tag: "Pogoda i warunki",
-    description: "Pogoda, warunki podróży, zdarzenia w trasie i zagrożenia środowiskowe.",
+    description: "Opis pogody, temperatura, odchylenie od normy oraz wiatr.",
     tone: "blue",
     icon: "storm",
     order: 60,
   },
   trap: {
-    title: "Pułapka / Hazard",
+    title: "Pułapka",
     tag: "Pułapki i zagrożenia",
     description: "Pułapki, hazardy, zagadki i niebezpieczeństwa czekające na bohaterów.",
     tone: "purple",
@@ -117,9 +112,9 @@ const CARD_META = {
     order: 70,
   },
   faction: {
-    title: "Frakcja / Kult",
-    tag: "Frakcje i organizacje",
-    description: "Organizacje, gildie, kulty i grupy działające w twoim świecie.",
+    title: "Organizacje",
+    tag: "Setting",
+    description: "Organizacje dopasowane do settingu: cel, metody, zasoby, sekret i konflikt.",
     tone: "green",
     icon: "shield",
     order: 80,
@@ -132,8 +127,24 @@ const CARD_META = {
     icon: "spark",
     order: 85,
   },
+  loot_fantasy: {
+    title: "Łup",
+    tag: "Fantasy",
+    description: "Szybki łup: monety, główny przedmiot, dziwny detal i sekret.",
+    tone: "gold",
+    icon: "chest",
+    order: 86,
+  },
+  clue: {
+    title: "Wskazówka",
+    tag: "Setting",
+    description: "Dowód albo ślad do sceny: opis, znaczenie i zwodniczy detal.",
+    tone: "purple",
+    icon: "scroll",
+    order: 87,
+  },
   name: {
-    title: "Imiona / Nazwy",
+    title: "Imiona",
     tag: "Imiona i nazwy",
     description: "Imiona, nazwiska, nazwy miejsc, karczm, organizacji i artefaktów.",
     tone: "gold",
@@ -150,7 +161,7 @@ const CARD_META = {
   },
   shop_fantasy: {
     title: "Sklep fantasy",
-    tag: "Przedmioty i handel",
+    tag: "Lokacja",
     description: "Sklep, wlasciciel, towary, nietypowy przedmiot i problem.",
     tone: "gold",
     icon: "chest",
@@ -174,7 +185,7 @@ const CARD_META = {
   },
   dungeon_concept: {
     title: "Koncept lochu",
-    tag: "Loch / ruiny",
+    tag: "Loch",
     description: "Historia miejsca, obecny stan, glowne zagrozenie i sekret.",
     tone: "purple",
     icon: "gear",
@@ -182,7 +193,7 @@ const CARD_META = {
   },
   dungeon_room: {
     title: "Pomieszczenie lochu",
-    tag: "Pokoj / komnata",
+    tag: "Pokoj",
     description: "Pojedyncza scena eksploracji z zawartoscia i zagrozeniem.",
     tone: "purple",
     icon: "gear",
@@ -212,6 +223,70 @@ const CARD_META = {
     icon: "scroll",
     order: 180,
   },
+  fantasy_world: {
+    title: "Swiat fantasy",
+    tag: "Worldbuilding",
+    description: "Swiat fantasy z magia, geografia, konfliktem, krolestwem i sekretem.",
+    tone: "purple",
+    icon: "planet",
+    order: 240,
+  },
+  calendar_fantasy: {
+    title: "Kalendarz fantasy",
+    tag: "Worldbuilding",
+    description: "Kalendarz swiata: tygodnie, miesiace, ksiezyce, swieta i presja czasu.",
+    tone: "blue",
+    icon: "clock",
+    order: 250,
+  },
+  demographics_fantasy: {
+    title: "Demografia sredniowieczna",
+    tag: "Osada",
+    description: "Populacja, grupy mieszkancow, zawody, jezyki, religia i napiecia.",
+    tone: "gold",
+    icon: "users",
+    order: 260,
+  },
+  castle_fantasy: {
+    title: "Zamek fantasy",
+    tag: "Lokacja",
+    description: "Zamek lub twierdza z typem, stanem, wladca, problemem i sekretem.",
+    tone: "teal",
+    icon: "castle",
+    order: 270,
+  },
+  five_room_dungeon: {
+    title: "Loch",
+    tag: "Mapa",
+    description: "Pięciopokojowy loch z wejściem, wyzwaniem, komplikacją, konfliktem, nagrodą i prostą mapą.",
+    tone: "red",
+    icon: "map",
+    order: 280,
+  },
+  coc_investigator_npc: {
+    title: "NPC grozy sledczej",
+    tag: "Horror",
+    description: "Opisowy NPC horroru sledczego z obsesja, sekretem i tropem.",
+    tone: "green",
+    icon: "eye",
+    order: 135,
+  },
+  scifi_world: {
+    title: "Swiat sci-fi",
+    tag: "Planeta",
+    description: "Swiat sci-fi z technologia, rzadem, kultura, konfliktem i sekretem.",
+    tone: "blue",
+    icon: "planet",
+    order: 135,
+  },
+  star_system: {
+    title: "System gwiezdny",
+    tag: "Kosmos",
+    description: "System gwiezdny z gwiazda, planetami, zagrozeniami i frakcjami.",
+    tone: "blue",
+    icon: "planet",
+    order: 145,
+  },
 };
 
 const DEFAULT_META = {
@@ -235,37 +310,32 @@ const CANONICAL_GENERATOR_TYPES = [
   "name",
 ];
 
-const GENERATOR_CATEGORIES = [
-  { code: "FANTASY", label: "Fantasy", icon: "swords" },
-  { code: "HORROR", label: "Horror", icon: "eye" },
-  { code: "POSTAPO", label: "Postapo", icon: "biohazard" },
-  { code: "SCIFI", label: "Sci-Fi", icon: "rocket" },
-];
-
-const SYSTEM_FILTERS = [
-  { value: "all", label: "Wszystkie" },
-  { value: "dnd", label: "D&D 5E" },
-  { value: "pf2e", label: "Pathfinder 2E" },
-  { value: "wfrp4e", label: "Warhammer 4E" },
-  { value: "morkborg", label: "Mork Borg" },
-  { value: "coc7e", label: "CoC 7E" },
-  { value: "alien", label: "Alien" },
-];
-
 const TYPE_FILTERS = [
   { value: "all", label: "Wszystkie" },
   { value: "npc", label: "NPC" },
   { value: "location", label: "Lokacje" },
   { value: "settlement", label: "Osady" },
+  { value: "world", label: "Swiaty" },
+  { value: "worldbuilding", label: "Worldbuilding" },
   { value: "encounter", label: "Spotkania" },
   { value: "item", label: "Przedmioty" },
   { value: "creature", label: "Stworzenia" },
-  { value: "document", label: "Dokumenty / tropy" },
+  { value: "clue", label: "Tropy" },
+  { value: "resource", label: "Zasoby" },
+  { value: "event", label: "Wydarzenia" },
+  { value: "mood", label: "Nastrój" },
+  { value: "complication", label: "Komplikacje" },
+  { value: "obstacle", label: "Przeszkody" },
+  { value: "travel", label: "Podróż" },
+  { value: "sensory", label: "Zmysły" },
+  { value: "rumor", label: "Plotki" },
+  { value: "social", label: "Społeczne" },
+  { value: "rule", label: "Zasady" },
   { value: "faction", label: "Frakcje" },
   { value: "story", label: "Fabuła" },
   { value: "quest", label: "Questy" },
   { value: "threat", label: "Zagrożenia" },
-  { value: "environment", label: "Środowisko" },
+  { value: "environment", label: "Pogoda" },
   { value: "name", label: "Imiona" },
 ];
 
@@ -314,16 +384,87 @@ function buildKey(item) {
   return `${item.system}:${item.type}`;
 }
 
+function readFavoriteKeys() {
+  if (typeof window === "undefined") return [];
+  try {
+    const value = window.localStorage.getItem(FAVORITES_STORAGE_KEY);
+    const parsed = value ? JSON.parse(value) : [];
+    return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeFavoriteKeys(keys) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(Array.from(keys)));
+}
+
 function normalizedInputType(param) {
   return String(param.inputType || param.type || "text").toLowerCase();
 }
 
 function buildInitialParams(item) {
-  return (item?.params || []).reduce((acc, param) => {
+  return visibleParams(item?.params).reduce((acc, param) => {
     const inputType = normalizedInputType(param);
     acc[param.key] = param.defaultValue ?? (inputType === "number" ? param.min ?? 1 : inputType === "checkbox" ? false : "");
     return acc;
   }, {});
+}
+
+function visibleParams(params = []) {
+  return params.filter((param) => !["system", "tone"].includes(param.key));
+}
+
+const NPC_ROLE_OPTIONS_BY_SETTING = {
+  Fantasy: ["Losowa", "Kupiec", "Strażnik", "Uczony", "Kapłan", "Przestępca", "Szlachcic", "Rzemieślnik", "Podróżnik", "Najemnik", "Zwiadowca", "Alchemik", "Bard", "Sędzia", "Herold"],
+  Horror: ["Losowa", "Śledczy", "Świadek", "Podejrzany", "Lekarz", "Bibliotekarz", "Okultysta", "Dziennikarz", "Ksiądz", "Dozorca", "Fotograf", "Patolog"],
+  "Sci-Fi": ["Losowa", "Mechanik", "Pilot", "Medyk", "Najemnik", "Analityk", "Przemytnik", "Oficer stacji", "Haker", "Dyplomata", "Inżynier napędu", "Kurier orbitalny"],
+  Postapo: ["Losowa", "Ocalały", "Lider osady", "Szabrownik", "Medyk", "Łowca zasobów", "Strażnik bramy", "Handlarz wodą", "Zwiadowca", "Mechanik", "Kaznodzieja"],
+  Realistyczny: ["Losowa", "Dziennikarz", "Policjant", "Lekarz", "Prawnik", "Kierowca", "Urzędnik", "Nauczyciel", "Ochroniarz", "Recepcjonistka", "Technik"],
+};
+
+const LOCATION_TYPE_OPTIONS_BY_SETTING = {
+  Fantasy: ["Losowy", "Tawerna", "Sklep", "Osada", "Dzielnica", "Świątynia", "Biblioteka", "Port", "Las", "Ruiny", "Zamek", "Wieża maga", "Cmentarz", "Most", "Kopalnia", "Młyn", "Sąd"],
+  Horror: ["Losowy", "Miejsce śledztwa", "Archiwum", "Szpital", "Świątynia", "Las", "Motel", "Stary dom", "Kostnica", "Szkoła", "Sanatorium"],
+  "Sci-Fi": ["Losowy", "Statek kosmiczny", "Stacja kosmiczna", "Kolonia", "Planeta", "Laboratorium", "Port orbitalny", "Wrak", "Kopuła mieszkalna", "Kopalnia asteroid", "Archiwum danych"],
+  Postapo: ["Losowy", "Schronienie", "Ruiny miejskie", "Bunkier", "Farma", "Fabryka", "Posterunek", "Targ złomu", "Wieża radiowa", "Stacja benzynowa", "Tunel metra"],
+  Realistyczny: ["Losowy", "Mieszkanie", "Biuro", "Bar", "Magazyn", "Dworzec", "Hotel", "Parking", "Kawiarnia", "Szpital", "Komisariat", "Warsztat"],
+};
+
+const FACTION_TYPE_OPTIONS_BY_SETTING = {
+  Fantasy: ["Losowy", "Gildia", "Zakon", "Rada miejska", "Kult", "Kompania najemna", "Cech", "Bractwo", "Ród", "Krąg magów", "Straż świątynna", "Liga kupiecka"],
+  Horror: ["Losowy", "Kult", "Towarzystwo okultystyczne", "Fundacja", "Krąg badaczy", "Rodzina wpływów", "Komitet parafialny", "Sanatorium", "Klub kolekcjonerów"],
+  "Sci-Fi": ["Losowy", "Korporacja", "Załoga", "Agencja", "Kartel", "Konsorcjum", "Ruch oporu", "Klan orbitalny", "Syndykat danych", "Flota najemna"],
+  Postapo: ["Losowy", "Osada", "Banda", "Karawana", "Milicja", "Klan", "Syndykat zasobów", "Radio-wspólnota", "Zakon wody", "Mechanicy"],
+  Realistyczny: ["Losowy", "Stowarzyszenie", "Firma", "Komitet", "Ruch społeczny", "Sieć kontaktów", "Fundacja", "Spółdzielnia", "Klub"],
+};
+
+const CLUE_TYPE_OPTIONS_BY_SETTING = {
+  Fantasy: ["Losowy", "Ślad fizyczny", "Znak magiczny", "Plotka", "Dokument", "Relikwia", "Herb", "Przysięga", "Mapa", "Pieczęć"],
+  Horror: ["Losowy", "Ślad fizyczny", "Dokument", "Relacja świadka", "Nagranie", "Symbol", "Fotografia", "Próbka", "List", "Brakujący przedmiot"],
+  "Sci-Fi": ["Losowy", "Log systemowy", "Nagranie", "Uszkodzony sensor", "Dane biometryczne", "Brakujący plik", "Fałszywy identyfikator", "Sygnał", "Czarna skrzynka"],
+  Postapo: ["Losowy", "Ślad w terenie", "Porzucony przedmiot", "Mapa", "Radio", "Znak ostrzegawczy", "Świeże ognisko", "Łuska", "Filtr", "Opaska"],
+  Realistyczny: ["Losowy", "Dokument", "Monitoring", "Zeznanie", "Rzecz osobista", "Niepasujący detal", "Paragon", "Telefon", "Klucz", "Notatka"],
+};
+
+function scopedParams(params = [], values = {}, generatorCode = "") {
+  const setting = values.setting || "Losowy";
+  return visibleParams(params).map((param) => {
+    if (generatorCode === "npc" && param.key === "role") {
+      return { ...param, options: NPC_ROLE_OPTIONS_BY_SETTING[setting] || ["Losowa"] };
+    }
+    if (generatorCode === "location" && param.key === "locationType") {
+      return { ...param, options: LOCATION_TYPE_OPTIONS_BY_SETTING[setting] || ["Losowy"] };
+    }
+    if (generatorCode === "faction" && param.key === "factionType") {
+      return { ...param, options: FACTION_TYPE_OPTIONS_BY_SETTING[setting] || ["Losowy"] };
+    }
+    if (generatorCode === "clue" && param.key === "clueType") {
+      return { ...param, options: CLUE_TYPE_OPTIONS_BY_SETTING[setting] || ["Losowy"] };
+    }
+    return param;
+  });
 }
 
 function flattenDefinitions(definitions) {
@@ -335,6 +476,7 @@ function flattenDefinitions(definitions) {
       variantCode: variant.variantCode,
       type: definition.code,
       system: variant.systemCode || "any",
+      category: definition.category,
       categoryCode: definition.categoryCode || definition.category,
       typeCode: definition.typeCode || definition.code,
       genreTags: definition.genreTags || [],
@@ -352,11 +494,11 @@ function flattenDefinitions(definitions) {
 
 function variantRank(item) {
   if (item.kind === "variant") {
-    if (item.variantCode === "dnd.quick" || item.variantCode === "general.quick") return 0;
+    if (item.variantCode === "general.quick") return 0;
     if (String(item.variantCode || "").includes("quick")) return 1;
     return 4;
   }
-  if (item.system === "dnd" || item.system === "any") return 2;
+  if (item.system === "system_agnostic" || item.system === "any") return 2;
   return 5;
 }
 
@@ -393,46 +535,6 @@ function renderValue(value) {
   if (Array.isArray(value)) return value.join(", ");
   if (typeof value === "object") return JSON.stringify(value);
   return String(value);
-}
-
-function resultToClipboardText(result) {
-  if (!result) return "";
-  if (Array.isArray(result.sections)) {
-    return [
-      result.title,
-      result.subtitle,
-      ...result.sections.map((section) => {
-        const items = Array.isArray(section.items) && section.items.length
-          ? section.items.map((item) => `${item.label}: ${renderValue(item.value)}`).join("\n")
-          : "";
-        return [section.title, section.content, items].filter(Boolean).join("\n");
-      }),
-    ].filter(Boolean).join("\n\n");
-  }
-
-  return Object.entries(result.payload || {})
-    .map(([key, value]) => `${key}: ${renderValue(value)}`)
-    .join("\n");
-}
-
-function materialTypeFor(generatorCode) {
-  return {
-    npc: "NPC",
-    location: "LOCATION",
-    loot: "ITEM",
-    trap: "HAZARD",
-    faction: "FACTION",
-    hook: "STORY",
-    twist: "STORY",
-    weather: "ENVIRONMENT",
-    encounter: "ENCOUNTER",
-    name: "NAMES",
-  }[generatorCode] || "GENERATED";
-}
-
-function trimForApi(value, max) {
-  const text = String(value || "").trim();
-  return text.length > max ? `${text.slice(0, max - 3)}...` : text;
 }
 
 function IconBase({ children }) {
@@ -607,11 +709,173 @@ function generatorPath(item) {
 
 function resultSections(result) {
   if (!result) return [];
-  if (Array.isArray(result.sections)) return result.sections;
+  if (Array.isArray(result.sections)) return result.sections.filter(s => s.type !== 'stats');
   return Object.entries(result.payload || {}).map(([key, value]) => ({
     title: key,
     content: renderValue(value),
   }));
+}
+
+function sectionContent(sections, title) {
+  return sections.find((section) => section.title === title)?.content || "";
+}
+
+function linesFromContent(content) {
+  return String(content || "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function dungeonMapRows(content) {
+  return String(content || "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => /^[0-9A-Zevu]+$/.test(line));
+}
+
+function dungeonRoomNumber(tile) {
+  if (/^[A-Z]$/.test(tile)) return tile.charCodeAt(0) - 64;
+  if (Number(tile) >= 5) return Number(tile) - 4;
+  return null;
+}
+
+function dungeonTileClass(tile) {
+  if (["e", "u", "v"].includes(tile)) return "tile-stairs";
+  return dungeonRoomNumber(tile) ? "tile-roomLabel" : `tile-${tile}`;
+}
+
+function dungeonTileLabel(tile) {
+  if (tile === "e") return "E";
+  if (tile === "u") return "↑";
+  if (tile === "v") return "↓";
+  const roomNumber = dungeonRoomNumber(tile);
+  if (roomNumber) return String(roomNumber);
+  return "";
+}
+
+function dungeonTileTitle(tile) {
+  if (tile === "e") return "Wejście";
+  if (tile === "u") return "Przejście na wyższy poziom";
+  if (tile === "v") return "Zejście na niższy poziom";
+  if (tile === "1") return "Korytarz";
+  if (tile === "2") return "Pokój";
+  if (tile === "3") return "Korytarz";
+  const roomNumber = dungeonRoomNumber(tile);
+  if (roomNumber) return `Pokój #${roomNumber}`;
+  return "Ściana";
+}
+
+function renderDungeonMap(section) {
+  const rows = dungeonMapRows(section.content);
+  if (!rows.length) return null;
+  const legend = Array.isArray(section.items) ? section.items : [];
+  return (
+    <div className="dungeonMapBlock">
+      <div className="dungeonMapViewport" style={{ "--dungeon-cols": rows[0]?.length || 1 }}>
+        {rows.map((row, y) => (
+          <div className="dungeonMapRow" key={`row-${y}`}>
+            {[...row].map((tile, x) => (
+              <span
+                key={`${x}-${y}`}
+                className={`dungeonTile ${dungeonTileClass(tile)}`}
+                title={dungeonTileTitle(tile)}
+              >
+                {dungeonTileLabel(tile)}
+              </span>
+            ))}
+          </div>
+        ))}
+      </div>
+      {legend.length > 0 && (
+        <div className="dungeonMapLegend">
+          {legend.map((item) => (
+            <span key={item.label}>
+              <small>{item.label}</small>
+              <strong>{renderValue(item.value)}</strong>
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function dungeonFloorNumber(title) {
+  const match = String(title || "").match(/poziom\s+(\d+)/i);
+  return match ? Number(match[1]) : 1;
+}
+
+function dungeonFloorsFromSections(sections) {
+  const maps = sections.filter((section) => section.type === "dungeon_map");
+  const hasMultipleFloors = maps.length > 1;
+  return maps.map((mapSection, index) => {
+    const number = hasMultipleFloors ? dungeonFloorNumber(mapSection.title) : index + 1;
+    const roomSection = sections.find((section) => {
+      if (section.type !== "dungeon_rooms") return false;
+      return hasMultipleFloors ? dungeonFloorNumber(section.title) === number : section.title === "Pomieszczenia";
+    });
+    return { number, mapSection, roomSection };
+  });
+}
+
+function renderSectionItems(section) {
+  if (!section || !Array.isArray(section.items) || !section.items.length) return null;
+  return (
+    <div className="generatorWindowStats">
+      {section.items.map((item) => (
+        <span key={item.label}>
+          <small>{item.label}</small>
+          <strong>{renderValue(item.value)}</strong>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function DungeonFloorTabs({ floors, activeIndex, onChange }) {
+  if (!floors.length) return null;
+  const safeIndex = Math.min(activeIndex, floors.length - 1);
+  const activeFloor = floors[safeIndex] || floors[0];
+  return (
+    <article className="is-dungeon-floors">
+      <div className="dungeonFloorTabs">
+        {floors.map((floor, index) => (
+          <button
+            key={floor.mapSection.title}
+            type="button"
+            className={index === safeIndex ? "is-active" : ""}
+            onClick={() => onChange(index)}
+          >
+            Poziom {floor.number}
+          </button>
+        ))}
+      </div>
+      <div className="dungeonFloorPanel">
+        <h3>{activeFloor.mapSection.title}</h3>
+        {renderDungeonMap(activeFloor.mapSection)}
+        {activeFloor.roomSection && (
+          <div className="dungeonFloorRooms">
+            <h3>{activeFloor.roomSection.title}</h3>
+            {renderSectionItems(activeFloor.roomSection)}
+          </div>
+        )}
+      </div>
+    </article>
+  );
+}
+
+function formatGeneratedAt(value) {
+  if (!value) return "Jeszcze nie wygenerowano";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("pl-PL", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
 }
 
 export default function GeneratorsPage() {
@@ -623,17 +887,16 @@ export default function GeneratorsPage() {
   const [forms, setForms] = useState(() => ({ [buildKey(decorateCatalog(FALLBACK_CATALOG)[0])]: buildInitialParams(decorateCatalog(FALLBACK_CATALOG)[0]) }));
   const [result, setResult] = useState(null);
   const [resultIsNew, setResultIsNew] = useState(false);
-  const [campaigns, setCampaigns] = useState([]);
-  const [selectedCampaignId, setSelectedCampaignId] = useState("");
-  const [activeCategory, setActiveCategory] = useState("FANTASY");
-  const [selectedSystem, setSelectedSystem] = useState("all");
+  const [activeDungeonFloor, setActiveDungeonFloor] = useState(0);
   const [selectedType, setSelectedType] = useState("all");
   const [selectedTone, setSelectedTone] = useState("all");
+  const [catalogSearch, setCatalogSearch] = useState("");
+  const [catalogSort, setCatalogSort] = useState("popular");
+  const [favoriteKeys, setFavoriteKeys] = useState(() => new Set(readFavoriteKeys()));
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [addingToCampaign, setAddingToCampaign] = useState(false);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -642,8 +905,8 @@ export default function GeneratorsPage() {
       setCatalogLoading(true);
       try {
         const definitions = await getGeneratorDefinitions(token, {
-          category: activeCategory,
-          system: selectedSystem,
+          category: "all",
+          system: "all",
           type: selectedType,
           tone: selectedTone,
         });
@@ -670,54 +933,73 @@ export default function GeneratorsPage() {
     return () => {
       cancelled = true;
     };
-  }, [token, activeCategory, selectedSystem, selectedType, selectedTone]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadCampaigns() {
-      if (!token) {
-        setCampaigns([]);
-        setSelectedCampaignId("");
-        return;
-      }
-      try {
-        const data = await listCampaigns(token);
-        if (cancelled) return;
-        const nextCampaigns = Array.isArray(data) ? data : [];
-        setCampaigns(nextCampaigns);
-        setSelectedCampaignId((previous) => previous || String(nextCampaigns[0]?.id || ""));
-      } catch {
-        if (!cancelled) setCampaigns([]);
-      }
-    }
-
-    loadCampaigns();
-    return () => {
-      cancelled = true;
-    };
-  }, [token]);
+  }, [token, selectedType, selectedTone]);
 
   const activeDefinition = useMemo(
     () => catalog.find((item) => buildKey(item) === activeKey) || catalog[0],
     [activeKey, catalog]
   );
   const activeValues = forms[activeKey] || buildInitialParams(activeDefinition);
-  const visibleCatalog = catalog;
+  const visibleCatalog = useMemo(() => {
+    const query = catalogSearch.trim().toLowerCase();
+    const filtered = catalog.filter((item) => {
+      if (favoritesOnly && !favoriteKeys.has(buildKey(item))) return false;
+      if (!query) return true;
+      return [
+        item.label,
+        item.cardDescription,
+        item.cardTag,
+        item.categoryCode,
+        item.typeCode,
+      ].filter(Boolean).some((value) => String(value).toLowerCase().includes(query));
+    });
 
-  const toneOptions = TONE_OPTIONS_BY_CATEGORY[activeCategory] || [{ value: "all", label: "Wszystkie" }];
+    return [...filtered].sort((left, right) => {
+      if (catalogSort === "name") return String(left.label).localeCompare(String(right.label), "pl");
+      if (catalogSort === "type") return String(left.typeCode || left.type).localeCompare(String(right.typeCode || right.type), "pl");
+      return (left.order || 0) - (right.order || 0);
+    });
+  }, [catalog, catalogSearch, catalogSort, favoriteKeys, favoritesOnly]);
 
-  function handleCategoryChange(category) {
-    setActiveCategory(category);
-    setSelectedTone("all");
-    setResult(null);
+  const sidebarTypeFilters = TYPE_FILTERS.map((option) => ({
+    ...option,
+    label: option.value === "all"
+      ? "Wszystkie typy"
+      : option.label
+          .replace("Lokacje", "Lokacja")
+          .replace("Przedmioty", "Przedmiot")
+          .replace("Stworzenia", "Stworzenie")
+          .replace("Wydarzenia", "Zdarzenie")
+          .replace("Zagrożenia", "Zagrożenie"),
+    count: option.value === "all" ? visibleCatalog.length : visibleCatalog.filter((item) => item.typeCode === option.value).length,
+  })).filter((option) => option.value === "all" || option.count > 0);
+
+  function toggleFavorite(generator) {
+    const key = buildKey(generator);
+    setFavoriteKeys((previous) => {
+      const next = new Set(previous);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      writeFavoriteKeys(next);
+      return next;
+    });
   }
 
   useEffect(() => {
     if (!generatorCode || !catalog.length) return;
     const routeTarget = catalog.find((item) => item.type === generatorCode);
     if (!routeTarget) return;
-    setActiveKey(buildKey(routeTarget));
+    const nextKey = buildKey(routeTarget);
+    setActiveKey((previousKey) => {
+      if (previousKey !== nextKey) {
+        setResult(null);
+        setError("");
+      }
+      return nextKey;
+    });
   }, [catalog, generatorCode]);
 
   useEffect(() => {
@@ -728,14 +1010,14 @@ export default function GeneratorsPage() {
       try {
         const form = await getGeneratorForm(token, activeDefinition.generatorCode, activeDefinition.variantCode);
         if (cancelled) return;
-        const params = (form.fields || []).map((field) => ({
+        const params = visibleParams((form.fields || []).map((field) => ({
           key: field.key,
           label: field.label,
           inputType: String(field.type || "text").toLowerCase(),
           options: field.options || [],
           defaultValue: field.defaultValue,
           required: field.required,
-        }));
+        })));
         setCatalog((previous) => previous.map((item) =>
           buildKey(item) === activeKey
             ? { ...item, label: item.title || form.name || item.label, description: form.description || item.description, params }
@@ -759,52 +1041,34 @@ export default function GeneratorsPage() {
   }, [activeDefinition, activeKey, token]);
 
   function setFieldValue(key, value) {
-    setForms((prev) => ({
-      ...prev,
-      [activeKey]: {
+    setForms((prev) => {
+      const current = {
         ...(prev[activeKey] || {}),
         [key]: value,
-      },
-    }));
+      };
+      const code = activeDefinition?.kind === "variant" ? activeDefinition.generatorCode : activeDefinition?.type;
+      if (key === "setting" && code === "npc") {
+        current.role = "Losowa";
+      }
+      if (key === "setting" && code === "location") {
+        current.locationType = "Losowy";
+      }
+      if (key === "setting" && code === "faction") {
+        current.factionType = "Losowy";
+      }
+      if (key === "setting" && code === "clue") {
+        current.clueType = "Losowy";
+      }
+      return {
+        ...prev,
+        [activeKey]: current,
+      };
+    });
   }
 
   function activeGeneratorCode() {
     return activeDefinition?.kind === "variant" ? activeDefinition.generatorCode : activeDefinition?.type;
   }
-
-  function activeVariantCode() {
-    return activeDefinition?.kind === "variant" ? activeDefinition.variantCode : `${activeDefinition?.system}.quick`;
-  }
-
-  async function handleAddToCampaign() {
-    if (!result || !token) {
-      setError("Zaloguj się, żeby dodać wynik do kampanii.");
-      return;
-    }
-    if (!selectedCampaignId) {
-      setError("Wybierz kampanię przed dodaniem wyniku.");
-      return;
-    }
-    setAddingToCampaign(true);
-    setError("");
-    setNotice("");
-    try {
-      const generatorCode = result.generatorCode || activeGeneratorCode();
-      const title = trimForApi(result.title || activeDefinition?.label || "Wygenerowana treść", 200);
-      const content = trimForApi(resultToClipboardText(result), 5000);
-      await createCampaignMaterial(token, selectedCampaignId, {
-        type: materialTypeFor(generatorCode),
-        title,
-        content,
-      });
-      setNotice(`Dodano do kampanii: ${title}`);
-    } catch (e) {
-      setError(e?.message || "Nie udało się dodać wyniku do kampanii.");
-    } finally {
-      setAddingToCampaign(false);
-    }
-  }
-
   async function handleGenerate(target = activeDefinition) {
     if (!target) {
       setError("Nie znaleziono generatora.");
@@ -815,7 +1079,6 @@ export default function GeneratorsPage() {
     setActiveKey(key);
     setLoading(true);
     setError("");
-    setNotice("");
     setResult(null);
 
     try {
@@ -824,6 +1087,7 @@ export default function GeneratorsPage() {
         ? await generateVariantContent(token, target.generatorCode, target.variantCode, values)
         : await generateContent(token, target.system, target.type, values);
       setResult(generated);
+      setActiveDungeonFloor(0);
       setResultIsNew(true);
       setTimeout(() => setResultIsNew(false), 600);
     } catch (e) {
@@ -833,15 +1097,135 @@ export default function GeneratorsPage() {
     }
   }
 
-  function copyResultToClipboard() {
-    if (!result) return;
-    navigator.clipboard.writeText(resultToClipboardText(result)).catch(() => {
-      alert("Nie udało się skopiować do schowka");
-    });
-  }
-
   if (generatorCode) {
     const sections = resultSections(result);
+    const isWeatherGenerator = activeGeneratorCode() === "weather";
+    const dungeonFloors = dungeonFloorsFromSections(sections);
+    const showDungeonFloorTabs = activeGeneratorCode() === "dungeon_advanced" && dungeonFloors.length > 1;
+    const displayedSections = showDungeonFloorTabs
+      ? sections.filter((section) => section.type !== "dungeon_map" && section.type !== "dungeon_rooms")
+      : sections;
+
+    if (isWeatherGenerator) {
+      const weatherParams = activeDefinition?.params || [];
+      const climateParam = weatherParams.find((param) => param.key === "climate") || {
+        key: "climate",
+        label: "Klimat",
+        options: ["Umiarkowany", "Tropikalny", "Suchy", "Zimny", "Górski", "Nadmorski", "Bagienny"],
+        defaultValue: "Umiarkowany",
+      };
+      const seasonParam = weatherParams.find((param) => param.key === "season") || {
+        key: "season",
+        label: "Pora roku",
+        options: ["Wiosna", "Lato", "Jesień", "Zima"],
+        defaultValue: "Wiosna",
+      };
+      const weatherDescription = sectionContent(sections, "Opis");
+      const weatherConditionLines = linesFromContent(sectionContent(sections, "Warunki"));
+      const weatherTableUse = sectionContent(sections, "Przy stole");
+      const selectedClimate = activeValues.climate || climateParam.defaultValue || "Umiarkowany";
+      const selectedSeason = activeValues.season || seasonParam.defaultValue || "Wiosna";
+
+      return (
+        <div className="page generatorsPage generatorsDashboard weatherGeneratorPage">
+          <header className="weatherGeneratorHeader">
+            <button type="button" className="weatherBackButton" onClick={() => navigate("/generators")}>
+              {"← Generatory"}
+            </button>
+            <div className="weatherHeaderIdentity">
+              <div className="weatherHeaderIcon" aria-hidden="true">
+                <GeneratorIcon name="storm" />
+              </div>
+              <div>
+                <h1>Generator Pogody</h1>
+                <p>Uniwersalny generator warunków pogodowych</p>
+              </div>
+            </div>
+          </header>
+
+          <div className="weatherGeneratorLayout">
+            <aside className="weatherSettingsCard">
+              <div className="weatherPanelHeading">Ustawienia</div>
+              <div className="weatherControlStack">
+                <label className="weatherControl">
+                  <span>Klimat</span>
+                  <select value={selectedClimate} onChange={(event) => setFieldValue("climate", event.target.value)}>
+                    {(climateParam.options || []).map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="weatherControl">
+                  <span>Pora roku</span>
+                  <select value={selectedSeason} onChange={(event) => setFieldValue("season", event.target.value)}>
+                    {(seasonParam.options || []).map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              {error && <div className="generatorError">{error}</div>}
+
+              <button className="weatherPrimaryAction" type="button" onClick={() => handleGenerate(activeDefinition)} disabled={loading || catalogLoading}>
+                <GeneratorIcon name="spark" />
+                <span>{loading ? "Generowanie..." : "Generuj pogodę"}</span>
+              </button>
+            </aside>
+
+            <main className="weatherResultPanel">
+              {result ? (
+                <section className={`weatherResultContent${resultIsNew ? " is-new" : ""}`}>
+                  <footer className="weatherResultFooter">
+                    <span><small>Klimat</small><strong>{selectedClimate}</strong></span>
+                    <span><small>Pora roku</small><strong>{selectedSeason}</strong></span>
+                    <span><small>Wygenerowano</small><strong>{formatGeneratedAt(result.generatedAt)}</strong></span>
+                  </footer>
+
+                  <article className="weatherHeroCard">
+                    <div className="weatherHeroCopy">
+                      <h2>{result.title || "Pogoda"}</h2>
+                      <div className="weatherChips">
+                        <span>{selectedClimate} klimat</span>
+                        <span>{selectedSeason}</span>
+                      </div>
+                    </div>
+                    <div className="weatherImagePlaceholder" aria-label="Miejsce na przyszły obraz pogody" />
+                  </article>
+
+                  <div className="weatherResultGrid">
+                    <article className="weatherResultCard weatherResultCard--wide">
+                      <h3>Opis</h3>
+                      <ul>
+                        {[weatherDescription, ...weatherConditionLines].filter(Boolean).map((line) => (
+                          <li key={line}>{line}</li>
+                        ))}
+                      </ul>
+                    </article>
+                    <article className="weatherResultCard">
+                      <h3>Efekt przy stole</h3>
+                      <p>{weatherTableUse || "Użyj pogody jako tła sceny i lekkiej presji."}</p>
+                    </article>
+                  </div>
+
+                  <footer className="weatherResultFooter">
+                    <span><small>Klimat</small><strong>{selectedClimate}</strong></span>
+                    <span><small>Pora roku</small><strong>{selectedSeason}</strong></span>
+                    <span><small>Wygenerowano</small><strong>{formatGeneratedAt(result.generatedAt)}</strong></span>
+                  </footer>
+                </section>
+              ) : (
+                <div className="weatherEmptyState">
+                  <GeneratorIcon name="storm" />
+                  <strong>Wynik pogody pojawi się tutaj</strong>
+                  <span>Wybierz klimat, opcje sceny i uruchom generator.</span>
+                </div>
+              )}
+            </main>
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div className={`page generatorsPage generatorsDashboard generatorWindowPage generatorWindowPage--${activeDefinition?.tone || "purple"}`}>
@@ -865,22 +1249,9 @@ export default function GeneratorsPage() {
           <aside className="generatorSettingsPanel">
             <div className="generatorPanelNumber">1. Ustawienia</div>
 
-            <div className="generatorModeGroup">
-              <span className="generatorSettingsLabel">Tryb generatora</span>
-              <div className="generatorModeButtons">
-                <button type="button" className="is-active">
-                  <GeneratorIcon name="spark" />
-                  <span>
-                    <strong>Szybki</strong>
-                    <small>Podstawowe informacje</small>
-                  </span>
-                </button>
-              </div>
-            </div>
-
             <div className="generatorWindowFields">
-              {activeDefinition?.params?.length ? (
-                activeDefinition.params.map((param) => (
+              {scopedParams(activeDefinition?.params, activeValues, activeGeneratorCode()).length ? (
+                scopedParams(activeDefinition?.params, activeValues, activeGeneratorCode()).map((param) => (
                   <Field key={param.key} param={param} value={activeValues[param.key]} onChange={setFieldValue} />
                 ))
               ) : (
@@ -889,31 +1260,16 @@ export default function GeneratorsPage() {
             </div>
 
             {error && <div className="generatorError">{error}</div>}
-            {notice && <div className="generatorNotice">{notice}</div>}
 
             <button className="generatorWindowGenerate" type="button" onClick={() => handleGenerate(activeDefinition)} disabled={loading || catalogLoading}>
               <GeneratorIcon name="spark" />
-              <span>{loading ? "Generowanie..." : `Generuj ${activeDefinition?.label || ""}`}</span>
+              <span>{loading ? "Generowanie..." : result ? "Przelosuj" : `Generuj ${activeDefinition?.label || ""}`}</span>
             </button>
-            <button className="generatorAdvancedButton" type="button" disabled>Opcje zaawansowane</button>
           </aside>
 
           <main className="generatorOutputPanel">
             <div className="generatorOutputTop">
               <div className="generatorPanelNumber">2. Wynik</div>
-            <div className="generatorOutputActions">
-                <button type="button" onClick={copyResultToClipboard} disabled={!result}>Kopiuj</button>
-                {campaigns.length > 0 && (
-                  <select className="generatorCampaignSelect" value={selectedCampaignId} onChange={(event) => setSelectedCampaignId(event.target.value)}>
-                    {campaigns.map((campaign) => (
-                      <option key={campaign.id} value={campaign.id}>{campaign.title || campaign.name}</option>
-                    ))}
-                  </select>
-                )}
-                <button type="button" onClick={handleAddToCampaign} disabled={!result || addingToCampaign || !campaigns.length}>
-                  {addingToCampaign ? "Dodawanie..." : "Dodaj do kampanii"}
-                </button>
-              </div>
             </div>
 
             {result ? (
@@ -928,35 +1284,29 @@ export default function GeneratorsPage() {
                   </div>
                 </div>
 
-                <div className="generatorResultMetaStrip">
-                  <span><small>System</small><strong>{SYSTEM_LABELS[result.system] || result.system || "D&D 5E"}</strong></span>
-                  <span><small>Źródło</small><strong>{result.source || activeDefinition?.source || "seed"}</strong></span>
-                  <span><small>Wariant</small><strong>{result.variantCode || activeVariantCode()}</strong></span>
-                  <span><small>Typ</small><strong>{activeDefinition?.label}</strong></span>
-                </div>
 
                 <div className="generatorWindowSections">
-                  {sections.map((section, index) => (
-                    <article key={`${section.title}-${index}`} className={Array.isArray(section.items) && section.items.length ? "has-items" : ""}>
-                      <h3>{section.title}</h3>
-                      {section.content && <p>{section.content}</p>}
-                      {Array.isArray(section.items) && section.items.length > 0 && (
-                        <div className="generatorWindowStats">
-                          {section.items.map((item) => (
-                            <span key={item.label}>
-                              <small>{item.label}</small>
-                              <strong>{renderValue(item.value)}</strong>
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </article>
-                  ))}
-                </div>
-
-                <div className="generatorWindowBottomActions">
-                  <button type="button" onClick={() => handleGenerate(activeDefinition)} disabled={loading}>Generuj ponownie</button>
-                  <button type="button" className="is-primary" disabled>Edytuj i rozwiń</button>
+                  {showDungeonFloorTabs && (
+                    <DungeonFloorTabs
+                      floors={dungeonFloors}
+                      activeIndex={activeDungeonFloor}
+                      onChange={setActiveDungeonFloor}
+                    />
+                  )}
+                  {displayedSections.map((section, index) => {
+                    const isDungeonMap = section.type === "dungeon_map";
+                    const hasItems = Array.isArray(section.items) && section.items.length > 0;
+                    return (
+                      <article
+                        key={`${section.title}-${index}`}
+                        className={[hasItems ? "has-items" : "", isDungeonMap ? "is-dungeon-map" : ""].filter(Boolean).join(" ")}
+                      >
+                        <h3>{section.title}</h3>
+                        {isDungeonMap ? renderDungeonMap(section) : section.content && <p>{section.content}</p>}
+                        {!isDungeonMap && hasItems && renderSectionItems(section)}
+                      </article>
+                    );
+                  })}
                 </div>
               </section>
             ) : (
@@ -975,99 +1325,111 @@ export default function GeneratorsPage() {
   }
 
   return (
-    <div className="page generatorsPage generatorsDashboard">
-      <header className="generatorsHero">
-        <div className="generatorsHeroIcon" aria-hidden="true">
-          <GeneratorIcon name="spark" />
+    <div className="page generatorsPage generatorsDashboard generatorsCatalogPage">
+      <header className="generatorsCatalogHeader">
+        <div className="generatorsCatalogBrand">
+          <div className="generatorsHeroIcon" aria-hidden="true">
+            <GeneratorIcon name="spark" />
+          </div>
+          <div>
+            <h1>Generator Losowego Kontentu</h1>
+            <p>Wybierz generator i stwórz coś niesamowitego do swojej sesji RPG</p>
+          </div>
         </div>
-        <div>
-          <h1>Generatory</h1>
-          <p>Seed-first generatory do pracy przy stole, z wynikami liczonymi albo losowanymi po stronie backendu.</p>
+
+        <div className="generatorsCatalogActions">
+          <label className="generatorsSearch">
+            <span className="generatorsSearchIcon" aria-hidden="true">⌕</span>
+            <input
+              type="search"
+              value={catalogSearch}
+              onChange={(event) => setCatalogSearch(event.target.value)}
+              placeholder="Szukaj generatorów..."
+            />
+          </label>
+          <button
+            type="button"
+            className={`generatorsFavoritesButton${favoritesOnly ? " is-active" : ""}`}
+            onClick={() => setFavoritesOnly((value) => !value)}
+            aria-pressed={favoritesOnly}
+          >
+            <span aria-hidden="true">{favoritesOnly ? "★" : "☆"}</span>
+            <span>Ulubione</span>
+          </button>
         </div>
       </header>
 
-      <section className="generatorsCommandBar" aria-label="Filtry generatorów">
-        <div className="generatorsTabs">
-          {GENERATOR_CATEGORIES.map(({ code, label, icon }) => (
-            <button key={code} type="button" className={activeCategory === code ? "is-active" : ""} onClick={() => handleCategoryChange(code)}>
-              <GeneratorIcon name={icon} />
-              <span>{label}</span>
-            </button>
-          ))}
-        </div>
-        <label className="generatorsSystemSelect">
-          <span>System:</span>
-          <select value={selectedSystem} onChange={(event) => setSelectedSystem(event.target.value)}>
-            {SYSTEM_FILTERS.map((option) => (
-              <option key={option.value} value={option.value}>{option.label}</option>
-            ))}
-          </select>
-        </label>
-        <label className="generatorsSystemSelect">
-          <span>Typ:</span>
-          <select value={selectedType} onChange={(event) => setSelectedType(event.target.value)}>
-            {TYPE_FILTERS.map((option) => (
-              <option key={option.value} value={option.value}>{option.label}</option>
-            ))}
-          </select>
-        </label>
-        <label className="generatorsSystemSelect">
-          <span>Klimat:</span>
-          <select value={selectedTone} onChange={(event) => setSelectedTone(event.target.value)}>
-            {toneOptions.map((option) => (
-              <option key={option.value} value={option.value}>{option.label}</option>
-            ))}
-          </select>
-        </label>
-      </section>
+      <div className="generatorsCatalogLayout">
+        <aside className="generatorsSidebar" aria-label="Filtry generatorów">
+          <section className="generatorsFilterSection">
+            <h2>Typ generatora</h2>
+            <label className="generatorsFilterSelect">
+              <select value={selectedType} onChange={(event) => setSelectedType(event.target.value)}>
+                {sidebarTypeFilters.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label} ({option.count})
+                  </option>
+                ))}
+              </select>
+            </label>
+          </section>
 
-      <div className="generatorsWorkspace">
-        <main className="generatorsMain">
-          <section className="generatorCardsGrid" aria-busy={catalogLoading}>
+        </aside>
+
+        <main className="generatorsContent">
+          <div className="generatorsToolbar">
+            <div className="generatorsFound">
+              Znaleziono: <strong>{visibleCatalog.length}</strong> generatory
+            </div>
+            <label className="generatorsSort">
+              <span>Sortuj:</span>
+              <select value={catalogSort} onChange={(event) => setCatalogSort(event.target.value)}>
+                <option value="popular">Popularność</option>
+                <option value="name">Nazwa</option>
+                <option value="type">Typ</option>
+              </select>
+            </label>
+          </div>
+
+          <section className="generatorsGrid" aria-busy={catalogLoading}>
             {visibleCatalog.map((generator) => {
               const isActive = buildKey(generator) === activeKey;
+              const isFavorite = favoriteKeys.has(buildKey(generator));
               return (
-                <article key={buildKey(generator)} className={`generatorTile generatorTile--${generator.tone}${isActive ? " is-active" : ""}`}>
+                <article key={buildKey(generator)} className={`generatorCard generatorCard--${generator.tone}${isActive ? " is-active" : ""}`}>
                   <button
                     type="button"
-                    className="generatorTileStar"
-                    title="Oznacz jako ulubiony"
-                    aria-label="Oznacz jako ulubiony"
-                    onClick={() => {
-                      navigate(generatorPath(generator));
-                      setResult(null);
+                    className={`generatorCardFavorite${isFavorite ? " is-favorite" : ""}`}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      toggleFavorite(generator);
                     }}
+                    aria-pressed={isFavorite}
+                    aria-label={isFavorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
+                    title={isFavorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
                   >
-                    {"☆"}
+                    {isFavorite ? "★" : "☆"}
                   </button>
                   <button
                     type="button"
-                    className="generatorTileBody"
+                    className="generatorCardBody"
                     onClick={() => {
                       navigate(generatorPath(generator));
                     }}
                   >
-                    <span className="generatorTileIcon">
+                    <span className="generatorCardMedia">
+                    </span>
+                    <span className="generatorCardIcon">
                       <GeneratorIcon name={generator.icon} />
                     </span>
-                    <span className="generatorTileTitle">{generator.label}</span>
-                    <span className="generatorTileTag">{generator.cardTag}</span>
-                    <span className="generatorTileDescription">{generator.cardDescription}</span>
-                    <span className="generatorTileMeta">
-                      <span>{generator.categoryCode || activeCategory}</span>
-                      <span>{generator.typeCode || generator.type}</span>
+                    <span className="generatorCardContent">
+                      <span className="generatorCardTitle">{generator.label}</span>
+                      <span className="generatorCardDescription">{generator.cardDescription}</span>
+                      <span className="generatorCardBadges">
+                        <span className="generatorBadge">{generator.typeCode || generator.type}</span>
+                        <span className="generatorBadge generatorBadge--variant">Opisowy</span>
+                      </span>
                     </span>
-                  </button>
-                  <button
-                    type="button"
-                    className="generatorTileAction"
-                    disabled={loading && isActive}
-                    onClick={() => {
-                      navigate(generatorPath(generator));
-                    }}
-                  >
-                    <span>Otwórz</span>
-                    <span aria-hidden="true">{"→"}</span>
                   </button>
                 </article>
               );
@@ -1078,9 +1440,19 @@ export default function GeneratorsPage() {
               </div>
             )}
           </section>
-        </main>
 
+          {visibleCatalog.length > 0 && (
+            <div className="generatorsLoadMoreWrap">
+              <button type="button" className="generatorsLoadMore">
+                <span aria-hidden="true">⌄</span>
+                <span>Załaduj więcej</span>
+                <span aria-hidden="true">⌄</span>
+              </button>
+            </div>
+          )}
+        </main>
       </div>
     </div>
   );
+
 }

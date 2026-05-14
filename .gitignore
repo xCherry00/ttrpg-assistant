@@ -9,6 +9,9 @@ backend/.env
 # Local backups
 backups/
 
+# Local project notes
+docs/
+
 # Local test payloads with credentials
 login.json
 req.json

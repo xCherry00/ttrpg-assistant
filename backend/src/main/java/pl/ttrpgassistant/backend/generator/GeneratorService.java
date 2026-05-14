@@ -109,7 +109,6 @@ public class GeneratorService {
         return definitionRepository.findByActiveTrueOrderByNameAsc().stream()
                 .filter(definition -> matchesCategory(definition, category))
                 .filter(definition -> matchesType(definition, type))
-                .filter(definition -> matchesSystem(definition, system))
                 .filter(definition -> matchesTone(definition, tone))
                 .sorted((left, right) -> Integer.compare(left.getDisplayOrder(), right.getDisplayOrder()))
                 .map(definition -> new GeneratorDefinitionResponse(
@@ -176,6 +175,8 @@ public class GeneratorService {
         GeneratorStructuredResultResponse generated = strategy == null
                 ? legacyVariant(normalizedGenerator, normalizedVariant, request)
                 : strategy.generate(normalizedGenerator, normalizedVariant, request);
+        generated = compactForMvp(generated);
+
         GeneratorResultEntity saved = new GeneratorResultEntity();
         saved.setCampaignId(request == null ? null : request.campaignId());
         saved.setGeneratorCode(normalizedGenerator);
@@ -199,6 +200,113 @@ public class GeneratorService {
         );
     }
 
+    private GeneratorStructuredResultResponse compactForMvp(GeneratorStructuredResultResponse generated) {
+        if (generated == null || generated.sections() == null) {
+            return generated;
+        }
+
+        List<GeneratorOutputSection> compactSections = new ArrayList<>();
+        List<GeneratorOutputSection> stats = generated.sections().stream()
+                .filter(section -> "stats".equals(section.type()) || "characteristics".equals(section.type()))
+                .limit(1)
+                .map(this::compactSection)
+                .toList();
+        int textLimit = switch (generated.generatorCode()) {
+            case "five_room_dungeon" -> 6;
+            case "dungeon_advanced" -> 8;
+            default -> stats.isEmpty() ? 6 : 5;
+        };
+        List<GeneratorOutputSection> text = generated.sections().stream()
+                .filter(section -> !"stats".equals(section.type()) && !"characteristics".equals(section.type()))
+                .limit(textLimit)
+                .map(this::compactSection)
+                .toList();
+
+        compactSections.addAll(stats);
+        compactSections.addAll(text);
+
+        return new GeneratorStructuredResultResponse(
+                generated.id(),
+                generated.generatorCode(),
+                generated.variantCode(),
+                compactText(generated.title(), 120),
+                compactText(generated.subtitle(), 160),
+                compactSections,
+                generated.source(),
+                generated.generatedAt()
+        );
+    }
+
+    private GeneratorOutputSection compactSection(GeneratorOutputSection section) {
+        if ("dungeon_map".equals(section.type())) {
+            List<Map<String, Object>> items = section.items() == null ? List.of() : section.items().stream()
+                    .limit(4)
+                    .map(item -> compactItem(item, 40, 180))
+                    .toList();
+            return new GeneratorOutputSection(
+                    section.type(),
+                    compactText(section.title(), 64),
+                    section.content(),
+                    items
+            );
+        }
+        if ("dungeon_rooms".equals(section.type())) {
+            List<Map<String, Object>> items = section.items() == null ? List.of() : section.items().stream()
+                    .limit(24)
+                    .map(item -> compactItem(item, 48, 180))
+                    .toList();
+            return new GeneratorOutputSection(
+                    section.type(),
+                    compactText(section.title(), 64),
+                    section.content(),
+                    items
+            );
+        }
+        List<Map<String, Object>> items = section.items() == null ? List.of() : section.items().stream()
+                .limit(6)
+                .map(this::compactItem)
+                .toList();
+        return new GeneratorOutputSection(
+                section.type(),
+                compactText(section.title(), 64),
+                compactText(section.content(), 220),
+                items
+        );
+    }
+
+    private Map<String, Object> compactItem(Map<String, Object> item) {
+        return compactItem(item, 40, 80);
+    }
+
+    private Map<String, Object> compactItem(Map<String, Object> item, int labelLimit, int valueLimit) {
+        Map<String, Object> compact = new LinkedHashMap<>();
+        compact.put("label", compactText(String.valueOf(item.getOrDefault("label", "")), labelLimit));
+        compact.put("value", compactText(String.valueOf(item.getOrDefault("value", "")), valueLimit));
+        return compact;
+    }
+
+    private String compactText(String value, int maxLength) {
+        if (value == null) return null;
+        String cleaned = GeneratorTextSanitizer.clean(value)
+                .replace("\r\n", "\n")
+                .replace('\r', '\n')
+                .trim();
+        if (cleaned.isBlank()) return cleaned;
+
+        String[] lines = cleaned.split("\\n+");
+        if (lines.length > 2) {
+            cleaned = lines[0].trim() + "\n" + lines[1].trim();
+        }
+        if (cleaned.length() <= maxLength) {
+            return cleaned;
+        }
+        int cut = cleaned.lastIndexOf(' ', maxLength - 1);
+        if (cut < maxLength / 2) {
+            cut = maxLength - 1;
+        }
+        return cleaned.substring(0, cut).trim() + "...";
+    }
+
     public List<GeneratorRecentResultResponse> recentResults() {
         return resultRepository.findTop10ByOrderByCreatedAtDesc().stream()
                 .map(result -> new GeneratorRecentResultResponse(
@@ -216,12 +324,10 @@ public class GeneratorService {
         Map<String, Object> params = request == null || request.params() == null ? Map.of() : request.params();
         GeneratorResultResponse legacy = switch (generatorCode + ":" + variantCode) {
             case "name:general.quick" -> generate("any", "name", request);
-            case "npc:dnd.quick" -> generate("dnd", "npc", request);
-            case "loot:dnd.quick" -> generate("dnd", "loot", request);
             case "weather:general.quick" -> generate("any", "weather", request);
             case "hook:general.quick" -> generate("any", "hook", request);
             case "twist:general.quick" -> generate("any", "twist", request);
-            default -> throw new ResourceNotFoundException("Generator strategy not found");
+            default -> generate("any", generatorCode, request);
         };
 
         List<GeneratorOutputSection> sections = legacy.payload().entrySet().stream()
@@ -259,10 +365,8 @@ public class GeneratorService {
     private String legacySubtitle(String generatorCode, String variantCode, Map<String, Object> params) {
         return switch (generatorCode + ":" + variantCode) {
             case "name:general.quick" -> "Imiona ogólne";
-            case "npc:dnd.quick" -> "D&D 5E | poziom " + stringParam(params, "level", "5");
-            case "loot:dnd.quick" -> "D&D 5E | " + stringParam(params, "crBand", "0-4");
             case "weather:general.quick" -> "Pogoda | " + stringParam(params, "climate", "Losowy");
-            case "hook:general.quick" -> "Haczyk | " + stringParam(params, "mood", "Losowy");
+            case "hook:general.quick" -> "Przygoda | " + stringParam(params, "setting", "Losowy");
             case "twist:general.quick" -> "Twist | " + stringParam(params, "scene", "Losowa");
             default -> variantCode;
         };
@@ -402,7 +506,7 @@ public class GeneratorService {
         }
         payload.put("Gdzie leży", pick(asList(pool.get("containers"))) + ", " + pick(asList(pool.get("hidingPlaces"))));
         payload.put("Szczegół MG", pick(asList(pool.get("quirks"))));
-        return result("loot", system, hoard ? "Skarbiec D&D 5E" : "Łup indywidualny D&D 5E", payload, "algorithm");
+        return result("loot", system, hoard ? "Skarbiec 5E compatible" : "Łup indywidualny 5E compatible", payload, "algorithm");
     }
 
     private GeneratorResultResponse dndEncounter(Map<String, Object> params) {
@@ -434,7 +538,7 @@ public class GeneratorService {
         }
 
         Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("System", "D&D 5E");
+        payload.put("System", "5E compatible");
         payload.put("Poziom drużyny", partyLevel);
         payload.put("Liczba graczy", partySize);
         payload.put("Trudność", difficulty);
@@ -442,7 +546,7 @@ public class GeneratorService {
         payload.put("Propozycja", monsters.isEmpty() ? "Brak pasujących potworów w puli SRD" : String.join("; ", monsters));
         payload.put("XP bazowe", xp);
         payload.put("Notatka MG", "Sprawdź ekonomię akcji i teren, bo sam budżet XP nie mówi wszystkiego.");
-        return result("encounter", "dnd", "Encounter D&D 5E", payload, "algorithm");
+        return result("encounter", "dnd", "Encounter 5E compatible", payload, "algorithm");
     }
 
     private GeneratorResultResponse pf2eEncounter(Map<String, Object> params) {
@@ -588,18 +692,6 @@ public class GeneratorService {
         return normalizeFilter(definition.getTypeCode()).equals(normalizeFilter(type));
     }
 
-    private boolean matchesSystem(GeneratorDefinitionEntity definition, String system) {
-        if (isBlankOrAll(system)) return true;
-        String wanted = normalizeSystemFilter(system);
-        if (definition.getSystemTags().stream().map(this::normalizeSystemFilter).anyMatch(tag -> tag.equals(wanted) || "system_agnostic".equals(tag) || "any".equals(tag))) {
-            return true;
-        }
-        return variantRepository.findByGeneratorDefinition_CodeAndActiveTrueOrderByNameAsc(definition.getCode()).stream()
-                .map(GeneratorVariantEntity::getSystemCode)
-                .map(this::normalizeSystemFilter)
-                .anyMatch(code -> code.equals(wanted) || "system_agnostic".equals(code) || "any".equals(code));
-    }
-
     private boolean matchesTone(GeneratorDefinitionEntity definition, String tone) {
         if (isBlankOrAll(tone)) return true;
         String wanted = normalizeFilter(tone);
@@ -614,18 +706,6 @@ public class GeneratorService {
 
     private String normalizeFilter(String value) {
         return value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
-    }
-
-    private String normalizeSystemFilter(String value) {
-        String normalized = normalizeFilter(value);
-        return switch (normalized) {
-            case "dnd", "dnd5e", "d&d 5e" -> "dnd";
-            case "pf2", "pf2e", "pathfinder2e" -> "pf2e";
-            case "coc", "coc7e", "call_of_cthulhu" -> "coc7e";
-            case "wfrp", "wfrp4", "wfrp4e", "warhammer4e" -> "wfrp4e";
-            case "mork_borg" -> "morkborg";
-            default -> normalized;
-        };
     }
 
     private String valueOrFallback(String value, String fallback) {
@@ -936,7 +1016,7 @@ public class GeneratorService {
             case "wh4e" -> "Warhammer Fantasy 4E";
             case "pf2e" -> "Pathfinder 2E";
             case "morkborg" -> "Mork Borg";
-            case "dnd" -> "D&D 5E";
+            case "dnd" -> "5E compatible";
             default -> system;
         };
     }

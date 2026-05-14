@@ -37,36 +37,81 @@ public class HookGeneralQuickGeneratorStrategy implements GeneratorStrategy {
     public GeneratorStructuredResultResponse generate(GeneratorRequest request) {
         Map<String, Object> params = request == null || request.params() == null ? Map.of() : request.params();
         Map<String, Object> pool = readPool();
-        String mood = stringParam(params, "mood", "Losowy");
-        Map<String, Object> entry = pickEntry(pool, mood);
+        String setting = setting(params);
+        String kind = stringParam(params, "mood", "Losowy");
+        Map<String, Object> entry = pickEntry(pool, kind);
 
         List<GeneratorOutputSection> sections = List.of(
-                new GeneratorOutputSection("stats", "Podsumowanie", null, List.of(
-                        item("Klimat", value(entry, "mood")),
-                        item("Skala", value(entry, "scale")),
-                        item("Zrodlo", "seed")
-                )),
-                section("Sytuacja", value(entry, "situation")),
-                section("Dziwny szczegol", value(entry, "detail")),
-                section("Tropy", value(entry, "lead")),
-                section("Komplikacja", pick(List.of(
-                        "Ktos z lokalnych wie wiecej, ale boi sie powiedziec to publicznie.",
-                        "Pierwszy trop prowadzi do osoby, ktora sama jest ofiara wiekszego planu.",
-                        "Czas dziala przeciwko druzynie: po kazdej scenie problem przesuwa sie o krok dalej."
-                ))),
-                section("Jak odpalic scene", "Przedstaw problem przez NPC lub widoczny slad, a potem pokaz konsekwencje zwloki.")
+                section("Problem", problemFor(setting, entry)),
+                section("Dziwny detal", detailFor(setting, entry)),
+                section("Komplikacja", complicationFor(setting)),
+                section("Wskazówka", leadFor(setting, entry))
         );
 
         return new GeneratorStructuredResultResponse(
                 null,
                 "hook",
                 "general.quick",
-                "Haczyk: " + value(entry, "mood"),
-                "Fabula - " + value(entry, "scale"),
+                "Przygoda: " + displayKind(kind, entry),
+                setting + " | " + value(entry, "scale"),
                 sections,
                 "seed",
                 OffsetDateTime.now()
         );
+    }
+
+    private String setting(Map<String, Object> params) {
+        String requested = stringParam(params, "setting", "Losowy");
+        return randomChoice(requested)
+                ? pick(List.of("Fantasy", "Horror", "Sci-Fi", "Postapo", "Realistyczny"))
+                : requested;
+    }
+
+    private String displayKind(String requested, Map<String, Object> entry) {
+        return randomChoice(requested) ? value(entry, "mood") : requested;
+    }
+
+    private String problemFor(String setting, Map<String, Object> entry) {
+        String base = value(entry, "situation");
+        return switch (looseKey(setting)) {
+            case "fantasy" -> base + " W tle jest lokalna przysięga, dług albo naruszony trakt.";
+            case "horror" -> base + " Oficjalne wyjaśnienie brzmi logicznie, ale nie pasuje do jednego śladu.";
+            case "sci-fi", "scifi" -> base + " Dane, kontrakt albo logi pokazują inną wersję zdarzeń.";
+            case "postapo" -> base + " Stawka jest prosta: zasoby, bezpieczeństwo albo droga odwrotu.";
+            default -> base;
+        };
+    }
+
+    private String detailFor(String setting, Map<String, Object> entry) {
+        String base = value(entry, "detail");
+        return switch (looseKey(setting)) {
+            case "fantasy" -> base + " Symbol wygląda na starszy niż okolica.";
+            case "horror" -> base + " Ktoś bardzo chce, żeby uznano to za przypadek.";
+            case "sci-fi", "scifi" -> base + " Jeden odczyt ma niemożliwy znacznik czasu.";
+            case "postapo" -> base + " Ślad prowadzi do miejsca, gdzie nikt rozsądny nie nocuje.";
+            default -> base;
+        };
+    }
+
+    private String complicationFor(String setting) {
+        return switch (looseKey(setting)) {
+            case "fantasy" -> pick(List.of("Patron zna winnego, ale nie może oskarżyć go publicznie.", "Nagroda należy do kogoś, kto jeszcze się po nią zgłosi.", "Stary sojusznik prosi, by drużyna zataiła część prawdy.", "Rozwiązanie problemu złamie lokalne prawo.", "Jedna frakcja chce pomóc tylko po to, by przejąć zasługę."));
+            case "horror" -> pick(List.of("Pierwszy świadek kłamie, żeby kogoś chronić.", "Każda zwłoka sprawia, że kolejny dowód znika.", "Policja uznaje sprawę za zamkniętą zbyt szybko.", "Najbardziej pomocna osoba boi się wejść do kluczowego miejsca.", "Dowód zmienia znaczenie po zmroku."));
+            case "sci-fi", "scifi" -> pick(List.of("Zleceniodawca zmienia warunki po starcie misji.", "Druga załoga ma ten sam cel i inne rozkazy.", "AI odmawia wykonania jednego legalnego polecenia.", "Nagroda zależy od skasowania niewygodnych danych.", "Cel misji ma własną wersję kontraktu."));
+            case "postapo" -> pick(List.of("Pomoc jednej grupie odbierze zasoby drugiej.", "Najkrótsza droga jest kontrolowana przez ludzi, którzy chcą zapłaty z góry.", "Zapasy istnieją, ale są skażone albo oznaczone cudzym symbolem.", "Ktoś śledzi drużynę od pierwszego postoju.", "Rozwiązanie problemu może zniszczyć kruche porozumienie."));
+            default -> pick(List.of("Ktoś z lokalnych wie więcej, ale boi się powiedzieć to publicznie.", "Pierwszy trop prowadzi do osoby, która sama jest ofiarą większego planu.", "Najprostsze rozwiązanie krzywdzi kogoś niewinnego.", "Ktoś oferuje pomoc dokładnie wtedy, gdy robi się zbyt wygodnie."));
+        };
+    }
+
+    private String leadFor(String setting, Map<String, Object> entry) {
+        String lead = value(entry, "lead");
+        return switch (looseKey(setting)) {
+            case "fantasy" -> lead + " Zacznij od herbu, plotki albo świadka na targu.";
+            case "horror" -> lead + " Zacznij od niezgodności w relacji świadka.";
+            case "sci-fi", "scifi" -> lead + " Zacznij od błędu w logach albo skasowanego nagrania.";
+            case "postapo" -> lead + " Zacznij od śladu przy zasobie, którego brakuje.";
+            default -> lead;
+        };
     }
 
     private Map<String, Object> pickEntry(Map<String, Object> pool, String mood) {

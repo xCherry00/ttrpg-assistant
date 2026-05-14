@@ -121,7 +121,7 @@ public class EncounterDndQuickGeneratorStrategy implements GeneratorStrategy {
                 "encounter",
                 "dnd.quick",
                 title(encounterType, environment),
-                "Encounter • D&D 5E • " + difficulty,
+                "Encounter • 5E compatible • " + difficulty,
                 sections,
                 "algorithm/seed",
                 OffsetDateTime.now()
@@ -162,7 +162,7 @@ public class EncounterDndQuickGeneratorStrategy implements GeneratorStrategy {
                 "encounter",
                 "dnd.quick",
                 title(encounterType, environment),
-                "Encounter • D&D 5E • Non-combat",
+                "Encounter • 5E compatible • Non-combat",
                 sections,
                 "algorithm/seed",
                 OffsetDateTime.now()

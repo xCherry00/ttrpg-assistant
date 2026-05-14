@@ -52,7 +52,7 @@ public class LootDndQuickGeneratorStrategy implements GeneratorStrategy {
                 item("Typ", hoard ? "Skarbiec" : "Łup indywidualny"),
                 item("CR / poziom", crBand),
                 item("Motyw", theme),
-                item("Źródło", "D&D 5E seed")
+                item("Źródło", "5E compatible seed")
         )));
         if (includeCoins) {
             sections.add(section("Monety", coinsForTier(tier, hoard)));
@@ -71,8 +71,8 @@ public class LootDndQuickGeneratorStrategy implements GeneratorStrategy {
                 null,
                 "loot",
                 "dnd.quick",
-                hoard ? "Skarbiec D&D 5E" : "Łup indywidualny D&D 5E",
-                "Skarb / Przedmiot • D&D 5E • " + crBand,
+                hoard ? "Skarbiec 5E compatible" : "Łup indywidualny 5E compatible",
+                "Skarb / Przedmiot • 5E compatible • " + crBand,
                 sections,
                 "algorithm/seed",
                 OffsetDateTime.now()

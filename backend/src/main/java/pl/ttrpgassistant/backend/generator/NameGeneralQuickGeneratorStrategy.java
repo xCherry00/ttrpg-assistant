@@ -43,6 +43,7 @@ public class NameGeneralQuickGeneratorStrategy implements GeneratorStrategy {
         Map<String, Object> selected = asMap(cultures.getOrDefault(culture, cultures.values().stream().findFirst().orElse(Map.of())));
         String requestedGender = stringParam(params, "gender", "Losowa");
         String gender = genderKey(requestedGender);
+        String format = stringParam(params, "nameFormat", "Imię + nazwisko");
         int count = intParam(params, "count", 3, 1, 10);
 
         List<Map<String, Object>> names = new ArrayList<>();
@@ -52,18 +53,19 @@ public class NameGeneralQuickGeneratorStrategy implements GeneratorStrategy {
             if (givenNames.isEmpty()) {
                 givenNames = asList(selected.get("neutral"));
             }
-            names.add(item(pick(givenNames) + " " + pick(asList(selected.get("family"))), displayGender(currentGender)));
+            String given = pick(givenNames);
+            String family = pick(asList(selected.get("family")));
+            names.add(item(formatName(given, family, format), displayGender(currentGender)));
         }
 
         List<GeneratorOutputSection> sections = List.of(
                 new GeneratorOutputSection("stats", "Ustawienia", null, List.of(
                         item("Kultura", culture),
-                        item("Plec", randomChoice(requestedGender) ? "Losowa" : requestedGender),
-                        item("Liczba wynikow", count)
+                        item("Płeć", randomChoice(requestedGender) ? "Losowa" : requestedGender),
+                        item("Format", format),
+                        item("Liczba wyników", count)
                 )),
-                new GeneratorOutputSection("table", "Wyniki", null, names),
-                section("Uzycie przy stole", "Gotowe do uzycia jako imiona NPC, nazwiska rodow, podpisy na mapie albo nazwy kontaktow."),
-                section("Szybki wariant", "Wez pierwsze imie jako NPC, drugie jako osobe powiazana, a nazwisko potraktuj jako nazwe rodu albo ulicy.")
+                new GeneratorOutputSection("table", "Imiona i aliasy", null, names)
         );
 
         return new GeneratorStructuredResultResponse(
@@ -71,7 +73,7 @@ public class NameGeneralQuickGeneratorStrategy implements GeneratorStrategy {
                 "name",
                 "general.quick",
                 "Imiona: " + culture,
-                "Imiona / Nazwy - " + culture,
+                "Imiona - " + culture,
                 sections,
                 "seed",
                 OffsetDateTime.now()
@@ -107,10 +109,24 @@ public class NameGeneralQuickGeneratorStrategy implements GeneratorStrategy {
 
     private String matchingKey(Map<String, Object> map, String requested) {
         String wanted = looseKey(requested);
+        List<String> candidates = cultureCandidates(wanted);
         return map.keySet().stream()
-                .filter(key -> looseKey(key).equals(wanted))
+                .filter(key -> candidates.contains(looseKey(key)))
                 .findFirst()
                 .orElseGet(() -> map.keySet().stream().findFirst().orElse(requested));
+    }
+
+    private List<String> cultureCandidates(String wanted) {
+        if (wanted.contains("lacinska") || wanted.contains("rzymska") || wanted.contains("lacinski") || wanted.contains("rzymski")) {
+            return List.of("lacinska / rzymska", "lacinska", "rzymska", "romanska", "roman");
+        }
+        if (wanted.contains("azjatycka")) {
+            return List.of("azjatycka ogolna", "japonska", "chinska", "koreanska");
+        }
+        if (wanted.contains("afrykanska")) {
+            return List.of("afrykanska ogolna", "egipska");
+        }
+        return List.of(wanted);
     }
 
     private String genderKey(String value) {
@@ -124,10 +140,18 @@ public class NameGeneralQuickGeneratorStrategy implements GeneratorStrategy {
 
     private String displayGender(String gender) {
         return switch (gender) {
-            case "male" -> "Meska";
-            case "female" -> "Zenska";
+            case "male" -> "Męska";
+            case "female" -> "Żeńska";
             case "neutral" -> "Neutralna";
             default -> "Losowa";
+        };
+    }
+
+    private String formatName(String given, String family, String format) {
+        return switch (looseKey(format)) {
+            case "tylko imie" -> given;
+            case "tylko nazwisko" -> family;
+            default -> given + " " + family;
         };
     }
 
@@ -173,7 +197,7 @@ public class NameGeneralQuickGeneratorStrategy implements GeneratorStrategy {
     }
 
     private String looseKey(String value) {
-        String normalized = Normalizer.normalize(value == null ? "" : value, Normalizer.Form.NFD)
+        String normalized = Normalizer.normalize(value == null ? "" : value.replace('Ł', 'L').replace('ł', 'l'), Normalizer.Form.NFD)
                 .replaceAll("\\p{M}", "");
         return normalized.toLowerCase(Locale.ROOT).trim();
     }

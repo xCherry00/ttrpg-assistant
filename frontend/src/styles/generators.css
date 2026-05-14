@@ -17,6 +17,519 @@
   padding-right: 4px;
 }
 
+.generatorsCatalogPage {
+  min-height: 100vh;
+  display: grid;
+  align-content: start;
+  gap: 24px;
+  padding: 28px;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(124, 58, 237, 0.16), transparent 34%),
+    radial-gradient(circle at 88% 12%, rgba(14, 165, 233, 0.08), transparent 32%),
+    linear-gradient(135deg, #070a12 0%, #0b1020 46%, #111827 100%);
+  color: #e5e7eb;
+}
+
+.generatorsCatalogHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.generatorsCatalogBrand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.generatorsCatalogBrand .generatorsHeroIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.92), rgba(49, 18, 104, 0.92));
+  box-shadow: 0 18px 42px rgba(88, 28, 135, 0.34);
+}
+
+.generatorsCatalogBrand .generatorsHeroIcon svg {
+  width: 30px;
+  height: 30px;
+}
+
+.generatorsCatalogBrand h1 {
+  margin: 0;
+  color: #f9fafb;
+  font-size: 23px;
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+.generatorsCatalogBrand p {
+  margin: 8px 0 0;
+  color: rgba(229, 231, 235, 0.72);
+  font-size: 14px;
+}
+
+.generatorsCatalogActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  min-width: min(100%, 470px);
+}
+
+.generatorsSearch,
+.generatorsFavoritesButton,
+.generatorsSort select,
+.generatorsSideSelect select,
+.generatorsFilterSelect select {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e5e7eb;
+  background: rgba(8, 13, 25, 0.72);
+  border-radius: 14px;
+}
+
+.generatorsSearch {
+  flex: 1;
+  min-width: 260px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+}
+
+.generatorsSearchIcon {
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  color: #94a3b8;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.generatorsSearch input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  color: #e5e7eb;
+  background: transparent;
+  font-size: 14px;
+}
+
+.generatorsSearch input::placeholder {
+  color: rgba(148, 163, 184, 0.82);
+}
+
+.generatorsFavoritesButton {
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+
+.generatorsFavoritesButton:hover {
+  border-color: rgba(168, 85, 247, 0.38);
+  background: rgba(124, 58, 237, 0.12);
+  transform: translateY(-1px);
+}
+
+.generatorsFavoritesButton.is-active {
+  border-color: rgba(168, 85, 247, 0.52);
+  color: #f8fafc;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.38), rgba(88, 28, 135, 0.28));
+}
+
+.generatorsCatalogLayout {
+  display: grid;
+  grid-template-columns: 262px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.generatorsSidebar,
+.generatorsContent {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.72);
+  border-radius: 18px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.generatorsSidebar {
+  display: grid;
+  gap: 22px;
+  padding: 18px;
+}
+
+.generatorsFilterSection {
+  display: grid;
+  gap: 10px;
+}
+
+.generatorsFilterSection h2 {
+  margin: 0 0 4px;
+  color: #f8fafc;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.generatorsFilterList {
+  display: grid;
+  gap: 7px;
+}
+
+.generatorsFilterItem {
+  min-height: 38px;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 11px;
+  color: rgba(229, 231, 235, 0.9);
+  background: rgba(8, 13, 25, 0.36);
+  padding: 0 10px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.generatorsFilterItem svg {
+  width: 16px;
+  height: 16px;
+  color: #a7c7d1;
+}
+
+.generatorsFilterItem span {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.generatorsFilterItem strong {
+  color: rgba(216, 180, 254, 0.95);
+  font-size: 12px;
+}
+
+.generatorsFilterItem:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.generatorsFilterItem.is-active {
+  border-color: rgba(168, 85, 247, 0.45);
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.85), rgba(88, 28, 135, 0.75));
+  box-shadow: 0 12px 28px rgba(88, 28, 135, 0.24);
+}
+
+.generatorsFilterItem.is-active svg,
+.generatorsFilterItem.is-active strong {
+  color: #ffffff;
+}
+
+.generatorsSideSelect select,
+.generatorsFilterSelect select,
+.generatorsSort select {
+  min-height: 36px;
+  padding: 0 34px 0 12px;
+  font-weight: 800;
+}
+
+.generatorsFilterSelect {
+  display: block;
+  position: relative;
+}
+
+.generatorsFilterSelect::after {
+  content: "⌄";
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  color: rgba(216, 180, 254, 0.9);
+  pointer-events: none;
+  transform: translateY(-52%);
+}
+
+.generatorsFilterSelect select {
+  width: 100%;
+  min-height: 42px;
+  appearance: none;
+  border-radius: 13px;
+  background:
+    linear-gradient(135deg, rgba(124, 58, 237, 0.18), rgba(8, 13, 25, 0.72)),
+    rgba(8, 13, 25, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(124, 58, 237, 0.08);
+  cursor: pointer;
+}
+
+.generatorsFilterSelect select:focus {
+  outline: 2px solid rgba(168, 85, 247, 0.28);
+  outline-offset: 2px;
+}
+
+.generatorsContent {
+  min-height: 640px;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.generatorsToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.generatorsFound {
+  color: rgba(229, 231, 235, 0.76);
+  font-size: 15px;
+}
+
+.generatorsFound strong {
+  color: #ffffff;
+}
+
+.generatorsSort {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(229, 231, 235, 0.72);
+}
+
+.generatorsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.generatorCard {
+  --card-accent: #8b5cf6;
+  --card-media-a: rgba(124, 58, 237, 0.42);
+  --card-media-b: rgba(30, 41, 59, 0.92);
+  position: relative;
+  min-height: 270px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.85);
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.generatorCard:hover,
+.generatorCard.is-active {
+  border-color: rgba(168, 85, 247, 0.45);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(168, 85, 247, 0.12);
+  transform: translateY(-3px);
+}
+
+.generatorCard--green {
+  --card-accent: #10b981;
+  --card-media-a: rgba(16, 185, 129, 0.36);
+}
+
+.generatorCard--gold {
+  --card-accent: #f59e0b;
+  --card-media-a: rgba(245, 158, 11, 0.36);
+}
+
+.generatorCard--blue {
+  --card-accent: #3b82f6;
+  --card-media-a: rgba(59, 130, 246, 0.36);
+}
+
+.generatorCard--red {
+  --card-accent: #ef4444;
+  --card-media-a: rgba(239, 68, 68, 0.34);
+}
+
+.generatorCard--teal {
+  --card-accent: #14b8a6;
+  --card-media-a: rgba(20, 184, 166, 0.34);
+}
+
+.generatorCardBody {
+  width: 100%;
+  min-height: 270px;
+  display: grid;
+  grid-template-rows: 120px auto;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.generatorCardMedia {
+  position: relative;
+  display: block;
+  min-height: 120px;
+  background:
+    linear-gradient(180deg, rgba(2, 6, 23, 0.05), rgba(2, 6, 23, 0.78)),
+    radial-gradient(circle at 30% 16%, rgba(255, 255, 255, 0.12), transparent 25%),
+    linear-gradient(135deg, var(--card-media-a), var(--card-media-b));
+}
+
+.generatorCardFavorite {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 3;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  color: rgba(226, 232, 240, 0.9);
+  background: rgba(2, 6, 23, 0.34);
+  backdrop-filter: blur(10px);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+
+.generatorCardFavorite:hover {
+  border-color: rgba(216, 180, 254, 0.65);
+  color: #ffffff;
+  background: rgba(124, 58, 237, 0.32);
+  transform: scale(1.06);
+}
+
+.generatorCardFavorite.is-favorite {
+  border-color: rgba(250, 204, 21, 0.52);
+  color: #facc15;
+  background: rgba(113, 63, 18, 0.32);
+}
+
+.generatorCardIcon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  margin: -19px 0 0 14px;
+  position: relative;
+  z-index: 1;
+  border-radius: 999px;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--card-accent), rgba(15, 23, 42, 0.92));
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+
+.generatorCardIcon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.generatorCardContent {
+  display: grid;
+  gap: 10px;
+  padding: 8px 14px 16px;
+}
+
+.generatorCardTitle {
+  color: #f9fafb;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.generatorCardDescription {
+  min-height: 42px;
+  display: -webkit-box;
+  overflow: hidden;
+  color: rgba(229, 231, 235, 0.76);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.generatorCardBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.generatorBadge {
+  min-height: 23px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  color: rgba(229, 231, 235, 0.82);
+  background: rgba(255, 255, 255, 0.07);
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.generatorBadge--fantasy {
+  color: #d8b4fe;
+  background: rgba(124, 58, 237, 0.28);
+}
+
+.generatorBadge--horror {
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.2);
+}
+
+.generatorBadge--postapo {
+  color: #facc15;
+  background: rgba(245, 158, 11, 0.2);
+}
+
+.generatorBadge--scifi {
+  color: #7dd3fc;
+  background: rgba(14, 165, 233, 0.2);
+}
+
+.generatorBadge--universal {
+  color: #ddd6fe;
+  background: rgba(124, 58, 237, 0.22);
+}
+
+.generatorBadge--variant {
+  color: #67e8f9;
+  background: rgba(14, 165, 233, 0.22);
+}
+
+.generatorsLoadMoreWrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+.generatorsLoadMore {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: rgba(229, 231, 235, 0.88);
+  background: rgba(8, 13, 25, 0.62);
+  padding: 0 18px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.generatorsLoadMore:hover {
+  border-color: rgba(168, 85, 247, 0.38);
+  background: rgba(124, 58, 237, 0.12);
+}
+
 .generatorsDashboard::before {
   content: "";
   position: fixed;
@@ -890,6 +1403,436 @@
   --window-accent: var(--gen-green);
 }
 
+.weatherGeneratorPage {
+  min-height: 100vh;
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  padding: 18px;
+  background:
+    radial-gradient(circle at 14% 8%, rgba(124, 58, 237, 0.22), transparent 32%),
+    radial-gradient(circle at 78% 0%, rgba(14, 165, 233, 0.12), transparent 30%),
+    linear-gradient(135deg, #050811 0%, #09111f 48%, #0d1726 100%);
+  color: #f8fafc;
+}
+
+.weatherGeneratorHeader,
+.weatherSettingsCard,
+.weatherResultPanel {
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background:
+    radial-gradient(circle at 8% 0%, rgba(124, 58, 237, 0.14), transparent 28%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.82), rgba(7, 12, 22, 0.88));
+  border-radius: 16px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(18px);
+}
+
+.weatherGeneratorHeader {
+  min-height: 96px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 24px;
+}
+
+.weatherBackButton {
+  min-height: 36px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 999px;
+  color: rgba(226, 232, 240, 0.78);
+  background: rgba(15, 23, 42, 0.62);
+  padding: 0 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.weatherHeaderIdentity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.weatherHeaderIcon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  color: #dbeafe;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.9), rgba(37, 99, 235, 0.48));
+  box-shadow: 0 0 34px rgba(124, 58, 237, 0.34);
+}
+
+.weatherHeaderIcon svg {
+  width: 30px;
+  height: 30px;
+}
+
+.weatherHeaderIdentity h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(2rem, 3vw, 2.9rem);
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.weatherHeaderIdentity p {
+  margin: 8px 0 0;
+  color: rgba(203, 213, 225, 0.76);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.weatherHeaderActions,
+.weatherResultActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.weatherHeaderActions button,
+.weatherResultActions button,
+.weatherResultActions select {
+  min-height: 42px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 10px;
+  color: rgba(241, 245, 249, 0.9);
+  background: rgba(15, 23, 42, 0.66);
+  padding: 0 16px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.weatherGeneratorLayout {
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
+.weatherSettingsCard {
+  min-height: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 22px;
+}
+
+.weatherPanelHeading {
+  color: #c084fc;
+  font-size: 15px;
+  font-weight: 950;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.weatherPanelHeading--optional {
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  padding-top: 20px;
+}
+
+.weatherControlStack {
+  display: grid;
+  gap: 16px;
+}
+
+.weatherControl {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.weatherControl span,
+.weatherToggleRow span {
+  color: rgba(241, 245, 249, 0.9);
+  font-weight: 800;
+}
+
+.weatherControl select {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 8px;
+  color: #f8fafc;
+  background: rgba(8, 13, 25, 0.74);
+  padding: 0 14px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.weatherControl select:hover,
+.weatherControl select:focus {
+  border-color: rgba(168, 85, 247, 0.42);
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+}
+
+.weatherToggleRow {
+  min-height: 46px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 54px;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+
+.weatherToggleRow input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.weatherToggleRow i {
+  width: 54px;
+  height: 28px;
+  position: relative;
+  border: 1px solid rgba(168, 85, 247, 0.24);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.76);
+}
+
+.weatherToggleRow i::after {
+  content: "";
+  width: 22px;
+  height: 22px;
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  border-radius: 999px;
+  background: #cbd5e1;
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+
+.weatherToggleRow input:checked + i {
+  background: linear-gradient(135deg, #7c3aed, #2563eb);
+}
+
+.weatherToggleRow input:checked + i::after {
+  background: #ffffff;
+  transform: translateX(25px);
+}
+
+.weatherPrimaryAction {
+  margin-top: auto;
+  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-radius: 9px;
+  font-weight: 950;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.weatherPrimaryAction {
+  border: 1px solid rgba(192, 132, 252, 0.52);
+  color: #ffffff;
+  background: linear-gradient(135deg, #7c3aed, #4c1d95);
+  box-shadow: 0 18px 44px rgba(124, 58, 237, 0.28);
+}
+
+.weatherPrimaryAction svg {
+  width: 18px;
+  height: 18px;
+}
+
+.weatherPrimaryAction:disabled {
+  opacity: 0.58;
+  cursor: wait;
+}
+
+.weatherResultPanel {
+  min-height: 480px;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 18px;
+}
+
+.weatherResultTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.weatherResultActions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.weatherResultContent {
+  display: grid;
+  gap: 10px;
+  animation: resultSlideIn 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.weatherHeroCard {
+  min-height: 104px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.88), rgba(8, 13, 25, 0.94));
+}
+
+.weatherHeroCopy {
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  padding: 18px;
+}
+
+.weatherHeroCopy h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 28px;
+  line-height: 1.12;
+  letter-spacing: 0;
+}
+
+.weatherHeroCopy p {
+  max-width: 620px;
+  margin: 0;
+  color: rgba(226, 232, 240, 0.82);
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.weatherChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.weatherChips span {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 8px;
+  color: #dbeafe;
+  background: rgba(59, 130, 246, 0.14);
+  padding: 0 10px;
+  font-weight: 800;
+}
+
+.weatherChips span:nth-child(2) {
+  color: #f0abfc;
+  background: rgba(124, 58, 237, 0.18);
+}
+
+.weatherChips span:nth-child(3) {
+  color: #67e8f9;
+  background: rgba(14, 165, 233, 0.14);
+}
+
+.weatherImagePlaceholder {
+  display: none;
+}
+
+.weatherResultGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.weatherResultCard {
+  min-height: 0;
+  border: 1px solid rgba(148, 163, 184, 0.13);
+  border-radius: 8px;
+  background: rgba(10, 17, 30, 0.78);
+  padding: 14px;
+}
+
+.weatherResultCard:nth-child(n+2) {
+  display: none;
+}
+
+.weatherResultCard h3 {
+  margin: 0 0 12px;
+  color: #c084fc;
+  font-size: 15px;
+  text-transform: uppercase;
+}
+
+.weatherResultCard p,
+.weatherResultCard li {
+  color: rgba(226, 232, 240, 0.84);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.weatherResultCard p {
+  margin: 0;
+}
+
+.weatherResultCard ul {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.weatherResultFooter {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.13);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.58);
+}
+
+.weatherResultFooter span {
+  display: grid;
+  gap: 5px;
+  padding: 10px 12px;
+}
+
+.weatherResultFooter small {
+  color: rgba(148, 163, 184, 0.88);
+}
+
+.weatherResultFooter strong {
+  overflow: hidden;
+  color: #ffffff;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.weatherResultGrid + .weatherResultFooter {
+  display: none;
+}
+
+.weatherEmptyState {
+  min-height: 560px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  border: 1px dashed rgba(148, 163, 184, 0.18);
+  border-radius: 12px;
+  color: rgba(203, 213, 225, 0.72);
+  text-align: center;
+}
+
+.weatherEmptyState svg {
+  width: 52px;
+  height: 52px;
+  color: #a78bfa;
+}
+
+.weatherEmptyState strong {
+  color: #ffffff;
+  font-size: 20px;
+}
+
 .generatorWindowHero {
   display: grid;
   gap: 14px;
@@ -964,16 +1907,17 @@
 }
 
 .generatorSettingsPanel {
-  min-height: 680px;
-  display: grid;
-  align-content: start;
-  gap: 18px;
-  padding: 22px;
+  height: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  overflow: hidden;
 }
 
 .generatorOutputPanel {
-  min-height: 680px;
-  padding: 22px 24px;
+  min-height: 560px;
+  padding: 18px 20px;
 }
 
 .generatorPanelNumber {
@@ -1037,6 +1981,9 @@
 .generatorWindowFields {
   display: grid;
   gap: 14px;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .generatorWindowFields .generatorGrid {
@@ -1054,6 +2001,7 @@
 }
 
 .generatorWindowGenerate {
+  margin-top: auto;
   min-height: 48px;
   display: inline-flex;
   align-items: center;
@@ -1128,19 +2076,19 @@
 
 .generatorWindowResult {
   display: grid;
-  gap: 18px;
+  gap: 14px;
   animation: resultSlideIn 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .generatorResultIdentity {
   display: grid;
-  grid-template-columns: 172px minmax(0, 1fr);
-  gap: 24px;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 14px;
   align-items: center;
 }
 
 .generatorPortrait {
-  width: 172px;
+  width: 72px;
   aspect-ratio: 1;
   display: grid;
   place-items: center;
@@ -1154,22 +2102,22 @@
 }
 
 .generatorPortrait svg {
-  width: 76px;
-  height: 76px;
+  width: 34px;
+  height: 34px;
 }
 
 .generatorResultIdentity h2 {
   margin: 0;
   color: #ffffff;
-  font-size: clamp(2rem, 3vw, 3rem);
-  line-height: 1;
+  font-size: 28px;
+  line-height: 1.08;
   letter-spacing: 0;
 }
 
 .generatorResultIdentity p {
-  margin: 12px 0 0;
+  margin: 6px 0 0;
   color: var(--gen-muted);
-  font-size: 22px;
+  font-size: 15px;
 }
 
 .generatorResultMetaStrip {
@@ -1204,39 +2152,86 @@
 .generatorWindowSections {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 10px;
 }
 
 .generatorWindowSections article {
   border: 1px solid rgba(161, 173, 204, 0.1);
-  border-radius: 10px;
-  background: linear-gradient(180deg, rgba(20, 30, 50, 0.76), rgba(12, 19, 32, 0.82));
-  padding: 16px;
+  border-radius: 8px;
+  background: rgba(12, 19, 32, 0.82);
+  padding: 13px;
 }
 
 .generatorWindowSections article:not(.has-items) {
-  grid-column: span 2;
+  grid-column: span 1;
+}
+
+.generatorWindowSections article.is-dungeon-map {
+  grid-column: 1 / -1;
+}
+
+.generatorWindowSections article.is-dungeon-floors {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 12px;
+}
+
+.dungeonFloorTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom: 1px solid rgba(161, 173, 204, 0.12);
+  padding-bottom: 10px;
+}
+
+.dungeonFloorTabs button {
+  min-height: 34px;
+  border: 1px solid rgba(161, 173, 204, 0.16);
+  border-radius: 8px;
+  color: rgba(244, 247, 255, 0.78);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.dungeonFloorTabs button.is-active {
+  border-color: color-mix(in srgb, var(--window-accent) 64%, transparent 36%);
+  color: #ffffff;
+  background: color-mix(in srgb, var(--window-accent) 24%, transparent 76%);
+}
+
+.dungeonFloorPanel,
+.dungeonFloorRooms {
+  display: grid;
+  gap: 10px;
+}
+
+.dungeonFloorRooms {
+  margin-top: 4px;
 }
 
 .generatorWindowSections h3 {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   color: color-mix(in srgb, var(--window-accent) 72%, white 28%);
-  font-size: 15px;
+  font-size: 13px;
   letter-spacing: 0;
+  text-transform: uppercase;
 }
 
 .generatorWindowSections p {
   margin: 0;
   color: rgba(244, 247, 255, 0.82);
-  line-height: 1.55;
+  font-size: 14px;
+  line-height: 1.45;
   white-space: pre-wrap;
 }
 
 .generatorWindowStats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 10px;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .generatorWindowStats span {
@@ -1245,7 +2240,7 @@
   border: 1px solid rgba(161, 173, 204, 0.1);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.04);
-  padding: 10px;
+  padding: 8px;
 }
 
 .generatorWindowStats small {
@@ -1259,12 +2254,114 @@
   font-size: 14px;
 }
 
+.dungeonMapBlock {
+  display: grid;
+  gap: 10px;
+}
+
+.dungeonMapViewport {
+  display: inline-flex;
+  max-width: 100%;
+  width: max-content;
+  flex-direction: column;
+  overflow: auto;
+  border: 1px solid rgba(161, 173, 204, 0.14);
+  border-radius: 8px;
+  background: #05070d;
+  padding: 10px;
+  line-height: 0;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+.dungeonMapRow {
+  display: flex;
+}
+
+.dungeonTile {
+  display: inline-flex;
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  color: transparent;
+  font-size: 7px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.dungeonTile.tile-0 {
+  background: #05070d;
+}
+
+.dungeonTile.tile-1 {
+  background: #263241;
+}
+
+.dungeonTile.tile-2 {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #4b5563;
+}
+
+.dungeonTile.tile-3 {
+  background: #263241;
+}
+
+.dungeonTile.tile-4 {
+  background: #4b5563;
+  color: #10131a;
+}
+
+.dungeonTile.tile-5,
+.dungeonTile.tile-6,
+.dungeonTile.tile-7,
+.dungeonTile.tile-8,
+.dungeonTile.tile-9,
+.dungeonTile.tile-roomLabel {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: #64748b;
+  color: #ffffff;
+}
+
+.dungeonTile.tile-stairs {
+  border: 1px solid rgba(253, 224, 71, 0.42);
+  background: #8a5a10;
+  color: #fff7c2;
+}
+
+.dungeonMapLegend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.dungeonMapLegend span {
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(161, 173, 204, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 8px;
+}
+
+.dungeonMapLegend small {
+  color: var(--gen-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.dungeonMapLegend strong {
+  color: #ffffff;
+  font-size: 14px;
+}
+
 .generatorWindowBottomActions {
   display: grid;
   grid-template-columns: minmax(0, 0.6fr) minmax(0, 1fr);
-  gap: 24px;
+  gap: 12px;
   border-top: 1px solid rgba(161, 173, 204, 0.12);
-  padding: 24px 16px 8px;
+  padding: 14px 0 0;
 }
 
 .generatorWindowBottomActions button {
@@ -1311,6 +2408,21 @@
   }
 }
 
+@media (max-width: 1120px) {
+  .generatorsCatalogLayout {
+    grid-template-columns: 224px minmax(0, 1fr);
+  }
+
+  .generatorsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  }
+
+  .generatorsSidebar,
+  .generatorsContent {
+    border-radius: 16px;
+  }
+}
+
 @media (max-width: 1220px) {
   .generatorsWorkspace {
     grid-template-columns: 1fr;
@@ -1319,6 +2431,14 @@
   .generatorsRightRail {
     position: static;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .weatherGeneratorLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .weatherSettingsCard {
+    min-height: auto;
   }
 }
 
@@ -1357,6 +2477,63 @@
   .generatorWindowSections article:not(.has-items) {
     grid-column: span 1;
   }
+
+  .weatherGeneratorHeader,
+  .weatherResultTop {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+
+  .weatherHeaderActions,
+  .weatherResultActions {
+    justify-content: flex-start;
+  }
+
+  .weatherHeroCard,
+  .weatherResultGrid,
+  .weatherResultFooter {
+    grid-template-columns: 1fr;
+  }
+
+  .weatherImagePlaceholder {
+    min-height: 220px;
+    border-left: 0;
+    border-top: 1px solid rgba(148, 163, 184, 0.12);
+  }
+}
+
+@media (max-width: 860px) {
+  .generatorsCatalogPage {
+    padding: 18px;
+  }
+
+  .generatorsCatalogHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .generatorsCatalogActions {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .generatorsSearch {
+    min-width: 0;
+  }
+
+  .generatorsCatalogLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .generatorsToolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .generatorsSort {
+    justify-content: space-between;
+  }
 }
 
 @media (max-width: 680px) {
@@ -1375,5 +2552,58 @@
 
   .generatorResultHeader {
     flex-direction: column;
+  }
+
+  .weatherGeneratorPage {
+    padding: 12px;
+  }
+
+  .weatherGeneratorHeader,
+  .weatherSettingsCard,
+  .weatherResultPanel {
+    padding: 16px;
+  }
+
+  .weatherControl {
+    grid-template-columns: 1fr;
+  }
+
+  .weatherHeaderActions,
+  .weatherResultActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .weatherResultActions select,
+  .weatherResultActions button,
+  .weatherHeaderActions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .generatorsCatalogPage {
+    padding: 14px;
+  }
+
+  .generatorsCatalogBrand {
+    align-items: flex-start;
+  }
+
+  .generatorsCatalogBrand h1 {
+    font-size: 21px;
+  }
+
+  .generatorsCatalogActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .generatorsFavoritesButton {
+    justify-content: center;
+  }
+
+  .generatorsGrid {
+    grid-template-columns: 1fr;
   }
 }

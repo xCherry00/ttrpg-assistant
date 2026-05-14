@@ -87,7 +87,7 @@ public class NpcDndQuickGeneratorStrategy implements GeneratorStrategy {
                 "npc",
                 "dnd.quick",
                 fullName,
-                "NPC • D&D 5E • poziom " + level,
+                "NPC • 5E compatible • poziom " + level,
                 sections,
                 "seed",
                 OffsetDateTime.now()
