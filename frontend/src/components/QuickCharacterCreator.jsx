@@ -67,13 +67,13 @@ export default function QuickCharacterCreator({ onCreate, creating, onBack }) {
     return () => { cancelled = true; };
   }, [token]);
 
-  function usePreset(value) {
+  function selectPreset(value) {
     setLocalError("");
     setPortraitSource("preset");
     setForm((p) => ({ ...p, portraitUrl: value }));
   }
 
-  function useFile(file) {
+  function handleFile(file) {
     setLocalError("");
     if (!file) return;
     if (!file.type.startsWith("image/")) {
@@ -117,7 +117,7 @@ export default function QuickCharacterCreator({ onCreate, creating, onBack }) {
           {portraitSource === "preset" && (
             <div className="charactersPortraitPresets">
               {PORTRAIT_PRESETS.map((preset) => (
-                <button key={preset.id} type="button" className={`charactersPortraitPreset${form.portraitUrl === preset.value ? " is-active" : ""}`} onClick={() => usePreset(preset.value)}>
+                <button key={preset.id} type="button" className={`charactersPortraitPreset${form.portraitUrl === preset.value ? " is-active" : ""}`} onClick={() => selectPreset(preset.value)}>
                   <img src={preset.value} alt="" />
                   <span>{preset.label}</span>
                 </button>
@@ -128,7 +128,7 @@ export default function QuickCharacterCreator({ onCreate, creating, onBack }) {
           {portraitSource === "file" && (
             <label className="charactersField">
               <span>Plik z komputera</span>
-              <input type="file" accept="image/*" onChange={(e) => useFile(e.target.files?.[0])} />
+              <input type="file" accept="image/*" onChange={(e) => handleFile(e.target.files?.[0])} />
             </label>
           )}
 

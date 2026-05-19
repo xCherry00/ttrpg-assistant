@@ -9,6 +9,7 @@ import pl.ttrpgassistant.backend.character.dto.PlayerCharacterDetailsResponse;
 import pl.ttrpgassistant.backend.character.dto.PlayerCharacterSummaryResponse;
 import pl.ttrpgassistant.backend.character.dto.QuickCreateDndCharacterRequest;
 import pl.ttrpgassistant.backend.character.dto.UpdateCharacterSheetRequest;
+import pl.ttrpgassistant.backend.character.dto.CreateCocQuickCharacterRequest;
 import pl.ttrpgassistant.backend.common.error.ResourceNotFoundException;
 
 import java.util.LinkedHashMap;
@@ -20,7 +21,8 @@ import java.util.Map;
 public class PlayerCharacterService {
 
     private final PlayerCharacterRepository playerCharacterRepository;
-    private final DndCharacterSheetService sheetService;
+    private final DndCharacterSheetService dndSheetService;
+    private final CocCharacterSheetService cocSheetService;
     private final DndCompendiumService compendiumService;
     private final ObjectMapper objectMapper;
 
@@ -38,7 +40,7 @@ public class PlayerCharacterService {
 
     @Transactional
     public PlayerCharacterDetailsResponse quickCreate(Long userId, QuickCreateDndCharacterRequest request) {
-        Map<String, Object> sheet = sheetService.generate(
+        Map<String, Object> sheet = dndSheetService.generate(
                 request.name().trim(),
                 request.raceIndex().trim(),
                 request.classIndex().trim(),
@@ -59,6 +61,35 @@ public class PlayerCharacterService {
                 .maxHp(intFromCombat(sheet, "maxHp", 1))
                 .currentHp(intFromCombat(sheet, "currentHp", 1))
                 .tempHp(intFromCombat(sheet, "tempHp", 0))
+                .privateNotes("")
+                .sheetJson(writeSheet(sheet))
+                .build();
+
+        return toDetails(playerCharacterRepository.save(entity));
+    }
+
+    @Transactional
+    public PlayerCharacterDetailsResponse quickCreateCoc(Long userId, CreateCocQuickCharacterRequest request) {
+        Map<String, Object> sheet = cocSheetService.generate(request);
+        Map<String, Object> identity = map(sheet, "identity");
+        Map<String, Object> derived = map(sheet, "derived");
+        String fullName = String.valueOf(identity.getOrDefault("name", "Investigator"));
+        String occupation = String.valueOf(identity.getOrDefault("occupation", "Investigator"));
+        int hp = intValue(derived.get("hp"), 10);
+
+        PlayerCharacterEntity entity = PlayerCharacterEntity.builder()
+                .ownerUserId(userId)
+                .systemCode("coc7e")
+                .status("ACTIVE")
+                .name(fullName)
+                .portraitUrl(normalizeNullable((String) identity.get("portraitUrl")))
+                .raceName("Human")
+                .className(occupation)
+                .backgroundName("")
+                .level(0)
+                .maxHp(hp)
+                .currentHp(hp)
+                .tempHp(0)
                 .privateNotes("")
                 .sheetJson(writeSheet(sheet))
                 .build();
@@ -172,6 +203,11 @@ public class PlayerCharacterService {
 
     private int intFromCombat(Map<String, Object> sheet, String key, int fallback) {
         Object value = map(sheet, "combat").get(key);
+        if (value instanceof Number number) return number.intValue();
+        return fallback;
+    }
+
+    private int intValue(Object value, int fallback) {
         if (value instanceof Number number) return number.intValue();
         return fallback;
     }

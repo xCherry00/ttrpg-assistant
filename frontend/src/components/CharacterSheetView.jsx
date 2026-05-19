@@ -1,7 +1,17 @@
 import { useEffect, useState } from "react";
+import CharacterHeader from "./characters/sheet/CharacterHeader";
+import CombatPanel from "./characters/sheet/CombatPanel";
+import AbilityScoresPanel from "./characters/sheet/AbilityScoresPanel";
+import SavingThrowsPanel from "./characters/sheet/SavingThrowsPanel";
+import SkillsTable from "./characters/sheet/SkillsTable";
+import InventoryPanel from "./characters/sheet/InventoryPanel";
+import FeaturesTraitsPanel from "./characters/sheet/FeaturesTraitsPanel";
+import SpellsPanel from "./characters/sheet/SpellsPanel";
+import NotesPanel from "./characters/sheet/NotesPanel";
 
 export default function CharacterSheetView({ detail, onSave, saving }) {
-  const sheet = detail?.sheetJson || {};
+  const sheet = detail?.sheetJson && typeof detail.sheetJson === "object" ? detail.sheetJson : {};
+  const sheetIsInvalid = !detail?.sheetJson || typeof detail.sheetJson !== "object";
   const identity = sheet.identity || {};
   const abilities = sheet.abilityScores || {};
   const combat = sheet.combat || {};
@@ -14,82 +24,43 @@ export default function CharacterSheetView({ detail, onSave, saving }) {
   const [inventory, setInventory] = useState(Array.isArray(sheet.inventory) ? sheet.inventory.join("\n") : "");
 
   useEffect(() => {
+    const nextSheet = detail?.sheetJson && typeof detail.sheetJson === "object" ? detail.sheetJson : {};
+    const nextCombat = nextSheet.combat || {};
+    const nextNotes = nextSheet.notes || {};
     setName(detail?.name || "");
     setPortraitUrl(detail?.portraitUrl || "");
-    setCurrentHp(detail?.currentHp ?? combat.currentHp ?? 0);
-    setTempHp(detail?.tempHp ?? combat.tempHp ?? 0);
-    setPrivateNotes(detail?.privateNotes || notes.privateNotes || "");
-    setInventory(Array.isArray(sheet.inventory) ? sheet.inventory.join("\n") : "");
-  }, [detail?.id]);
-
-  const abilityEntries = Object.entries(abilities);
+    setCurrentHp(detail?.currentHp ?? nextCombat.currentHp ?? 0);
+    setTempHp(detail?.tempHp ?? nextCombat.tempHp ?? 0);
+    setPrivateNotes(detail?.privateNotes || nextNotes.privateNotes || "");
+    setInventory(Array.isArray(nextSheet.inventory) ? nextSheet.inventory.join("\n") : "");
+  }, [detail]);
 
   return (
-    <div className="charactersPanels">
-      <div className="charactersPanel">
-        <h3>Basic Info</h3>
-        <div className="charactersGrid">
-          <label className="charactersField"><span>Name</span><input value={name} onChange={(e) => setName(e.target.value)} /></label>
-          <label className="charactersField"><span>Portrait URL</span><input value={portraitUrl} onChange={(e) => setPortraitUrl(e.target.value)} /></label>
-          <label className="charactersField"><span>Race</span><input value={identity.race || detail?.raceName || ""} readOnly /></label>
-          <label className="charactersField"><span>Class</span><input value={identity.className || detail?.className || ""} readOnly /></label>
-          <label className="charactersField"><span>Background</span><input value={identity.background || detail?.backgroundName || ""} readOnly /></label>
-          <label className="charactersField"><span>Level</span><input value={sheet.level ?? detail?.level ?? 1} readOnly /></label>
-        </div>
-      </div>
-
-      <div className="charactersPanel">
-        <h3>Ability Scores</h3>
-        <div className="charactersGrid">
-          {abilityEntries.map(([k, v]) => <label key={k} className="charactersField"><span>{k}</span><input value={v} readOnly /></label>)}
-        </div>
-      </div>
-
-      <div className="charactersPanel">
-        <h3>Combat</h3>
-        <div className="charactersGrid">
-          <label className="charactersField"><span>Max HP</span><input value={combat.maxHp ?? 0} readOnly /></label>
-          <label className="charactersField"><span>Current HP</span><input type="number" min="0" value={currentHp} onChange={(e) => setCurrentHp(Number(e.target.value || 0))} /></label>
-          <label className="charactersField"><span>Temp HP</span><input type="number" min="0" value={tempHp} onChange={(e) => setTempHp(Number(e.target.value || 0))} /></label>
-          <label className="charactersField"><span>Armor Class</span><input value={combat.armorClass ?? 0} readOnly /></label>
-          <label className="charactersField"><span>Initiative</span><input value={combat.initiative ?? 0} readOnly /></label>
-          <label className="charactersField"><span>Speed</span><input value={combat.speed ?? 0} readOnly /></label>
-        </div>
-      </div>
-
-      <div className="charactersPanel">
-        <h3>Saving Throws</h3>
-        <div>{Array.isArray(sheet.savingThrows) ? sheet.savingThrows.join(", ") : "-"}</div>
-      </div>
-
-      <div className="charactersPanel">
-        <h3>Skills</h3>
-        <div>{Array.isArray(sheet.skills) ? sheet.skills.join(", ") : "-"}</div>
-      </div>
-
-      <div className="charactersPanel">
-        <h3>Inventory</h3>
-        <label className="charactersField charactersField--full"><textarea rows="6" value={inventory} onChange={(e) => setInventory(e.target.value)} /></label>
-      </div>
-
-      <div className="charactersPanel">
-        <h3>Features & Traits</h3>
-        <div>{Array.isArray(sheet.featuresTraits) ? sheet.featuresTraits.join(", ") : "-"}</div>
-      </div>
-
-      {Array.isArray(sheet.spells) && (
-        <div className="charactersPanel">
-          <h3>Spells</h3>
-          <div>{sheet.spells.join(", ")}</div>
-        </div>
-      )}
-
-      <div className="charactersPanel">
-        <h3>Notes</h3>
-        <label className="charactersField charactersField--full"><span>Private Notes</span><textarea rows="6" value={privateNotes} onChange={(e) => setPrivateNotes(e.target.value)} /></label>
-      </div>
-
-      <div className="charactersActionsFooter">
+    <div className="sheetLayout">
+      {sheetIsInvalid && <div className="sheetEmpty">Karta postaci nie ma poprawnego sheet_json. Widok pokazuje tylko pola podstawowe.</div>}
+      <CharacterHeader
+        detail={detail}
+        identity={identity}
+        name={name}
+        onNameChange={setName}
+        portraitUrl={portraitUrl}
+        onPortraitUrlChange={setPortraitUrl}
+      />
+      <CombatPanel
+        combat={combat}
+        currentHp={currentHp}
+        tempHp={tempHp}
+        onCurrentHpChange={setCurrentHp}
+        onTempHpChange={setTempHp}
+      />
+      <AbilityScoresPanel abilityScores={abilities} />
+      <SavingThrowsPanel savingThrows={sheet.savingThrows} />
+      <SkillsTable skills={sheet.skills} />
+      <InventoryPanel inventory={inventory} onInventoryChange={setInventory} />
+      <FeaturesTraitsPanel featuresTraits={sheet.featuresTraits} />
+      <SpellsPanel spells={sheet.spells} />
+      <NotesPanel privateNotes={privateNotes} onPrivateNotesChange={setPrivateNotes} />
+      <div className="sheetActions">
         <button
           type="button"
           className="charactersPrimaryBtn"

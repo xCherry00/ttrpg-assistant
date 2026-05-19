@@ -16,6 +16,7 @@ import pl.ttrpgassistant.backend.character.dto.PlayerCharacterDetailsResponse;
 import pl.ttrpgassistant.backend.character.dto.PlayerCharacterSummaryResponse;
 import pl.ttrpgassistant.backend.character.dto.QuickCreateDndCharacterRequest;
 import pl.ttrpgassistant.backend.character.dto.UpdateCharacterSheetRequest;
+import pl.ttrpgassistant.backend.character.dto.CreateCocQuickCharacterRequest;
 import pl.ttrpgassistant.backend.common.pagination.PagedResponse;
 
 import java.util.List;
@@ -68,6 +69,15 @@ public class PlayerCharacterController {
         return playerCharacterService.quickCreate(userId, request);
     }
 
+    @PostMapping("/api/characters/coc7e/quick-create")
+    public PlayerCharacterDetailsResponse quickCreateCoc(
+            Authentication auth,
+            @Valid @RequestBody CreateCocQuickCharacterRequest request
+    ) {
+        Long userId = (Long) auth.getPrincipal();
+        return playerCharacterService.quickCreateCoc(userId, request);
+    }
+
     @GetMapping("/api/compendium/dnd/classes")
     public List<Map<String, Object>> dndClasses() {
         return playerCharacterService.compendiumClasses();
@@ -82,4 +92,5 @@ public class PlayerCharacterController {
     public List<Map<String, Object>> dndBackgrounds() {
         return playerCharacterService.compendiumBackgrounds();
     }
+
 }

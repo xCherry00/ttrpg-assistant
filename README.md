@@ -76,11 +76,15 @@ cd ttrpg-assistant
 cp .env.example .env
 # Otwórz .env i uzupełnij wartości — szczegóły w .env.example
 
-# 3. Uruchom bazę danych i backend
-cd infra
-docker compose up -d
+# 3. Zbuduj backend JAR
+cd backend
+mvn -q -DskipTests package
 
-# 4. Uruchom frontend
+# 4. Uruchom bazę danych i backend
+cd ../infra
+docker compose up -d --build
+
+# 5. Uruchom frontend
 cd ../frontend
 npm install
 npm run dev
@@ -105,7 +109,8 @@ docker logs ttrpg_backend -f --tail 50
 docker exec -it ttrpg_db psql -U ttrpg -d ttrpg
 
 # Przebuduj backend po zmianach w kodzie
-cd infra && docker compose up -d --build backend
+cd backend && mvn -q -DskipTests package
+cd ../infra && docker compose up -d --build backend
 ```
 
 **Weryfikacja kodu:**
@@ -174,6 +179,7 @@ monsters / glossary_terms dane statyczne (baza potworów, słownik)
 | Biała pusta strona | Błąd JS | F12 → Console |
 | `401 Unauthorized` wszędzie | Wygasły token | Wyloguj i zaloguj ponownie |
 | Flyway error przy starcie | Konflikt wersji migracji | `SELECT * FROM flyway_schema_history` — znajdź co się nie zgadza |
+| Backend działa na starym kodzie | Dockerfile kopiuje `target/*.jar`, a JAR nie został przebudowany | Przed `docker compose up -d --build` uruchom `cd backend && mvn -q -DskipTests package` |
 
 ### Znane ograniczenia i TODO techniczne
 
@@ -258,11 +264,15 @@ cd ttrpg-assistant
 cp .env.example .env
 # Open .env and fill in the values — details in .env.example
 
-# 3. Start the database and backend
-cd infra
-docker compose up -d
+# 3. Build backend JAR
+cd backend
+mvn -q -DskipTests package
 
-# 4. Start the frontend
+# 4. Start the database and backend
+cd ../infra
+docker compose up -d --build
+
+# 5. Start the frontend
 cd ../frontend
 npm install
 npm run dev
@@ -287,7 +297,8 @@ docker logs ttrpg_backend -f --tail 50
 docker exec -it ttrpg_db psql -U ttrpg -d ttrpg
 
 # Rebuild backend after code changes
-cd infra && docker compose up -d --build backend
+cd backend && mvn -q -DskipTests package
+cd ../infra && docker compose up -d --build backend
 ```
 
 **Code verification:**
@@ -356,6 +367,7 @@ monsters / glossary_terms static data (monster db, TTRPG glossary)
 | Blank white page | JS error | F12 → Console |
 | `401 Unauthorized` everywhere | Expired token | Log out and log back in |
 | Flyway error on startup | Migration version conflict | `SELECT * FROM flyway_schema_history` — find the mismatch |
+| Backend runs stale code | Dockerfile copies `target/*.jar` and the jar was not rebuilt | Before `docker compose up -d --build`, run `cd backend && mvn -q -DskipTests package` |
 
 ### Known limitations and technical TODOs
 

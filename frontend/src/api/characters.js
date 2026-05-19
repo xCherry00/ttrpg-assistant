@@ -28,6 +28,14 @@ export function quickCreateCharacter(token, body) {
   return http("/api/characters/dnd/quick-create", { method: "POST", token, body });
 }
 
+export function getCocOccupations(token) {
+  return http("/api/compendium/coc7e/occupations", { method: "GET", token });
+}
+
+export function quickCreateCocCharacter(token, body) {
+  return http("/api/characters/coc7e/quick-create", { method: "POST", token, body });
+}
+
 export function updateCharacterSheet(token, characterId, body) {
   return http(`/api/characters/${characterId}/sheet`, { method: "PUT", token, body });
 }

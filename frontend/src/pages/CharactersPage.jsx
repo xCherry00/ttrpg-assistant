@@ -1,14 +1,17 @@
-﻿import { useEffect, useState } from "react";
+﻿import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import {
   deleteCharacter,
   getCharacter,
   listCharacters,
   quickCreateCharacter,
+  quickCreateCocCharacter,
   updateCharacterSheet,
 } from "../api/characters";
-import QuickCharacterCreator from "../components/QuickCharacterCreator";
-import CharacterSheetView from "../components/CharacterSheetView";
+import CharacterCreatorRouter from "../components/characters/CharacterCreatorRouter";
+import CharacterSheetRouter from "../components/characters/CharacterSheetRouter";
+import CharacterSystemSelector from "../components/characters/CharacterSystemSelector";
+import CharacterSidebar from "../components/characters/CharacterSidebar";
 import "../styles/characters.css";
 
 export default function CharactersPage() {
@@ -21,45 +24,39 @@ export default function CharactersPage() {
   const [creating, setCreating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [createSystem, setCreateSystem] = useState(null);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [creatorOpen, setCreatorOpen] = useState(false);
+  const [selectedCreationSystem, setSelectedCreationSystem] = useState(null);
+  const [notice, setNotice] = useState(null);
   const [error, setError] = useState("");
 
-  const systems = [
-    {
-      code: "dnd5e",
-      name: "D&D 5e",
-      status: "Gotowe",
-      description: "Szybki kreator poziomu 1 z danymi z kompendium i lokalnymi fallbackami.",
-      enabled: true,
-    },
-    {
-      code: "generic",
-      name: "Uniwersalny TTRPG",
-      status: "Wkrotce",
-      description: "Prosty szkic postaci bez zasad konkretnego systemu.",
-      enabled: false,
-    },
-  ];
+  const showNotice = useCallback((type, text) => {
+    setNotice({ type, text });
+  }, []);
 
-  async function loadList() {
+  const loadList = useCallback(async ({ preserveSelection = false } = {}) => {
     setLoading(true);
     setError("");
     try {
       const data = await listCharacters(token);
       const next = Array.isArray(data) ? data : [];
       setItems(next);
-      setSelectedId((prev) => prev ?? next[0]?.id ?? null);
+      setSelectedId((prev) => {
+        if (preserveSelection && prev && next.some((item) => item.id === prev)) return prev;
+        return prev ?? next[0]?.id ?? null;
+      });
     } catch (err) {
-      setError(err?.message || "Nie udalo sie pobrac postaci.");
+      const message = err?.message || "Nie udalo sie pobrac postaci.";
+      setError(message);
+      showNotice("error", message);
     } finally {
       setLoading(false);
     }
-  }
+  }, [token, showNotice]);
 
   useEffect(() => {
-    loadList();
-  }, [token]);
+    loadList({ preserveSelection: true });
+  }, [loadList]);
 
   useEffect(() => {
     if (!selectedId) {
@@ -70,20 +67,47 @@ export default function CharactersPage() {
     setError("");
     getCharacter(token, selectedId)
       .then(setDetail)
-      .catch((e) => setError(e?.message || "Nie udalo sie pobrac karty."))
+      .catch((e) => {
+        const message = e?.message || "Nie udalo sie pobrac karty.";
+        setError(message);
+        showNotice("error", message);
+      })
       .finally(() => setDetailLoading(false));
-  }, [token, selectedId]);
+  }, [token, selectedId, showNotice]);
 
   async function onCreate(payload) {
     setCreating(true);
     setError("");
     try {
       const created = await quickCreateCharacter(token, payload);
-      setModalOpen(false);
-      await loadList();
+      setCreatorOpen(false);
+      setSelectedCreationSystem(null);
+      await loadList({ preserveSelection: true });
       setSelectedId(created.id);
+      showNotice("success", "Postac utworzona.");
     } catch (err) {
-      setError(err?.message || "Nie udalo sie utworzyc postaci.");
+      const message = err?.message || "Nie udalo sie utworzyc postaci.";
+      setError(message);
+      showNotice("error", message);
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  async function onCreateCoc(payload) {
+    setCreating(true);
+    setError("");
+    try {
+      const created = await quickCreateCocCharacter(token, payload);
+      setCreatorOpen(false);
+      setSelectedCreationSystem(null);
+      await loadList({ preserveSelection: true });
+      setSelectedId(created.id);
+      showNotice("success", "Badacz utworzony.");
+    } catch (err) {
+      const message = err?.message || "Nie udalo sie utworzyc badacza.";
+      setError(message);
+      showNotice("error", message);
     } finally {
       setCreating(false);
     }
@@ -96,9 +120,12 @@ export default function CharactersPage() {
     try {
       const saved = await updateCharacterSheet(token, selectedId, update);
       setDetail(saved);
-      await loadList();
+      await loadList({ preserveSelection: true });
+      showNotice("success", "Zmiany zapisane.");
     } catch (err) {
-      setError(err?.message || "Nie udalo sie zapisac zmian.");
+      const message = err?.message || "Nie udalo sie zapisac zmian.";
+      setError(message);
+      showNotice("error", message);
     } finally {
       setSaving(false);
     }
@@ -112,9 +139,13 @@ export default function CharactersPage() {
       await deleteCharacter(token, selectedId);
       setDetail(null);
       setSelectedId(null);
-      await loadList();
+      await loadList({ preserveSelection: true });
+      setConfirmDeleteOpen(false);
+      showNotice("success", "Postac usunieta.");
     } catch (err) {
-      setError(err?.message || "Nie udalo sie usunac postaci.");
+      const message = err?.message || "Nie udalo sie usunac postaci.";
+      setError(message);
+      showNotice("error", message);
     } finally {
       setDeleting(false);
     }
@@ -122,14 +153,20 @@ export default function CharactersPage() {
 
   function openCreateFlow() {
     setError("");
-    setCreateSystem(null);
-    setModalOpen(true);
+    setSelectedCreationSystem(null);
+    setCreatorOpen(true);
   }
 
   function closeCreateFlow() {
-    setModalOpen(false);
-    setCreateSystem(null);
+    setCreatorOpen(false);
+    setSelectedCreationSystem(null);
   }
+
+  useEffect(() => {
+    if (!notice) return;
+    const timer = setTimeout(() => setNotice(null), 3500);
+    return () => clearTimeout(timer);
+  }, [notice]);
 
   return (
     <div className="page charactersPage">
@@ -142,60 +179,60 @@ export default function CharactersPage() {
         <button type="button" className="charactersPrimaryBtn" onClick={openCreateFlow}>+ Nowa postac</button>
       </div>
 
+      {notice && <div className={`charactersNotice${notice.type === "error" ? " is-error" : ""}`}>{notice.text}</div>}
       {error && <div className="charactersError">{error}</div>}
       {loading && <div className="charactersState">Ladowanie...</div>}
 
       {!loading && (
         <div className="charactersLayout">
-          <section className="charactersSidebar">
-            <div className="charactersSidebarTop"><h2>Moje postacie</h2><span>{items.length}</span></div>
-            {items.map((item) => (
-              <button key={item.id} type="button" className={`charactersCard${item.id === selectedId ? " is-active" : ""}`} onClick={() => setSelectedId(item.id)}>
-                <div className="charactersCardTop">
-                  <div>
-                    <strong>{item.name}</strong>
-                    <div>{item.raceName} / {item.className}</div>
-                  </div>
-                </div>
-                <div className="charactersCardMeta"><span>Poziom {item.level}</span></div>
-              </button>
-            ))}
-          </section>
+          <CharacterSidebar items={items} loading={loading} selectedId={selectedId} onSelect={setSelectedId} onCreate={openCreateFlow} />
 
           <section className="charactersDetail">
-            {modalOpen && (
+            {creatorOpen && (
               <div className="charactersPanel charactersCreatePanel">
                 <div className="charactersCreateHead">
-                  <div>
-                    <div className="charactersEyebrow">{createSystem ? "Szybki kreator" : "Wybierz system"}</div>
-                    <h2>{createSystem === "dnd5e" ? "Nowa postac D&D 5e" : "Nowa postac"}</h2>
-                    <p>{createSystem === "dnd5e" ? "Wybierz podstawowe dane, portret i utworz startowa karte." : "Najpierw wybierz system gry. Potem pokazemy odpowiedni szybki kreator."}</p>
+                    <div>
+                      <div className="charactersEyebrow">{selectedCreationSystem ? "Szybki kreator" : "Wybierz system"}</div>
+                    <h2>{selectedCreationSystem === "dnd5e" ? "Nowa postac D&D 5e" : selectedCreationSystem === "coc7e" ? "Nowy badacz CoC 7e" : "Nowa postac"}</h2>
+                    <p>{selectedCreationSystem ? "Wypelnij podstawowe dane i utworz startowa karte." : "Najpierw wybierz system gry. Potem pokazemy odpowiedni szybki kreator."}</p>
                   </div>
                   <button type="button" className="charactersGhostBtn" onClick={closeCreateFlow}>Zamknij</button>
                 </div>
-                {!createSystem && (
-                  <div className="charactersSystemGrid">
-                    {systems.map((system) => (
-                      <button key={system.code} type="button" className="charactersSystemCard" disabled={!system.enabled} onClick={() => setCreateSystem(system.code)}>
-                        <span>{system.status}</span>
-                        <strong>{system.name}</strong>
-                        <p>{system.description}</p>
-                      </button>
-                    ))}
-                  </div>
-                )}
-                {createSystem === "dnd5e" && (
-                  <QuickCharacterCreator onCreate={onCreate} creating={creating} onBack={() => setCreateSystem(null)} />
+                {!selectedCreationSystem && <CharacterSystemSelector onSelect={setSelectedCreationSystem} />}
+                {selectedCreationSystem && (
+                  <>
+                    {creating && <div className="charactersState">Tworzenie postaci...</div>}
+                    <CharacterCreatorRouter
+                      systemCode={selectedCreationSystem}
+                      creating={creating}
+                      onCreateDnd={onCreate}
+                      onCreateCoc={onCreateCoc}
+                      onBack={() => setSelectedCreationSystem(null)}
+                    />
+                  </>
                 )}
               </div>
             )}
-            {!modalOpen && !selectedId && <div className="charactersEmpty">Wybierz postac z listy albo utworz nowa.</div>}
-            {!modalOpen && detailLoading && <div className="charactersState">Ladowanie karty...</div>}
-            {!modalOpen && detail && !detailLoading && (
+
+            {!creatorOpen && items.length === 0 && <div className="charactersEmpty">Nie masz jeszcze postaci. Uzyj przycisku + Nowa postac.</div>}
+            {!creatorOpen && items.length > 0 && !selectedId && <div className="charactersEmpty">Wybierz postac z listy po lewej.</div>}
+            {!creatorOpen && detailLoading && <div className="charactersState">Ladowanie karty...</div>}
+
+            {!creatorOpen && detail && !detailLoading && (
               <>
-                <CharacterSheetView detail={detail} onSave={onSave} saving={saving} />
+                {saving && <div className="charactersState">Zapisywanie zmian...</div>}
+                <CharacterSheetRouter detail={detail} onSave={onSave} saving={saving} />
+                {confirmDeleteOpen && (
+                  <div className="charactersConfirmBox">
+                    <p>Czy na pewno chcesz usunac postac: <strong>{detail.name}</strong>?</p>
+                    <div className="charactersActionsFooter">
+                      <button type="button" className="charactersGhostBtn" disabled={deleting} onClick={() => setConfirmDeleteOpen(false)}>Anuluj</button>
+                      <button type="button" className="charactersDangerBtn" disabled={deleting} onClick={onDelete}>{deleting ? "Usuwanie..." : "Potwierdz usuniecie"}</button>
+                    </div>
+                  </div>
+                )}
                 <div className="charactersActionsFooter">
-                  <button type="button" className="charactersDangerBtn" disabled={deleting} onClick={onDelete}>{deleting ? "Usuwanie..." : "Usun postac"}</button>
+                  <button type="button" className="charactersDangerBtn" disabled={deleting} onClick={() => setConfirmDeleteOpen(true)}>Usun postac</button>
                 </div>
               </>
             )}
@@ -205,4 +242,3 @@ export default function CharactersPage() {
     </div>
   );
 }
-
