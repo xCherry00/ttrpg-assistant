@@ -65,13 +65,6 @@ function formatTime(value) {
   return new Intl.DateTimeFormat("pl-PL", { hour: "2-digit", minute: "2-digit" }).format(new Date(value));
 }
 
-function toLocalInput(value) {
-  if (!value) return "";
-  const date = new Date(value);
-  const pad = (n) => String(n).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-
 function fromLocalInput(value) {
   if (!value) return "";
   const date = new Date(value);
@@ -298,7 +291,7 @@ export default function CampaignDetailsPage() {
     return () => {
       cancelled = true;
     };
-  }, [token, campaignId]);
+  }, [token, campaignId, selectedSessionId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -363,7 +356,7 @@ export default function CampaignDetailsPage() {
     return () => {
       cancelled = true;
     };
-  }, [token, campaignId]);
+  }, [token, campaignId, selectedSessionId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -745,15 +738,6 @@ export default function CampaignDetailsPage() {
       setSessionDetailError(err?.message || "Nie udało się zapisać notatki.");
     } finally {
       setSessionBusy("");
-    }
-  }
-
-  async function handleMarkNotificationRead(notificationId) {
-    try {
-      const updated = await markCampaignNotificationRead(token, campaignId, notificationId);
-      setNotifications((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
-    } catch {
-      // ignore
     }
   }
 

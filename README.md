@@ -38,7 +38,7 @@ Przeglądarka (React SPA)
   Flyway migrations
 ```
 
-Frontend to React SPA serwowany przez Vite. Wszystkie requesty do `/api` Vite proxy'uje na backend (port 8080). Backend to Spring Boot — przyjmuje JSON, waliduje, odpowiada JSON. Dane siedzą w Postgresie, schemat zarządzany przez Flyway (migracje V1–V31).
+Frontend to React SPA serwowany przez Vite. Wszystkie requesty do `/api` Vite proxy'uje na backend (port 8080). Backend to Spring Boot — przyjmuje JSON, waliduje, odpowiada JSON. Dane siedzą w Postgresie, schemat zarządzany przez Flyway (migracje V1–V61).
 
 Auth: po zalogowaniu backend zwraca JWT. Frontend trzyma go w pamięci (AuthContext) i dokłada do każdego requesta jako `Authorization: Bearer <token>`. Spring Security weryfikuje go na każdym endpoincie.
 
@@ -48,7 +48,7 @@ Auth: po zalogowaniu backend zwraca JWT. Frontend trzyma go w pamięci (AuthCont
 |----|------|----------|
 | Frontend | React 19 + Vite 7 | SPA, szybkie HMR podczas developmentu, lazy loading stron |
 | Styling | Custom CSS + CSS variables | Pełna kontrola nad motywem, dark/light bez biblioteki |
-| Backend | Spring Boot 3.5, Java 17 | Sprawdzony enterprise stack, dużo gotowych mechanizmów (security, walidacja, JPA) |
+| Backend | Spring Boot 3.5.x, Java 17 | Sprawdzony enterprise stack, dużo gotowych mechanizmów (security, walidacja, JPA) |
 | ORM | Spring Data JPA + Hibernate | Nie chciałem pisać SQL ręcznie dla podstawowych operacji |
 | Migracje | Flyway | Wersjonowanie schematu, rollback, historia zmian |
 | Auth | JWT (JJWT 0.12) | Bezstanowe, nie trzeba trzymać sesji po stronie serwera |
@@ -108,6 +108,19 @@ docker exec -it ttrpg_db psql -U ttrpg -d ttrpg
 cd infra && docker compose up -d --build backend
 ```
 
+**Weryfikacja kodu:**
+
+```bash
+# Frontend
+cd frontend
+npm run lint
+npm run build
+
+# Backend
+cd ../backend
+mvn test
+```
+
 ### Struktura projektu
 
 ```
@@ -124,7 +137,7 @@ ttrpg-assistant/
 │
 ├── backend/src/main/resources/
 │   ├── application.yml             # konfiguracja przez zmienne środowiskowe
-│   └── db/migration/V1–V31.sql     # cała historia schematu
+│   └── db/migration/V1–V61.sql     # cała historia schematu
 │
 ├── frontend/src/
 │   ├── api/        # cienkie wrappery na fetch, po jednym pliku na moduł
@@ -162,12 +175,14 @@ monsters / glossary_terms dane statyczne (baza potworów, słownik)
 | `401 Unauthorized` wszędzie | Wygasły token | Wyloguj i zaloguj ponownie |
 | Flyway error przy starcie | Konflikt wersji migracji | `SELECT * FROM flyway_schema_history` — znajdź co się nie zgadza |
 
-### Znane ograniczenia
+### Znane ograniczenia i TODO techniczne
 
-- Brak testów — jest tylko boilerplate `BackendApplicationTests.java`
+- Testy są nadal minimalne — obecnie jest tylko prosty sanity test klasy aplikacji, bez testu kontekstu Spring i bez bazy
 - Frontend w JavaScript — bez TypeScript i bez PropTypes
 - Brak Swagger/OpenAPI — endpointy opisane tylko w kontrolerach
 - `tailwindcss` w `package.json` — wciągnięty, nigdy nieużyty
+- Backend używa wersji Spring Boot `3.5.10-SNAPSHOT`; do stabilniejszego CI warto przejść na wydanie stabilne
+- Token JWT jest trzymany po stronie frontendu w `localStorage`, co jest wygodne lokalnie, ale wymaga ostrożności przy XSS w produkcji
 
 ---
 
@@ -205,7 +220,7 @@ Browser (React SPA)
  Flyway migrations
 ```
 
-The frontend is a React SPA served by Vite. All `/api` requests get proxied to the backend (port 8080). The backend accepts JSON, validates it, and responds with JSON. Data lives in Postgres with schema managed by Flyway migrations (V1–V31).
+The frontend is a React SPA served by Vite. All `/api` requests get proxied to the backend (port 8080). The backend accepts JSON, validates it, and responds with JSON. Data lives in Postgres with schema managed by Flyway migrations (V1–V61).
 
 Auth: on login, the backend returns a JWT. The frontend stores it in memory (AuthContext) and attaches it as `Authorization: Bearer <token>` on every request. Spring Security verifies it on every protected endpoint.
 
@@ -215,7 +230,7 @@ Auth: on login, the backend returns a JWT. The frontend stores it in memory (Aut
 |-------|------|-----|
 | Frontend | React 19 + Vite 7 | SPA, fast HMR during development, lazy-loaded pages |
 | Styling | Custom CSS + CSS variables | Full control over theming, dark/light mode without a library |
-| Backend | Spring Boot 3.5, Java 17 | Battle-tested enterprise stack, lots of built-in mechanisms (security, validation, JPA) |
+| Backend | Spring Boot 3.5.x, Java 17 | Battle-tested enterprise stack, lots of built-in mechanisms (security, validation, JPA) |
 | ORM | Spring Data JPA + Hibernate | Didn't want to write raw SQL for every basic operation |
 | Migrations | Flyway | Schema versioning, migration history, predictable state |
 | Auth | JWT (JJWT 0.12) | Stateless — no server-side session storage needed |
@@ -275,6 +290,19 @@ docker exec -it ttrpg_db psql -U ttrpg -d ttrpg
 cd infra && docker compose up -d --build backend
 ```
 
+**Code verification:**
+
+```bash
+# Frontend
+cd frontend
+npm run lint
+npm run build
+
+# Backend
+cd ../backend
+mvn test
+```
+
 ### Project structure
 
 ```
@@ -291,7 +319,7 @@ ttrpg-assistant/
 │
 ├── backend/src/main/resources/
 │   ├── application.yml             # config via environment variables
-│   └── db/migration/V1–V31.sql     # full schema history
+│   └── db/migration/V1–V61.sql     # full schema history
 │
 ├── frontend/src/
 │   ├── api/        # thin fetch wrappers, one file per module
@@ -329,12 +357,14 @@ monsters / glossary_terms static data (monster db, TTRPG glossary)
 | `401 Unauthorized` everywhere | Expired token | Log out and log back in |
 | Flyway error on startup | Migration version conflict | `SELECT * FROM flyway_schema_history` — find the mismatch |
 
-### Known limitations
+### Known limitations and technical TODOs
 
-- No tests — only the boilerplate `BackendApplicationTests.java` exists
+- Tests are still minimal — currently there is only a small application class sanity test, without a Spring context test or database
 - Frontend is plain JavaScript — no TypeScript, no PropTypes
 - No Swagger/OpenAPI — endpoints are only documented in the controller files
 - `tailwindcss` is in `package.json` but was never actually used
+- The backend currently uses Spring Boot `3.5.10-SNAPSHOT`; for more stable CI, switch to a stable release
+- JWT is stored in frontend `localStorage`, which is convenient locally but needs XSS care in production
 
 ---
 

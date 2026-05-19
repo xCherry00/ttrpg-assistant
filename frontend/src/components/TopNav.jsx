@@ -109,7 +109,7 @@ export default function TopNav() {
       const me = await getMyProfile(token);
       setUser(me);
       setAvatarSrc(localStorage.getItem(getAvatarStorageKey(me?.email)) || "");
-    } catch (err) {
+    } catch {
       setUserError("Nie udało się pobrać danych konta.");
       setUser(null);
       setAvatarSrc("");

@@ -8,7 +8,37 @@ const TYPE_OPTIONS = [
   { value: "player", label: "Gracz" },
 ];
 
-const INIT_CACHE_KEY = "ttrpg_initiative_rows_v1";
+const INIT_CACHE_KEY = "ttrpg_initiative_rows_v2";
+const INIT_SYSTEM_KEY = "ttrpg_initiative_system_v1";
+
+const SYSTEM_CONFIG = {
+  dnd: {
+    label: "D&D",
+    hasRoll: true,
+    hasCompendium: true,
+    columns: ["participant", "type", "initiative", "ac", "hpMax", "hp", "note", "delete"],
+  },
+  coc: {
+    label: "Zew Cthulhu",
+    hasRoll: false,
+    hasCompendium: false,
+    columns: ["participant", "type", "dex", "hp", "armor", "attacksNote", "delete"],
+  },
+};
+
+const DEFAULT_FORM = {
+  type: "enemy",
+  name: "",
+  count: 1,
+  mod: 0,
+  ac: 10,
+  hpMax: 10,
+  note: "",
+  dex: 50,
+  hp: 10,
+  armor: "",
+  attacksNote: "",
+};
 
 function normalizeMonster(m) {
   const name =
@@ -71,6 +101,7 @@ function normalizeMonster(m) {
     index: m.index,
     name: String(name || "").trim(),
     initiativeMod: Number.isFinite(parseInt(initMod, 10)) ? parseInt(initMod, 10) : 0,
+    mod: Number.isFinite(parseInt(initMod, 10)) ? parseInt(initMod, 10) : 0,
     ac: Number.isFinite(parseInt(ac, 10)) ? parseInt(ac, 10) : 10,
     hpMax: Math.max(1, Number.isFinite(parseInt(hp, 10)) ? parseInt(hp, 10) : 10),
   };
@@ -78,6 +109,7 @@ function normalizeMonster(m) {
 
 export default function InitiativePage() {
   const [rows, setRows] = useState([]);
+  const [system, setSystem] = useState("dnd");
   const [currentTurnIndex, setCurrentTurnIndex] = useState(null);
   const [hydrated, setHydrated] = useState(false); // // <- KLUCZ: blokuje zapis zanim wczytamy cache
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -89,15 +121,10 @@ export default function InitiativePage() {
   const [monstersError, setMonstersError] = useState("");
   const [selectedMonsterId, setSelectedMonsterId] = useState("");
 
-  const [form, setForm] = useState({
-    type: "enemy",
-    name: "",
-    count: 1,
-    mod: 0,
-    ac: 10,
-    hpMax: 10,
-    note: "",
-  });
+  const [form, setForm] = useState(DEFAULT_FORM);
+
+  const config = SYSTEM_CONFIG[system] || SYSTEM_CONFIG.dnd;
+  const columns = config.columns;
 
   const nextId = () =>
     typeof crypto !== "undefined" && crypto.randomUUID
@@ -129,6 +156,94 @@ export default function InitiativePage() {
     return "hp--red";
   }
 
+  function normalizeRow(row, fallbackSystem = "dnd") {
+    const rowSystem = row.system === "coc" || row.system === "dnd" ? row.system : fallbackSystem;
+    const initiativeMod = row.initiativeMod ?? row.mod ?? 0;
+    const hpMax = Math.max(1, toInt(row.hpMax ?? row.hp ?? 1, 1));
+    const dex = row.dex == null ? null : toInt(row.dex, null);
+
+    return {
+      id: row.id || nextId(),
+      system: rowSystem,
+      type: row.type || "enemy",
+      name: row.name || "Nowy",
+      initiativeMod: rowSystem === "dnd" ? toInt(initiativeMod, 0) : null,
+      baseRoll: rowSystem === "dnd" ? row.baseRoll ?? null : null,
+      initiative: row.initiative ?? (rowSystem === "coc" ? dex ?? 50 : null),
+      dex,
+      ac: rowSystem === "dnd" ? toInt(row.ac, 10) : null,
+      armor: row.armor ?? "",
+      hpMax,
+      hp: clampHpMinOnly(row.hp ?? hpMax),
+      note: row.note || "",
+      attacksNote: row.attacksNote || "",
+      dmgHeal: row.dmgHeal || "",
+    };
+  }
+
+  function createDndRow(name) {
+    const hpMax = Math.max(1, toInt(form.hpMax, 10));
+    return {
+      id: nextId(),
+      system: "dnd",
+      type: form.type,
+      name,
+      initiativeMod: toInt(form.mod, 0),
+      baseRoll: 0,
+      initiative: 0,
+      dex: null,
+      ac: toInt(form.ac, 10),
+      armor: null,
+      hpMax,
+      hp: hpMax,
+      note: form.note || "",
+      attacksNote: "",
+      dmgHeal: "",
+    };
+  }
+
+  function createCocRow(name) {
+    const dex = toInt(form.dex, 50);
+    const hp = Math.max(1, toInt(form.hp, 1));
+    return {
+      id: nextId(),
+      system: "coc",
+      type: form.type,
+      name,
+      initiativeMod: null,
+      baseRoll: null,
+      initiative: dex,
+      dex,
+      ac: null,
+      armor: form.armor || "",
+      hpMax: hp,
+      hp,
+      note: "",
+      attacksNote: form.attacksNote || "",
+      dmgHeal: "",
+    };
+  }
+
+  function sortDndRows(list) {
+    return [...list].sort((a, b) =>
+      Number(b.initiative ?? -9999) - Number(a.initiative ?? -9999) ||
+      Number(b.baseRoll ?? -1) - Number(a.baseRoll ?? -1) ||
+      (a.name || "").localeCompare(b.name || "", "pl")
+    );
+  }
+
+  function sortCocRows(list) {
+    return [...list].sort((a, b) =>
+      Number(b.dex ?? 0) - Number(a.dex ?? 0) ||
+      (a.name || "").localeCompare(b.name || "", "pl")
+    );
+  }
+
+  function sortRows(list, selectedSystem = system) {
+    if (selectedSystem === "coc") return sortCocRows(list);
+    return sortDndRows(list);
+  }
+
   function updateRow(id, patch) {
     setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
   }
@@ -142,10 +257,13 @@ export default function InitiativePage() {
   // =========================================================
   useEffect(() => {
     try {
+      const storedSystem = sessionStorage.getItem(INIT_SYSTEM_KEY);
+      if (storedSystem === "dnd" || storedSystem === "coc") setSystem(storedSystem);
+
       const raw = sessionStorage.getItem(INIT_CACHE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) setRows(parsed);
+        if (Array.isArray(parsed)) setRows(parsed.map((row) => normalizeRow(row, storedSystem || "dnd")));
       }
     } catch {
       // ignore
@@ -158,10 +276,11 @@ export default function InitiativePage() {
     if (!hydrated) return; // // <- BLOKADA zapisu zanim wczytamy
     try {
       sessionStorage.setItem(INIT_CACHE_KEY, JSON.stringify(rows));
+      sessionStorage.setItem(INIT_SYSTEM_KEY, system);
     } catch {
       // ignore
     }
-  }, [rows, hydrated]);
+  }, [rows, system, hydrated]);
 
   // Modal UX: ESC + blokada scrolla
   useEffect(() => {
@@ -182,7 +301,7 @@ export default function InitiativePage() {
 
   // Load monsters only when modal open
   useEffect(() => {
-    if (!isModalOpen) return;
+    if (!isModalOpen || !config.hasCompendium) return;
 
     let cancelled = false;
 
@@ -217,9 +336,10 @@ export default function InitiativePage() {
     return () => {
       cancelled = true;
     };
-  }, [isModalOpen]);
+  }, [isModalOpen, config.hasCompendium]);
 
   async function onPickMonster(monsterId) {
+    if (!config.hasCompendium) return;
     setSelectedMonsterId(monsterId);
 
     const m = monsters.find((x) => String(x.id) === String(monsterId));
@@ -253,56 +373,45 @@ export default function InitiativePage() {
 
     const newRows = [];
     for (let i = 1; i <= count; i++) {
-      const hpMax = Math.max(1, toInt(form.hpMax, 10));
-      newRows.push({
-        id: nextId(),
-        type: form.type,
-        name: count > 1 ? `${baseName} #${i}` : baseName,
-        mod: toInt(form.mod, 0),
-        ac: toInt(form.ac, 10),
-        hpMax,
-        hp: hpMax,
-        note: form.note || "",
-        baseRoll: null,
-        initiative: null,
-        dmgHeal: "",
-      });
+      const name = count > 1 ? `${baseName} ${i}` : baseName;
+      newRows.push(system === "coc" ? createCocRow(name) : createDndRow(name));
     }
 
     setRows((prev) => [...prev, ...newRows]);
     setIsModalOpen(false);
 
     setSelectedMonsterId("");
-    setForm((p) => ({ ...p, name: "", count: 1, note: "" }));
+    setForm((p) => ({ ...p, name: "", count: 1, note: "", attacksNote: "" }));
   }
 
   function rollInitiativeForAll() {
+    if (!config.hasRoll) {
+      sortByDex();
+      return;
+    }
     setRows((prev) =>
-      prev.map((r) => {
+      sortRows(prev.map((r) => {
         const roll = 1 + Math.floor(Math.random() * 20);
-        const total = roll + toInt(r.mod, 0);
+        const total = roll + toInt(r.initiativeMod ?? r.mod, 0);
         return { ...r, baseRoll: roll, initiative: total };
-      })
+      }), "dnd")
     );
     setCurrentTurnIndex(0);
   }
 
   function sortRowsByInitiative() {
-    setRows((prev) => {
-      const copy = [...prev];
-      copy.sort((a, b) => {
-        const ai = a.initiative ?? -9999;
-        const bi = b.initiative ?? -9999;
-        if (bi !== ai) return bi - ai;
+    setRows((prev) => sortRows(prev, system));
+    setCurrentTurnIndex(0);
+  }
 
-        const ar = a.baseRoll ?? -1;
-        const br = b.baseRoll ?? -1;
-        if (br !== ar) return br - ar;
-
-        return (a.name || "").localeCompare(b.name || "", "pl");
-      });
-      return copy;
-    });
+  function sortByDex() {
+    setRows((prev) =>
+      sortCocRows(prev.map((row) => ({
+        ...row,
+        dex: row.dex ?? 50,
+        initiative: Number(row.dex ?? 50),
+      })))
+    );
     setCurrentTurnIndex(0);
   }
 
@@ -317,13 +426,14 @@ export default function InitiativePage() {
   }
 
   function rollInitiativeForRow(id) {
+    if (!config.hasRoll) return;
     setRows((prev) =>
-      prev.map((r) => {
+      sortRows(prev.map((r) => {
         if (r.id !== id) return r;
         const roll = 1 + Math.floor(Math.random() * 20);
-        const total = roll + toInt(r.mod, 0);
+        const total = roll + toInt(r.initiativeMod ?? r.mod, 0);
         return { ...r, baseRoll: roll, initiative: total };
-      })
+      }), "dnd")
     );
   }
 
@@ -332,6 +442,7 @@ export default function InitiativePage() {
     setCurrentTurnIndex(null);
     try {
       sessionStorage.removeItem(INIT_CACHE_KEY);
+      sessionStorage.removeItem(INIT_SYSTEM_KEY);
     } catch {
       // ignore
     }
@@ -360,8 +471,8 @@ export default function InitiativePage() {
   }
 
   const countText = useMemo(
-    () => `${rows.length} uczestników • kolejność zmienia się dopiero po Sortuj`,
-    [rows.length]
+    () => `${rows.length} uczestników • system: ${config.label} • kolejność zmienia się dopiero po Sortuj`,
+    [config.label, rows.length]
   );
 
   // =========================================================
@@ -425,14 +536,32 @@ export default function InitiativePage() {
   }
 
   return (
-    <div className="page page--wide">
+    <div className="page page--wide initiativePage">
       <div className="pageHeader">
         <div>
           <span className="pageEyebrow">narzędzia</span>
           <h1 className="pageTitle">Kolejka inicjatywy</h1>
           <p className="pageSubtitle">
-            Dodaj uczestników, rzuć inicjatywę (k20 + mod), sortuj i aktualizuj HP.
+            Dodaj uczestników, prowadź kolejność tur i aktualizuj HP dla D&D albo Zewu Cthulhu.
           </p>
+        </div>
+      </div>
+
+      <section className="initControlPanel">
+        <div className="initSystemBlock">
+          <span className="initControlLabel">System walki</span>
+          <div className="initSystemSwitch" aria-label="System walki">
+            {Object.entries(SYSTEM_CONFIG).map(([key, item]) => (
+              <button
+                key={key}
+                className={`initSystemBtn${system === key ? " is-active" : ""}`}
+                type="button"
+                onClick={() => setSystem(key)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="initToolbar">
@@ -440,13 +569,13 @@ export default function InitiativePage() {
             + Dodaj
           </button>
 
-          <button className="btn" type="button" onClick={rollInitiativeForAll} disabled={rows.length === 0}>
-            Rzuć inicjatywę
+          <button className="btn" type="button" onClick={config.hasRoll ? rollInitiativeForAll : sortByDex} disabled={rows.length === 0}>
+            {config.hasRoll ? "Rzuć inicjatywę" : "Sortuj według DEX"}
           </button>
 
-          <button className="btn" type="button" onClick={sortRowsByInitiative} disabled={rows.length === 0}>
+          {config.hasRoll && <button className="btn" type="button" onClick={sortRowsByInitiative} disabled={rows.length === 0}>
             Sortuj
-          </button>
+          </button>}
 
           <div className="initTurnButtons">
             <button className="btn" type="button" onClick={prevTurn} disabled={currentTurnIndex == null || rows.length === 0} title="Poprzednia tura">
@@ -461,20 +590,27 @@ export default function InitiativePage() {
             Wyczyść
           </button>
         </div>
+      </section>
+
+      <div className="initSystemNotice">
+        Zmiana systemu wpływa na formularz i kolumny. Obecni uczestnicy zostają, ale część pól może być ukryta.
       </div>
 
       <div className="initTableWrap initTableWrap--wide">
         <div className="initTableScroll">
-          <div className="initGrid">
+          <div className={`initGrid initGrid--${system}`}>
             <div className="initGridHeader">
-              <div className="cellCenter">Uczestnik</div>
-              <div className="cellCenter">Typ</div>
-              <div className="cellCenter">Inicjatywa</div>
-              <div className="cellCenter">AC</div>
-                    <div className="rangeLabel">HP Max (stałe)</div>
-              <div className="cellCenter">HP</div>
-              <div className="cellCenter">Notatka</div>
-              <div className="cellCenter" aria-label="Akcje"></div>
+              {columns.includes("participant") && <div className="cellCenter">Uczestnik</div>}
+              {columns.includes("type") && <div className="cellCenter">Typ</div>}
+              {columns.includes("initiative") && <div className="cellCenter">Inicjatywa</div>}
+              {columns.includes("dex") && <div className="cellCenter">DEX</div>}
+              {columns.includes("ac") && <div className="cellCenter">AC</div>}
+              {columns.includes("hpMax") && <div className="cellCenter">Max HP</div>}
+              {columns.includes("hp") && <div className="cellCenter">HP</div>}
+              {columns.includes("armor") && <div className="cellCenter">Armor</div>}
+              {columns.includes("note") && <div className="cellCenter">Notatka</div>}
+              {columns.includes("attacksNote") && <div className="cellCenter">Ataki / Notatki</div>}
+              {columns.includes("delete") && <div className="cellCenter" aria-label="Akcje"></div>}
             </div>
 
             {rows.map((r, idx) => (
@@ -498,7 +634,7 @@ export default function InitiativePage() {
                 onDrop={(e) => handleDrop(e, r.id)}
                 onDragEnd={handleDragEnd}
               >
-                <div className="cellBox">
+                {columns.includes("participant") && <div className="cellBox">
                   <div className="nameCell nameCell--center">
                     <input
                       className="nameInput"
@@ -507,9 +643,9 @@ export default function InitiativePage() {
                       placeholder="Nazwa…"
                     />
                   </div>
-                </div>
+                </div>}
 
-                <div className="cellCenter cellBox">
+                {columns.includes("type") && <div className="cellCenter cellBox">
                   <select
                     className="cellSelect"
                     value={r.type}
@@ -521,9 +657,9 @@ export default function InitiativePage() {
                       </option>
                     ))}
                   </select>
-                </div>
+                </div>}
 
-                <div className="cellCenter cellBox initInitiativeCell">
+                {columns.includes("initiative") && <div className="cellCenter cellBox initInitiativeCell">
                   <input
                     className="cellInput cellInput--init"
                     type="number"
@@ -531,12 +667,25 @@ export default function InitiativePage() {
                     onChange={(e) => updateRow(r.id, { initiative: toInt(e.target.value, null) })}
                     placeholder="—"
                   />
-                  <button className="btn btn--tiny initRerollBtn" type="button" onClick={() => rollInitiativeForRow(r.id)} title="Rzuć dla tej postaci" aria-label="Rzuć inicjatywę">
+                  {config.hasRoll && <button className="btn btn--tiny initRerollBtn" type="button" onClick={() => rollInitiativeForRow(r.id)} title="Rzuć dla tej postaci" aria-label="Rzuć inicjatywę">
                     ↻
-                  </button>
-                </div>
+                  </button>}
+                </div>}
 
-                <div className="cellCenter cellBox">
+                {columns.includes("dex") && <div className="cellCenter cellBox">
+                  <input
+                    className="cellInput cellInput--tiny"
+                    type="number"
+                    value={r.dex ?? ""}
+                    onChange={(e) => {
+                      const dex = toInt(e.target.value, 0);
+                      updateRow(r.id, { dex, initiative: dex });
+                    }}
+                    placeholder="50"
+                  />
+                </div>}
+
+                {columns.includes("ac") && <div className="cellCenter cellBox">
                   <input
                     className="cellInput cellInput--tiny"
                     type="number"
@@ -544,9 +693,9 @@ export default function InitiativePage() {
                     onChange={(e) => updateRow(r.id, { ac: toInt(e.target.value, 0) })}
                     placeholder="—"
                   />
-                </div>
+                </div>}
 
-                <div className="cellCenter cellBox">
+                {columns.includes("hpMax") && <div className="cellCenter cellBox">
                   <input
                     className="cellInput cellInput--tiny"
                     type="number"
@@ -555,9 +704,9 @@ export default function InitiativePage() {
                     onChange={(e) => updateRow(r.id, { hpMax: Math.max(1, toInt(e.target.value, 10)) })}
                     placeholder="—"
                   />
-                </div>
+                </div>}
 
-                <div className="cellBox hpCell">
+                {columns.includes("hp") && <div className="cellBox hpCell">
                   <div className="hpTop">
                     <div className={"hpPill " + hpClass(r.hp, r.hpMax)}>
                       <input
@@ -585,22 +734,40 @@ export default function InitiativePage() {
                       HEAL
                     </button>
                   </div>
-                </div>
+                </div>}
 
-                <div className="cellBox">
+                {columns.includes("armor") && <div className="cellBox">
+                  <input
+                    className="cellInput cellInput--note"
+                    value={r.armor ?? ""}
+                    onChange={(e) => updateRow(r.id, { armor: e.target.value })}
+                    placeholder="np. 1 punkt, kurtka, brak"
+                  />
+                </div>}
+
+                {columns.includes("note") && <div className="cellBox">
                   <input
                     className="cellInput cellInput--note"
                     value={r.note ?? ""}
                     onChange={(e) => updateRow(r.id, { note: e.target.value })}
                     placeholder="np. łucznik / koncentracja / warunki…"
                   />
-                </div>
+                </div>}
 
-                <div className="cellCenter cellBox">
+                {columns.includes("attacksNote") && <div className="cellBox">
+                  <input
+                    className="cellInput cellInput--note"
+                    value={r.attacksNote ?? ""}
+                    onChange={(e) => updateRow(r.id, { attacksNote: e.target.value })}
+                    placeholder="np. pistolet 1k10, nóż, ucieka"
+                  />
+                </div>}
+
+                {columns.includes("delete") && <div className="cellCenter cellBox">
                   <button className="btn btn--icon" type="button" onClick={() => removeRow(r.id)} title="Usuń" aria-label="Usuń uczestnika">
                     ×
                   </button>
-                </div>
+                </div>}
               </div>
             ))}
 
@@ -626,7 +793,7 @@ export default function InitiativePage() {
             </div>
 
             <div className="modalBody">
-              <div className="monsterBlock">
+              {config.hasCompendium && <div className="monsterBlock">
                 <div className="monsterBlockTop">
                   <div className="rangeLabel">Gotowy przeciwnik z kompendium</div>
 
@@ -648,7 +815,7 @@ export default function InitiativePage() {
                   {monstersLoading && <span style={{ fontWeight: 700 }}>Ładowanie potworów…</span>}
                   {!!monstersError && <span style={{ fontWeight: 800 }}>⚠ {monstersError}</span>}
                 </div>
-              </div>
+              </div>}
 
               <div className="modalGrid2">
                 <div className="modalCol">
@@ -677,7 +844,7 @@ export default function InitiativePage() {
                     />
                   </div>
 
-                  <div className="formField">
+                  {system === "dnd" && <div className="formField">
                     <div className="rangeLabel">Notatka</div>
                     <input
                       className="cellInput"
@@ -685,7 +852,17 @@ export default function InitiativePage() {
                       onChange={(e) => setForm((p) => ({ ...p, note: e.target.value }))}
                       placeholder="np. łucznik, tarcza, warunki…"
                     />
-                  </div>
+                  </div>}
+
+                  {system === "coc" && <div className="formField">
+                    <div className="rangeLabel">Ataki / Notatki</div>
+                    <input
+                      className="cellInput"
+                      value={form.attacksNote}
+                      onChange={(e) => setForm((p) => ({ ...p, attacksNote: e.target.value }))}
+                      placeholder="np. rewolwer, nóż, osłabiony…"
+                    />
+                  </div>}
                 </div>
 
                 <div className="modalCol modalCol--numbers">
@@ -703,7 +880,7 @@ export default function InitiativePage() {
                     />
                   </div>
 
-                  <div className="formField">
+                  {system === "dnd" && <div className="formField">
                     <div className="rangeLabel">Mod inicjatywy</div>
                     <input
                       className="cellInput cellInput--num"
@@ -711,9 +888,9 @@ export default function InitiativePage() {
                       value={form.mod}
                       onChange={(e) => setForm((p) => ({ ...p, mod: toInt(e.target.value, 0) }))}
                     />
-                  </div>
+                  </div>}
 
-                  <div className="formField">
+                  {system === "dnd" && <div className="formField">
                     <div className="rangeLabel">AC</div>
                     <input
                       className="cellInput cellInput--num"
@@ -721,9 +898,9 @@ export default function InitiativePage() {
                       value={form.ac}
                       onChange={(e) => setForm((p) => ({ ...p, ac: toInt(e.target.value, 10) }))}
                     />
-                  </div>
+                  </div>}
 
-                  <div className="formField">
+                  {system === "dnd" && <div className="formField">
                     <div className="rangeLabel">HP Max (stałe)</div>
                     <input
                       className="cellInput cellInput--num"
@@ -734,7 +911,38 @@ export default function InitiativePage() {
                         setForm((p) => ({ ...p, hpMax: Math.max(1, toInt(e.target.value, 10)) }))
                       }
                     />
-                  </div>
+                  </div>}
+
+                  {system === "coc" && <div className="formField">
+                    <div className="rangeLabel">DEX</div>
+                    <input
+                      className="cellInput cellInput--num"
+                      type="number"
+                      value={form.dex}
+                      onChange={(e) => setForm((p) => ({ ...p, dex: toInt(e.target.value, 50) }))}
+                    />
+                  </div>}
+
+                  {system === "coc" && <div className="formField">
+                    <div className="rangeLabel">HP</div>
+                    <input
+                      className="cellInput cellInput--num"
+                      type="number"
+                      min={1}
+                      value={form.hp}
+                      onChange={(e) => setForm((p) => ({ ...p, hp: Math.max(1, toInt(e.target.value, 1)) }))}
+                    />
+                  </div>}
+
+                  {system === "coc" && <div className="formField">
+                    <div className="rangeLabel">Armor</div>
+                    <input
+                      className="cellInput cellInput--num"
+                      value={form.armor}
+                      onChange={(e) => setForm((p) => ({ ...p, armor: e.target.value }))}
+                      placeholder="np. 1"
+                    />
+                  </div>}
                 </div>
               </div>
             </div>

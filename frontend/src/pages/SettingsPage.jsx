@@ -12,7 +12,8 @@ import { logout as logoutApi } from "../api/auth";
 import "../styles/settings.css";
 
 const THEME_STORAGE_KEY = "ttrpg_theme";
-const INITIATIVE_CACHE_KEY = "ttrpg_initiative_rows_v1";
+const INITIATIVE_CACHE_KEY = "ttrpg_initiative_rows_v2";
+const INITIATIVE_SYSTEM_KEY = "ttrpg_initiative_system_v1";
 const CHAT_NICK_PRESETS = ["#b26cff", "#7bdff2", "#ff8fab", "#80ed99", "#f4a261", "#a0c4ff", "#f5d76e", "#ff6b6b"];
 
 const NAV_SECTIONS = [
@@ -298,6 +299,7 @@ export default function SettingsPage() {
 
   function clearInitiativeCache() {
     sessionStorage.removeItem(INITIATIVE_CACHE_KEY);
+    sessionStorage.removeItem(INITIATIVE_SYSTEM_KEY);
     setMiscSuccess("Cache inicjatywy wyczyszczony.");
   }
 

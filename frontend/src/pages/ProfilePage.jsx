@@ -61,12 +61,6 @@ function formatRelative(value) {
   return `${Math.round(diffMs / day)} dni temu`;
 }
 
-function formatDate(value) {
-  const d = safeDate(value);
-  if (!d) return "Brak";
-  return d.toLocaleDateString("pl-PL", { day: "2-digit", month: "2-digit", year: "numeric" });
-}
-
 function toSessionHours(session) {
   const start = safeDate(session?.startedAt);
   const finish = safeDate(session?.finishedAt);
@@ -229,7 +223,7 @@ export default function ProfilePage() {
     const sessionEvents = sessions
       .map((session) => ({
         id: `ses-${session.id}`,
-        title: session?.status === "finished" ? `Zakonczono sesje \"${session.title || "Sesja"}\"` : `Zaktualizowano sesje \"${session.title || "Sesja"}\"`,
+        title: session?.status === "finished" ? `Zakonczono sesje "${session.title || "Sesja"}"` : `Zaktualizowano sesje "${session.title || "Sesja"}"`,
         subtitle: session?.campaignTitle || "Kampania",
         at: session?.updatedAt || session?.finishedAt || session?.startedAt || session?.createdAt,
       }))

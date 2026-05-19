@@ -43,7 +43,7 @@ export function AuthProvider({ children }) {
   // Memoize value to prevent unnecessary re-renders of child components
   const value = useMemo(
     () => ({ token, isLoggedIn, loginWithToken, logout }),
-    [token] // Only depend on token since isLoggedIn is derived
+    [token, isLoggedIn]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

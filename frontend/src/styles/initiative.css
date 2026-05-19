@@ -9,28 +9,130 @@
   width: 100%;
 }
 
+.initiativePage {
+  color: rgba(244, 247, 255, 0.92);
+}
+
 .page.page--wide .pageHeader {
   width: 100%;
   max-width: var(--container);
   margin-right: auto;
   margin-left: auto;
-  margin-bottom: 24px;
+  margin-bottom: 14px;
 }
 
 /* ===== Toolbar ===== */
+.initControlPanel {
+  width: 100%;
+  max-width: var(--container);
+  margin: 0 auto 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid rgba(139, 92, 246, 0.18);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(124, 58, 237, 0.16), transparent 42%),
+    linear-gradient(135deg, rgba(20, 17, 47, 0.92), rgba(8, 20, 34, 0.92));
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.22);
+}
+
+.initSystemBlock {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.initControlLabel {
+  color: rgba(226, 232, 255, 0.7);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
 .initToolbar {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
+}
+
+.initSystemSwitch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 4px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(3, 7, 18, 0.56);
+}
+
+.initSystemBtn {
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgba(255,255,255,0.72);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.initSystemBtn:hover,
+.initSystemBtn.is-active {
+  border-color: rgba(124, 92, 255, 0.36);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.92), rgba(14, 165, 233, 0.55));
+  color: #ffffff;
+}
+
+.initSystemNotice {
+  width: 100%;
+  max-width: var(--container);
+  margin: 0 auto 16px;
+  padding: 10px 14px;
+  border: 1px solid rgba(139, 92, 246, 0.16);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.72);
+  color: rgba(226, 232, 255, 0.72);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .initTurnButtons {
   display: flex;
   gap: 4px;
-  border-left: 1px solid rgba(255,255,255,0.08);
+  border-left: 1px solid rgba(255,255,255,0.10);
   padding-left: 8px;
+}
+
+.initiativePage .btn {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.82);
+  color: rgba(244, 247, 255, 0.88);
+}
+
+.initiativePage .btn:hover:not(:disabled) {
+  border-color: rgba(167, 139, 250, 0.46);
+  background: rgba(30, 41, 59, 0.92);
+}
+
+.initiativePage .btn-primary {
+  border-color: rgba(251, 191, 36, 0.44);
+  background: linear-gradient(135deg, #7c3aed, #0ea5e9);
+  color: #ffffff;
+  box-shadow: 0 12px 34px rgba(124, 58, 237, 0.28);
+}
+
+.initiativePage .btn:disabled {
+  opacity: 0.46;
+  color: rgba(226, 232, 240, 0.48);
 }
 
 .initTurnButtons .btn {
@@ -43,9 +145,12 @@
 
 .initTableWrap {
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(139, 92, 246, 0.16);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(124, 58, 237, 0.13), transparent 38%),
+    rgba(8, 13, 26, 0.92);
   overflow: hidden;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.2);
 }
 
 /* Scroll pionowy */
@@ -78,6 +183,18 @@
   column-gap: 10px;
 }
 
+.initGrid--coc .initGridHeader,
+.initGrid--coc .initGridRow {
+  grid-template-columns:
+    minmax(240px, 27%)   /* Uczestnik */
+    minmax(120px, 12%)   /* Typ */
+    minmax(80px, 8%)     /* DEX */
+    minmax(260px, 25%)   /* HP */
+    minmax(120px, 12%)   /* Armor */
+    minmax(180px, 16%)   /* Ataki / Notatki */
+    56px;                /* Kosz */
+}
+
 .initGridHeader {
   position: sticky;
   top: 0;
@@ -88,8 +205,8 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--primary);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
-  background: rgba(10, 12, 18, 0.96);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.14);
+  background: rgba(11, 16, 32, 0.96);
   backdrop-filter: blur(10px);
   text-align: center;
 }
@@ -97,7 +214,7 @@
 .initGridRow {
   position: relative;
   padding: 10px 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
   min-width: 0;
   transition: all 0.2s ease;
   cursor: grab;
@@ -126,9 +243,9 @@
   box-shadow: inset 0 0 32px rgba(232, 181, 88, 0.06);
 }
 
-.initGridRow:nth-child(2n) { background: rgba(255, 255, 255, 0.012); }
+.initGridRow:nth-child(2n) { background: rgba(255, 255, 255, 0.018); }
 .initGridRow:nth-child(2n).is-drag-over { background: rgba(124, 92, 255, 0.15); }
-.initGridRow:hover { background: rgba(255, 255, 255, 0.03); }
+.initGridRow:hover { background: rgba(124, 58, 237, 0.06); }
 
 /* marker typu */
 .rowType::before {
@@ -209,8 +326,8 @@
 .cellSelect {
   height: 30px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(3, 7, 18, 0.62);
   color: rgba(255, 255, 255, 0.92);
   outline: none;
   padding: 5px 8px;
@@ -220,7 +337,10 @@
 }
 
 .cellInput:focus,
-.cellSelect:focus { box-shadow: var(--ring); }
+.cellSelect:focus {
+  border-color: rgba(167, 139, 250, 0.5);
+  box-shadow: var(--ring);
+}
 
 .cellSelect { max-width: 180px; }
 
@@ -290,8 +410,8 @@
 .hpPill {
   height: 30px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(3, 7, 18, 0.48);
   display: inline-flex;
   align-items: center;
   padding: 0 8px;
@@ -343,9 +463,9 @@
 .initMeta {
   padding: 10px 12px;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.65);
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(255, 255, 255, 0.015);
+  color: rgba(226, 232, 255, 0.68);
+  border-top: 1px solid rgba(139, 92, 246, 0.12);
+  background: rgba(15, 23, 42, 0.42);
 }
 
 /* HP kolory */
@@ -358,7 +478,7 @@
 .hp--na     { opacity: 0.75; }
 
 /* Dropdown optiony (dla czytelności listy) */
-.cellSelect option { color: #000; background: #fff; }
+.cellSelect option { color: #ffffff; background: #0b1020; }
 
 /* =========================================================
    MODAL — overlay + layout
@@ -450,6 +570,20 @@
   color: rgba(255,255,255,0.70);
 }
 
+.initiativePage .empty {
+  border: 1px dashed rgba(148, 163, 184, 0.18);
+  background: rgba(3, 7, 18, 0.38);
+  color: rgba(226, 232, 255, 0.82);
+}
+
+.initiativePage .emptyTitle {
+  color: #ffffff;
+}
+
+.initiativePage .emptyText {
+  color: rgba(226, 232, 255, 0.68);
+}
+
 /* Układ: lewa kolumna (opis) + prawa (liczby) */
 .modalGrid2 {
   display: grid;
@@ -497,9 +631,49 @@
       minmax(160px, 1.6fr)
       56px;
   }
+
+  .initGrid--coc .initGridHeader,
+  .initGrid--coc .initGridRow {
+    grid-template-columns:
+      minmax(220px, 2.2fr)
+      minmax(110px, 1.1fr)
+      minmax(80px, 0.9fr)
+      minmax(240px, 2.2fr)
+      minmax(120px, 1.1fr)
+      minmax(180px, 1.7fr)
+      56px;
+  }
 }
 
 @media (max-width: 860px) {
+  .initControlPanel,
+  .initSystemBlock {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .initToolbar {
+    justify-content: stretch;
+  }
+
+  .initToolbar > .btn,
+  .initTurnButtons {
+    flex: 1 1 auto;
+  }
+
+  .initTurnButtons {
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  .initSystemSwitch {
+    width: 100%;
+  }
+
+  .initSystemBtn {
+    flex: 1;
+  }
+
   .monsterBlockTop { grid-template-columns: 1fr; }
 
   .modalGrid2 { grid-template-columns: 1fr; }
@@ -526,6 +700,17 @@
 :root[data-theme="light"] .initTableWrap,
 :root[data-theme="light"] .monsterBlock {
   background: color-mix(in srgb, var(--card-2) 96%, transparent 4%);
+}
+
+:root[data-theme="light"] .initSystemSwitch,
+:root[data-theme="light"] .initSystemNotice {
+  border-color: rgba(88, 69, 33, 0.14);
+  background: rgba(255, 248, 239, 0.74);
+  color: var(--text-2);
+}
+
+:root[data-theme="light"] .initSystemSwitch span {
+  color: var(--text-2);
 }
 
 :root[data-theme="light"] .initGridHeader {

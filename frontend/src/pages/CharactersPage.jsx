@@ -233,7 +233,8 @@ function createEmptyForm() {
 }
 
 function sanitizeCharacterPayload(character) {
-  const { abilityPool, ...payload } = character;
+  const payload = { ...character };
+  delete payload.abilityPool;
   return payload;
 }
 
@@ -388,10 +389,6 @@ export default function CharactersPage() {
     setSelectedPoolIndex(null);
     setDraggedPoolIndex(null);
     setDraggedAbility("");
-  }
-
-  function applyStats(setter, mode, values) {
-    setter((prev) => ({ ...prev, abilityMode: mode, ...values }));
   }
 
   function applyStandardArray(setter) {

@@ -957,7 +957,7 @@ export default function GeneratorsPage() {
   const [resultIsNew, setResultIsNew] = useState(false);
   const [activeDungeonFloor, setActiveDungeonFloor] = useState(0);
   const [selectedType, setSelectedType] = useState("all");
-  const [selectedTone, setSelectedTone] = useState("all");
+  const [selectedTone] = useState("all");
   const [catalogSearch, setCatalogSearch] = useState("");
   const [catalogSort, setCatalogSort] = useState("popular");
   const [favoriteKeys, setFavoriteKeys] = useState(() => new Set(readFavoriteKeys()));

@@ -138,8 +138,6 @@ export default function CampaignsPage() {
     if (code) setJoinCode(code);
   }, [searchParams]);
 
-  const displayName = "Uzytkownik";
-
   const myCampaigns = useMemo(() => {
     const q = normalizeText(query);
     let list = campaigns;
@@ -317,20 +315,6 @@ export default function CampaignsPage() {
           </div>
         </div>
 
-        {false && (
-        <div className="campaignsHeader__actions">
-          <button type="button" className="campaignsBell" aria-label="Powiadomienia"><CampaignIcon name="bell" /></button>
-
-          <button type="button" className="campaignsUser">
-            <span className="campaignsUser__avatar">{displayName.slice(0, 1).toUpperCase()}</span>
-            <span>
-              <small>Użytkownik</small>
-              <strong>{displayName}</strong>
-            </span>
-            <CampaignIcon name="chevron-down" />
-          </button>
-        </div>
-        )}
       </header>
 
       <nav className="campaignListTabs" aria-label="Widoki kampanii">
