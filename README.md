@@ -450,6 +450,27 @@ Status rules:
 - List returns active assignments only (`is_active = true`) with character summary fields.
 - Current scope intentionally excludes persistent initiative, HP/state tracking, and status automation.
 
+### Persistent Initiative Tracker (v0.6.2)
+
+- Initiative is persisted per campaign in:
+  - `combat_encounters` (encounter metadata, status, turn pointer, round)
+  - `combat_participants` (ordered participants, optional linked character)
+- Encounter status: `ACTIVE`, `FINISHED`, `ARCHIVED`.
+- Participant type: `PLAYER_CHARACTER`, `NPC`, `MONSTER`, `CUSTOM`.
+- Turn logic:
+  - `next-turn` moves to next active/non-defeated participant.
+  - wrapping to first participant increments `roundNumber`.
+  - `previous-turn` moves backwards and can decrease round when wrapping.
+- Access:
+  - owner manages encounters and participants.
+  - member can read encounters.
+  - non-member has no access.
+- Current limits:
+  - no persistent HP damage ledger,
+  - no condition tracking yet,
+  - no full combat manager automation.
+- Planned next step: session HP and condition tracking foundation.
+
 ## Security (MVP v0.5.4)
 - JWT is currently stored in localStorage (	trpg_token) for MVP simplicity.
 - Added hardening: CSP + frame deny + safe image/data URL validation + auth rate limiting + no token logging.

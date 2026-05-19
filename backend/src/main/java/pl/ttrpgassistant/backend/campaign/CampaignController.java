@@ -26,12 +26,17 @@ import pl.ttrpgassistant.backend.campaign.dto.CampaignSummaryResponse;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignFriendCandidateResponse;
 import pl.ttrpgassistant.backend.campaign.dto.AssignCharacterToCampaignRequest;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignCharacterResponse;
+import pl.ttrpgassistant.backend.campaign.dto.CombatEncounterResponse;
 import pl.ttrpgassistant.backend.campaign.dto.CreateCampaignMaterialRequest;
+import pl.ttrpgassistant.backend.campaign.dto.CreateCombatEncounterRequest;
 import pl.ttrpgassistant.backend.campaign.dto.CreateCampaignSessionMessageRequest;
 import pl.ttrpgassistant.backend.campaign.dto.CreateCampaignSessionRequest;
 import pl.ttrpgassistant.backend.campaign.dto.CreateCampaignRequest;
 import pl.ttrpgassistant.backend.campaign.dto.JoinCampaignRequest;
 import pl.ttrpgassistant.backend.campaign.dto.JoinCampaignResponse;
+import pl.ttrpgassistant.backend.campaign.dto.AddCombatParticipantRequest;
+import pl.ttrpgassistant.backend.campaign.dto.UpdateCombatParticipantRequest;
+import pl.ttrpgassistant.backend.campaign.dto.ReorderParticipantsRequest;
 import pl.ttrpgassistant.backend.campaign.dto.UpdateCampaignRequest;
 import pl.ttrpgassistant.backend.campaign.dto.UpdateSessionAttendanceRequest;
 import pl.ttrpgassistant.backend.campaign.dto.UpsertCampaignSessionNoteRequest;
@@ -48,6 +53,7 @@ public class CampaignController {
     private final CampaignService campaignService;
     private final CampaignWorkspaceService campaignWorkspaceService;
     private final CampaignCharacterService campaignCharacterService;
+    private final CombatEncounterService combatEncounterService;
 
     @GetMapping
     public PagedResponse<CampaignSummaryResponse> list(
@@ -297,5 +303,97 @@ public class CampaignController {
     public void detachCharacter(Authentication auth, @PathVariable Long id, @PathVariable Long characterId) {
         Long userId = (Long) auth.getPrincipal();
         campaignCharacterService.detachCharacter(userId, id, characterId);
+    }
+
+    @PostMapping("/{id}/encounters")
+    public CombatEncounterResponse createEncounter(
+            Authentication auth,
+            @PathVariable Long id,
+            @Valid @RequestBody CreateCombatEncounterRequest request
+    ) {
+        Long userId = (Long) auth.getPrincipal();
+        return combatEncounterService.createEncounter(userId, id, request);
+    }
+
+    @GetMapping("/{id}/encounters")
+    public List<CombatEncounterResponse> listEncounters(Authentication auth, @PathVariable Long id) {
+        Long userId = (Long) auth.getPrincipal();
+        return combatEncounterService.listEncounters(userId, id);
+    }
+
+    @GetMapping("/{id}/encounters/{encounterId}")
+    public CombatEncounterResponse getEncounter(Authentication auth, @PathVariable Long id, @PathVariable Long encounterId) {
+        Long userId = (Long) auth.getPrincipal();
+        return combatEncounterService.getEncounter(userId, id, encounterId);
+    }
+
+    @PostMapping("/{id}/encounters/{encounterId}/participants")
+    public CombatEncounterResponse addEncounterParticipant(
+            Authentication auth,
+            @PathVariable Long id,
+            @PathVariable Long encounterId,
+            @Valid @RequestBody AddCombatParticipantRequest request
+    ) {
+        Long userId = (Long) auth.getPrincipal();
+        return combatEncounterService.addParticipant(userId, id, encounterId, request);
+    }
+
+    @PatchMapping("/{id}/encounters/{encounterId}/participants/{participantId}")
+    public CombatEncounterResponse updateEncounterParticipant(
+            Authentication auth,
+            @PathVariable Long id,
+            @PathVariable Long encounterId,
+            @PathVariable Long participantId,
+            @Valid @RequestBody UpdateCombatParticipantRequest request
+    ) {
+        Long userId = (Long) auth.getPrincipal();
+        return combatEncounterService.updateParticipant(userId, id, encounterId, participantId, request);
+    }
+
+    @DeleteMapping("/{id}/encounters/{encounterId}/participants/{participantId}")
+    public CombatEncounterResponse removeEncounterParticipant(
+            Authentication auth,
+            @PathVariable Long id,
+            @PathVariable Long encounterId,
+            @PathVariable Long participantId
+    ) {
+        Long userId = (Long) auth.getPrincipal();
+        return combatEncounterService.removeParticipant(userId, id, encounterId, participantId);
+    }
+
+    @PostMapping("/{id}/encounters/{encounterId}/participants/reorder")
+    public CombatEncounterResponse reorderEncounterParticipants(
+            Authentication auth,
+            @PathVariable Long id,
+            @PathVariable Long encounterId,
+            @Valid @RequestBody ReorderParticipantsRequest request
+    ) {
+        Long userId = (Long) auth.getPrincipal();
+        return combatEncounterService.reorderParticipants(userId, id, encounterId, request.participantIds());
+    }
+
+    @PostMapping("/{id}/encounters/{encounterId}/next-turn")
+    public CombatEncounterResponse nextEncounterTurn(Authentication auth, @PathVariable Long id, @PathVariable Long encounterId) {
+        Long userId = (Long) auth.getPrincipal();
+        return combatEncounterService.nextTurn(userId, id, encounterId);
+    }
+
+    @PostMapping("/{id}/encounters/{encounterId}/previous-turn")
+    public CombatEncounterResponse previousEncounterTurn(Authentication auth, @PathVariable Long id, @PathVariable Long encounterId) {
+        Long userId = (Long) auth.getPrincipal();
+        return combatEncounterService.previousTurn(userId, id, encounterId);
+    }
+
+    @PostMapping("/{id}/encounters/{encounterId}/finish")
+    public CombatEncounterResponse finishEncounter(Authentication auth, @PathVariable Long id, @PathVariable Long encounterId) {
+        Long userId = (Long) auth.getPrincipal();
+        return combatEncounterService.finishEncounter(userId, id, encounterId);
+    }
+
+    @DeleteMapping("/{id}/encounters/{encounterId}")
+    @ResponseStatus(NO_CONTENT)
+    public void softDeleteEncounter(Authentication auth, @PathVariable Long id, @PathVariable Long encounterId) {
+        Long userId = (Long) auth.getPrincipal();
+        combatEncounterService.softDeleteEncounter(userId, id, encounterId);
     }
 }

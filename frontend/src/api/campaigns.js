@@ -218,3 +218,76 @@ export async function detachCharacterFromCampaign(token, campaignId, characterId
     token,
   });
 }
+
+export async function createEncounter(token, campaignId, payload) {
+  return http(`/api/campaigns/${campaignId}/encounters`, {
+    method: "POST",
+    token,
+    body: payload,
+  });
+}
+
+export async function getCampaignEncounters(token, campaignId) {
+  return http(`/api/campaigns/${campaignId}/encounters`, {
+    method: "GET",
+    token,
+  });
+}
+
+export async function getEncounter(token, campaignId, encounterId) {
+  return http(`/api/campaigns/${campaignId}/encounters/${encounterId}`, {
+    method: "GET",
+    token,
+  });
+}
+
+export async function addEncounterParticipant(token, campaignId, encounterId, payload) {
+  return http(`/api/campaigns/${campaignId}/encounters/${encounterId}/participants`, {
+    method: "POST",
+    token,
+    body: payload,
+  });
+}
+
+export async function updateEncounterParticipant(token, campaignId, encounterId, participantId, payload) {
+  return http(`/api/campaigns/${campaignId}/encounters/${encounterId}/participants/${participantId}`, {
+    method: "PATCH",
+    token,
+    body: payload,
+  });
+}
+
+export async function removeEncounterParticipant(token, campaignId, encounterId, participantId) {
+  return http(`/api/campaigns/${campaignId}/encounters/${encounterId}/participants/${participantId}`, {
+    method: "DELETE",
+    token,
+  });
+}
+
+export async function nextEncounterTurn(token, campaignId, encounterId) {
+  return http(`/api/campaigns/${campaignId}/encounters/${encounterId}/next-turn`, {
+    method: "POST",
+    token,
+  });
+}
+
+export async function previousEncounterTurn(token, campaignId, encounterId) {
+  return http(`/api/campaigns/${campaignId}/encounters/${encounterId}/previous-turn`, {
+    method: "POST",
+    token,
+  });
+}
+
+export async function finishEncounter(token, campaignId, encounterId) {
+  return http(`/api/campaigns/${campaignId}/encounters/${encounterId}/finish`, {
+    method: "POST",
+    token,
+  });
+}
+
+export async function deleteEncounter(token, campaignId, encounterId) {
+  return http(`/api/campaigns/${campaignId}/encounters/${encounterId}`, {
+    method: "DELETE",
+    token,
+  });
+}
