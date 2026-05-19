@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import {
@@ -60,7 +60,7 @@ export default function FriendsPage() {
   const [busyKey, setBusyKey] = useState("");
   const [error, setError] = useState("");
 
-  async function loadOverview() {
+  const loadOverview = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
@@ -71,11 +71,11 @@ export default function FriendsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [token]);
 
   useEffect(() => {
     loadOverview();
-  }, [token]);
+  }, [loadOverview]);
 
   useEffect(() => {
     let active = true;

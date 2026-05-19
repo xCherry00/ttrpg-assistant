@@ -5,11 +5,12 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import pl.ttrpgassistant.backend.common.validation.SafeImageOrHttpUrl;
 
 public record UpsertPlayerCharacterRequest(
         @NotBlank @Size(max = 160) String name,
         @Size(max = 20) String status,
-        @Size(max = 400000) String portraitUrl,
+        @Size(max = 400000) @SafeImageOrHttpUrl String portraitUrl,
         @Size(max = 120) String raceName,
         @Size(max = 120) String subraceName,
         @Size(max = 120) String className,
@@ -32,7 +33,7 @@ public record UpsertPlayerCharacterRequest(
         @Min(-20) @Max(20) Integer initiativeBonus,
         @Min(0) @Max(200) Integer speed,
         @Min(2) @Max(9) Integer proficiencyBonus,
-        @Size(max = 60) String hitDice,
+        @Pattern(regexp = "^$|^\\d+d\\d+(\\s*[+-]\\s*\\d+)?$", message = "hitDice must match format like 1d10 or 2d8+2") @Size(max = 60) String hitDice,
         @Size(max = 6000) String skillNotes,
         @Size(max = 6000) String savingThrowNotes,
         @Size(max = 10000) String equipmentNotes,

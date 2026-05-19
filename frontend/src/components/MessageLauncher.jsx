@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { getConversations, getUnreadMessagesCount } from "../api/messages";
@@ -102,7 +102,7 @@ export default function MessageLauncher() {
 
   const isMessagesPage = location.pathname === "/messages";
 
-  async function loadData() {
+  const loadData = useCallback(async () => {
     try {
       const [rows, unread] = await Promise.all([
         getConversations(token, "all"),
@@ -114,14 +114,14 @@ export default function MessageLauncher() {
     } catch (err) {
       setError(err?.message || "Nie udało się pobrać wiadomości.");
     }
-  }
+  }, [token]);
 
   useEffect(() => {
     if (!token || isMessagesPage) return;
     loadData();
     const intervalId = window.setInterval(loadData, 20000);
     return () => window.clearInterval(intervalId);
-  }, [token, isMessagesPage]);
+  }, [token, isMessagesPage, loadData]);
 
   useEffect(() => {
     if (isMessagesPage) {

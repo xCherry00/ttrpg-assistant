@@ -8,3 +8,7 @@ export function setToken(token) {
   if (token) localStorage.setItem(STORAGE_KEY, token);
   else localStorage.removeItem(STORAGE_KEY);
 }
+
+export function clearToken() {
+  localStorage.removeItem(STORAGE_KEY);
+}

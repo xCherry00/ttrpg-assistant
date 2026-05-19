@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { blockUser, getPublicProfile, sendFriendRequest } from "../api/social";
@@ -37,7 +37,7 @@ export default function PublicUserPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  async function loadProfile() {
+  const loadProfile = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
@@ -48,11 +48,11 @@ export default function PublicUserPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [handle, token]);
 
   useEffect(() => {
     loadProfile();
-  }, [handle, token]);
+  }, [loadProfile]);
 
   async function runAction(action) {
     if (!profile?.user) return;
@@ -225,3 +225,4 @@ export default function PublicUserPage() {
     </div>
   );
 }
+

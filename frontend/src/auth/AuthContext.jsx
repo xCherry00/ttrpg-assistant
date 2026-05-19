@@ -1,8 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { clearToken, getToken, setToken as persistToken } from "./authstorage";
 
 const AuthContext = createContext(null);
-
-const TOKEN_STORAGE_KEY = "token";
 
 /**
  * AuthProvider component that manages authentication state.
@@ -10,16 +9,14 @@ const TOKEN_STORAGE_KEY = "token";
  */
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => {
-    // Initialize from localStorage on first render
-    return localStorage.getItem(TOKEN_STORAGE_KEY) || "";
+    return getToken();
   });
 
-  // Persist token changes to localStorage
   useEffect(() => {
     if (token) {
-      localStorage.setItem(TOKEN_STORAGE_KEY, token);
+      persistToken(token);
     } else {
-      localStorage.removeItem(TOKEN_STORAGE_KEY);
+      clearToken();
     }
   }, [token]);
 

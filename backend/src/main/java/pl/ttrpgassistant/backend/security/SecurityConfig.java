@@ -26,6 +26,17 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .headers(headers -> headers
+                .frameOptions(frame -> frame.deny())
+                .contentSecurityPolicy(csp -> csp.policyDirectives(
+                    "default-src 'self'; " +
+                    "base-uri 'self'; " +
+                    "frame-ancestors 'none'; " +
+                    "object-src 'none'; " +
+                    "img-src 'self' data: https:; " +
+                    "connect-src 'self' http://localhost:5173 http://localhost:8080 ws://localhost:5173 ws://localhost:8080"
+                ))
+            )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 

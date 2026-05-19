@@ -156,31 +156,6 @@ export default function InitiativePage() {
     return "hp--red";
   }
 
-  function normalizeRow(row, fallbackSystem = "dnd") {
-    const rowSystem = row.system === "coc" || row.system === "dnd" ? row.system : fallbackSystem;
-    const initiativeMod = row.initiativeMod ?? row.mod ?? 0;
-    const hpMax = Math.max(1, toInt(row.hpMax ?? row.hp ?? 1, 1));
-    const dex = row.dex == null ? null : toInt(row.dex, null);
-
-    return {
-      id: row.id || nextId(),
-      system: rowSystem,
-      type: row.type || "enemy",
-      name: row.name || "Nowy",
-      initiativeMod: rowSystem === "dnd" ? toInt(initiativeMod, 0) : null,
-      baseRoll: rowSystem === "dnd" ? row.baseRoll ?? null : null,
-      initiative: row.initiative ?? (rowSystem === "coc" ? dex ?? 50 : null),
-      dex,
-      ac: rowSystem === "dnd" ? toInt(row.ac, 10) : null,
-      armor: row.armor ?? "",
-      hpMax,
-      hp: clampHpMinOnly(row.hp ?? hpMax),
-      note: row.note || "",
-      attacksNote: row.attacksNote || "",
-      dmgHeal: row.dmgHeal || "",
-    };
-  }
-
   function createDndRow(name) {
     const hpMax = Math.max(1, toInt(form.hpMax, 10));
     return {
@@ -256,6 +231,31 @@ export default function InitiativePage() {
   // CACHE (SESSION) — NAJPIERW WCZYTAJ, POTEM ZAPISUJ
   // =========================================================
   useEffect(() => {
+    function normalizeStoredRow(row, fallbackSystem = "dnd") {
+      const rowSystem = row.system === "coc" || row.system === "dnd" ? row.system : fallbackSystem;
+      const initiativeMod = row.initiativeMod ?? row.mod ?? 0;
+      const hpMax = Math.max(1, toInt(row.hpMax ?? row.hp ?? 1, 1));
+      const dex = row.dex == null ? null : toInt(row.dex, null);
+
+      return {
+        id: row.id || nextId(),
+        system: rowSystem,
+        type: row.type || "enemy",
+        name: row.name || "Nowy",
+        initiativeMod: rowSystem === "dnd" ? toInt(initiativeMod, 0) : null,
+        baseRoll: rowSystem === "dnd" ? row.baseRoll ?? null : null,
+        initiative: row.initiative ?? (rowSystem === "coc" ? dex ?? 50 : null),
+        dex,
+        ac: rowSystem === "dnd" ? toInt(row.ac, 10) : null,
+        armor: row.armor ?? "",
+        hpMax,
+        hp: Math.max(0, toInt(row.hp ?? hpMax, 0)),
+        note: row.note || "",
+        attacksNote: row.attacksNote || "",
+        dmgHeal: row.dmgHeal || "",
+      };
+    }
+
     try {
       const storedSystem = sessionStorage.getItem(INIT_SYSTEM_KEY);
       if (storedSystem === "dnd" || storedSystem === "coc") setSystem(storedSystem);
@@ -263,7 +263,7 @@ export default function InitiativePage() {
       const raw = sessionStorage.getItem(INIT_CACHE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) setRows(parsed.map((row) => normalizeRow(row, storedSystem || "dnd")));
+        if (Array.isArray(parsed)) setRows(parsed.map((row) => normalizeStoredRow(row, storedSystem || "dnd")));
       }
     } catch {
       // ignore

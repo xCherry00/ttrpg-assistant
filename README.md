@@ -113,6 +113,18 @@ cd backend && mvn -q -DskipTests package
 cd ../infra && docker compose up -d --build backend
 ```
 
+**Backend Docker workflow (zawsze aktualny JAR):**
+
+```bash
+cd backend
+mvn -q -DskipTests package
+cd ../infra
+docker compose down
+docker compose up -d --build
+```
+
+Jeśli backend uruchamia stary kod, przyczyną zwykle jest brak świeżego `mvn package` przed compose build (Dockerfile kopiuje `target/*.jar`).
+
 **Weryfikacja kodu:**
 
 ```bash
@@ -300,6 +312,18 @@ docker exec -it ttrpg_db psql -U ttrpg -d ttrpg
 cd backend && mvn -q -DskipTests package
 cd ../infra && docker compose up -d --build backend
 ```
+
+**Backend Docker workflow (always fresh JAR):**
+
+```bash
+cd backend
+mvn -q -DskipTests package
+cd ../infra
+docker compose down
+docker compose up -d --build
+```
+
+If backend runs stale code, the most common cause is skipping `mvn package` before compose build (Dockerfile copies `target/*.jar`).
 
 **Code verification:**
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { discoverUsers } from "../api/social";
@@ -57,7 +57,7 @@ export default function MessagesPage() {
     [activeConversationId, conversations]
   );
 
-  async function loadConversations(selectedFilter = filter) {
+  const loadConversations = useCallback(async (selectedFilter = filter) => {
     setLoadingConversations(true);
     setError("");
     try {
@@ -79,9 +79,9 @@ export default function MessagesPage() {
     } finally {
       setLoadingConversations(false);
     }
-  }
+  }, [activeConversationId, filter, searchParams, token]);
 
-  async function loadMessages(conversationId, { beforeId, appendOlder = false } = {}) {
+  const loadMessages = useCallback(async (conversationId, { beforeId, appendOlder = false } = {}) => {
     if (!conversationId) return;
     if (!appendOlder) {
       setLoadingMessages(true);
@@ -102,11 +102,11 @@ export default function MessagesPage() {
         setLoadingMessages(false);
       }
     }
-  }
+  }, [token]);
 
   useEffect(() => {
     loadConversations(filter);
-  }, [filter, token]);
+  }, [filter, loadConversations]);
 
   useEffect(() => {
     if (!activeConversationId) {
@@ -120,7 +120,7 @@ export default function MessagesPage() {
       next.set("conversation", String(activeConversationId));
       return next;
     });
-  }, [activeConversationId, token, setSearchParams]);
+  }, [activeConversationId, loadMessages, setSearchParams, token]);
 
   useEffect(() => {
     const timeoutId = setTimeout(async () => {
@@ -422,3 +422,4 @@ export default function MessagesPage() {
     </div>
   );
 }
+
