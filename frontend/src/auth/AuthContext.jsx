@@ -20,6 +20,12 @@ export function AuthProvider({ children }) {
     }
   }, [token]);
 
+  useEffect(() => {
+    const handleUnauthorized = () => setToken("");
+    window.addEventListener("ttrpg:unauthorized", handleUnauthorized);
+    return () => window.removeEventListener("ttrpg:unauthorized", handleUnauthorized);
+  }, []);
+
   // Derive isLoggedIn from token (no need to store separately)
   const isLoggedIn = !!token;
 

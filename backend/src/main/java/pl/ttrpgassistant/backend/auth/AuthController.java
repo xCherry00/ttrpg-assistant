@@ -29,10 +29,7 @@ public class AuthController {
     }
 
     private String clientKey(HttpServletRequest request, String email) {
-        String forwardedFor = request.getHeader("X-Forwarded-For");
-        String ip = forwardedFor == null || forwardedFor.isBlank()
-                ? request.getRemoteAddr()
-                : forwardedFor.split(",")[0].trim();
+        String ip = request.getRemoteAddr();
         String normalizedEmail = email == null ? "" : email.trim().toLowerCase();
         return ip + ":" + normalizedEmail;
     }

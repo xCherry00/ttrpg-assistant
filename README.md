@@ -405,3 +405,11 @@ monsters / glossary_terms static data (monster db, TTRPG glossary)
 ---
 
 *Engineering thesis project · 2025*
+
+## Security (MVP v0.5.4)
+- JWT is currently stored in localStorage (	trpg_token) for MVP simplicity.
+- Added hardening: CSP + frame deny + safe image/data URL validation + auth rate limiting + no token logging.
+- Rate limiter uses server-observed client IP (emoteAddr) and ignores spoofed X-Forwarded-For in current MVP mode.
+- HttpOnly cookie migration is intentionally postponed to a future phase to avoid breaking auth flow in this release.
+- Manual smoke: register (min 8 password), invalid login (generic 401), protected endpoint 401/200 checks, ownership checks for characters/campaigns.
+

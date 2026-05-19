@@ -17,6 +17,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -80,6 +81,27 @@ class PlayerCharacterQuickCreateIT {
         assertThat(saved.getSheetJson()).isNotBlank();
 
         playerCharacterRepository.delete(saved);
+    }
+
+    @Test
+    void quickCreateShouldRejectJavascriptPortraitUrl() throws Exception {
+        Long userId = 6L;
+        String token = jwtService.createToken(userId, "PLAYER", false);
+        Map<String, Object> request = Map.of(
+                "name", "Unsafe Portrait",
+                "raceIndex", "human",
+                "classIndex", "fighter",
+                "backgroundIndex", "soldier",
+                "portraitUrl", "javascript:alert(1)"
+        );
+
+        mockMvc.perform(post("/api/characters/dnd/quick-create")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(dndCharacterSheetService);
     }
 
     private Map<String, Object> sampleSheet(String name) {

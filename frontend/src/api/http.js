@@ -1,4 +1,6 @@
 // Backend API base URL. Vite injects VITE_API_URL from .env; localhost remains the dev fallback.
+import { clearToken } from "../auth/authstorage";
+
 export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 export function unwrapPage(data) {
@@ -84,6 +86,10 @@ export async function http(path, { method = "GET", body, token } = {}) {
       err.status = res.status;
       err.data = data;
       err.rawMessage = rawMessage;
+      if (res.status === 401) {
+        clearToken();
+        window.dispatchEvent(new Event("ttrpg:unauthorized"));
+      }
       console.error("API error", { path, status: res.status, rawMessage, data });
       throw err;
     }

@@ -36,7 +36,7 @@ public class AuthService {
      */
     public AuthResponse register(RegisterRequest req) {
         if (userRepository.existsByEmail(req.email())) {
-            throw new DuplicateResourceException("Email already in use: " + req.email());
+            throw new DuplicateResourceException("Email already in use");
         }
 
         String normalizedEmail = req.email().trim().toLowerCase(Locale.ROOT);
