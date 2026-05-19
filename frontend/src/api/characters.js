@@ -8,14 +8,26 @@ export function getCharacter(token, characterId) {
   return http(`/api/characters/${characterId}`, { method: "GET", token });
 }
 
-export function createCharacter(token, body) {
-  return http("/api/characters", { method: "POST", token, body });
-}
-
-export function updateCharacter(token, characterId, body) {
-  return http(`/api/characters/${characterId}`, { method: "PUT", token, body });
-}
-
 export function deleteCharacter(token, characterId) {
   return http(`/api/characters/${characterId}`, { method: "DELETE", token });
+}
+
+export function getDndClasses(token) {
+  return http("/api/compendium/dnd/classes", { method: "GET", token });
+}
+
+export function getDndRaces(token) {
+  return http("/api/compendium/dnd/races", { method: "GET", token });
+}
+
+export function getDndBackgrounds(token) {
+  return http("/api/compendium/dnd/backgrounds", { method: "GET", token });
+}
+
+export function quickCreateCharacter(token, body) {
+  return http("/api/characters/dnd/quick-create", { method: "POST", token, body });
+}
+
+export function updateCharacterSheet(token, characterId, body) {
+  return http(`/api/characters/${characterId}/sheet`, { method: "PUT", token, body });
 }

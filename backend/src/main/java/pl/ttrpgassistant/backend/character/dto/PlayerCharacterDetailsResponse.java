@@ -1,6 +1,7 @@
 package pl.ttrpgassistant.backend.character.dto;
 
 import java.time.Instant;
+import java.util.Map;
 
 public record PlayerCharacterDetailsResponse(
         Long id,
@@ -9,34 +10,13 @@ public record PlayerCharacterDetailsResponse(
         String status,
         String portraitUrl,
         String raceName,
-        String subraceName,
         String className,
-        String subclassName,
         String backgroundName,
-        String alignment,
         Integer level,
-        Integer experiencePoints,
-        String abilityMode,
-        Integer strength,
-        Integer dexterity,
-        Integer constitution,
-        Integer intelligence,
-        Integer wisdom,
-        Integer charisma,
-        Integer maxHp,
         Integer currentHp,
         Integer tempHp,
-        Integer armorClass,
-        Integer initiativeBonus,
-        Integer speed,
-        Integer proficiencyBonus,
-        String hitDice,
-        String skillNotes,
-        String savingThrowNotes,
-        String equipmentNotes,
-        String featureNotes,
-        String personalityNotes,
         String privateNotes,
+        Map<String, Object> sheetJson,
         Instant createdAt,
         Instant updatedAt
 ) {}

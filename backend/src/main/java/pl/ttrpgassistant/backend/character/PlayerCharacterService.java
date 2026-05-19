@@ -1,21 +1,28 @@
 package pl.ttrpgassistant.backend.character;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.ttrpgassistant.backend.character.dto.PlayerCharacterDetailsResponse;
 import pl.ttrpgassistant.backend.character.dto.PlayerCharacterSummaryResponse;
-import pl.ttrpgassistant.backend.character.dto.UpsertPlayerCharacterRequest;
+import pl.ttrpgassistant.backend.character.dto.QuickCreateDndCharacterRequest;
+import pl.ttrpgassistant.backend.character.dto.UpdateCharacterSheetRequest;
 import pl.ttrpgassistant.backend.common.error.ResourceNotFoundException;
 
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class PlayerCharacterService {
 
     private final PlayerCharacterRepository playerCharacterRepository;
+    private final DndCharacterSheetService sheetService;
+    private final DndCompendiumService compendiumService;
+    private final ObjectMapper objectMapper;
 
     @Transactional(readOnly = true)
     public List<PlayerCharacterSummaryResponse> listForUser(Long userId) {
@@ -30,62 +37,88 @@ public class PlayerCharacterService {
     }
 
     @Transactional
-    public PlayerCharacterDetailsResponse create(Long userId, UpsertPlayerCharacterRequest request) {
+    public PlayerCharacterDetailsResponse quickCreate(Long userId, QuickCreateDndCharacterRequest request) {
+        Map<String, Object> sheet = sheetService.generate(
+                request.name().trim(),
+                request.raceIndex().trim(),
+                request.classIndex().trim(),
+                request.backgroundIndex().trim(),
+                normalizeNullable(request.portraitUrl())
+        );
+
         PlayerCharacterEntity entity = PlayerCharacterEntity.builder()
                 .ownerUserId(userId)
+                .systemCode("dnd5e")
+                .status("ACTIVE")
                 .name(request.name().trim())
+                .portraitUrl(normalizeNullable(request.portraitUrl()))
+                .raceName(labelFromSnapshot(sheet, "race"))
+                .className(labelFromSnapshot(sheet, "class"))
+                .backgroundName(labelFromSnapshot(sheet, "background"))
+                .level(1)
+                .maxHp(intFromCombat(sheet, "maxHp", 1))
+                .currentHp(intFromCombat(sheet, "currentHp", 1))
+                .tempHp(intFromCombat(sheet, "tempHp", 0))
+                .privateNotes("")
+                .sheetJson(writeSheet(sheet))
                 .build();
 
-        applyRequest(entity, request);
         return toDetails(playerCharacterRepository.save(entity));
     }
 
     @Transactional
-    public PlayerCharacterDetailsResponse update(Long userId, Long characterId, UpsertPlayerCharacterRequest request) {
+    public PlayerCharacterDetailsResponse updateSheet(Long userId, Long characterId, UpdateCharacterSheetRequest request) {
         PlayerCharacterEntity entity = requireOwnedCharacter(userId, characterId);
-        entity.setName(request.name().trim());
-        applyRequest(entity, request);
+        Map<String, Object> sheet = readSheet(entity.getSheetJson());
+
+        if (request.name() != null && !request.name().isBlank()) {
+            String name = request.name().trim();
+            entity.setName(name);
+            map(sheet, "identity").put("name", name);
+        }
+        if (request.portraitUrl() != null) {
+            String portrait = normalizeNullable(request.portraitUrl());
+            entity.setPortraitUrl(portrait);
+            map(sheet, "identity").put("portraitUrl", portrait == null ? "" : portrait);
+        }
+        if (request.currentHp() != null) {
+            entity.setCurrentHp(request.currentHp());
+            map(sheet, "combat").put("currentHp", request.currentHp());
+        }
+        if (request.tempHp() != null) {
+            entity.setTempHp(request.tempHp());
+            map(sheet, "combat").put("tempHp", request.tempHp());
+        }
+        if (request.privateNotes() != null) {
+            entity.setPrivateNotes(request.privateNotes().trim());
+            map(sheet, "notes").put("privateNotes", request.privateNotes().trim());
+        }
+        if (request.inventory() != null) {
+            sheet.put("inventory", request.inventory());
+        }
+
+        entity.setSheetJson(writeSheet(sheet));
         return toDetails(playerCharacterRepository.save(entity));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> compendiumClasses() {
+        return compendiumService.classes();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> compendiumRaces() {
+        return compendiumService.races();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> compendiumBackgrounds() {
+        return compendiumService.backgrounds();
     }
 
     @Transactional
     public void delete(Long userId, Long characterId) {
         playerCharacterRepository.delete(requireOwnedCharacter(userId, characterId));
-    }
-
-    private void applyRequest(PlayerCharacterEntity entity, UpsertPlayerCharacterRequest request) {
-        entity.setSystemCode("dnd5e");
-        entity.setStatus(normalizeStatus(request.status()));
-        entity.setPortraitUrl(normalizeNullable(request.portraitUrl()));
-        entity.setRaceName(normalize(request.raceName()));
-        entity.setSubraceName(normalize(request.subraceName()));
-        entity.setClassName(normalize(request.className()));
-        entity.setSubclassName(normalize(request.subclassName()));
-        entity.setBackgroundName(normalize(request.backgroundName()));
-        entity.setAlignment(normalize(request.alignment()));
-        entity.setLevel(orDefault(request.level(), 1));
-        entity.setExperiencePoints(orDefault(request.experiencePoints(), 0));
-        entity.setAbilityMode(normalizeAbilityMode(request.abilityMode()));
-        entity.setStrength(orDefault(request.strength(), 10));
-        entity.setDexterity(orDefault(request.dexterity(), 10));
-        entity.setConstitution(orDefault(request.constitution(), 10));
-        entity.setIntelligence(orDefault(request.intelligence(), 10));
-        entity.setWisdom(orDefault(request.wisdom(), 10));
-        entity.setCharisma(orDefault(request.charisma(), 10));
-        entity.setMaxHp(orDefault(request.maxHp(), 1));
-        entity.setCurrentHp(orDefault(request.currentHp(), entity.getMaxHp()));
-        entity.setTempHp(orDefault(request.tempHp(), 0));
-        entity.setArmorClass(orDefault(request.armorClass(), 10));
-        entity.setInitiativeBonus(orDefault(request.initiativeBonus(), 0));
-        entity.setSpeed(orDefault(request.speed(), 30));
-        entity.setProficiencyBonus(orDefault(request.proficiencyBonus(), 2));
-        entity.setHitDice(normalize(request.hitDice()));
-        entity.setSkillNotes(normalizeLarge(request.skillNotes()));
-        entity.setSavingThrowNotes(normalizeLarge(request.savingThrowNotes()));
-        entity.setEquipmentNotes(normalizeLarge(request.equipmentNotes()));
-        entity.setFeatureNotes(normalizeLarge(request.featureNotes()));
-        entity.setPersonalityNotes(normalizeLarge(request.personalityNotes()));
-        entity.setPrivateNotes(normalizeLarge(request.privateNotes()));
     }
 
     private PlayerCharacterEntity requireOwnedCharacter(Long userId, Long characterId) {
@@ -115,45 +148,62 @@ public class PlayerCharacterService {
                 entity.getStatus(),
                 entity.getPortraitUrl(),
                 entity.getRaceName(),
-                entity.getSubraceName(),
                 entity.getClassName(),
-                entity.getSubclassName(),
                 entity.getBackgroundName(),
-                entity.getAlignment(),
                 entity.getLevel(),
-                entity.getExperiencePoints(),
-                entity.getAbilityMode(),
-                entity.getStrength(),
-                entity.getDexterity(),
-                entity.getConstitution(),
-                entity.getIntelligence(),
-                entity.getWisdom(),
-                entity.getCharisma(),
-                entity.getMaxHp(),
                 entity.getCurrentHp(),
                 entity.getTempHp(),
-                entity.getArmorClass(),
-                entity.getInitiativeBonus(),
-                entity.getSpeed(),
-                entity.getProficiencyBonus(),
-                entity.getHitDice(),
-                entity.getSkillNotes(),
-                entity.getSavingThrowNotes(),
-                entity.getEquipmentNotes(),
-                entity.getFeatureNotes(),
-                entity.getPersonalityNotes(),
                 entity.getPrivateNotes(),
+                readSheet(entity.getSheetJson()),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
         );
     }
 
-    private String normalize(String value) {
-        return value == null ? "" : value.trim();
+    private String labelFromSnapshot(Map<String, Object> sheet, String key) {
+        Map<String, Object> snapshots = map(sheet, "snapshots");
+        Object raw = snapshots.get(key);
+        if (raw instanceof Map<?, ?> item) {
+            Object label = item.get("name");
+            return label == null ? "" : String.valueOf(label);
+        }
+        return "";
     }
 
-    private String normalizeLarge(String value) {
-        return value == null ? "" : value.trim();
+    private int intFromCombat(Map<String, Object> sheet, String key, int fallback) {
+        Object value = map(sheet, "combat").get(key);
+        if (value instanceof Number number) return number.intValue();
+        return fallback;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> map(Map<String, Object> root, String key) {
+        Object value = root.get(key);
+        if (value instanceof Map<?, ?> map) {
+            return (Map<String, Object>) map;
+        }
+        Map<String, Object> created = new LinkedHashMap<>();
+        root.put(key, created);
+        return created;
+    }
+
+    private String writeSheet(Map<String, Object> sheet) {
+        try {
+            return objectMapper.writeValueAsString(sheet);
+        } catch (Exception ex) {
+            throw new IllegalStateException("Could not serialize character sheet");
+        }
+    }
+
+    private Map<String, Object> readSheet(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return new LinkedHashMap<>();
+        }
+        try {
+            return objectMapper.readValue(raw, new TypeReference<>() {});
+        } catch (Exception ex) {
+            return new LinkedHashMap<>();
+        }
     }
 
     private String normalizeNullable(String value) {
@@ -161,31 +211,5 @@ public class PlayerCharacterService {
             return null;
         }
         return value.trim();
-    }
-
-    private Integer orDefault(Integer value, Integer fallback) {
-        return value == null ? fallback : value;
-    }
-
-    private String normalizeStatus(String value) {
-        if (value == null || value.isBlank()) {
-            return "DRAFT";
-        }
-        String normalized = value.trim().toUpperCase(Locale.ROOT);
-        return switch (normalized) {
-            case "ACTIVE", "ARCHIVED", "DRAFT" -> normalized;
-            default -> "DRAFT";
-        };
-    }
-
-    private String normalizeAbilityMode(String value) {
-        if (value == null || value.isBlank()) {
-            return "MANUAL";
-        }
-        String normalized = value.trim().toUpperCase(Locale.ROOT);
-        return switch (normalized) {
-            case "STANDARD_ARRAY", "ROLLED", "MANUAL" -> normalized;
-            default -> "MANUAL";
-        };
     }
 }

@@ -181,7 +181,7 @@ monsters / glossary_terms dane statyczne (baza potworów, słownik)
 - Frontend w JavaScript — bez TypeScript i bez PropTypes
 - Brak Swagger/OpenAPI — endpointy opisane tylko w kontrolerach
 - `tailwindcss` w `package.json` — wciągnięty, nigdy nieużyty
-- Backend używa wersji Spring Boot `3.5.10-SNAPSHOT`; do stabilniejszego CI warto przejść na wydanie stabilne
+- Backend używa stabilnej wersji Spring Boot `3.4.1`; przy aktualizacjach trzymaj się wydań stabilnych zamiast snapshotów
 - Token JWT jest trzymany po stronie frontendu w `localStorage`, co jest wygodne lokalnie, ale wymaga ostrożności przy XSS w produkcji
 
 ---
@@ -363,7 +363,7 @@ monsters / glossary_terms static data (monster db, TTRPG glossary)
 - Frontend is plain JavaScript — no TypeScript, no PropTypes
 - No Swagger/OpenAPI — endpoints are only documented in the controller files
 - `tailwindcss` is in `package.json` but was never actually used
-- The backend currently uses Spring Boot `3.5.10-SNAPSHOT`; for more stable CI, switch to a stable release
+- The backend uses stable Spring Boot `3.4.1`; keep future upgrades on stable releases instead of snapshots
 - JWT is stored in frontend `localStorage`, which is convenient locally but needs XSS care in production
 
 ---

@@ -45,6 +45,7 @@
 .charactersCardTop,
 .charactersHero,
 .charactersModalTop,
+.charactersCreateHead,
 .charactersActionsFooter,
 .charactersActionsInline {
   display: flex;
@@ -56,8 +57,179 @@
 .charactersSidebarTop h2,
 .charactersPanel h3,
 .charactersHero h2,
+.charactersCreateHead h2,
 .charactersModalTop h2 {
   margin: 0;
+}
+
+.charactersCreatePanel {
+  padding: 22px;
+}
+
+.charactersCreateHead {
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.charactersCreateHead h2 {
+  margin-top: 6px;
+  font-size: clamp(2rem, 3vw, 3rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.charactersCreateHead p {
+  margin: 10px 0 0;
+  color: var(--text-2);
+  line-height: 1.6;
+}
+
+.charactersQuickCreate,
+.charactersPortraitControls {
+  display: grid;
+  gap: 16px;
+}
+
+.charactersSystemGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.charactersSystemCard {
+  min-height: 190px;
+  padding: 22px;
+  border-radius: 24px;
+  border: 1px solid rgba(236, 191, 96, 0.18);
+  background:
+    radial-gradient(circle at top left, rgba(236, 191, 96, 0.12), transparent 42%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015)),
+    rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  text-align: left;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+.charactersSystemCard:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: rgba(236, 191, 96, 0.34);
+  background:
+    radial-gradient(circle at top left, rgba(236, 191, 96, 0.18), transparent 42%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+    rgba(255, 255, 255, 0.04);
+}
+
+.charactersSystemCard:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.charactersSystemCard span {
+  width: max-content;
+  border-radius: 999px;
+  padding: 6px 10px;
+  border: 1px solid rgba(236, 191, 96, 0.18);
+  color: #f5d79f;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.charactersSystemCard strong {
+  font-size: clamp(1.55rem, 3vw, 2.4rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.charactersSystemCard p {
+  margin: 0;
+  color: var(--text-2);
+  line-height: 1.6;
+}
+
+.charactersPortraitPicker {
+  display: grid;
+  grid-template-columns: minmax(180px, 260px) minmax(0, 1fr);
+  gap: 18px;
+  padding: 18px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    radial-gradient(circle at top left, rgba(56, 154, 255, 0.1), transparent 38%),
+    rgba(255, 255, 255, 0.025);
+}
+
+.charactersPortraitPreview {
+  min-height: 260px;
+  overflow: hidden;
+  border-radius: 24px;
+  border: 1px solid rgba(236, 191, 96, 0.18);
+  background: rgba(8, 12, 20, 0.62);
+  display: grid;
+  place-items: center;
+  color: var(--text-2);
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.charactersPortraitPreview img {
+  width: 100%;
+  height: 100%;
+  min-height: 260px;
+  object-fit: cover;
+}
+
+.charactersPortraitTabs,
+.charactersPortraitPresets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.charactersGhostBtn.is-active {
+  border-color: rgba(236, 191, 96, 0.32);
+  background: rgba(236, 191, 96, 0.12);
+  color: #fff1c8;
+}
+
+.charactersPortraitPreset {
+  width: 118px;
+  padding: 10px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  display: grid;
+  gap: 8px;
+  cursor: pointer;
+  transition: transform 0.16s ease, border-color 0.16s ease;
+}
+
+.charactersPortraitPreset:hover {
+  transform: translateY(-1px);
+}
+
+.charactersPortraitPreset.is-active {
+  border-color: rgba(236, 191, 96, 0.34);
+}
+
+.charactersPortraitPreset img {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.charactersPortraitPreset span {
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
 }
 
 .charactersPanel h3 {
@@ -639,8 +811,10 @@
   inset: 0;
   z-index: 80;
   display: grid;
-  place-items: center;
-  padding: 56px 24px 24px;
+  align-items: start;
+  justify-items: center;
+  overflow: hidden;
+  padding: 32px 24px;
   background:
     radial-gradient(circle at top, rgba(56, 154, 255, 0.1), transparent 28%),
     rgba(4, 8, 16, 0.74);
@@ -649,8 +823,8 @@
 
 .charactersModalCard {
   width: min(1060px, 100%);
-  max-height: min(calc(100vh - 80px), 920px);
-  overflow: auto;
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
   padding: 0;
   border-radius: 30px;
   border-color: rgba(129, 173, 219, 0.16);
@@ -856,7 +1030,7 @@
 
 .charactersModalCard .charactersGrid,
 .charactersModalCard .charactersAbilities {
-  padding: 0 22px;
+  padding: 18px 22px 22px;
 }
 
 .charactersModalCard .charactersDraftSection {
@@ -1540,7 +1714,9 @@
   .quickBuilderOptionGrid--compact,
   .charactersAbilityModes,
   .charactersAbilitiesGrid,
-  .charactersChoiceHelp {
+  .charactersChoiceHelp,
+  .charactersSystemGrid,
+  .charactersPortraitPicker {
     grid-template-columns: 1fr;
   }
 
@@ -1558,6 +1734,7 @@
   .charactersSidebarTop,
   .charactersCardTop,
   .charactersModalTop,
+  .charactersCreateHead,
   .charactersActionsFooter,
   .charactersActionsInline {
     flex-direction: column;
