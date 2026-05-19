@@ -74,4 +74,7 @@ public class UserEntity {
     @Column(name = "last_active_at", nullable = false)
     @Builder.Default
     private Instant lastActiveAt = Instant.now();
+
+    @Column(name = "token_invalidated_at")
+    private Instant tokenInvalidatedAt;
 }

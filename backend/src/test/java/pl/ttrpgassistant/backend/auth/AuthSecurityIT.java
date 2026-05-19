@@ -13,11 +13,13 @@ import pl.ttrpgassistant.backend.campaign.CampaignEntity;
 import pl.ttrpgassistant.backend.campaign.CampaignRepository;
 import pl.ttrpgassistant.backend.character.PlayerCharacterEntity;
 import pl.ttrpgassistant.backend.character.PlayerCharacterRepository;
+import pl.ttrpgassistant.backend.common.error.ResourceNotFoundException;
 import pl.ttrpgassistant.backend.security.JwtService;
 import pl.ttrpgassistant.backend.user.UserEntity;
 import pl.ttrpgassistant.backend.user.UserRepository;
 import pl.ttrpgassistant.backend.user.UserRole;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
 
@@ -29,7 +31,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@SpringBootTest(properties = "app.auth.expose-reset-token=true")
 @AutoConfigureMockMvc
 class AuthSecurityIT {
 
@@ -53,6 +55,9 @@ class AuthSecurityIT {
 
     @Autowired
     private CampaignRepository campaignRepository;
+
+    @Autowired
+    private PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Test
     void registerShouldRejectPasswordShorterThanEight() throws Exception {
@@ -214,6 +219,163 @@ class AuthSecurityIT {
                                 "password", "wrong-password"
                         ))))
                 .andExpect(status().isTooManyRequests());
+    }
+
+    @Test
+    void forgotPasswordShouldReturnNeutralResponseForExistingEmail() throws Exception {
+        String email = uniqueEmail("forgot-existing");
+        createUser(email, "password-123");
+
+        String responseBody = mockMvc.perform(post("/api/auth/forgot-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("email", email))))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Map<?, ?> response = objectMapper.readValue(responseBody, Map.class);
+        assertThat(response.get("message")).isEqualTo("If the email exists, password reset instructions have been generated.");
+        assertThat(response.get("resetToken")).isNotNull();
+    }
+
+    @Test
+    void forgotPasswordShouldReturnNeutralResponseForMissingEmail() throws Exception {
+        String responseBody = mockMvc.perform(post("/api/auth/forgot-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("email", uniqueEmail("forgot-missing")))))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Map<?, ?> response = objectMapper.readValue(responseBody, Map.class);
+        assertThat(response.get("message")).isEqualTo("If the email exists, password reset instructions have been generated.");
+    }
+
+    @Test
+    void resetPasswordWithValidTokenShouldChangePasswordAndRejectOldJwt() throws Exception {
+        String email = uniqueEmail("reset-ok");
+        String oldPassword = "password-123";
+        String newPassword = "new-password-123";
+        UserEntity user = createUser(email, oldPassword);
+        String oldToken = jwtService.createToken(user.getId(), "PLAYER", false);
+
+        String forgotBody = mockMvc.perform(post("/api/auth/forgot-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("email", email))))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        String resetToken = String.valueOf(objectMapper.readValue(forgotBody, Map.class).get("resetToken"));
+        assertThat(resetToken).isNotBlank();
+
+        mockMvc.perform(post("/api/auth/reset-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "token", resetToken,
+                                "newPassword", newPassword
+                        ))))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/api/characters")
+                        .header("Authorization", "Bearer " + oldToken))
+                .andExpect(status().isUnauthorized());
+
+        String loginBody = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", email,
+                                "password", newPassword
+                        ))))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        assertThat(objectMapper.readValue(loginBody, Map.class).get("token")).isNotNull();
+    }
+
+    @Test
+    void resetPasswordWithUsedTokenShouldFail() throws Exception {
+        String email = uniqueEmail("reset-used");
+        createUser(email, "password-123");
+
+        String forgotBody = mockMvc.perform(post("/api/auth/forgot-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("email", email))))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        String resetToken = String.valueOf(objectMapper.readValue(forgotBody, Map.class).get("resetToken"));
+
+        Map<String, Object> resetRequest = Map.of("token", resetToken, "newPassword", "password-456");
+        mockMvc.perform(post("/api/auth/reset-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(resetRequest)))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(post("/api/auth/reset-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(resetRequest)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void resetPasswordWithExpiredTokenShouldFail() throws Exception {
+        String email = uniqueEmail("reset-expired");
+        createUser(email, "password-123");
+
+        String forgotBody = mockMvc.perform(post("/api/auth/forgot-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("email", email))))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        String resetToken = String.valueOf(objectMapper.readValue(forgotBody, Map.class).get("resetToken"));
+        UUID tokenId = UUID.fromString(resetToken.substring(0, resetToken.indexOf('.')));
+        PasswordResetTokenEntity tokenEntity = passwordResetTokenRepository.findById(tokenId)
+                .orElseThrow(() -> new ResourceNotFoundException("Token not found"));
+        tokenEntity.setExpiresAt(Instant.now().minusSeconds(5));
+        passwordResetTokenRepository.save(tokenEntity);
+
+        mockMvc.perform(post("/api/auth/reset-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "token", resetToken,
+                                "newPassword", "password-789"
+                        ))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void oldJwtShouldBeRejectedAfterChangePassword() throws Exception {
+        String email = uniqueEmail("change-old-jwt");
+        String oldPassword = "password-123";
+        String newPassword = "password-999";
+        UserEntity user = createUser(email, oldPassword);
+        String oldToken = jwtService.createToken(user.getId(), "PLAYER", false);
+
+        mockMvc.perform(post("/api/user/change-password")
+                        .header("Authorization", "Bearer " + oldToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "currentPassword", oldPassword,
+                                "newPassword", newPassword
+                        ))))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/api/characters")
+                        .header("Authorization", "Bearer " + oldToken))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", email,
+                                "password", newPassword
+                        ))))
+                .andExpect(status().isOk());
     }
 
     private UserEntity createUser(String email, String password) {

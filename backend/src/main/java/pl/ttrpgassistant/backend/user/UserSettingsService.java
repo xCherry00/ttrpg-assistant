@@ -48,6 +48,7 @@ public class UserSettingsService {
         }
 
         user.setPasswordHash(passwordEncoder.encode(req.newPassword()));
+        user.setTokenInvalidatedAt(java.time.Instant.now());
         userRepository.save(user);
     }
 

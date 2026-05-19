@@ -43,6 +43,10 @@ app:
     # JWT token expiration time in minutes (default: 7 days)
     jwtExpirationMinutes: ${JWT_EXP_MIN:10080}
 
+  auth:
+    reset-token-ttl-minutes: ${RESET_TOKEN_TTL_MIN:60}
+    expose-reset-token: ${EXPOSE_RESET_TOKEN:false}
+
   # CORS configuration for frontend access
   cors:
     # Comma-separated list of allowed origins

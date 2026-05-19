@@ -10,17 +10,22 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import pl.ttrpgassistant.backend.user.UserEntity;
+import pl.ttrpgassistant.backend.user.UserRepository;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final UserRepository userRepository;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    public JwtAuthenticationFilter(JwtService jwtService, UserRepository userRepository) {
         this.jwtService = jwtService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -45,8 +50,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
-            Long userId = jwtService.getUserId(token);
-            String role = jwtService.getRole(token);
+            var claims = jwtService.parseClaims(token);
+            Long userId = Long.parseLong(claims.getSubject());
+            String role = claims.get("role", String.class);
+            Instant issuedAt = claims.getIssuedAt() == null ? null : claims.getIssuedAt().toInstant();
+            UserEntity user = userRepository.findById(userId).orElse(null);
+            if (user == null) {
+                SecurityContextHolder.clearContext();
+                filterChain.doFilter(request, response);
+                return;
+            }
+            if (user.getTokenInvalidatedAt() != null && (issuedAt == null || issuedAt.isBefore(user.getTokenInvalidatedAt()))) {
+                SecurityContextHolder.clearContext();
+                filterChain.doFilter(request, response);
+                return;
+            }
 
             var authorities = role == null
                     ? List.<SimpleGrantedAuthority>of()

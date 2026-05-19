@@ -1,4 +1,5 @@
 import { http } from "./http";
+import { clearToken } from "../auth/authstorage";
 
 const CACHE_KEY = "ttrpg_initiative_rows_v1";
 
@@ -30,11 +31,25 @@ export async function register(email, password) {
   });
 }
 
+export async function forgotPassword(email) {
+  return http("/api/auth/forgot-password", {
+    method: "POST",
+    body: { email },
+  });
+}
+
+export async function resetPassword(token, newPassword) {
+  return http("/api/auth/reset-password", {
+    method: "POST",
+    body: { token, newPassword },
+  });
+}
+
 /**
  * Clear all authentication-related data from storage.
  * Called on logout to clean up cache and credentials.
  */
 export function logout() {
-  localStorage.removeItem("token");
+  clearToken();
   sessionStorage.removeItem(CACHE_KEY);
 }

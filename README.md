@@ -413,3 +413,11 @@ monsters / glossary_terms static data (monster db, TTRPG glossary)
 - HttpOnly cookie migration is intentionally postponed to a future phase to avoid breaking auth flow in this release.
 - Manual smoke: register (min 8 password), invalid login (generic 401), protected endpoint 401/200 checks, ownership checks for characters/campaigns.
 
+
+### Password Reset (v0.5.5)
+- Added endpoints: POST /api/auth/forgot-password and POST /api/auth/reset-password.
+- Forgot password always returns a neutral response to avoid account enumeration.
+- Reset tokens are stored hashed in DB (password_reset_tokens) with expiration and single-use flag.
+- Token delivery by email is TODO for future infrastructure; for tests/dev it can be exposed via EXPOSE_RESET_TOKEN=true.
+- Added users.token_invalidated_at: after password change/reset, older JWTs (issued before invalidation time) are rejected.
+
