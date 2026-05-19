@@ -37,6 +37,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class CampaignWorkspaceService {
+    private static final String SESSION_STATUS_PLANNED = "PLANNED";
+    private static final String SESSION_STATUS_IN_PROGRESS = "IN_PROGRESS";
+    private static final String SESSION_STATUS_FINISHED = "FINISHED";
 
     private final CampaignRepository campaignRepository;
     private final CampaignMemberRepository campaignMemberRepository;
@@ -107,7 +110,7 @@ public class CampaignWorkspaceService {
                 .campaignId(campaignId)
                 .title(request.title().trim())
                 .descriptionMd(normalizeText(request.description()))
-                .status("PLANNED")
+                .status(SESSION_STATUS_PLANNED)
                 .scheduledFor(parseInstant(request.scheduledFor()))
                 .createdByUserId(userId)
                 .build());
@@ -120,10 +123,14 @@ public class CampaignWorkspaceService {
     @Transactional
     public CampaignSessionSummaryResponse startSession(Long userId, Long campaignId, Long sessionId) {
         CampaignSessionEntity session = requireOwnerSession(userId, campaignId, sessionId);
-        if ("FINISHED".equals(session.getStatus())) {
-            throw new IllegalArgumentException("Ta sesja jest juz zakonczona.");
+        String status = normalizeSessionStatus(session.getStatus());
+        if (SESSION_STATUS_FINISHED.equals(status)) {
+            throw new IllegalArgumentException("Finished session cannot be started again.");
         }
-        session.setStatus("ACTIVE");
+        if (!SESSION_STATUS_PLANNED.equals(status)) {
+            throw new IllegalArgumentException("Only PLANNED session can be started.");
+        }
+        session.setStatus(SESSION_STATUS_IN_PROGRESS);
         session.setStartedAt(Instant.now());
         CampaignSessionEntity saved = campaignSessionRepository.save(session);
         notifyCampaignMembers(campaignId, userId, "SESSION_STARTED", "MG rozpoczal sesje: " + saved.getTitle(), true);
@@ -133,7 +140,14 @@ public class CampaignWorkspaceService {
     @Transactional
     public CampaignSessionSummaryResponse finishSession(Long userId, Long campaignId, Long sessionId) {
         CampaignSessionEntity session = requireOwnerSession(userId, campaignId, sessionId);
-        session.setStatus("FINISHED");
+        String status = normalizeSessionStatus(session.getStatus());
+        if (SESSION_STATUS_FINISHED.equals(status)) {
+            throw new IllegalArgumentException("Session is already finished.");
+        }
+        if (!SESSION_STATUS_IN_PROGRESS.equals(status)) {
+            throw new IllegalArgumentException("Only IN_PROGRESS session can be finished.");
+        }
+        session.setStatus(SESSION_STATUS_FINISHED);
         if (session.getStartedAt() == null) {
             session.setStartedAt(Instant.now());
         }
@@ -205,7 +219,7 @@ public class CampaignWorkspaceService {
     @Transactional
     public CampaignSessionMessageResponse addMessage(Long userId, Long campaignId, Long sessionId, CreateCampaignSessionMessageRequest request) {
         CampaignSessionEntity session = requireMemberSession(userId, campaignId, sessionId);
-        if (!"ACTIVE".equals(session.getStatus())) {
+        if (!SESSION_STATUS_IN_PROGRESS.equals(normalizeSessionStatus(session.getStatus()))) {
             throw new IllegalArgumentException("Chat jest aktywny tylko w trakcie trwajacej sesji.");
         }
 
@@ -348,6 +362,15 @@ public class CampaignWorkspaceService {
         }
     }
 
+    @Transactional
+    public void softDeleteCampaign(Long userId, Long campaignId) {
+        CampaignEntity campaign = requireOwnerAccess(userId, campaignId);
+        if (campaign.getDeletedAt() == null) {
+            campaign.setDeletedAt(Instant.now());
+            campaignRepository.save(campaign);
+        }
+    }
+
     private void seedAttendanceForCampaignMembers(Long campaignId, Long sessionId) {
         List<CampaignSessionAttendanceEntity> rows = campaignMemberRepository.findByIdCampaignId(campaignId).stream()
                 .map(member -> CampaignSessionAttendanceEntity.builder()
@@ -466,6 +489,15 @@ public class CampaignWorkspaceService {
         return switch (value) {
             case "YES", "NO", "MAYBE" -> value;
             default -> throw new IllegalArgumentException("Attendance status must be YES, NO or MAYBE");
+        };
+    }
+
+    private String normalizeSessionStatus(String rawStatus) {
+        String value = rawStatus == null ? "" : rawStatus.trim().toUpperCase(Locale.ROOT);
+        return switch (value) {
+            case SESSION_STATUS_PLANNED, SESSION_STATUS_IN_PROGRESS, SESSION_STATUS_FINISHED -> value;
+            case "ACTIVE" -> SESSION_STATUS_IN_PROGRESS;
+            default -> throw new IllegalArgumentException("Unsupported session status.");
         };
     }
 

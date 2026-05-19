@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -150,15 +151,81 @@ class CampaignRegressionIT {
         String joinerToken = tokenFor(joiner);
 
         Number campaignId = createCampaign(ownerToken, "Deleted Campaign");
-        CampaignEntity campaign = campaignRepository.findById(campaignId.longValue()).orElseThrow();
-        String joinCode = campaign.getJoinCode();
-        campaign.setDeletedAt(Instant.now());
-        campaignRepository.save(campaign);
+        String detailsBody = mockMvc.perform(get("/api/campaigns/" + campaignId.longValue())
+                        .header("Authorization", "Bearer " + ownerToken))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        String joinCode = String.valueOf(objectMapper.readValue(detailsBody, Map.class).get("joinCode"));
+
+        mockMvc.perform(delete("/api/campaigns/" + campaignId.longValue())
+                        .header("Authorization", "Bearer " + ownerToken))
+                .andExpect(status().isNoContent());
 
         mockMvc.perform(post("/api/campaigns/join")
                         .header("Authorization", "Bearer " + joinerToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("code", joinCode))))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void softDeleteShouldBeAllowedForOwnerAndHideCampaignData() throws Exception {
+        UserEntity owner = createUser("soft-owner");
+        String ownerToken = tokenFor(owner);
+        Number campaignId = createCampaign(ownerToken, "Soft Delete Campaign");
+
+        mockMvc.perform(delete("/api/campaigns/" + campaignId.longValue())
+                        .header("Authorization", "Bearer " + ownerToken))
+                .andExpect(status().isNoContent());
+
+        String listBody = mockMvc.perform(get("/api/campaigns")
+                        .header("Authorization", "Bearer " + ownerToken))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        Map<?, ?> listResponse = objectMapper.readValue(listBody, Map.class);
+        List<?> items = (List<?>) listResponse.get("items");
+        List<Long> listedIds = items.stream()
+                .map(item -> ((Number) ((Map<?, ?>) item).get("id")).longValue())
+                .toList();
+        assertThat(listedIds).doesNotContain(campaignId.longValue());
+
+        mockMvc.perform(get("/api/campaigns/" + campaignId.longValue())
+                        .header("Authorization", "Bearer " + ownerToken))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/api/campaigns/" + campaignId.longValue() + "/sessions")
+                        .header("Authorization", "Bearer " + ownerToken))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void softDeleteShouldRejectNonOwnerAndOutsider() throws Exception {
+        UserEntity owner = createUser("del-owner");
+        UserEntity member = createUser("del-member");
+        UserEntity outsider = createUser("del-outsider");
+        String ownerToken = tokenFor(owner);
+        String memberToken = tokenFor(member);
+        String outsiderToken = tokenFor(outsider);
+
+        Number campaignId = createCampaign(ownerToken, "Delete Guard Campaign");
+        String detailsBody = mockMvc.perform(get("/api/campaigns/" + campaignId.longValue())
+                        .header("Authorization", "Bearer " + ownerToken))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        String joinCode = String.valueOf(objectMapper.readValue(detailsBody, Map.class).get("joinCode"));
+
+        mockMvc.perform(post("/api/campaigns/join")
+                        .header("Authorization", "Bearer " + memberToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("code", joinCode))))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(delete("/api/campaigns/" + campaignId.longValue())
+                        .header("Authorization", "Bearer " + memberToken))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(delete("/api/campaigns/" + campaignId.longValue())
+                        .header("Authorization", "Bearer " + outsiderToken))
                 .andExpect(status().isNotFound());
     }
 
@@ -207,11 +274,22 @@ class CampaignRegressionIT {
                         .header("Authorization", "Bearer " + ownerToken))
                 .andExpect(status().isOk());
 
+        String startedBody = mockMvc.perform(get("/api/campaigns/" + campaignId.longValue() + "/sessions")
+                        .header("Authorization", "Bearer " + ownerToken))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        List<?> startedSessions = objectMapper.readValue(startedBody, List.class);
+        assertThat(((Map<?, ?>) startedSessions.get(0)).get("status")).isEqualTo("IN_PROGRESS");
+
         mockMvc.perform(post("/api/campaigns/" + campaignId.longValue() + "/sessions/" + sessionId.longValue() + "/finish")
                         .header("Authorization", "Bearer " + ownerToken))
                 .andExpect(status().isOk());
 
         mockMvc.perform(post("/api/campaigns/" + campaignId.longValue() + "/sessions/" + sessionId.longValue() + "/start")
+                        .header("Authorization", "Bearer " + ownerToken))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(post("/api/campaigns/" + campaignId.longValue() + "/sessions/" + sessionId.longValue() + "/finish")
                         .header("Authorization", "Bearer " + ownerToken))
                 .andExpect(status().isBadRequest());
 

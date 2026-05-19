@@ -406,6 +406,32 @@ monsters / glossary_terms static data (monster db, TTRPG glossary)
 
 *Engineering thesis project · 2025*
 
+## Campaign Management Core (v0.6.0)
+
+- `GET /api/campaigns` lists visible campaigns (owner/member, excluding soft-deleted).
+- `GET /api/campaigns/{id}` returns details only for owner/member.
+- `POST /api/campaigns` creates campaign.
+- `PATCH /api/campaigns/{id}` updates campaign core data (owner only).
+- `DELETE /api/campaigns/{id}` soft-deletes campaign (owner only, returns `204`).
+- `POST /api/campaigns/join` joins by code; deleted campaign codes return `404`.
+
+Role rules:
+- Owner can update/delete campaign and create/start/finish sessions.
+- Member can view campaign and workspace data.
+- Non-member cannot view private campaign details or modify campaign/session state.
+
+Soft-delete behavior:
+- API sets `campaigns.deleted_at` and keeps DB row.
+- Deleted campaigns disappear from list and details endpoints.
+- Session endpoints on deleted campaign return `404`.
+- Join code uniqueness is partial for active rows only (`deleted_at IS NULL`), so deleted code can be reused.
+
+Status rules:
+- Campaign status values: `active`, `finished`, `archived` (validated in DB + entity guard).
+- Session status values: `PLANNED`, `IN_PROGRESS`, `FINISHED`.
+- Allowed flow: `PLANNED -> IN_PROGRESS -> FINISHED`.
+- Re-starting finished session or finishing non-`IN_PROGRESS` session returns `400`.
+
 ## Security (MVP v0.5.4)
 - JWT is currently stored in localStorage (	trpg_token) for MVP simplicity.
 - Added hardening: CSP + frame deny + safe image/data URL validation + auth rate limiting + no token logging.

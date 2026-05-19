@@ -80,6 +80,13 @@ export async function updateCampaign(token, campaignId, body) {
   });
 }
 
+export async function deleteCampaign(token, campaignId) {
+  return http(`/api/campaigns/${campaignId}`, {
+    method: "DELETE",
+    token,
+  });
+}
+
 export async function toggleCampaignFavorite(token, campaignId) {
   return http(`/api/campaigns/${campaignId}/favorite`, {
     method: "POST",

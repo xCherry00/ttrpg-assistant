@@ -14,6 +14,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.Locale;
+import java.util.Set;
 
 @Entity
 @Table(name = "campaigns")
@@ -22,6 +24,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @Builder
 public class CampaignEntity {
+    private static final Set<String> ALLOWED_STATUSES = Set.of("active", "finished", "archived");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -71,12 +74,22 @@ public class CampaignEntity {
     @PrePersist
     void onCreate() {
         Instant now = Instant.now();
+        status = normalizeStatus(status);
         if (createdAt == null) createdAt = now;
         updatedAt = now;
     }
 
     @PreUpdate
     void onUpdate() {
+        status = normalizeStatus(status);
         updatedAt = Instant.now();
+    }
+
+    private String normalizeStatus(String rawStatus) {
+        String normalized = rawStatus == null ? "" : rawStatus.trim().toLowerCase(Locale.ROOT);
+        if (!ALLOWED_STATUSES.contains(normalized)) {
+            throw new IllegalArgumentException("Unsupported campaign status.");
+        }
+        return normalized;
     }
 }

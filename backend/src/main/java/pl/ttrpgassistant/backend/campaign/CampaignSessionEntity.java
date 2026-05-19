@@ -14,6 +14,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.Locale;
+import java.util.Set;
 
 @Entity
 @Table(name = "campaign_sessions")
@@ -22,6 +24,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @Builder
 public class CampaignSessionEntity {
+    private static final Set<String> ALLOWED_STATUSES = Set.of("PLANNED", "IN_PROGRESS", "FINISHED");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -62,12 +65,25 @@ public class CampaignSessionEntity {
     @PrePersist
     void onCreate() {
         Instant now = Instant.now();
+        status = normalizeStatus(status);
         if (createdAt == null) createdAt = now;
         updatedAt = now;
     }
 
     @PreUpdate
     void onUpdate() {
+        status = normalizeStatus(status);
         updatedAt = Instant.now();
+    }
+
+    private String normalizeStatus(String rawStatus) {
+        String normalized = rawStatus == null ? "" : rawStatus.trim().toUpperCase(Locale.ROOT);
+        if ("ACTIVE".equals(normalized)) {
+            normalized = "IN_PROGRESS";
+        }
+        if (!ALLOWED_STATUSES.contains(normalized)) {
+            throw new IllegalArgumentException("Unsupported campaign session status.");
+        }
+        return normalized;
     }
 }

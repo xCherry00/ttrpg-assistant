@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignMaterialResponse;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignMemberActionResponse;
@@ -35,6 +36,7 @@ import pl.ttrpgassistant.backend.campaign.dto.UpsertCampaignSessionNoteRequest;
 import pl.ttrpgassistant.backend.common.pagination.PagedResponse;
 
 import java.util.List;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
 @RequestMapping("/api/campaigns")
@@ -108,6 +110,13 @@ public class CampaignController {
     ) {
         Long userId = (Long) auth.getPrincipal();
         return campaignWorkspaceService.updateCampaign(userId, id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(NO_CONTENT)
+    public void softDelete(Authentication auth, @PathVariable Long id) {
+        Long userId = (Long) auth.getPrincipal();
+        campaignWorkspaceService.softDeleteCampaign(userId, id);
     }
 
     @PostMapping("/join")
