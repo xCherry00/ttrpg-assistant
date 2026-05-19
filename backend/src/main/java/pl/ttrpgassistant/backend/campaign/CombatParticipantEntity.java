@@ -60,6 +60,30 @@ public class CombatParticipantEntity {
     @Column(name = "notes")
     private String notes;
 
+    @Column(name = "max_hp")
+    private Integer maxHp;
+
+    @Column(name = "current_hp")
+    private Integer currentHp;
+
+    @Column(name = "temp_hp", nullable = false)
+    @Builder.Default
+    private Integer tempHp = 0;
+
+    @Column(name = "armor_class")
+    private Integer armorClass;
+
+    @Column(name = "conditions")
+    private String conditions;
+
+    @Column(name = "death_save_successes", nullable = false)
+    @Builder.Default
+    private Integer deathSaveSuccesses = 0;
+
+    @Column(name = "death_save_failures", nullable = false)
+    @Builder.Default
+    private Integer deathSaveFailures = 0;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 

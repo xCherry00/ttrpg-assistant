@@ -264,6 +264,52 @@ export async function removeEncounterParticipant(token, campaignId, encounterId,
   });
 }
 
+export async function applyParticipantDamage(token, campaignId, encounterId, participantId, amount) {
+  return http(`/api/campaigns/${campaignId}/encounters/${encounterId}/participants/${participantId}/damage`, {
+    method: "POST",
+    token,
+    body: { amount },
+  });
+}
+
+export async function healParticipant(token, campaignId, encounterId, participantId, amount) {
+  return http(`/api/campaigns/${campaignId}/encounters/${encounterId}/participants/${participantId}/heal`, {
+    method: "POST",
+    token,
+    body: { amount },
+  });
+}
+
+export async function setParticipantTemporaryHp(token, campaignId, encounterId, participantId, amount) {
+  return http(`/api/campaigns/${campaignId}/encounters/${encounterId}/participants/${participantId}/temporary-hp`, {
+    method: "POST",
+    token,
+    body: { amount },
+  });
+}
+
+export async function setParticipantConditions(token, campaignId, encounterId, participantId, conditions) {
+  return http(`/api/campaigns/${campaignId}/encounters/${encounterId}/participants/${participantId}/conditions`, {
+    method: "POST",
+    token,
+    body: { conditions },
+  });
+}
+
+export async function defeatParticipant(token, campaignId, encounterId, participantId) {
+  return http(`/api/campaigns/${campaignId}/encounters/${encounterId}/participants/${participantId}/defeat`, {
+    method: "POST",
+    token,
+  });
+}
+
+export async function restoreParticipant(token, campaignId, encounterId, participantId) {
+  return http(`/api/campaigns/${campaignId}/encounters/${encounterId}/participants/${participantId}/restore`, {
+    method: "POST",
+    token,
+  });
+}
+
 export async function nextEncounterTurn(token, campaignId, encounterId) {
   return http(`/api/campaigns/${campaignId}/encounters/${encounterId}/next-turn`, {
     method: "POST",
@@ -287,6 +333,41 @@ export async function finishEncounter(token, campaignId, encounterId) {
 
 export async function deleteEncounter(token, campaignId, encounterId) {
   return http(`/api/campaigns/${campaignId}/encounters/${encounterId}`, {
+    method: "DELETE",
+    token,
+  });
+}
+
+export async function createDiceRoll(token, campaignId, payload) {
+  return http(`/api/campaigns/${campaignId}/dice-rolls`, {
+    method: "POST",
+    token,
+    body: payload,
+  });
+}
+
+export async function getCampaignDiceRolls(token, campaignId, filters = {}) {
+  const params = new URLSearchParams();
+  if (filters.limit != null) params.set("limit", String(filters.limit));
+  if (filters.sessionId != null) params.set("sessionId", String(filters.sessionId));
+  if (filters.encounterId != null) params.set("encounterId", String(filters.encounterId));
+  if (filters.characterId != null) params.set("characterId", String(filters.characterId));
+  const query = params.toString();
+  return http(`/api/campaigns/${campaignId}/dice-rolls${query ? `?${query}` : ""}`, {
+    method: "GET",
+    token,
+  });
+}
+
+export async function getDiceRoll(token, campaignId, rollId) {
+  return http(`/api/campaigns/${campaignId}/dice-rolls/${rollId}`, {
+    method: "GET",
+    token,
+  });
+}
+
+export async function deleteDiceRoll(token, campaignId, rollId) {
+  return http(`/api/campaigns/${campaignId}/dice-rolls/${rollId}`, {
     method: "DELETE",
     token,
   });

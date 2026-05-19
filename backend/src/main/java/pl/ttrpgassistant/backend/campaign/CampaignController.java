@@ -27,6 +27,7 @@ import pl.ttrpgassistant.backend.campaign.dto.CampaignFriendCandidateResponse;
 import pl.ttrpgassistant.backend.campaign.dto.AssignCharacterToCampaignRequest;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignCharacterResponse;
 import pl.ttrpgassistant.backend.campaign.dto.CombatEncounterResponse;
+import pl.ttrpgassistant.backend.campaign.dto.CreateDiceRollRequest;
 import pl.ttrpgassistant.backend.campaign.dto.CreateCampaignMaterialRequest;
 import pl.ttrpgassistant.backend.campaign.dto.CreateCombatEncounterRequest;
 import pl.ttrpgassistant.backend.campaign.dto.CreateCampaignSessionMessageRequest;
@@ -35,9 +36,14 @@ import pl.ttrpgassistant.backend.campaign.dto.CreateCampaignRequest;
 import pl.ttrpgassistant.backend.campaign.dto.JoinCampaignRequest;
 import pl.ttrpgassistant.backend.campaign.dto.JoinCampaignResponse;
 import pl.ttrpgassistant.backend.campaign.dto.AddCombatParticipantRequest;
+import pl.ttrpgassistant.backend.campaign.dto.ApplyDamageRequest;
+import pl.ttrpgassistant.backend.campaign.dto.ApplyHealingRequest;
 import pl.ttrpgassistant.backend.campaign.dto.UpdateCombatParticipantRequest;
 import pl.ttrpgassistant.backend.campaign.dto.ReorderParticipantsRequest;
+import pl.ttrpgassistant.backend.campaign.dto.SetParticipantConditionsRequest;
+import pl.ttrpgassistant.backend.campaign.dto.SetTemporaryHpRequest;
 import pl.ttrpgassistant.backend.campaign.dto.UpdateCampaignRequest;
+import pl.ttrpgassistant.backend.campaign.dto.DiceRollResponse;
 import pl.ttrpgassistant.backend.campaign.dto.UpdateSessionAttendanceRequest;
 import pl.ttrpgassistant.backend.campaign.dto.UpsertCampaignSessionNoteRequest;
 import pl.ttrpgassistant.backend.common.pagination.PagedResponse;
@@ -54,6 +60,7 @@ public class CampaignController {
     private final CampaignWorkspaceService campaignWorkspaceService;
     private final CampaignCharacterService campaignCharacterService;
     private final CombatEncounterService combatEncounterService;
+    private final DiceRollService diceRollService;
 
     @GetMapping
     public PagedResponse<CampaignSummaryResponse> list(
@@ -361,6 +368,76 @@ public class CampaignController {
         return combatEncounterService.removeParticipant(userId, id, encounterId, participantId);
     }
 
+    @PostMapping("/{id}/encounters/{encounterId}/participants/{participantId}/damage")
+    public CombatEncounterResponse applyParticipantDamage(
+            Authentication auth,
+            @PathVariable Long id,
+            @PathVariable Long encounterId,
+            @PathVariable Long participantId,
+            @Valid @RequestBody ApplyDamageRequest request
+    ) {
+        Long userId = (Long) auth.getPrincipal();
+        return combatEncounterService.applyDamage(userId, id, encounterId, participantId, request.amount());
+    }
+
+    @PostMapping("/{id}/encounters/{encounterId}/participants/{participantId}/heal")
+    public CombatEncounterResponse applyParticipantHealing(
+            Authentication auth,
+            @PathVariable Long id,
+            @PathVariable Long encounterId,
+            @PathVariable Long participantId,
+            @Valid @RequestBody ApplyHealingRequest request
+    ) {
+        Long userId = (Long) auth.getPrincipal();
+        return combatEncounterService.applyHealing(userId, id, encounterId, participantId, request.amount());
+    }
+
+    @PostMapping("/{id}/encounters/{encounterId}/participants/{participantId}/temporary-hp")
+    public CombatEncounterResponse setParticipantTemporaryHp(
+            Authentication auth,
+            @PathVariable Long id,
+            @PathVariable Long encounterId,
+            @PathVariable Long participantId,
+            @Valid @RequestBody SetTemporaryHpRequest request
+    ) {
+        Long userId = (Long) auth.getPrincipal();
+        return combatEncounterService.setTemporaryHp(userId, id, encounterId, participantId, request.amount());
+    }
+
+    @PostMapping("/{id}/encounters/{encounterId}/participants/{participantId}/conditions")
+    public CombatEncounterResponse setParticipantConditions(
+            Authentication auth,
+            @PathVariable Long id,
+            @PathVariable Long encounterId,
+            @PathVariable Long participantId,
+            @Valid @RequestBody SetParticipantConditionsRequest request
+    ) {
+        Long userId = (Long) auth.getPrincipal();
+        return combatEncounterService.setConditions(userId, id, encounterId, participantId, request.conditions());
+    }
+
+    @PostMapping("/{id}/encounters/{encounterId}/participants/{participantId}/defeat")
+    public CombatEncounterResponse defeatParticipant(
+            Authentication auth,
+            @PathVariable Long id,
+            @PathVariable Long encounterId,
+            @PathVariable Long participantId
+    ) {
+        Long userId = (Long) auth.getPrincipal();
+        return combatEncounterService.defeatParticipant(userId, id, encounterId, participantId);
+    }
+
+    @PostMapping("/{id}/encounters/{encounterId}/participants/{participantId}/restore")
+    public CombatEncounterResponse restoreParticipant(
+            Authentication auth,
+            @PathVariable Long id,
+            @PathVariable Long encounterId,
+            @PathVariable Long participantId
+    ) {
+        Long userId = (Long) auth.getPrincipal();
+        return combatEncounterService.restoreParticipant(userId, id, encounterId, participantId);
+    }
+
     @PostMapping("/{id}/encounters/{encounterId}/participants/reorder")
     public CombatEncounterResponse reorderEncounterParticipants(
             Authentication auth,
@@ -395,5 +472,41 @@ public class CampaignController {
     public void softDeleteEncounter(Authentication auth, @PathVariable Long id, @PathVariable Long encounterId) {
         Long userId = (Long) auth.getPrincipal();
         combatEncounterService.softDeleteEncounter(userId, id, encounterId);
+    }
+
+    @PostMapping("/{id}/dice-rolls")
+    public DiceRollResponse createDiceRoll(
+            Authentication auth,
+            @PathVariable Long id,
+            @Valid @RequestBody CreateDiceRollRequest request
+    ) {
+        Long userId = (Long) auth.getPrincipal();
+        return diceRollService.createRoll(userId, id, request);
+    }
+
+    @GetMapping("/{id}/dice-rolls")
+    public List<DiceRollResponse> listDiceRolls(
+            Authentication auth,
+            @PathVariable Long id,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long sessionId,
+            @RequestParam(required = false) Long encounterId,
+            @RequestParam(required = false) Long characterId
+    ) {
+        Long userId = (Long) auth.getPrincipal();
+        return diceRollService.listRolls(userId, id, limit, sessionId, encounterId, characterId);
+    }
+
+    @GetMapping("/{id}/dice-rolls/{rollId}")
+    public DiceRollResponse getDiceRoll(Authentication auth, @PathVariable Long id, @PathVariable Long rollId) {
+        Long userId = (Long) auth.getPrincipal();
+        return diceRollService.getRoll(userId, id, rollId);
+    }
+
+    @DeleteMapping("/{id}/dice-rolls/{rollId}")
+    @ResponseStatus(NO_CONTENT)
+    public void softDeleteDiceRoll(Authentication auth, @PathVariable Long id, @PathVariable Long rollId) {
+        Long userId = (Long) auth.getPrincipal();
+        diceRollService.softDeleteRoll(userId, id, rollId);
     }
 }

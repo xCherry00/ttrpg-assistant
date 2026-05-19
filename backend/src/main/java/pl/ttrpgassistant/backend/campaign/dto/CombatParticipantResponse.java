@@ -10,5 +10,12 @@ public record CombatParticipantResponse(
         Integer sortOrder,
         boolean isActive,
         boolean isDefeated,
-        String notes
+        String notes,
+        Integer maxHp,
+        Integer currentHp,
+        Integer tempHp,
+        Integer armorClass,
+        String conditions,
+        Integer deathSaveSuccesses,
+        Integer deathSaveFailures
 ) {}

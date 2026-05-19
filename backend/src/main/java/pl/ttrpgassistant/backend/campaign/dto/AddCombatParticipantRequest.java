@@ -10,5 +10,10 @@ public record AddCombatParticipantRequest(
         @Size(max = 30) String participantType,
         @Min(-100) @Max(100) Integer initiativeValue,
         @Min(-100) @Max(100) Integer initiativeModifier,
-        @Size(max = 5000) String notes
+        @Size(max = 5000) String notes,
+        @Min(0) Integer maxHp,
+        @Min(0) Integer currentHp,
+        @Min(0) Integer tempHp,
+        @Min(0) Integer armorClass,
+        @Size(max = 1000) String conditions
 ) {}

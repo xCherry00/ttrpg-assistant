@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CombatEncounterService {
 
-    private static final Set<String> ENCOUNTER_STATUSES = Set.of("ACTIVE", "FINISHED", "ARCHIVED");
     private static final Set<String> PARTICIPANT_TYPES = Set.of("PLAYER_CHARACTER", "NPC", "MONSTER", "CUSTOM");
 
     private final CampaignRepository campaignRepository;
@@ -94,6 +93,13 @@ public class CombatEncounterService {
                 .active(true)
                 .defeated(false)
                 .notes(input.notes())
+                .maxHp(input.maxHp())
+                .currentHp(input.currentHp())
+                .tempHp(input.tempHp())
+                .armorClass(input.armorClass())
+                .conditions(input.conditions())
+                .deathSaveSuccesses(0)
+                .deathSaveFailures(0)
                 .build());
 
         refreshEncounterPointers(encounter, loadSortedParticipants(encounter.getId()));
@@ -124,6 +130,27 @@ public class CombatEncounterService {
         }
         if (request.notes() != null) {
             participant.setNotes(request.notes());
+        }
+        if (request.maxHp() != null) {
+            participant.setMaxHp(request.maxHp());
+        }
+        if (request.currentHp() != null) {
+            participant.setCurrentHp(request.currentHp());
+        }
+        if (request.tempHp() != null) {
+            participant.setTempHp(request.tempHp());
+        }
+        if (request.armorClass() != null) {
+            participant.setArmorClass(request.armorClass());
+        }
+        if (request.conditions() != null) {
+            participant.setConditions(request.conditions());
+        }
+        if (request.deathSaveSuccesses() != null) {
+            participant.setDeathSaveSuccesses(request.deathSaveSuccesses());
+        }
+        if (request.deathSaveFailures() != null) {
+            participant.setDeathSaveFailures(request.deathSaveFailures());
         }
         combatParticipantRepository.save(participant);
 
@@ -226,6 +253,96 @@ public class CombatEncounterService {
     }
 
     @Transactional
+    public CombatEncounterResponse applyDamage(Long userId, Long campaignId, Long encounterId, Long participantId, int amount) {
+        requireOwnerAccess(userId, campaignId);
+        CombatEncounterEntity encounter = requireEncounter(campaignId, encounterId);
+        ensureEncounterMutable(encounter);
+        CombatParticipantEntity participant = requireParticipant(encounterId, participantId);
+        ensureHpTrackingEnabled(participant);
+
+        int remaining = amount;
+        int temp = safeInt(participant.getTempHp());
+        int usedTemp = Math.min(temp, remaining);
+        participant.setTempHp(temp - usedTemp);
+        remaining -= usedTemp;
+
+        int current = safeInt(participant.getCurrentHp());
+        int nextCurrent = Math.max(0, current - remaining);
+        participant.setCurrentHp(nextCurrent);
+        if (nextCurrent == 0) {
+            participant.setDefeated(true);
+        }
+        combatParticipantRepository.save(participant);
+        refreshEncounterPointers(encounter, loadSortedParticipants(encounter.getId()));
+        return toResponse(encounter, loadSortedParticipants(encounter.getId()));
+    }
+
+    @Transactional
+    public CombatEncounterResponse applyHealing(Long userId, Long campaignId, Long encounterId, Long participantId, int amount) {
+        requireOwnerAccess(userId, campaignId);
+        CombatEncounterEntity encounter = requireEncounter(campaignId, encounterId);
+        ensureEncounterMutable(encounter);
+        CombatParticipantEntity participant = requireParticipant(encounterId, participantId);
+        if (participant.getCurrentHp() == null || participant.getMaxHp() == null) {
+            throw new IllegalArgumentException("HP tracking not enabled for participant.");
+        }
+        int healed = Math.min(participant.getMaxHp(), safeInt(participant.getCurrentHp()) + amount);
+        participant.setCurrentHp(healed);
+        if (healed > 0) {
+            participant.setDefeated(false);
+        }
+        combatParticipantRepository.save(participant);
+        refreshEncounterPointers(encounter, loadSortedParticipants(encounter.getId()));
+        return toResponse(encounter, loadSortedParticipants(encounter.getId()));
+    }
+
+    @Transactional
+    public CombatEncounterResponse setTemporaryHp(Long userId, Long campaignId, Long encounterId, Long participantId, int amount) {
+        requireOwnerAccess(userId, campaignId);
+        CombatEncounterEntity encounter = requireEncounter(campaignId, encounterId);
+        ensureEncounterMutable(encounter);
+        CombatParticipantEntity participant = requireParticipant(encounterId, participantId);
+        participant.setTempHp(amount);
+        combatParticipantRepository.save(participant);
+        return toResponse(encounter, loadSortedParticipants(encounter.getId()));
+    }
+
+    @Transactional
+    public CombatEncounterResponse setConditions(Long userId, Long campaignId, Long encounterId, Long participantId, String conditions) {
+        requireOwnerAccess(userId, campaignId);
+        CombatEncounterEntity encounter = requireEncounter(campaignId, encounterId);
+        ensureEncounterMutable(encounter);
+        CombatParticipantEntity participant = requireParticipant(encounterId, participantId);
+        participant.setConditions(conditions);
+        combatParticipantRepository.save(participant);
+        return toResponse(encounter, loadSortedParticipants(encounter.getId()));
+    }
+
+    @Transactional
+    public CombatEncounterResponse defeatParticipant(Long userId, Long campaignId, Long encounterId, Long participantId) {
+        requireOwnerAccess(userId, campaignId);
+        CombatEncounterEntity encounter = requireEncounter(campaignId, encounterId);
+        ensureEncounterMutable(encounter);
+        CombatParticipantEntity participant = requireParticipant(encounterId, participantId);
+        participant.setDefeated(true);
+        combatParticipantRepository.save(participant);
+        refreshEncounterPointers(encounter, loadSortedParticipants(encounter.getId()));
+        return toResponse(encounter, loadSortedParticipants(encounter.getId()));
+    }
+
+    @Transactional
+    public CombatEncounterResponse restoreParticipant(Long userId, Long campaignId, Long encounterId, Long participantId) {
+        requireOwnerAccess(userId, campaignId);
+        CombatEncounterEntity encounter = requireEncounter(campaignId, encounterId);
+        ensureEncounterMutable(encounter);
+        CombatParticipantEntity participant = requireParticipant(encounterId, participantId);
+        participant.setDefeated(false);
+        combatParticipantRepository.save(participant);
+        refreshEncounterPointers(encounter, loadSortedParticipants(encounter.getId()));
+        return toResponse(encounter, loadSortedParticipants(encounter.getId()));
+    }
+
+    @Transactional
     public void softDeleteEncounter(Long userId, Long campaignId, Long encounterId) {
         requireOwnerAccess(userId, campaignId);
         CombatEncounterEntity encounter = requireEncounter(campaignId, encounterId);
@@ -245,7 +362,11 @@ public class CombatEncounterService {
             String name = request.name() == null || request.name().isBlank() ? character.getName() : request.name().trim();
             int init = request.initiativeValue() == null ? 0 : request.initiativeValue();
             Integer mod = request.initiativeModifier();
-            return new ParticipantInput(character.getId(), name, "PLAYER_CHARACTER", init, mod, request.notes());
+            Integer maxHp = request.maxHp() != null ? request.maxHp() : character.getMaxHp();
+            Integer currentHp = request.currentHp() != null ? request.currentHp() : character.getCurrentHp();
+            Integer armorClass = request.armorClass();
+            Integer tempHp = request.tempHp() != null ? request.tempHp() : safeInt(character.getTempHp());
+            return new ParticipantInput(character.getId(), name, "PLAYER_CHARACTER", init, mod, request.notes(), maxHp, currentHp, tempHp, armorClass, request.conditions());
         }
 
         String type = normalizeParticipantType(request.participantType());
@@ -255,7 +376,8 @@ public class CombatEncounterService {
         if (request.initiativeValue() == null) {
             throw new IllegalArgumentException("initiativeValue is required.");
         }
-        return new ParticipantInput(null, request.name().trim(), type, request.initiativeValue(), request.initiativeModifier(), request.notes());
+        Integer tempHp = request.tempHp() == null ? 0 : request.tempHp();
+        return new ParticipantInput(null, request.name().trim(), type, request.initiativeValue(), request.initiativeModifier(), request.notes(), request.maxHp(), request.currentHp(), tempHp, request.armorClass(), request.conditions());
     }
 
     private void ensureEncounterMutable(CombatEncounterEntity encounter) {
@@ -365,7 +487,14 @@ public class CombatEncounterService {
                         item.getSortOrder(),
                         item.isActive(),
                         item.isDefeated(),
-                        item.getNotes()
+                        item.getNotes(),
+                        item.getMaxHp(),
+                        item.getCurrentHp(),
+                        item.getTempHp(),
+                        item.getArmorClass(),
+                        item.getConditions(),
+                        item.getDeathSaveSuccesses(),
+                        item.getDeathSaveFailures()
                 ))
                 .toList();
 
@@ -405,6 +534,21 @@ public class CombatEncounterService {
             String participantType,
             Integer initiativeValue,
             Integer initiativeModifier,
-            String notes
+            String notes,
+            Integer maxHp,
+            Integer currentHp,
+            Integer tempHp,
+            Integer armorClass,
+            String conditions
     ) {}
+
+    private void ensureHpTrackingEnabled(CombatParticipantEntity participant) {
+        if (participant.getCurrentHp() == null) {
+            throw new IllegalArgumentException("HP tracking not enabled for participant.");
+        }
+    }
+
+    private int safeInt(Integer value) {
+        return value == null ? 0 : value;
+    }
 }

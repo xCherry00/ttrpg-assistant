@@ -471,6 +471,68 @@ Status rules:
   - no full combat manager automation.
 - Planned next step: session HP and condition tracking foundation.
 
+### Session HP & Conditions Foundation (v0.6.3)
+
+- `combat_participants` now supports optional state fields:
+  - `max_hp`, `current_hp`, `temp_hp`, `armor_class`, `conditions`,
+  - `death_save_successes`, `death_save_failures`.
+- New participant state endpoints:
+  - `POST /api/campaigns/{campaignId}/encounters/{encounterId}/participants/{participantId}/damage`
+  - `POST /api/campaigns/{campaignId}/encounters/{encounterId}/participants/{participantId}/heal`
+  - `POST /api/campaigns/{campaignId}/encounters/{encounterId}/participants/{participantId}/temporary-hp`
+  - `POST /api/campaigns/{campaignId}/encounters/{encounterId}/participants/{participantId}/conditions`
+  - `POST /api/campaigns/{campaignId}/encounters/{encounterId}/participants/{participantId}/defeat`
+  - `POST /api/campaigns/{campaignId}/encounters/{encounterId}/participants/{participantId}/restore`
+- Rules:
+  - damage consumes `temp_hp` first, then `current_hp`,
+  - `current_hp` never drops below `0`,
+  - reaching `current_hp = 0` sets `isDefeated = true` (MVP behavior),
+  - healing requires both `current_hp` and `max_hp`, caps at `max_hp`,
+  - healing above `0` clears defeated state,
+  - temporary HP endpoint sets value directly (overwrite, no stacking),
+  - conditions are stored as plain text (no automatic rule interpretation).
+- Access and mutability:
+  - owner can mutate HP/conditions/defeated state,
+  - members can read encounter state but cannot mutate,
+  - non-members have no access,
+  - state mutation is blocked when encounter is `FINISHED`.
+- Current intentional limits:
+  - no automatic D&D/CoC rules automation,
+  - no separate conditions table,
+  - no damage/action history log,
+  - no full combat manager UI redesign.
+
+### Dice Roll History (v0.6.4)
+
+- Added persistent dice roll log in `dice_rolls` with optional links to:
+  - campaign session (`session_id`),
+  - combat encounter (`encounter_id`),
+  - encounter participant (`participant_id`),
+  - character (`character_id`).
+- Supported roll expressions (MVP parser):
+  - `d20`, `1d20`, `2d6`, `2d6+3`, `1d20-1`, `4d6+2`, `d100`.
+- Parser limits:
+  - max 20 dice per roll,
+  - max die size `d1000`,
+  - modifier range `-1000..1000`,
+  - one simple expression only (`XdY±M`).
+- Roll type values:
+  - `GENERIC`, `ATTACK`, `DAMAGE`, `SAVE`, `SKILL`, `INITIATIVE`, `CUSTOM`.
+- Privacy rules:
+  - `isPrivate=false`: visible to campaign owner and members,
+  - `isPrivate=true`: visible to campaign owner and roll author only.
+- API:
+  - `POST /api/campaigns/{campaignId}/dice-rolls` (execute + persist),
+  - `GET /api/campaigns/{campaignId}/dice-rolls`,
+  - `GET /api/campaigns/{campaignId}/dice-rolls/{rollId}`,
+  - `DELETE /api/campaigns/{campaignId}/dice-rolls/{rollId}` (soft-delete).
+- Current MVP limits:
+  - no advantage/disadvantage automation,
+  - no Fate/Fudge dice support in backend parser,
+  - no Genesys dice support in backend parser,
+  - no auto-integration into initiative/damage workflows,
+  - no large dedicated UI for persistent roll history yet.
+
 ## Security (MVP v0.5.4)
 - JWT is currently stored in localStorage (	trpg_token) for MVP simplicity.
 - Added hardening: CSP + frame deny + safe image/data URL validation + auth rate limiting + no token logging.
