@@ -432,6 +432,24 @@ Status rules:
 - Allowed flow: `PLANNED -> IN_PROGRESS -> FINISHED`.
 - Re-starting finished session or finishing non-`IN_PROGRESS` session returns `400`.
 
+### Campaign Character Assignment (v0.6.1)
+
+- `campaign_characters` links campaign and player character without exposing `sheet_json` in list APIs.
+- Endpoints:
+  - `POST /api/campaigns/{campaignId}/characters`
+  - `GET /api/campaigns/{campaignId}/characters`
+  - `DELETE /api/campaigns/{campaignId}/characters/{characterId}` (soft detach)
+- Assign rules:
+  - owner/member can assign only their own character;
+  - non-member cannot assign;
+  - deleted campaign cannot accept assignments.
+- Detach rules:
+  - owner can detach any campaign character;
+  - member can detach only own character;
+  - non-member has no access.
+- List returns active assignments only (`is_active = true`) with character summary fields.
+- Current scope intentionally excludes persistent initiative, HP/state tracking, and status automation.
+
 ## Security (MVP v0.5.4)
 - JWT is currently stored in localStorage (	trpg_token) for MVP simplicity.
 - Added hardening: CSP + frame deny + safe image/data URL validation + auth rate limiting + no token logging.

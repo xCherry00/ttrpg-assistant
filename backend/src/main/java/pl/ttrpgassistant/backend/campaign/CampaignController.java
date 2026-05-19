@@ -24,6 +24,8 @@ import pl.ttrpgassistant.backend.campaign.dto.CampaignSessionNoteResponse;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignSessionSummaryResponse;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignSummaryResponse;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignFriendCandidateResponse;
+import pl.ttrpgassistant.backend.campaign.dto.AssignCharacterToCampaignRequest;
+import pl.ttrpgassistant.backend.campaign.dto.CampaignCharacterResponse;
 import pl.ttrpgassistant.backend.campaign.dto.CreateCampaignMaterialRequest;
 import pl.ttrpgassistant.backend.campaign.dto.CreateCampaignSessionMessageRequest;
 import pl.ttrpgassistant.backend.campaign.dto.CreateCampaignSessionRequest;
@@ -45,6 +47,7 @@ public class CampaignController {
 
     private final CampaignService campaignService;
     private final CampaignWorkspaceService campaignWorkspaceService;
+    private final CampaignCharacterService campaignCharacterService;
 
     @GetMapping
     public PagedResponse<CampaignSummaryResponse> list(
@@ -271,5 +274,28 @@ public class CampaignController {
     ) {
         Long userId = (Long) auth.getPrincipal();
         return campaignWorkspaceService.createMaterial(userId, id, request);
+    }
+
+    @PostMapping("/{id}/characters")
+    public CampaignCharacterResponse assignCharacter(
+            Authentication auth,
+            @PathVariable Long id,
+            @Valid @RequestBody AssignCharacterToCampaignRequest request
+    ) {
+        Long userId = (Long) auth.getPrincipal();
+        return campaignCharacterService.assignCharacter(userId, id, request);
+    }
+
+    @GetMapping("/{id}/characters")
+    public List<CampaignCharacterResponse> listCampaignCharacters(Authentication auth, @PathVariable Long id) {
+        Long userId = (Long) auth.getPrincipal();
+        return campaignCharacterService.listCampaignCharacters(userId, id);
+    }
+
+    @DeleteMapping("/{id}/characters/{characterId}")
+    @ResponseStatus(NO_CONTENT)
+    public void detachCharacter(Authentication auth, @PathVariable Long id, @PathVariable Long characterId) {
+        Long userId = (Long) auth.getPrincipal();
+        campaignCharacterService.detachCharacter(userId, id, characterId);
     }
 }

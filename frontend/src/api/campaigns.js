@@ -196,3 +196,25 @@ export async function createCampaignMaterial(token, campaignId, body) {
     body,
   });
 }
+
+export async function assignCharacterToCampaign(token, campaignId, characterId) {
+  return http(`/api/campaigns/${campaignId}/characters`, {
+    method: "POST",
+    token,
+    body: { characterId },
+  });
+}
+
+export async function getCampaignCharacters(token, campaignId) {
+  return http(`/api/campaigns/${campaignId}/characters`, {
+    method: "GET",
+    token,
+  });
+}
+
+export async function detachCharacterFromCampaign(token, campaignId, characterId) {
+  return http(`/api/campaigns/${campaignId}/characters/${characterId}`, {
+    method: "DELETE",
+    token,
+  });
+}
