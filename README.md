@@ -683,6 +683,21 @@ Refactor note (v0.6.6):
   - `GET /api/campaigns/{campaignId}/sessions/{sessionId}/attendance`
   - `PUT /api/campaigns/{campaignId}/sessions/{sessionId}/attendance/me`
 
+### Dashboard & Notifications Consistency (v0.7.3)
+
+- Main dashboard now renders real campaign session data:
+  - upcoming sessions come from user campaigns (`PLANNED`, sorted by date),
+  - active-session hero is based on real `IN_PROGRESS` sessions.
+- Main dashboard no longer duplicates global initiative actions.
+- Global tools remain in sidebar:
+  - `/dice`
+  - `/initiative`
+- Notifications support core actions from bell panel:
+  - mark one as read,
+  - mark all as read,
+  - delete one,
+  - clear all.
+
 ### Player Campaign Notes (v0.7.3)
 
 - Campaign dashboard now supports player campaign notes.

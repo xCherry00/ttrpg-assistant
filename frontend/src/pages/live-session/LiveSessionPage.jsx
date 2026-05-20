@@ -48,6 +48,7 @@ export default function LiveSessionPage() {
   const [notice, setNotice] = useState("");
   const [sessionActionBusy, setSessionActionBusy] = useState(false);
   const [requestedRolls, setRequestedRolls] = useState([]);
+  const [requestedActionBusy, setRequestedActionBusy] = useState(false);
   const [encounters, setEncounters] = useState([]);
   const [activeEncounter, setActiveEncounter] = useState(null);
   const [initiativeLoading, setInitiativeLoading] = useState(false);
@@ -107,13 +108,23 @@ export default function LiveSessionPage() {
   }, [token, campaignId, sessionId]);
 
   async function reloadSessionData() {
-    const sessionsData = await listCampaignSessions(token, campaignId);
+    const [sessionsData, requested, rollsData, liveStateData, encountersData] = await Promise.all([
+      listCampaignSessions(token, campaignId),
+      getRequestedRolls(token, campaignId, sessionId).catch(() => []),
+      getCampaignDiceRolls(token, campaignId, { sessionId, limit: 10 }).catch(() => []),
+      getSessionLiveState(token, campaignId, sessionId).catch(() => null),
+      getCampaignEncounters(token, campaignId).catch(() => []),
+    ]);
+
     const resolvedSession = Array.isArray(sessionsData)
       ? sessionsData.find((item) => String(item.id) === String(sessionId)) || null
       : null;
     setSession(resolvedSession);
-    const requested = await getRequestedRolls(token, campaignId, sessionId).catch(() => []);
     setRequestedRolls(Array.isArray(requested) ? requested : []);
+    setRecentRolls(Array.isArray(rollsData) ? rollsData : []);
+    setLiveState(liveStateData || null);
+    setEncounters(Array.isArray(encountersData) ? encountersData : []);
+    await loadActiveEncounterById(liveStateData?.activeEncounterId || null);
   }
 
   async function loadActiveEncounterById(encounterId) {
@@ -190,6 +201,7 @@ export default function LiveSessionPage() {
     };
     setError("");
     setNotice("");
+    setRequestedActionBusy(true);
     try {
       await createRequestedRoll(token, campaignId, sessionId, payload);
       await reloadSessionData();
@@ -197,30 +209,38 @@ export default function LiveSessionPage() {
       event.currentTarget.reset();
     } catch (err) {
       setError(err?.message || "Nie udalo sie utworzyc requested roll.");
+    } finally {
+      setRequestedActionBusy(false);
     }
   }
 
   async function handleFulfillRequestedRoll(requestId) {
     setError("");
     setNotice("");
+    setRequestedActionBusy(true);
     try {
       await fulfillRequestedRoll(token, campaignId, sessionId, requestId, {});
       await reloadSessionData();
       setNotice("Requested roll wykonany.");
     } catch (err) {
       setError(err?.message || "Nie udalo sie wykonac requested roll.");
+    } finally {
+      setRequestedActionBusy(false);
     }
   }
 
   async function handleCancelRequestedRoll(requestId) {
     setError("");
     setNotice("");
+    setRequestedActionBusy(true);
     try {
       await cancelRequestedRoll(token, campaignId, sessionId, requestId);
       await reloadSessionData();
       setNotice("Requested roll anulowany.");
     } catch (err) {
       setError(err?.message || "Nie udalo sie anulowac requested roll.");
+    } finally {
+      setRequestedActionBusy(false);
     }
   }
 
@@ -388,7 +408,7 @@ export default function LiveSessionPage() {
                 <label className="campaignField"><span>DC</span><input name="dc" type="number" min="0" /></label>
                 <label className="campaignField"><span><input name="isDcHidden" type="checkbox" defaultChecked /> Hide DC</span></label>
                 <label className="campaignField"><span><input name="showSuccessToPlayer" type="checkbox" /> Show success to player</span></label>
-                <button className="campaignDetailsPrimaryBtn" type="submit">Create requested roll</button>
+                <button className="campaignDetailsPrimaryBtn" type="submit" disabled={requestedActionBusy}>Create requested roll</button>
               </form>
             )}
             <div className="campaignMaterialList">
@@ -403,10 +423,10 @@ export default function LiveSessionPage() {
                   {roll.dcVisible && roll.dc != null && <p>DC: {roll.dc}</p>}
                   {roll.resultTotal != null && <p>Result: {roll.resultTotal}{roll.success != null ? ` (${roll.success ? "SUCCESS" : "FAIL"})` : ""}</p>}
                   {isInProgress && !isGmView && roll.status === "PENDING" && (
-                    <button className="campaignDetailsPrimaryBtn" type="button" onClick={() => handleFulfillRequestedRoll(roll.id)}>🎲 Roll</button>
+                    <button className="campaignDetailsPrimaryBtn" type="button" disabled={requestedActionBusy} onClick={() => handleFulfillRequestedRoll(roll.id)}>🎲 Roll</button>
                   )}
                   {isInProgress && isGmView && roll.status === "PENDING" && (
-                    <button className="campaignDetailsDangerBtn" type="button" onClick={() => handleCancelRequestedRoll(roll.id)}>Cancel</button>
+                    <button className="campaignDetailsDangerBtn" type="button" disabled={requestedActionBusy} onClick={() => handleCancelRequestedRoll(roll.id)}>Cancel</button>
                   )}
                 </article>
               ))}

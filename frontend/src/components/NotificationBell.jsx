@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
-import { getNotifications } from "../api/notifications";
+import {
+  clearNotifications,
+  deleteNotification,
+  getNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
+} from "../api/notifications";
 import { acceptFriendRequest, rejectFriendRequest } from "../api/social";
 
 const SHELL_PANEL_EVENT = "ttrpg-shell-panel-open";
@@ -76,6 +82,11 @@ function friendRequestId(item) {
   return match ? Number(match[1]) : 0;
 }
 
+function campaignNotificationId(item) {
+  const match = String(item?.id || "").match(/^campaign-(\d+)$/);
+  return match ? Number(match[1]) : 0;
+}
+
 export default function NotificationBell() {
   const { token } = useAuth();
   const navigate = useNavigate();
@@ -140,6 +151,17 @@ export default function NotificationBell() {
   }
 
   function goToNotification(item) {
+    if (item?.source === "campaign") {
+      const id = campaignNotificationId(item);
+      if (id && !item.read) {
+        void markNotificationRead(token, id).then((response) => {
+          setOverview({
+            unreadCount: response?.unreadCount || 0,
+            items: Array.isArray(response?.items) ? response.items : [],
+          });
+        }).catch(() => {});
+      }
+    }
     setOpen(false);
     if (item?.targetUrl) {
       navigate(item.targetUrl);
@@ -170,6 +192,54 @@ export default function NotificationBell() {
 
   const unreadCount = Number(overview.unreadCount) || 0;
 
+  async function handleMarkAllRead() {
+    if (!token || loading) return;
+    setError("");
+    try {
+      const response = await markAllNotificationsRead(token);
+      setOverview({
+        unreadCount: response?.unreadCount || 0,
+        items: Array.isArray(response?.items) ? response.items : [],
+      });
+    } catch (err) {
+      setError(err?.message || "Nie udało się oznaczyć powiadomień jako przeczytane.");
+    }
+  }
+
+  async function handleDeleteOne(event, item) {
+    event.preventDefault();
+    event.stopPropagation();
+    const id = campaignNotificationId(item);
+    if (!id || !token || actionId) return;
+    setActionId(`delete-${item.id}`);
+    setError("");
+    try {
+      const response = await deleteNotification(token, id);
+      setOverview({
+        unreadCount: response?.unreadCount || 0,
+        items: Array.isArray(response?.items) ? response.items : [],
+      });
+    } catch (err) {
+      setError(err?.message || "Nie udało się usunąć powiadomienia.");
+    } finally {
+      setActionId("");
+    }
+  }
+
+  async function handleClearAll() {
+    if (!token || loading) return;
+    setError("");
+    try {
+      const response = await clearNotifications(token);
+      setOverview({
+        unreadCount: response?.unreadCount || 0,
+        items: Array.isArray(response?.items) ? response.items : [],
+      });
+    } catch (err) {
+      setError(err?.message || "Nie udało się wyczyścić powiadomień.");
+    }
+  }
+
   return (
     <div className="notificationBell" ref={wrapperRef}>
       <button
@@ -194,6 +264,14 @@ export default function NotificationBell() {
             <button type="button" onClick={loadNotifications} disabled={loading}>
               Odśwież
               <RefreshIcon />
+            </button>
+            <button type="button" onClick={handleMarkAllRead} disabled={loading || overview.items.length === 0}>
+              Oznacz wszystkie
+              <CheckIcon />
+            </button>
+            <button type="button" onClick={handleClearAll} disabled={loading || overview.items.length === 0}>
+              Wyczyść
+              <XIcon />
             </button>
           </header>
 
@@ -241,6 +319,20 @@ export default function NotificationBell() {
                         aria-label="Odrzuć zaproszenie"
                         disabled={Boolean(actionId)}
                         onClick={(event) => handleInvitationAction(event, item, "reject")}
+                      >
+                        <XIcon />
+                      </button>
+                      {actionId.endsWith(item.id) && <span className="notificationItem__saving">...</span>}
+                    </span>
+                  )}
+                  {item.source === "campaign" && (
+                    <span className="notificationItem__actions" aria-label="Akcje powiadomienia">
+                      <button
+                        type="button"
+                        className="notificationItem__action is-reject"
+                        aria-label="Usuń powiadomienie"
+                        disabled={Boolean(actionId)}
+                        onClick={(event) => handleDeleteOne(event, item)}
                       >
                         <XIcon />
                       </button>

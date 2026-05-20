@@ -3,6 +3,7 @@ package pl.ttrpgassistant.backend.notifications;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.ttrpgassistant.backend.common.error.ResourceNotFoundException;
 import pl.ttrpgassistant.backend.campaign.CampaignNotificationEntity;
 import pl.ttrpgassistant.backend.campaign.CampaignNotificationRepository;
 import pl.ttrpgassistant.backend.messages.MessageService;
@@ -72,6 +73,42 @@ public class NotificationService {
         long unreadCount = unreadCampaigns + friendRequests.size() + unreadMessages;
 
         return new NotificationOverviewResponse(unreadCount, items);
+    }
+
+    @Transactional
+    public NotificationOverviewResponse markRead(Long userId, Long notificationId) {
+        CampaignNotificationEntity notification = campaignNotificationRepository.findByIdAndUserId(notificationId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Notification not found."));
+        if (notification.getReadAt() == null) {
+            notification.setReadAt(Instant.now());
+            campaignNotificationRepository.save(notification);
+        }
+        return overview(userId, null, null);
+    }
+
+    @Transactional
+    public NotificationOverviewResponse markAllRead(Long userId) {
+        List<CampaignNotificationEntity> unread = campaignNotificationRepository.findByUserIdAndReadAtIsNull(userId);
+        if (!unread.isEmpty()) {
+            Instant now = Instant.now();
+            unread.forEach(item -> item.setReadAt(now));
+            campaignNotificationRepository.saveAll(unread);
+        }
+        return overview(userId, null, null);
+    }
+
+    @Transactional
+    public NotificationOverviewResponse deleteOne(Long userId, Long notificationId) {
+        campaignNotificationRepository.findByIdAndUserId(notificationId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Notification not found."));
+        campaignNotificationRepository.deleteByIdAndUserId(notificationId, userId);
+        return overview(userId, null, null);
+    }
+
+    @Transactional
+    public NotificationOverviewResponse clearAll(Long userId) {
+        campaignNotificationRepository.deleteByUserId(userId);
+        return overview(userId, null, null);
     }
 
     private NotificationItemResponse campaignItem(CampaignNotificationEntity notification) {

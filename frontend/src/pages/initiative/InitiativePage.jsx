@@ -354,7 +354,7 @@ export default function InitiativePage() {
 
       {stateError && <div className="campaignDetailsError">{stateError}</div>}
       <div className="initMeta">
-        Fallback/TODO: poprzedni lokalny tracker (sessionStorage-only) zostal zastapiony persistent mode; jesli backend bedzie niedostepny, planowany jest osobny local fallback toggle.
+        Lokalny tracker (sessionStorage-only) zostal zastapiony trybem persistent opartym o backend.
       </div>
     </div>
   );

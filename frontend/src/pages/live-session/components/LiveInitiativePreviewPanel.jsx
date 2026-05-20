@@ -91,7 +91,13 @@ export default function LiveInitiativePreviewPanel({
       {message && <p className="liveSessionPlaceholder">{message}</p>}
       {loading && <p className="liveSessionPlaceholder">Ladowanie podgladu inicjatywy...</p>}
 
-      {!loading && !liveState?.activeEncounterId && <p className="liveSessionPlaceholder">Brak aktywnego starcia dla tej sesji.</p>}
+      {!loading && !liveState?.activeEncounterId && (
+        <p className="liveSessionPlaceholder">
+          Brak aktywnego starcia dla tej sesji.
+          {isOwner && encounters.length > 0 ? " Wybierz encounter z listy powyzej." : ""}
+          {isOwner && encounters.length === 0 ? " Najpierw utworz encounter w globalnym /initiative." : ""}
+        </p>
+      )}
 
       {!loading && liveState?.activeEncounterId && !encounter && (
         <p className="liveSessionPlaceholder">Nie udalo sie pobrac danych aktywnego starcia.</p>

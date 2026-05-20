@@ -32,17 +32,11 @@ const QUICK_ACTIONS = [
   },
   {
     title: "Dodaj notatkę",
-    description: "Zapisz ważne informacje i pomysły",
-    to: "/rules",
+    description: "Przejdz do notatek kampanii",
+    to: "/campaigns",
     icon: "file-plus",
     tone: "blue",
   },
-];
-
-const FALLBACK_SESSIONS = [
-  { id: "fallback-1", title: "Krwawy Szlak - Rozdział 3", scheduledFor: "2026-05-24T18:00:00", status: "PLANNED" },
-  { id: "fallback-2", title: "Krwawy Szlak - Rozdział 4", scheduledFor: "2026-05-31T18:00:00", status: "PLANNED" },
-  { id: "fallback-3", title: "Wrota Zapomnienia - Sesja 1", scheduledFor: "2026-06-07T19:00:00", status: "PLANNED" },
 ];
 
 const FALLBACK_MATERIALS = [
@@ -149,7 +143,7 @@ export default function DashboardPage() {
 
         if (campaignRows.length > 0) {
           const sessionResults = await Promise.allSettled(
-            campaignRows.slice(0, 6).map((campaign) => listCampaignSessions(token, campaign.id))
+            campaignRows.map((campaign) => listCampaignSessions(token, campaign.id))
           );
           const materialResults = await Promise.allSettled(
             campaignRows.slice(0, 6).map((campaign) => listCampaignMaterials(token, campaign.id))
@@ -160,7 +154,7 @@ export default function DashboardPage() {
           const sessionRows = sessionResults.flatMap((result, index) => {
             if (result.status !== "fulfilled") return [];
             const campaign = campaignRows[index];
-            return normalizeArray(result.value).map((session) => ({ ...session, campaignTitle: campaign?.title }));
+            return normalizeArray(result.value).map((session) => ({ ...session, campaignTitle: campaign?.title, campaignId: campaign?.id }));
           });
           const materialRows = materialResults.flatMap((result, index) => {
             if (result.status !== "fulfilled") return [];
@@ -202,11 +196,16 @@ export default function DashboardPage() {
 
   const upcomingSessions = useMemo(() => {
     const rows = sessions
-      .filter((session) => session.scheduledFor && String(session.status).toUpperCase() !== "FINISHED")
+      .filter((session) => String(session.status).toUpperCase() === "PLANNED")
       .sort((a, b) => new Date(a.scheduledFor).getTime() - new Date(b.scheduledFor).getTime())
-      .slice(0, 3);
-    return rows.length > 0 ? rows : FALLBACK_SESSIONS;
+      .slice(0, 5);
+    return rows;
   }, [sessions]);
+
+  const activeSession = useMemo(
+    () => sessions.find((session) => String(session.status).toUpperCase() === "IN_PROGRESS") || null,
+    [sessions],
+  );
 
   const recentMaterials = useMemo(() => {
     const rows = materials
@@ -219,7 +218,7 @@ export default function DashboardPage() {
   const kpiCards = [
     { title: "Kampanie", value: campaignCount, subtitle: "Łącznie kampanii", icon: "book", tone: "purple", to: "/campaigns" },
     { title: "Postacie", value: characterCount, subtitle: "Stworzonych postaci", icon: "users", tone: "green", to: "/characters" },
-    { title: "Aktywna walka", value: 0, subtitle: "Brak aktywnej walki", icon: "sword", tone: "orange", to: "/initiative" },
+    { title: "Nadchodzące sesje", value: upcomingSessions.length, subtitle: "Sesji zaplanowanych", icon: "calendar", tone: "orange", to: "/campaigns" },
     { title: "Materiały", value: materialCount, subtitle: "Notatek i zasobów", icon: "archive", tone: "blue", to: "/rules" },
   ];
 
@@ -253,19 +252,37 @@ export default function DashboardPage() {
       <section className="dashboardFeatureGrid">
         <article className="dashboardHero">
           <div className="dashboardHero__copy">
-            <span>AKTUALNIE</span>
-            <h2>Brak aktywnej sesji</h2>
-            <p>Rozpocznij nową sesję lub dołącz do istniejącej kampanii, aby rozpocząć przygodę.</p>
-            <div className="dashboardHero__actions">
-              <Link className="dashboardHero__primary" to="/campaigns">
-                <DashboardIcon name="play" />
-                Rozpocznij sesję
-              </Link>
-              <Link className="dashboardHero__secondary" to="/campaigns">
-                <DashboardIcon name="users" />
-                Dołącz do kampanii
-              </Link>
-            </div>
+            <span>AKTYWNA SESJA</span>
+            {activeSession ? (
+              <>
+                <h2>{activeSession.title}</h2>
+                <p>
+                  Kampania: {activeSession.campaignTitle || "Kampania"}.
+                  Status: {String(activeSession.status).toUpperCase()}.
+                </p>
+                <div className="dashboardHero__actions">
+                  <Link className="dashboardHero__primary" to={`/campaigns/${activeSession.campaignId}/sessions/${activeSession.id}/live`}>
+                    <DashboardIcon name="play" />
+                    Dołącz do aktywnej sesji
+                  </Link>
+                  <Link className="dashboardHero__secondary" to={`/campaigns/${activeSession.campaignId}`}>
+                    <DashboardIcon name="users" />
+                    Otwórz kampanię
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2>Brak aktywnej sesji</h2>
+                <p>Nie masz teraz sesji IN_PROGRESS. Sprawdź kampanie i nadchodzące terminy.</p>
+                <div className="dashboardHero__actions">
+                  <Link className="dashboardHero__primary" to="/campaigns">
+                    <DashboardIcon name="calendar" />
+                    Przejdź do kampanii
+                  </Link>
+                </div>
+              </>
+            )}
           </div>
           <div className="dashboardHero__image" aria-hidden="true" />
         </article>
@@ -303,19 +320,31 @@ export default function DashboardPage() {
           </header>
 
           <div className="dashboardSessionList">
+            {upcomingSessions.length === 0 && (
+              <div className="dashboardMaterialItem">
+                <span className="dashboardMaterialItem__icon"><DashboardIcon name="calendar" /></span>
+                <span>
+                  <strong>Brak zaplanowanych sesji</strong>
+                  <small>Utwórz sesję w kampanii, aby zobaczyć ją tutaj.</small>
+                </span>
+              </div>
+            )}
             {upcomingSessions.map((session) => {
               const date = getDateParts(session.scheduledFor);
+              const to = String(session.status).toUpperCase() === "IN_PROGRESS"
+                ? `/campaigns/${session.campaignId}/sessions/${session.id}/live`
+                : `/campaigns/${session.campaignId || ""}`;
               return (
-                <Link key={session.id} to="/campaigns" className="dashboardSessionItem">
+                <Link key={session.id} to={to} className="dashboardSessionItem">
                   <span className="dashboardDateBadge">
                     <small>{date.month}</small>
                     <strong>{date.day}</strong>
                   </span>
                   <span className="dashboardSessionItem__copy">
                     <strong>{session.title}</strong>
-                    <small>{date.time}</small>
+                    <small>{session.campaignTitle ? `${session.campaignTitle} • ${date.time}` : date.time}</small>
                   </span>
-                  <span className="dashboardTag">Zaplanowana</span>
+                  <span className="dashboardTag">{String(session.status || "PLANNED").toUpperCase()}</span>
                 </Link>
               );
             })}
@@ -345,21 +374,6 @@ export default function DashboardPage() {
           </div>
         </article>
 
-        <article className="dashboardPanel dashboardPanel--initiative">
-          <header className="dashboardPanel__head">
-            <div>
-              <DashboardIcon name="crossed-swords" />
-              <h2>Inicjatywa</h2>
-            </div>
-          </header>
-
-          <div className="dashboardInitiativeEmpty">
-            <span><DashboardIcon name="crossed-swords" /></span>
-            <strong>Brak aktywnej walki</strong>
-            <p>Rozpocznij walkę, aby śledzić inicjatywę postaci i przeciwników.</p>
-            <Link to="/initiative">Rozpocznij walkę</Link>
-          </div>
-        </article>
       </section>
 
       {(loading || error) && (

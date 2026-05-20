@@ -31,6 +31,17 @@ describe("LiveInitiativePreviewPanel", () => {
     expect(screen.getByText("Brak aktywnego starcia dla tej sesji.")).toBeInTheDocument();
   });
 
+  it("owner sees guidance to choose encounter when encounters exist", () => {
+    renderPanel({
+      isOwner: true,
+      sessionStatus: "IN_PROGRESS",
+      liveState: { activeEncounterId: null },
+      encounters: [{ id: 5, name: "Ambush" }],
+      onSelectActiveEncounter: vi.fn(),
+    });
+    expect(screen.getByText(/Wybierz encounter z listy powyzej/)).toBeInTheDocument();
+  });
+
   it("member sees limited current and next preview", () => {
     renderPanel({
       isOwner: false,

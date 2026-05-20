@@ -182,7 +182,9 @@ describe("LiveSessionPage", () => {
     campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "Dragonfall", owner: false });
     campaignsApi.listCampaignSessions.mockResolvedValue([{ id: 2, title: "Session Two", status: "IN_PROGRESS" }]);
     campaignsApi.getCampaignCharacters.mockResolvedValue([]);
-    campaignsApi.getCampaignDiceRolls.mockResolvedValue([]);
+    campaignsApi.getCampaignDiceRolls
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ id: 90, expression: "1d20+2", total: 14, rollType: "SKILL" }]);
     campaignsApi.getSessionLiveState.mockResolvedValue(null);
     campaignsApi.getRequestedRolls.mockResolvedValue([
       { id: 22, rollLabel: "Perception", status: "PENDING", dcVisible: false, rollExpression: "1d20", characterName: "Ela" },
@@ -194,6 +196,8 @@ describe("LiveSessionPage", () => {
     fireEvent.click(await screen.findByRole("button", { name: /roll/i }));
     await waitFor(() => {
       expect(campaignsApi.fulfillRequestedRoll).toHaveBeenCalledWith("test-token", "10", "2", 22, {});
+      expect(campaignsApi.getCampaignDiceRolls).toHaveBeenCalledTimes(2);
+      expect(screen.getByText(/1d20\+2 = 14/)).toBeInTheDocument();
     });
   });
 
