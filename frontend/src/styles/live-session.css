@@ -1,0 +1,88 @@
+.liveSessionPage {
+  display: grid;
+  gap: 16px;
+}
+
+.liveSessionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.liveSessionState {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+}
+
+.liveSessionPlaceholder {
+  color: var(--muted);
+  margin: 0;
+}
+
+.liveSessionCharacterPortrait {
+  margin-top: 8px;
+}
+
+.liveSessionCharacterPortrait img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+
+.liveSessionPortraitPlaceholder {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  border: 1px dashed var(--line);
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.liveSessionRollHistoryList {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+}
+
+.liveSessionSceneForm {
+  display: grid;
+  gap: 10px;
+}
+
+.liveSessionSceneReadonly {
+  display: grid;
+  gap: 10px;
+}
+
+.liveSessionSceneReadonly h3 {
+  margin: 0;
+}
+
+.liveSessionSceneReadonly p {
+  margin: 0;
+}
+
+.liveSessionSceneImage {
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+
+.liveSessionSceneImagePlaceholder {
+  min-height: 120px;
+  border-radius: 10px;
+  border: 1px dashed var(--line);
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  padding: 12px;
+}

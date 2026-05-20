@@ -11,6 +11,7 @@ vi.mock("../../../auth/AuthContext", () => ({
 vi.mock("../../../api/campaigns", () => ({
   getCampaignById: vi.fn(),
   getCampaignCharacters: vi.fn(),
+  listCampaignMembers: vi.fn(),
   listCampaignSessions: vi.fn(),
   listCampaignMaterials: vi.fn(),
   updateCampaign: vi.fn(),
@@ -47,6 +48,7 @@ describe("CampaignDetailPage smoke", () => {
   it("renders loading state", () => {
     campaignsApi.getCampaignById.mockReturnValue(new Promise(() => {}));
     campaignsApi.getCampaignCharacters.mockResolvedValue([]);
+    campaignsApi.listCampaignMembers.mockResolvedValue([]);
     campaignsApi.listCampaignSessions.mockResolvedValue([]);
     campaignsApi.listCampaignMaterials.mockResolvedValue([]);
     charactersApi.listCharacters.mockResolvedValue([]);
@@ -57,7 +59,8 @@ describe("CampaignDetailPage smoke", () => {
   it("renders campaign data", async () => {
     campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "A", owner: true, status: "active", systemCode: "dnd5e" });
     campaignsApi.getCampaignCharacters.mockResolvedValue([]);
-    campaignsApi.listCampaignSessions.mockResolvedValue([]);
+    campaignsApi.listCampaignMembers.mockResolvedValue([]);
+    campaignsApi.listCampaignSessions.mockResolvedValue([{ id: 2, title: "Live S", status: "IN_PROGRESS", description: "test" }]);
     campaignsApi.listCampaignMaterials.mockResolvedValue([]);
     charactersApi.listCharacters.mockResolvedValue([]);
     renderPage();
@@ -65,12 +68,35 @@ describe("CampaignDetailPage smoke", () => {
     await waitFor(() => {
       expect(screen.getByText("Campaign Workspace")).toBeInTheDocument();
       expect(screen.getByRole("heading", { name: "A" })).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Nadchodzaca sesja" })).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Gracze" })).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Frekwencja / Glosowanie" })).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Notatki graczy" })).toBeInTheDocument();
+      expect(screen.getAllByRole("link", { name: "Dolacz do aktywnej sesji" }).length).toBeGreaterThan(0);
+    });
+  });
+
+  it("does not render global tools links in campaign dashboard", async () => {
+    campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "A", owner: true, status: "active", systemCode: "dnd5e" });
+    campaignsApi.getCampaignCharacters.mockResolvedValue([]);
+    campaignsApi.listCampaignMembers.mockResolvedValue([]);
+    campaignsApi.listCampaignSessions.mockResolvedValue([{ id: 2, title: "Live S", status: "IN_PROGRESS", description: "test" }]);
+    campaignsApi.listCampaignMaterials.mockResolvedValue([]);
+    charactersApi.listCharacters.mockResolvedValue([]);
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "A" })).toBeInTheDocument();
+      expect(screen.queryByText("Campaign Tools")).not.toBeInTheDocument();
+      expect(document.querySelector('a[href="/dice"]')).toBeNull();
+      expect(document.querySelector('a[href="/initiative"]')).toBeNull();
     });
   });
 
   it("renders error state", async () => {
     campaignsApi.getCampaignById.mockRejectedValue(new Error("boom"));
     campaignsApi.getCampaignCharacters.mockResolvedValue([]);
+    campaignsApi.listCampaignMembers.mockResolvedValue([]);
     campaignsApi.listCampaignSessions.mockResolvedValue([]);
     campaignsApi.listCampaignMaterials.mockResolvedValue([]);
     charactersApi.listCharacters.mockResolvedValue([]);

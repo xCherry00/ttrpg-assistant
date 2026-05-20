@@ -1,4 +1,21 @@
-﻿# Live Session Workspace Architecture (v0.6.6 Draft)
+# Live Session Workspace Architecture (v0.6.9 Live State + Scene Panel)
+
+## 0. Current Implementation Status (v0.6.9)
+
+- Route implemented: `/campaigns/:campaignId/sessions/:sessionId/live`.
+- LiveSessionPage foundation implemented with:
+  - header + back link to campaign workspace,
+  - party/players list based on campaign characters,
+  - role-sensitive MVP split (GM/owner vs member/player),
+  - session roll history preview (best-effort read),
+  - placeholders for Requested Rolls and Initiative Preview.
+- Scene Panel is now connected to persisted `session_live_state`:
+  - owner can edit `sceneTitle`, `sceneImageUrl`, `sceneDescription`,
+  - member sees read-only scene content.
+- Scene image in MVP is URL/data-url only (no upload pipeline).
+- `/dice` and `/initiative` remain global tools and are not replaced.
+- No WebSockets/SSE in this stage.
+- No requested-roll persistence in this stage.
 
 ## 1. Screen Responsibility Split
 
@@ -21,13 +38,13 @@
 - Full persistent encounter tracker: queue, HP/states, participant mutations, encounter controls.
 - Not a player-facing active-session screen.
 
-### LiveSessionPage (future SessionRoomPage)
+### LiveSessionPage (SessionRoomPage foundation in v0.6.8)
 - Main active play screen for currently running campaign session.
 - Separate GM and player views over the same live session state.
-- Shared scene context (location image + session focus).
-- Requested rolls workflow from GM to selected players/characters.
-- Lightweight initiative awareness for players; full oversight for GM.
-- Short live roll history focused on session context.
+- Shared scene context (location image + session focus) is currently a placeholder.
+- Requested rolls workflow from GM to selected players/characters is currently a placeholder.
+- Lightweight initiative awareness for players; full oversight for GM is currently a placeholder.
+- Short live roll history focused on session context is foundation-only in v0.6.8.
 - Does not require redirecting users to `/dice` or `/initiative` for core session actions.
 - Contains embedded dice/requested-roll panel and embedded initiative preview.
 - Reuses the same backend data domains (`dice_rolls`, `combat_encounters`, `combat_participants`, HP/state), but presents them in active-session UX context.
@@ -50,6 +67,7 @@
 - Keep `/initiative` and `/dice` as independent specialist tools.
 - Do not remove existing routes; extend navigation progressively.
 - `/dice` and `/initiative` remain global tools.
+- Campaign dashboard must not duplicate global tools links from sidebar.
 - `/campaigns/:campaignId/sessions/:sessionId/live` is the primary active-session workspace.
 - LiveSessionPage may provide links to full tools, but base rolls, requested rolls, and initiative preview must work inline on the same page.
 
@@ -168,3 +186,39 @@ No schema migration is introduced in v0.6.6; this section is design-only.
 - DicePage and InitiativePage are not replaced by LiveSessionPage.
 - LiveSessionPage does not require opening separate pages for basic session rolls and initiative awareness.
 - Global tools and embedded session panels may share backend data, but they have different UX context.
+
+## 11. Campaign System Compatibility
+
+- Campaign has `systemCode` as the source of truth for session gameplay context.
+- Assigned characters must match the campaign `systemCode` (cross-system assignment is blocked).
+- Requested rolls will use campaign `systemCode` to select roll behavior.
+- D&D-style requested rolls can use d20 + ability/skill modifiers.
+- CoC-style requested rolls require separate percentile logic.
+- Mixed-system campaigns are out of MVP scope.
+
+## 12. Campaign Dashboard Model (Planned)
+
+- `CampaignDetailPage` acts as a mini campaign dashboard.
+- Planned dashboard modules:
+  - campaign overview,
+  - upcoming session,
+  - attendance/availability voting,
+  - players/members panel,
+  - assigned characters panel,
+  - player notes,
+  - materials,
+  - active session entrypoint.
+- Active session entrypoint is session-contextual (upcoming/active session panels), not a global tools panel.
+- Global `/dice` and `/initiative` access remains in sidebar navigation only.
+- Notes visibility plan:
+  - players can have private notes,
+  - GM can view player notes,
+  - players cannot view other players' private notes.
+- Attendance voting plan statuses:
+  - `available`,
+  - `unavailable`,
+  - `maybe`,
+  - `no response`.
+- Active session entry appears when GM starts a session.
+- Voting and notes implementation are intentionally deferred.
+

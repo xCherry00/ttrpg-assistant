@@ -1,11 +1,17 @@
-﻿export default function CampaignCharactersPanel({
+export default function CampaignCharactersPanel({
   campaignCharacters,
   myCharacters,
+  campaignSystemCode,
   canManage,
   busy,
   onAssign,
   onDetach,
 }) {
+  const normalizedCampaignSystem = (campaignSystemCode || "").trim().toLowerCase();
+  const compatibleCharacters = myCharacters.filter(
+    (character) => (character.systemCode || "").trim().toLowerCase() === normalizedCampaignSystem
+  );
+
   return (
     <section className="campaignDetailsCard panel-soft">
       <h2 className="campaignDetailsCardTitle">Postacie kampanii</h2>
@@ -23,7 +29,7 @@
         >
           <select className="cellSelect" name="characterId" defaultValue="">
             <option value="">- wybierz postac -</option>
-            {myCharacters.map((character) => (
+            {compatibleCharacters.map((character) => (
               <option key={character.id} value={character.id}>
                 {character.name} ({character.systemCode || "other"})
               </option>
@@ -31,6 +37,10 @@
           </select>
           <button className="campaignDetailsPrimaryBtn" type="submit" disabled={busy}>Przypisz postac</button>
         </form>
+      )}
+
+      {canManage && myCharacters.length > 0 && compatibleCharacters.length === 0 && (
+        <div className="campaignDetailsEmpty">Brak postaci zgodnych z systemem tej kampanii.</div>
       )}
 
       {campaignCharacters.length === 0 ? (

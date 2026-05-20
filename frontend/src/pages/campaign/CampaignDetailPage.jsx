@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 import { listCharacters } from "../../api/characters";
@@ -10,6 +10,7 @@ import {
   finishCampaignSession,
   getCampaignById,
   getCampaignCharacters,
+  listCampaignMembers,
   listCampaignMaterials,
   listCampaignSessions,
   startCampaignSession,
@@ -17,10 +18,12 @@ import {
 } from "../../api/campaigns";
 import "../../styles/campaign-details.css";
 import CampaignOverviewPanel from "./components/CampaignOverviewPanel";
+import UpcomingSessionPanel from "./components/UpcomingSessionPanel";
+import CampaignPlayersPanel from "./components/CampaignPlayersPanel";
 import CampaignCharactersPanel from "./components/CampaignCharactersPanel";
 import CampaignSessionsPanel from "./components/CampaignSessionsPanel";
 import CampaignMaterialsPanel from "./components/CampaignMaterialsPanel";
-import CampaignToolsPanel from "./components/CampaignToolsPanel";
+import CampaignPlaceholderPanel from "./components/CampaignPlaceholderPanel";
 
 export default function CampaignDetailPage() {
   const { token } = useAuth();
@@ -35,28 +38,26 @@ export default function CampaignDetailPage() {
   const [campaign, setCampaign] = useState(null);
   const [campaignCharacters, setCampaignCharacters] = useState([]);
   const [myCharacters, setMyCharacters] = useState([]);
+  const [members, setMembers] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [materials, setMaterials] = useState([]);
-
-  const activeSession = useMemo(
-    () => sessions.find((session) => session.status === "IN_PROGRESS") || sessions.find((session) => session.status === "PLANNED") || null,
-    [sessions]
-  );
 
   async function loadAll() {
     setLoading(true);
     setError("");
     try {
-      const [campaignData, campaignCharactersData, ownCharacters, sessionsData, materialsData] = await Promise.all([
+      const [campaignData, campaignCharactersData, ownCharacters, membersData, sessionsData, materialsData] = await Promise.all([
         getCampaignById(token, campaignId),
         getCampaignCharacters(token, campaignId),
         listCharacters(token),
+        listCampaignMembers(token, campaignId).catch(() => []),
         listCampaignSessions(token, campaignId),
         listCampaignMaterials(token, campaignId),
       ]);
       setCampaign(campaignData);
       setCampaignCharacters(Array.isArray(campaignCharactersData) ? campaignCharactersData : []);
       setMyCharacters(Array.isArray(ownCharacters) ? ownCharacters : []);
+      setMembers(Array.isArray(membersData) ? membersData : []);
       setSessions(Array.isArray(sessionsData) ? sessionsData : []);
       setMaterials(Array.isArray(materialsData) ? materialsData : []);
     } catch (err) {
@@ -142,7 +143,7 @@ export default function CampaignDetailPage() {
           <span className="pageEyebrow">Campaign Workspace</span>
           <h1 className="pageTitle">{campaign?.title || "Kampania"}</h1>
           <p className="pageSubtitle">
-            Centrum zarzadzania kampania, sesjami, postaciami, materialami oraz wejsciami do globalnych narzedzi i przyszlego live room.
+            Centrum zarzadzania kampania, sesjami, postaciami, materialami oraz wejsciami do aktywnej sesji.
           </p>
         </div>
       </div>
@@ -153,36 +154,54 @@ export default function CampaignDetailPage() {
 
       {!loading && campaign && (
         <div className="campaignWorkspaceGrid">
-          <CampaignOverviewPanel
-            campaign={campaign}
-            isOwner={Boolean(campaign.owner)}
-            busy={busy}
-            onUpdate={handleUpdateCampaign}
-            onDelete={handleDeleteCampaign}
-          />
+          <div className="campaignDashboardRow campaignDashboardRow--top">
+            <CampaignOverviewPanel
+              campaign={campaign}
+              isOwner={Boolean(campaign.owner)}
+              busy={busy}
+              onUpdate={handleUpdateCampaign}
+              onDelete={handleDeleteCampaign}
+            />
+            <UpcomingSessionPanel campaignId={campaignId} sessions={sessions} />
+            <CampaignPlayersPanel members={members} />
+          </div>
 
-          <CampaignToolsPanel campaignId={campaignId} activeSession={activeSession} />
+          <div className="campaignDashboardRow">
+            <CampaignCharactersPanel
+              campaignCharacters={campaignCharacters}
+              myCharacters={myCharacters}
+              campaignSystemCode={campaign.systemCode}
+              canManage={Boolean(campaign.owner)}
+              busy={busy}
+              onAssign={handleAssignCharacter}
+              onDetach={handleDetachCharacter}
+            />
 
-          <CampaignCharactersPanel
-            campaignCharacters={campaignCharacters}
-            myCharacters={myCharacters}
-            canManage={Boolean(campaign.owner)}
-            busy={busy}
-            onAssign={handleAssignCharacter}
-            onDetach={handleDetachCharacter}
-          />
+            <CampaignSessionsPanel
+              campaignId={campaignId}
+              sessions={sessions}
+              isOwner={Boolean(campaign.owner)}
+              busy={busy}
+              onCreate={handleCreateSession}
+              onStart={handleStartSession}
+              onFinish={handleFinishSession}
+            />
 
-          <CampaignSessionsPanel
-            campaignId={campaignId}
-            sessions={sessions}
-            isOwner={Boolean(campaign.owner)}
-            busy={busy}
-            onCreate={handleCreateSession}
-            onStart={handleStartSession}
-            onFinish={handleFinishSession}
-          />
+            <CampaignMaterialsPanel materials={materials} materialsAvailable />
+          </div>
 
-          <CampaignMaterialsPanel materials={materials} materialsAvailable />
+          <div className="campaignDashboardRow campaignDashboardRow--bottom">
+            <CampaignPlaceholderPanel
+              title="Frekwencja / Glosowanie"
+              text="Brak aktywnego glosowania. Placeholder pod przyszly attendance/voting panel."
+              actionLabel="Utworz glosowanie"
+            />
+            <CampaignPlaceholderPanel
+              title="Notatki graczy"
+              text="Brak notatek. Placeholder pod prywatne notatki graczy i widok GM."
+              actionLabel="Dodaj notatke"
+            />
+          </div>
         </div>
       )}
 

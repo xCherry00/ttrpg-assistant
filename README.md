@@ -38,7 +38,7 @@ Przeglądarka (React SPA)
   Flyway migrations
 ```
 
-Frontend to React SPA serwowany przez Vite. Wszystkie requesty do `/api` Vite proxy'uje na backend (port 8080). Backend to Spring Boot — przyjmuje JSON, waliduje, odpowiada JSON. Dane siedzą w Postgresie, schemat zarządzany przez Flyway (migracje V1–V61).
+Frontend to React SPA serwowany przez Vite. Wszystkie requesty do `/api` Vite proxy'uje na backend (port 8080). Backend to Spring Boot — przyjmuje JSON, waliduje, odpowiada JSON. Dane siedzą w Postgresie, schemat zarządzany przez Flyway (migracje V1–V72).
 
 Auth: po zalogowaniu backend zwraca JWT. Frontend trzyma go w pamięci (AuthContext) i dokłada do każdego requesta jako `Authorization: Bearer <token>`. Spring Security weryfikuje go na każdym endpoincie.
 
@@ -154,7 +154,7 @@ ttrpg-assistant/
 │
 ├── backend/src/main/resources/
 │   ├── application.yml             # konfiguracja przez zmienne środowiskowe
-│   └── db/migration/V1–V61.sql     # cała historia schematu
+│   └── db/migration/V1–V72*.sql    # cała historia schematu
 │
 ├── frontend/src/
 │   ├── api/        # cienkie wrappery na fetch, po jednym pliku na moduł
@@ -195,7 +195,7 @@ monsters / glossary_terms dane statyczne (baza potworów, słownik)
 
 ### Znane ograniczenia i TODO techniczne
 
-- Testy są nadal minimalne — obecnie jest tylko prosty sanity test klasy aplikacji, bez testu kontekstu Spring i bez bazy
+- Testy obejmują już backend i frontend (w tym campaign workspace i initiative panele), ale coverage integracyjny i end-to-end nadal warto rozwijać.
 - Frontend w JavaScript — bez TypeScript i bez PropTypes
 - Brak Swagger/OpenAPI — endpointy opisane tylko w kontrolerach
 - `tailwindcss` w `package.json` — wciągnięty, nigdy nieużyty
@@ -238,7 +238,7 @@ Browser (React SPA)
  Flyway migrations
 ```
 
-The frontend is a React SPA served by Vite. All `/api` requests get proxied to the backend (port 8080). The backend accepts JSON, validates it, and responds with JSON. Data lives in Postgres with schema managed by Flyway migrations (V1–V61).
+The frontend is a React SPA served by Vite. All `/api` requests get proxied to the backend (port 8080). The backend accepts JSON, validates it, and responds with JSON. Data lives in Postgres with schema managed by Flyway migrations (V1–V72).
 
 Auth: on login, the backend returns a JWT. The frontend stores it in memory (AuthContext) and attaches it as `Authorization: Bearer <token>` on every request. Spring Security verifies it on every protected endpoint.
 
@@ -377,7 +377,7 @@ ttrpg-assistant/
 │
 ├── backend/src/main/resources/
 │   ├── application.yml             # config via environment variables
-│   └── db/migration/V1–V61.sql     # full schema history
+│   └── db/migration/V1–V72*.sql    # full schema history
 │
 ├── frontend/src/
 │   ├── api/        # thin fetch wrappers, one file per module
@@ -418,7 +418,7 @@ monsters / glossary_terms static data (monster db, TTRPG glossary)
 
 ### Known limitations and technical TODOs
 
-- Tests are still minimal — currently there is only a small application class sanity test, without a Spring context test or database
+- Tests now cover backend and frontend flows, but integration and end-to-end coverage can still be expanded.
 - Frontend is plain JavaScript — no TypeScript, no PropTypes
 - No Swagger/OpenAPI — endpoints are only documented in the controller files
 - `tailwindcss` is in `package.json` but was never actually used
@@ -615,17 +615,66 @@ Refactor note (v0.6.6):
   - overview,
   - campaign characters,
   - campaign sessions,
-  - campaign materials,
-  - campaign tools.
+  - campaign materials.
 - `/dice` and `/initiative` remain global tools available across the application.
 - Future `LiveSessionPage` remains a separate active-session room with embedded session panels (see `LIVE_SESSION_ARCHITECTURE.md`).
 
+### LiveSessionPage Foundation (v0.6.8)
+
+- Added route: `/campaigns/:campaignId/sessions/:sessionId/live`.
+- Added `LiveSessionPage` MVP foundation for active session room.
+- `LiveSessionPage` currently includes:
+  - campaign/session header and back link to campaign workspace,
+  - party/players panel based on campaign characters,
+  - role split (`GM/owner` vs `member/player`) in basic form,
+  - placeholders for Scene panel, Requested Rolls, Initiative Preview,
+  - lightweight session roll history preview.
+- `/dice` and `/initiative` remain global off-session tools.
+- Embedded requested rolls logic, scene persistence, and full initiative embedding are intentionally deferred to next stages.
+
+### Session Live State & Scene Panel (v0.6.9)
+
+- Added DB table: `session_live_state` (one row per session via unique `session_id`).
+- Added live-state endpoints:
+  - `GET /api/campaigns/{campaignId}/sessions/{sessionId}/live-state`
+  - `PATCH /api/campaigns/{campaignId}/sessions/{sessionId}/live-state`
+- Access rules:
+  - owner/member can read,
+  - owner can update,
+  - member has read-only access.
+- LiveSessionPage Scene Panel now uses backend live state:
+  - owner: inline scene form (`sceneTitle`, `sceneImageUrl`, `sceneDescription`),
+  - member: read-only scene view.
+- MVP image model is URL/data-url only (no file upload).
+- No WebSocket/SSE live sync in this stage (future polling/SSE/WebSocket planned).
+
+### Campaign System Compatibility (v0.7.0)
+
+- Campaign `systemCode` is treated as source of truth for assignment compatibility.
+- Character assignment to campaign is filtered and validated by system:
+  - compatible system: assignment allowed,
+  - incompatible system: assignment blocked (backend-enforced).
+- Campaign characters assignment UI now shows only compatible character options.
+- If a user has characters but none match campaign system, UI shows:
+  - `Brak postaci zgodnych z systemem tej kampanii.`
+
+### Campaign Dashboard Direction (Planned)
+
+- `CampaignDetailPage` is evolving toward mini dashboard responsibilities:
+  - overview,
+  - upcoming session,
+  - players/members and assigned characters,
+  - attendance status (future),
+  - player notes (future),
+  - materials,
+  - active session entrypoint.
+- Global tools (`/dice`, `/initiative`) stay in app sidebar and are not duplicated as a campaign dashboard panel.
+
 ## Security (MVP v0.5.4)
 
-- JWT is currently stored in localStorage ( trpg_token) for MVP simplicity.
+- JWT is currently stored in localStorage (`ttrpg_token`) for MVP simplicity.
 - Added hardening: CSP + frame deny + safe image/data URL validation + auth rate limiting + no token logging.
-- Rate limiter uses server-observed client IP (
-  emoteAddr) and ignores spoofed X-Forwarded-For in current MVP mode.
+- Rate limiter uses server-observed client IP (`remoteAddr`) and ignores spoofed X-Forwarded-For in current MVP mode.
 - HttpOnly cookie migration is intentionally postponed to a future phase to avoid breaking auth flow in this release.
 - Manual smoke: register (min 8 password), invalid login (generic 401), protected endpoint 401/200 checks, ownership checks for characters/campaigns.
 
@@ -636,3 +685,4 @@ Refactor note (v0.6.6):
 - Reset tokens are stored hashed in DB (password_reset_tokens) with expiration and single-use flag.
 - Token delivery by email is TODO for future infrastructure; for tests/dev it can be exposed via EXPOSE_RESET_TOKEN=true.
 - Added users.token_invalidated_at: after password change/reset, older JWTs (issued before invalidation time) are rejected.
+

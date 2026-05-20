@@ -117,6 +117,21 @@ class CampaignCharacterAssignmentIT {
     }
 
     @Test
+    void shouldRejectAssigningCharacterFromDifferentSystem() throws Exception {
+        UserEntity owner = createUser("assign-system-owner");
+        String ownerToken = tokenFor(owner);
+        Number campaignId = createCampaign(ownerToken, "System Campaign");
+
+        PlayerCharacterEntity cocCharacter = createCharacter(owner.getId(), "Investigator", "coc7e");
+
+        mockMvc.perform(post("/api/campaigns/" + campaignId.longValue() + "/characters")
+                        .header("Authorization", "Bearer " + ownerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("characterId", cocCharacter.getId()))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void shouldRejectAssignToDeletedCampaign() throws Exception {
         UserEntity owner = createUser("deleted-campaign-owner");
         String ownerToken = tokenFor(owner);
@@ -264,9 +279,13 @@ class CampaignCharacterAssignmentIT {
     }
 
     private PlayerCharacterEntity createCharacter(Long ownerUserId, String name) {
+        return createCharacter(ownerUserId, name, "dnd5e");
+    }
+
+    private PlayerCharacterEntity createCharacter(Long ownerUserId, String name, String systemCode) {
         return playerCharacterRepository.save(PlayerCharacterEntity.builder()
                 .ownerUserId(ownerUserId)
-                .systemCode("dnd5e")
+                .systemCode(systemCode)
                 .name(name)
                 .status("ACTIVE")
                 .raceName("Human")

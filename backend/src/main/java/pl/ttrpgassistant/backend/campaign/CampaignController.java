@@ -42,8 +42,10 @@ import pl.ttrpgassistant.backend.campaign.dto.UpdateCombatParticipantRequest;
 import pl.ttrpgassistant.backend.campaign.dto.ReorderParticipantsRequest;
 import pl.ttrpgassistant.backend.campaign.dto.SetParticipantConditionsRequest;
 import pl.ttrpgassistant.backend.campaign.dto.SetTemporaryHpRequest;
+import pl.ttrpgassistant.backend.campaign.dto.SessionLiveStateResponse;
 import pl.ttrpgassistant.backend.campaign.dto.UpdateCampaignRequest;
 import pl.ttrpgassistant.backend.campaign.dto.DiceRollResponse;
+import pl.ttrpgassistant.backend.campaign.dto.UpdateSessionLiveStateRequest;
 import pl.ttrpgassistant.backend.campaign.dto.UpdateSessionAttendanceRequest;
 import pl.ttrpgassistant.backend.campaign.dto.UpsertCampaignSessionNoteRequest;
 import pl.ttrpgassistant.backend.common.pagination.PagedResponse;
@@ -61,6 +63,7 @@ public class CampaignController {
     private final CampaignCharacterService campaignCharacterService;
     private final CombatEncounterService combatEncounterService;
     private final DiceRollService diceRollService;
+    private final SessionLiveStateService sessionLiveStateService;
 
     @GetMapping
     public PagedResponse<CampaignSummaryResponse> list(
@@ -248,6 +251,23 @@ public class CampaignController {
     public CampaignSessionNoteResponse getNote(Authentication auth, @PathVariable Long id, @PathVariable Long sessionId) {
         Long userId = (Long) auth.getPrincipal();
         return campaignWorkspaceService.getNote(userId, id, sessionId);
+    }
+
+    @GetMapping("/{id}/sessions/{sessionId}/live-state")
+    public SessionLiveStateResponse getLiveState(Authentication auth, @PathVariable Long id, @PathVariable Long sessionId) {
+        Long userId = (Long) auth.getPrincipal();
+        return sessionLiveStateService.getState(userId, id, sessionId);
+    }
+
+    @PatchMapping("/{id}/sessions/{sessionId}/live-state")
+    public SessionLiveStateResponse updateLiveState(
+            Authentication auth,
+            @PathVariable Long id,
+            @PathVariable Long sessionId,
+            @Valid @RequestBody UpdateSessionLiveStateRequest request
+    ) {
+        Long userId = (Long) auth.getPrincipal();
+        return sessionLiveStateService.updateState(userId, id, sessionId, request);
     }
 
     @PutMapping("/{id}/sessions/{sessionId}/note")

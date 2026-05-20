@@ -3,10 +3,12 @@ import {
   applyParticipantDamage,
   createDiceRoll,
   createEncounter,
+  getSessionLiveState,
   getCampaignDiceRolls,
   getCampaignEncounters,
   healParticipant,
   nextEncounterTurn,
+  updateSessionLiveState,
 } from "../../api/campaigns";
 
 describe("campaigns api helpers", () => {
@@ -62,6 +64,18 @@ describe("campaigns api helpers", () => {
     expect(JSON.parse(postOptions.body).rollExpression).toBe("1d20+3");
     expect(getUrl).toContain("/api/campaigns/8/dice-rolls?limit=20&encounterId=11");
     expect(getOptions.method).toBe("GET");
+  });
+
+  it("live state helpers use expected endpoints", async () => {
+    await getSessionLiveState("token", 8, 4);
+    await updateSessionLiveState("token", 8, 4, { sceneTitle: "Harbor" });
+    const [getUrl, getOptions] = global.fetch.mock.calls[0];
+    const [patchUrl, patchOptions] = global.fetch.mock.calls[1];
+    expect(getUrl).toContain("/api/campaigns/8/sessions/4/live-state");
+    expect(getOptions.method).toBe("GET");
+    expect(patchUrl).toContain("/api/campaigns/8/sessions/4/live-state");
+    expect(patchOptions.method).toBe("PATCH");
+    expect(JSON.parse(patchOptions.body)).toEqual({ sceneTitle: "Harbor" });
   });
 
   it("propagates user-friendly error from http", async () => {

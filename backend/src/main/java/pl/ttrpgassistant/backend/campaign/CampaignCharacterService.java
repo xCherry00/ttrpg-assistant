@@ -11,6 +11,7 @@ import pl.ttrpgassistant.backend.common.error.ResourceNotFoundException;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -23,10 +24,15 @@ public class CampaignCharacterService {
 
     @Transactional
     public CampaignCharacterResponse assignCharacter(Long userId, Long campaignId, AssignCharacterToCampaignRequest request) {
-        requireMemberAccess(userId, campaignId);
+        CampaignEntity campaign = requireMemberAccess(userId, campaignId);
 
         PlayerCharacterEntity character = playerCharacterRepository.findByIdAndOwnerUserId(request.characterId(), userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Character not found"));
+        String campaignSystem = normalizeSystem(campaign.getSystemCode());
+        String characterSystem = normalizeSystem(character.getSystemCode());
+        if (!campaignSystem.equals(characterSystem)) {
+            throw new IllegalArgumentException("Character system must match campaign system.");
+        }
 
         CampaignCharacterEntity assignment = campaignCharacterRepository.findByIdCampaignIdAndIdCharacterId(campaignId, character.getId())
                 .orElseGet(() -> CampaignCharacterEntity.builder()
@@ -110,5 +116,9 @@ public class CampaignCharacterService {
                 assignment.getAssignedAt(),
                 assignment.isActive()
         );
+    }
+
+    private String normalizeSystem(String systemCode) {
+        return systemCode == null ? "" : systemCode.trim().toLowerCase(Locale.ROOT);
     }
 }

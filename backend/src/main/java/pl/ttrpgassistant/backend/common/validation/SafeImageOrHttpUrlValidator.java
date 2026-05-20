@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 public class SafeImageOrHttpUrlValidator implements ConstraintValidator<SafeImageOrHttpUrl, String> {
 
     private static final Pattern HTTP_URL = Pattern.compile("^https?://.+", Pattern.CASE_INSENSITIVE);
-    private static final Pattern DATA_IMAGE = Pattern.compile("^data:image/(png|jpeg|svg\\+xml);base64,.+", Pattern.CASE_INSENSITIVE);
+    private static final Pattern DATA_IMAGE = Pattern.compile("^data:image/(png|jpeg|jpg|webp|svg\\+xml)(;base64)?,.+", Pattern.CASE_INSENSITIVE);
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {

@@ -8,7 +8,11 @@ describe("CampaignSessionsPanel", () => {
       <MemoryRouter>
         <CampaignSessionsPanel
           campaignId="10"
-          sessions={[{ id: 2, title: "S1", status: "PLANNED", description: "x" }, { id: 3, title: "S2", status: "IN_PROGRESS", description: "y" }]}
+          sessions={[
+            { id: 2, title: "S1", status: "PLANNED", description: "x" },
+            { id: 3, title: "S2", status: "IN_PROGRESS", description: "y" },
+            { id: 4, title: "S3", status: "FINISHED", description: "z" },
+          ]}
           isOwner={false}
           busy={false}
           onCreate={() => {}}
@@ -21,5 +25,11 @@ describe("CampaignSessionsPanel", () => {
     expect(screen.getByText("S1")).toBeInTheDocument();
     expect(screen.getByText("PLANNED")).toBeInTheDocument();
     expect(screen.getByText("IN_PROGRESS")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Dolacz do aktywnej sesji" })).toHaveAttribute(
+      "href",
+      "/campaigns/10/sessions/3/live"
+    );
+    expect(screen.getByRole("button", { name: /Sesja jeszcze nie rozpocz/ })).toBeDisabled();
+    expect(screen.getByText("Sesja zakonczona (archiwalna).")).toBeInTheDocument();
   });
 });

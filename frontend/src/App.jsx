@@ -20,6 +20,7 @@ const CompendiumPage = lazy(() => import("./pages/CompendiumPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const CampaignsPage = lazy(() => import("./pages/CampaignsPage"));
 const CampaignDetailsPage = lazy(() => import("./pages/CampaignDetailsPage"));
+const LiveSessionPage = lazy(() => import("./pages/live-session/LiveSessionPage"));
 const FriendsPage = lazy(() => import("./pages/FriendsPage"));
 const MessagesPage = lazy(() => import("./pages/MessagesPage"));
 const PublicUserPage = lazy(() => import("./pages/PublicUserPage"));
@@ -69,6 +70,7 @@ export default function App() {
             <Route path="/compendium" element={<CompendiumPage />} />
             <Route path="/campaigns" element={<CampaignsPage />} />
             <Route path="/campaigns/:campaignId" element={<CampaignDetailsPage />} />
+            <Route path="/campaigns/:campaignId/sessions/:sessionId/live" element={<LiveSessionPage />} />
             <Route path="/characters" element={<CharactersPage />} />
             <Route path="/friends" element={<FriendsPage />} />
             <Route path="/messages" element={<MessagesPage />} />

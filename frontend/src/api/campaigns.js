@@ -168,6 +168,21 @@ export async function saveSessionNote(token, campaignId, sessionId, body) {
   });
 }
 
+export async function getSessionLiveState(token, campaignId, sessionId) {
+  return http(`/api/campaigns/${campaignId}/sessions/${sessionId}/live-state`, {
+    method: "GET",
+    token,
+  });
+}
+
+export async function updateSessionLiveState(token, campaignId, sessionId, body) {
+  return http(`/api/campaigns/${campaignId}/sessions/${sessionId}/live-state`, {
+    method: "PATCH",
+    token,
+    body,
+  });
+}
+
 export async function listCampaignNotifications(token, campaignId) {
   return http(`/api/campaigns/${campaignId}/notifications`, {
     method: "GET",

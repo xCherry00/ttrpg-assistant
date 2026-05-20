@@ -1,4 +1,4 @@
-ï»¿import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function statusLabel(status) {
   if (status === "IN_PROGRESS") return "IN_PROGRESS";
@@ -48,9 +48,19 @@ export default function CampaignSessionsPanel({ campaignId, sessions, isOwner, b
                 <span>ID: {session.id}</span>
               </div>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                <Link className="campaignDetailsGhostBtn" to={`/campaigns/${campaignId}/sessions/${session.id}/live`}>
-                  Live room (coming soon)
-                </Link>
+                {session.status === "IN_PROGRESS" && (
+                  <Link className="campaignDetailsGhostBtn" to={`/campaigns/${campaignId}/sessions/${session.id}/live`}>
+                    Dolacz do aktywnej sesji
+                  </Link>
+                )}
+                {session.status === "PLANNED" && (
+                  <button className="campaignDetailsGhostBtn" type="button" disabled>
+                    Sesja jeszcze nie rozpoczêta
+                  </button>
+                )}
+                {session.status === "FINISHED" && (
+                  <span className="campaignDetailsEmpty">Sesja zakonczona (archiwalna).</span>
+                )}
                 {isOwner && session.status === "PLANNED" && (
                   <button className="campaignDetailsPrimaryBtn" type="button" disabled={busy} onClick={() => onStart(session.id)}>Start</button>
                 )}
