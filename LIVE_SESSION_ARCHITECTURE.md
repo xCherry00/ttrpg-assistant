@@ -229,4 +229,7 @@ No schema migration is introduced in v0.6.6; this section is design-only.
   - `PLANNED`: read-only / blocked for requested rolls and embedded initiative preview.
   - `IN_PROGRESS`: active lifecycle state for live mechanics.
   - `FINISHED`: read-only / blocked for live mechanics.
+- Requested rolls are now implemented as embedded LiveSessionPage feature (v0.7.5).
+- `ALL` targeting creates multiple requested roll records (one per target character).
+- Character/system-specific modifiers are MVP/fallback based (future stage for deeper CoC/system rollers).
 

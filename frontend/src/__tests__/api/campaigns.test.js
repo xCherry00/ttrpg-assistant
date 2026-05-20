@@ -11,8 +11,12 @@ import {
   healParticipant,
   nextEncounterTurn,
   createCampaignPlayerNote,
+  createRequestedRoll,
   updateCampaignPlayerNote,
   deleteCampaignPlayerNote,
+  cancelRequestedRoll,
+  fulfillRequestedRoll,
+  getRequestedRolls,
   updateMySessionAttendance,
   updateSessionLiveState,
 } from "../../api/campaigns";
@@ -104,6 +108,17 @@ describe("campaigns api helpers", () => {
     const urls = global.fetch.mock.calls.map((call) => call[0]);
     expect(urls.some((u) => u.includes("/api/campaigns/8/player-notes"))).toBe(true);
     expect(urls.some((u) => u.includes("/api/campaigns/8/player-notes/3"))).toBe(true);
+  });
+
+  it("requested rolls helpers use expected endpoints", async () => {
+    await createRequestedRoll("token", 8, 4, { targetMode: "ALL", rollLabel: "Perception" });
+    await getRequestedRolls("token", 8, 4);
+    await fulfillRequestedRoll("token", 8, 4, 12, {});
+    await cancelRequestedRoll("token", 8, 4, 12);
+    const urls = global.fetch.mock.calls.map((call) => call[0]);
+    expect(urls.some((u) => u.includes("/api/campaigns/8/sessions/4/requested-rolls"))).toBe(true);
+    expect(urls.some((u) => u.includes("/requested-rolls/12/fulfill"))).toBe(true);
+    expect(urls.some((u) => u.includes("/requested-rolls/12/cancel"))).toBe(true);
   });
 
   it("propagates user-friendly error from http", async () => {

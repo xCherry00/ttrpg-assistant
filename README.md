@@ -702,6 +702,20 @@ Refactor note (v0.6.6):
 - Live session mechanics are active only for `IN_PROGRESS` sessions.
 - `PLANNED` and `FINISHED` sessions are treated as not-active for live mechanics.
 
+### Requested Rolls (v0.7.5)
+
+- GM/owner can create requested rolls in `LiveSessionPage` for:
+  - one/many characters (`CHARACTER`),
+  - one/many users (`USER`),
+  - all assigned compatible characters (`ALL`).
+- Players execute requested rolls directly in `LiveSessionPage` (without navigating to `/dice`).
+- Fulfilled requested rolls are persisted to `dice_rolls` with campaign/session context.
+- DC visibility rules:
+  - GM always sees DC and success/failure,
+  - player sees DC only when not hidden,
+  - player sees success/failure only when enabled.
+- Requested rolls are active only for `IN_PROGRESS` sessions.
+
 ## Security (MVP v0.5.4)
 
 - JWT is currently stored in localStorage (`ttrpg_token`) for MVP simplicity.

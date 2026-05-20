@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import LiveSessionPage from "../../../pages/live-session/LiveSessionPage";
 import * as campaignsApi from "../../../api/campaigns";
@@ -15,6 +15,10 @@ vi.mock("../../../api/campaigns", () => ({
   getSessionLiveState: vi.fn(),
   startCampaignSession: vi.fn(),
   finishCampaignSession: vi.fn(),
+  createRequestedRoll: vi.fn(),
+  getRequestedRolls: vi.fn(),
+  fulfillRequestedRoll: vi.fn(),
+  cancelRequestedRoll: vi.fn(),
   updateSessionLiveState: vi.fn(),
 }));
 
@@ -41,6 +45,7 @@ describe("LiveSessionPage", () => {
     campaignsApi.getCampaignCharacters.mockResolvedValue([]);
     campaignsApi.getCampaignDiceRolls.mockResolvedValue([]);
     campaignsApi.getSessionLiveState.mockResolvedValue(null);
+    campaignsApi.getRequestedRolls.mockResolvedValue([]);
     renderPage();
     expect(screen.getByText("Ladowanie live session...")).toBeInTheDocument();
   });
@@ -61,6 +66,7 @@ describe("LiveSessionPage", () => {
       activeEncounterId: null,
       updatedAt: null,
     });
+    campaignsApi.getRequestedRolls.mockResolvedValue([]);
     renderPage();
 
     await waitFor(() => {
@@ -92,6 +98,9 @@ describe("LiveSessionPage", () => {
       activeEncounterId: null,
       updatedAt: null,
     });
+    campaignsApi.getRequestedRolls.mockResolvedValue([
+      { id: 1, rollLabel: "Perception", status: "PENDING", dcVisible: false, rollExpression: "1d20", characterName: "Ela" },
+    ]);
     renderPage();
 
     await waitFor(() => {
@@ -99,6 +108,7 @@ describe("LiveSessionPage", () => {
       expect(screen.getByText("Wieczorny deszcz.")).toBeInTheDocument();
       expect(screen.getByRole("img", { name: "Port" })).toBeInTheDocument();
       expect(screen.queryByRole("button", { name: "Save scene" })).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "🎲 Roll" })).toBeInTheDocument();
     });
   });
 
@@ -108,6 +118,7 @@ describe("LiveSessionPage", () => {
     campaignsApi.getCampaignCharacters.mockResolvedValue([]);
     campaignsApi.getCampaignDiceRolls.mockResolvedValue([]);
     campaignsApi.getSessionLiveState.mockResolvedValue(null);
+    campaignsApi.getRequestedRolls.mockResolvedValue([]);
     renderPage();
 
     await waitFor(() => {
@@ -121,11 +132,42 @@ describe("LiveSessionPage", () => {
     campaignsApi.getCampaignCharacters.mockResolvedValue([]);
     campaignsApi.getCampaignDiceRolls.mockResolvedValue([]);
     campaignsApi.getSessionLiveState.mockResolvedValue(null);
+    campaignsApi.getRequestedRolls.mockResolvedValue([]);
     renderPage();
 
     await waitFor(() => {
       expect(screen.getByText("Session ended. Read-only view.")).toBeInTheDocument();
       expect(screen.getAllByText(/only for active session \(IN_PROGRESS\)/).length).toBeGreaterThan(0);
+    });
+  });
+
+  it("shows GM requested roll form only for in progress", async () => {
+    campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "Dragonfall", owner: true });
+    campaignsApi.listCampaignSessions.mockResolvedValue([{ id: 2, title: "Session Two", status: "IN_PROGRESS" }]);
+    campaignsApi.getCampaignCharacters.mockResolvedValue([]);
+    campaignsApi.getCampaignDiceRolls.mockResolvedValue([]);
+    campaignsApi.getSessionLiveState.mockResolvedValue(null);
+    campaignsApi.getRequestedRolls.mockResolvedValue([]);
+    renderPage();
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Create requested roll" })).toBeInTheDocument();
+    });
+  });
+
+  it("player click Roll calls fulfillRequestedRoll", async () => {
+    campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "Dragonfall", owner: false });
+    campaignsApi.listCampaignSessions.mockResolvedValue([{ id: 2, title: "Session Two", status: "IN_PROGRESS" }]);
+    campaignsApi.getCampaignCharacters.mockResolvedValue([]);
+    campaignsApi.getCampaignDiceRolls.mockResolvedValue([]);
+    campaignsApi.getSessionLiveState.mockResolvedValue(null);
+    campaignsApi.getRequestedRolls.mockResolvedValue([
+      { id: 22, rollLabel: "Perception", status: "PENDING", dcVisible: false, rollExpression: "1d20", characterName: "Ela" },
+    ]);
+    campaignsApi.fulfillRequestedRoll.mockResolvedValue({});
+    renderPage();
+    fireEvent.click(await screen.findByRole("button", { name: "🎲 Roll" }));
+    await waitFor(() => {
+      expect(campaignsApi.fulfillRequestedRoll).toHaveBeenCalledWith("test-token", "10", "2", 22, {});
     });
   });
 });

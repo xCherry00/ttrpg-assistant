@@ -242,6 +242,36 @@ export async function deleteCampaignPlayerNote(token, campaignId, noteId) {
   });
 }
 
+export async function createRequestedRoll(token, campaignId, sessionId, payload) {
+  return http(`/api/campaigns/${campaignId}/sessions/${sessionId}/requested-rolls`, {
+    method: "POST",
+    token,
+    body: payload,
+  });
+}
+
+export async function getRequestedRolls(token, campaignId, sessionId) {
+  return http(`/api/campaigns/${campaignId}/sessions/${sessionId}/requested-rolls`, {
+    method: "GET",
+    token,
+  });
+}
+
+export async function fulfillRequestedRoll(token, campaignId, sessionId, requestId, payload) {
+  return http(`/api/campaigns/${campaignId}/sessions/${sessionId}/requested-rolls/${requestId}/fulfill`, {
+    method: "POST",
+    token,
+    body: payload,
+  });
+}
+
+export async function cancelRequestedRoll(token, campaignId, sessionId, requestId) {
+  return http(`/api/campaigns/${campaignId}/sessions/${sessionId}/requested-rolls/${requestId}/cancel`, {
+    method: "POST",
+    token,
+  });
+}
+
 export async function assignCharacterToCampaign(token, campaignId, characterId) {
   return http(`/api/campaigns/${campaignId}/characters`, {
     method: "POST",

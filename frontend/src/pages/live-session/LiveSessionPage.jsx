@@ -9,6 +9,10 @@ import {
   listCampaignSessions,
   startCampaignSession,
   finishCampaignSession,
+  createRequestedRoll,
+  getRequestedRolls,
+  fulfillRequestedRoll,
+  cancelRequestedRoll,
   updateSessionLiveState,
 } from "../../api/campaigns";
 import "../../styles/live-session.css";
@@ -40,6 +44,7 @@ export default function LiveSessionPage() {
   const [savingScene, setSavingScene] = useState(false);
   const [notice, setNotice] = useState("");
   const [sessionActionBusy, setSessionActionBusy] = useState(false);
+  const [requestedRolls, setRequestedRolls] = useState([]);
 
   const isGmView = Boolean(campaign?.owner);
 
@@ -53,12 +58,13 @@ export default function LiveSessionPage() {
       setLoading(true);
       setError("");
       try {
-        const [campaignData, sessionsData, campaignCharactersData, rollsData, liveStateData] = await Promise.all([
+        const [campaignData, sessionsData, campaignCharactersData, rollsData, liveStateData, requestedRollsData] = await Promise.all([
           getCampaignById(token, campaignId),
           listCampaignSessions(token, campaignId),
           getCampaignCharacters(token, campaignId),
           getCampaignDiceRolls(token, campaignId, { sessionId, limit: 10 }).catch(() => []),
           getSessionLiveState(token, campaignId, sessionId).catch(() => null),
+          getRequestedRolls(token, campaignId, sessionId).catch(() => []),
         ]);
         const resolvedSession = Array.isArray(sessionsData)
           ? sessionsData.find((item) => String(item.id) === String(sessionId)) || null
@@ -68,6 +74,7 @@ export default function LiveSessionPage() {
         setCampaignCharacters(Array.isArray(campaignCharactersData) ? campaignCharactersData : []);
         setRecentRolls(Array.isArray(rollsData) ? rollsData : []);
         setLiveState(liveStateData);
+        setRequestedRolls(Array.isArray(requestedRollsData) ? requestedRollsData : []);
       } catch (err) {
         setError(err?.message || "Nie udalo sie zaladowac live session.");
       } finally {
@@ -84,6 +91,8 @@ export default function LiveSessionPage() {
       ? sessionsData.find((item) => String(item.id) === String(sessionId)) || null
       : null;
     setSession(resolvedSession);
+    const requested = await getRequestedRolls(token, campaignId, sessionId).catch(() => []);
+    setRequestedRolls(Array.isArray(requested) ? requested : []);
   }
 
   async function handleStartSession() {
@@ -119,6 +128,64 @@ export default function LiveSessionPage() {
   const isPlanned = session?.status === "PLANNED";
   const isInProgress = session?.status === "IN_PROGRESS";
   const isFinished = session?.status === "FINISHED";
+
+  async function handleCreateRequestedRoll(event) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const payload = {
+      targetMode: String(formData.get("targetMode") || "ALL"),
+      targetUserIds: String(formData.get("targetUserIds") || "")
+        .split(",")
+        .map((value) => Number(value.trim()))
+        .filter((value) => Number.isFinite(value) && value > 0),
+      targetCharacterIds: String(formData.get("targetCharacterIds") || "")
+        .split(",")
+        .map((value) => Number(value.trim()))
+        .filter((value) => Number.isFinite(value) && value > 0),
+      rollLabel: String(formData.get("rollLabel") || "").trim(),
+      rollType: String(formData.get("rollType") || "SKILL").trim(),
+      rollExpression: String(formData.get("rollExpression") || "").trim() || null,
+      abilityKey: String(formData.get("abilityKey") || "").trim() || null,
+      skillKey: String(formData.get("skillKey") || "").trim() || null,
+      dc: String(formData.get("dc") || "").trim() ? Number(formData.get("dc")) : null,
+      isDcHidden: formData.get("isDcHidden") === "on",
+      showSuccessToPlayer: formData.get("showSuccessToPlayer") === "on",
+    };
+    setError("");
+    setNotice("");
+    try {
+      await createRequestedRoll(token, campaignId, sessionId, payload);
+      await reloadSessionData();
+      setNotice("Requested roll utworzony.");
+      event.currentTarget.reset();
+    } catch (err) {
+      setError(err?.message || "Nie udalo sie utworzyc requested roll.");
+    }
+  }
+
+  async function handleFulfillRequestedRoll(requestId) {
+    setError("");
+    setNotice("");
+    try {
+      await fulfillRequestedRoll(token, campaignId, sessionId, requestId, {});
+      await reloadSessionData();
+      setNotice("Requested roll wykonany.");
+    } catch (err) {
+      setError(err?.message || "Nie udalo sie wykonac requested roll.");
+    }
+  }
+
+  async function handleCancelRequestedRoll(requestId) {
+    setError("");
+    setNotice("");
+    try {
+      await cancelRequestedRoll(token, campaignId, sessionId, requestId);
+      await reloadSessionData();
+      setNotice("Requested roll anulowany.");
+    } catch (err) {
+      setError(err?.message || "Nie udalo sie anulowac requested roll.");
+    }
+  }
 
   return (
     <div className="page liveSessionPage">
@@ -250,11 +317,45 @@ export default function LiveSessionPage() {
 
           <section className="campaignDetailsCard panel-soft">
             <h2 className="campaignDetailsCardTitle">Requested Rolls</h2>
-            <p className="liveSessionPlaceholder">
-              {isInProgress
-                ? "Requested rolls panel will be implemented in a next stage."
-                : "Requested rolls are available only for active session (IN_PROGRESS)."}
-            </p>
+            {isPlanned && <p className="liveSessionPlaceholder">Mechanika bedzie dostepna po rozpoczeciu sesji.</p>}
+            {isFinished && <p className="liveSessionPlaceholder">Sesja zakonczona. Requested rolls w trybie read-only.</p>}
+            {isInProgress && isGmView && (
+              <form className="campaignFormCard" onSubmit={handleCreateRequestedRoll}>
+                <label className="campaignField"><span>Target mode</span><select name="targetMode" defaultValue="ALL"><option value="ALL">ALL</option><option value="CHARACTER">CHARACTER</option><option value="USER">USER</option></select></label>
+                <label className="campaignField"><span>Target character IDs (comma)</span><input name="targetCharacterIds" placeholder="1,2,3" /></label>
+                <label className="campaignField"><span>Target user IDs (comma)</span><input name="targetUserIds" placeholder="10,11" /></label>
+                <label className="campaignField"><span>Label</span><input name="rollLabel" maxLength={160} required /></label>
+                <label className="campaignField"><span>Roll type</span><input name="rollType" defaultValue="SKILL" maxLength={40} /></label>
+                <label className="campaignField"><span>Roll expression</span><input name="rollExpression" defaultValue={campaign?.systemCode === "dnd5e" ? "1d20" : ""} maxLength={120} /></label>
+                <label className="campaignField"><span>Ability key</span><input name="abilityKey" maxLength={80} /></label>
+                <label className="campaignField"><span>Skill key</span><input name="skillKey" maxLength={80} /></label>
+                <label className="campaignField"><span>DC</span><input name="dc" type="number" min="0" /></label>
+                <label className="campaignField"><span><input name="isDcHidden" type="checkbox" defaultChecked /> Hide DC</span></label>
+                <label className="campaignField"><span><input name="showSuccessToPlayer" type="checkbox" /> Show success to player</span></label>
+                <button className="campaignDetailsPrimaryBtn" type="submit">Create requested roll</button>
+              </form>
+            )}
+            <div className="campaignMaterialList">
+              {requestedRolls.map((roll) => (
+                <article key={roll.id} className="campaignMaterialCard">
+                  <div className="campaignMaterialCard__top">
+                    <strong>{roll.rollLabel}</strong>
+                    <span className="campaignMemberBadge">{roll.status}</span>
+                  </div>
+                  <p>Target: {roll.characterName || roll.targetName || "-"}</p>
+                  <p>Expression: {roll.rollExpression || "fallback"}</p>
+                  {roll.dcVisible && roll.dc != null && <p>DC: {roll.dc}</p>}
+                  {roll.resultTotal != null && <p>Result: {roll.resultTotal}{roll.success != null ? ` (${roll.success ? "SUCCESS" : "FAIL"})` : ""}</p>}
+                  {isInProgress && !isGmView && roll.status === "PENDING" && (
+                    <button className="campaignDetailsPrimaryBtn" type="button" onClick={() => handleFulfillRequestedRoll(roll.id)}>🎲 Roll</button>
+                  )}
+                  {isInProgress && isGmView && roll.status === "PENDING" && (
+                    <button className="campaignDetailsDangerBtn" type="button" onClick={() => handleCancelRequestedRoll(roll.id)}>Cancel</button>
+                  )}
+                </article>
+              ))}
+              {requestedRolls.length === 0 && <p className="liveSessionPlaceholder">Brak requested rolls.</p>}
+            </div>
           </section>
 
           <section className="campaignDetailsCard panel-soft">
