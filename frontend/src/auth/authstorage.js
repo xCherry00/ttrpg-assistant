@@ -1,7 +1,7 @@
 export const STORAGE_KEY = "ttrpg_token";
 
 export function getToken() {
-  return localStorage.getItem(STORAGE_KEY) || "";
+  return localStorage.getItem(STORAGE_KEY);
 }
 
 export function setToken(token) {

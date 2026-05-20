@@ -338,6 +338,25 @@ cd ../backend
 mvn test
 ```
 
+### Frontend tests
+
+- Stack:
+  - Vitest (`jsdom`)
+  - React Testing Library
+  - `@testing-library/jest-dom`
+- Run:
+  - `cd frontend`
+  - `npm run test`
+- Current coverage:
+  - auth storage helpers (`getToken`, `setToken`, `clearToken`)
+  - AuthContext token initialization and unauthorized/logout handling
+  - representative campaigns API helpers (encounters, participant mutations, dice roll helpers)
+  - lightweight InitiativePage smoke cases (loading / empty encounters / participant render)
+  - initiative formatting helpers (`HP`, participant status, roll summary)
+- TODO:
+  - expand InitiativePage tests after splitting it into smaller components
+  - add more isolated UI state tests for error and disabled-button flows
+
 ### Project structure
 
 ```
@@ -532,6 +551,29 @@ Status rules:
   - no Genesys dice support in backend parser,
   - no auto-integration into initiative/damage workflows,
   - no large dedicated UI for persistent roll history yet.
+
+### Initiative UI Backend Integration (v0.6.4)
+
+- `InitiativePage` now works in persistent backend mode:
+  - select campaign,
+  - list/select/create/finish/delete encounters,
+  - load encounter participants with turn/round state from backend.
+- UI supports participant actions:
+  - add custom participant,
+  - add assigned campaign character as participant,
+  - next/previous turn,
+  - remove participant,
+  - HP/state updates (`damage`, `heal`, `temp HP`, `conditions`, `defeat`, `restore`).
+- UI includes a basic campaign/encounter dice history panel:
+  - execute simple expression roll,
+  - show recent rolls (expression, total, label, author, timestamp),
+  - refresh history after roll.
+- Loading/error/empty states are included for campaigns, encounters, participants, and roll history.
+- Current frontend scope limits:
+  - no final combat manager UI polish,
+  - no global redesign,
+  - no automatic D&D/CoC rules automation,
+  - dice rolls are not auto-applying damage or initiative effects.
 
 ## Security (MVP v0.5.4)
 - JWT is currently stored in localStorage (	trpg_token) for MVP simplicity.
