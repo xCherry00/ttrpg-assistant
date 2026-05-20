@@ -627,10 +627,10 @@ Refactor note (v0.6.6):
   - campaign/session header and back link to campaign workspace,
   - party/players panel based on campaign characters,
   - role split (`GM/owner` vs `member/player`) in basic form,
-  - placeholders for Scene panel, Requested Rolls, Initiative Preview,
+  - initial MVP sections for Scene panel, Requested Rolls, Initiative Preview (later expanded in v0.6.9+ / v0.7.x),
   - lightweight session roll history preview.
 - `/dice` and `/initiative` remain global off-session tools.
-- Embedded requested rolls logic, scene persistence, and full initiative embedding are intentionally deferred to next stages.
+- At this v0.6.8 checkpoint, embedded requested rolls logic, scene persistence, and initiative embedding were still deferred to later stages.
 
 ### Session Live State & Scene Panel (v0.6.9)
 
@@ -732,3 +732,20 @@ Refactor note (v0.6.6):
 - Token delivery by email is TODO for future infrastructure; for tests/dev it can be exposed via EXPOSE_RESET_TOKEN=true.
 - Added users.token_invalidated_at: after password change/reset, older JWTs (issued before invalidation time) are rejected.
 
+
+### Embedded Live Initiative Preview (v0.7.6)
+
+- `LiveSessionPage` now contains real embedded initiative preview based on existing `combat_encounters` and `combat_participants`.
+- Data source:
+  - `GET /api/campaigns/{campaignId}/sessions/{sessionId}/live-state` (`activeEncounterId`),
+  - `GET /api/campaigns/{campaignId}/encounters`,
+  - `GET /api/campaigns/{campaignId}/encounters/{encounterId}`.
+- No new backend combat model and no new initiative endpoints were added.
+- Session gating:
+  - `PLANNED`: preview locked with not-started message,
+  - `IN_PROGRESS`: full embedded preview available,
+  - `FINISHED`: read-only ended state.
+- Visibility split:
+  - GM/owner view: full queue preview, current participant, round, encounter status, HP/temp HP, conditions, defeated state.
+  - player/member view: limited read-only preview (current + next participants, type/allegiance badges), no HP/details controls.
+- `/initiative` remains the full global combat tool; embedded preview in live session does not replace it.

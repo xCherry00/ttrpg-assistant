@@ -3,7 +3,7 @@
     <section className="campaignDetailsCard panel-soft">
       <h2 className="campaignDetailsCardTitle">Materialy kampanii</h2>
       {!materialsAvailable ? (
-        <div className="campaignDetailsEmpty">TODO: endpointy/material helpery wymagaja dopiecia.</div>
+        <div className="campaignDetailsEmpty">Materialy kampanii sa chwilowo niedostepne.</div>
       ) : materials.length === 0 ? (
         <div className="campaignDetailsEmpty">Brak materialow.</div>
       ) : (

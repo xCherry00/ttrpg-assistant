@@ -50,6 +50,30 @@ describe("UpcomingSessionPanel attendance", () => {
     });
   });
 
+  it("shows attendance loading state", async () => {
+    campaignsApi.getSessionAttendance.mockReturnValue(new Promise(() => {}));
+    render(
+      <MemoryRouter>
+        <UpcomingSessionPanel campaignId={10} sessions={[{ id: 5, title: "S", status: "PLANNED" }]} isOwner />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Ladowanie frekwencji...")).toBeInTheDocument();
+  });
+
+  it("shows attendance error state when fetch fails", async () => {
+    campaignsApi.getSessionAttendance.mockRejectedValue(new Error("attendance boom"));
+    render(
+      <MemoryRouter>
+        <UpcomingSessionPanel campaignId={10} sessions={[{ id: 5, title: "S", status: "PLANNED" }]} isOwner />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("attendance boom")).toBeInTheDocument();
+    });
+  });
+
   it("clicking available sends updateMySessionAttendance", async () => {
     campaignsApi.getSessionAttendance.mockResolvedValue({
       availableCount: 0,

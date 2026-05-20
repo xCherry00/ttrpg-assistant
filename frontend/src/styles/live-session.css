@@ -86,3 +86,15 @@
   place-items: center;
   padding: 12px;
 }
+
+.liveInitiativeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.liveInitiativeMeta {
+  margin: 0 0 10px;
+  color: var(--muted);
+}

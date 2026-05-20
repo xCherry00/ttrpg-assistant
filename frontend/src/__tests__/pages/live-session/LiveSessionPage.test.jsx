@@ -20,6 +20,8 @@ vi.mock("../../../api/campaigns", () => ({
   fulfillRequestedRoll: vi.fn(),
   cancelRequestedRoll: vi.fn(),
   updateSessionLiveState: vi.fn(),
+  getCampaignEncounters: vi.fn(),
+  getEncounter: vi.fn(),
 }));
 
 function renderPage() {
@@ -46,6 +48,8 @@ describe("LiveSessionPage", () => {
     campaignsApi.getCampaignDiceRolls.mockResolvedValue([]);
     campaignsApi.getSessionLiveState.mockResolvedValue(null);
     campaignsApi.getRequestedRolls.mockResolvedValue([]);
+    campaignsApi.getCampaignEncounters.mockResolvedValue([]);
+    campaignsApi.getEncounter.mockResolvedValue(null);
     renderPage();
     expect(screen.getByText("Ladowanie live session...")).toBeInTheDocument();
   });
@@ -63,20 +67,30 @@ describe("LiveSessionPage", () => {
       sceneTitle: "Ruiny",
       sceneImageUrl: "https://img.example/scene.webp",
       sceneDescription: "Mgla i deszcz.",
-      activeEncounterId: null,
+      activeEncounterId: 7,
       updatedAt: null,
     });
     campaignsApi.getRequestedRolls.mockResolvedValue([]);
+    campaignsApi.getCampaignEncounters.mockResolvedValue([{ id: 7, name: "Street fight", status: "ACTIVE", participants: [] }]);
+    campaignsApi.getEncounter.mockResolvedValue({
+      id: 7,
+      name: "Street fight",
+      status: "ACTIVE",
+      roundNumber: 1,
+      currentParticipantId: 1,
+      participants: [{ id: 1, name: "Ela", participantType: "PLAYER_CHARACTER", sortOrder: 0, currentHp: 9, maxHp: 10 }],
+    });
     renderPage();
 
     await waitFor(() => {
       expect(screen.getByRole("heading", { name: "Dragonfall" })).toBeInTheDocument();
       expect(screen.getByText(/Session Two/)).toBeInTheDocument();
       expect(screen.getByText("Party / Players")).toBeInTheDocument();
-      expect(screen.getByText("Ela")).toBeInTheDocument();
+      expect(screen.getAllByText("Ela").length).toBeGreaterThan(0);
       expect(screen.getByText("Scene Panel")).toBeInTheDocument();
       expect(screen.getByText("Requested Rolls")).toBeInTheDocument();
       expect(screen.getByText("Initiative Preview")).toBeInTheDocument();
+      expect(screen.getByText(/Encounter:/)).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Save scene" })).toBeInTheDocument();
       expect(screen.getByDisplayValue("Ruiny")).toBeInTheDocument();
       expect(screen.getByDisplayValue("https://img.example/scene.webp")).toBeInTheDocument();
@@ -101,6 +115,8 @@ describe("LiveSessionPage", () => {
     campaignsApi.getRequestedRolls.mockResolvedValue([
       { id: 1, rollLabel: "Perception", status: "PENDING", dcVisible: false, rollExpression: "1d20", characterName: "Ela" },
     ]);
+    campaignsApi.getCampaignEncounters.mockResolvedValue([]);
+    campaignsApi.getEncounter.mockResolvedValue(null);
     renderPage();
 
     await waitFor(() => {
@@ -108,7 +124,8 @@ describe("LiveSessionPage", () => {
       expect(screen.getByText("Wieczorny deszcz.")).toBeInTheDocument();
       expect(screen.getByRole("img", { name: "Port" })).toBeInTheDocument();
       expect(screen.queryByRole("button", { name: "Save scene" })).not.toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "🎲 Roll" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /roll/i })).toBeInTheDocument();
+      expect(screen.getByText("Brak aktywnego starcia dla tej sesji.")).toBeInTheDocument();
     });
   });
 
@@ -119,10 +136,13 @@ describe("LiveSessionPage", () => {
     campaignsApi.getCampaignDiceRolls.mockResolvedValue([]);
     campaignsApi.getSessionLiveState.mockResolvedValue(null);
     campaignsApi.getRequestedRolls.mockResolvedValue([]);
+    campaignsApi.getCampaignEncounters.mockResolvedValue([]);
+    campaignsApi.getEncounter.mockResolvedValue(null);
     renderPage();
 
     await waitFor(() => {
       expect(screen.getByText("Session has not started yet.")).toBeInTheDocument();
+      expect(screen.getByText(/Podglad inicjatywy bedzie dostepny po rozpoczeciu sesji/)).toBeInTheDocument();
     });
   });
 
@@ -133,11 +153,13 @@ describe("LiveSessionPage", () => {
     campaignsApi.getCampaignDiceRolls.mockResolvedValue([]);
     campaignsApi.getSessionLiveState.mockResolvedValue(null);
     campaignsApi.getRequestedRolls.mockResolvedValue([]);
+    campaignsApi.getCampaignEncounters.mockResolvedValue([]);
+    campaignsApi.getEncounter.mockResolvedValue(null);
     renderPage();
 
     await waitFor(() => {
       expect(screen.getByText("Session ended. Read-only view.")).toBeInTheDocument();
-      expect(screen.getAllByText(/only for active session \(IN_PROGRESS\)/).length).toBeGreaterThan(0);
+      expect(screen.getByText(/Podglad inicjatywy jest w trybie read-only/)).toBeInTheDocument();
     });
   });
 
@@ -148,6 +170,8 @@ describe("LiveSessionPage", () => {
     campaignsApi.getCampaignDiceRolls.mockResolvedValue([]);
     campaignsApi.getSessionLiveState.mockResolvedValue(null);
     campaignsApi.getRequestedRolls.mockResolvedValue([]);
+    campaignsApi.getCampaignEncounters.mockResolvedValue([]);
+    campaignsApi.getEncounter.mockResolvedValue(null);
     renderPage();
     await waitFor(() => {
       expect(screen.getByRole("button", { name: "Create requested roll" })).toBeInTheDocument();
@@ -164,10 +188,62 @@ describe("LiveSessionPage", () => {
       { id: 22, rollLabel: "Perception", status: "PENDING", dcVisible: false, rollExpression: "1d20", characterName: "Ela" },
     ]);
     campaignsApi.fulfillRequestedRoll.mockResolvedValue({});
+    campaignsApi.getCampaignEncounters.mockResolvedValue([]);
+    campaignsApi.getEncounter.mockResolvedValue(null);
     renderPage();
-    fireEvent.click(await screen.findByRole("button", { name: "🎲 Roll" }));
+    fireEvent.click(await screen.findByRole("button", { name: /roll/i }));
     await waitFor(() => {
       expect(campaignsApi.fulfillRequestedRoll).toHaveBeenCalledWith("test-token", "10", "2", 22, {});
+    });
+  });
+
+  it("does not render hidden DC for player requested roll", async () => {
+    campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "Dragonfall", owner: false });
+    campaignsApi.listCampaignSessions.mockResolvedValue([{ id: 2, title: "Session Two", status: "IN_PROGRESS" }]);
+    campaignsApi.getCampaignCharacters.mockResolvedValue([]);
+    campaignsApi.getCampaignDiceRolls.mockResolvedValue([]);
+    campaignsApi.getSessionLiveState.mockResolvedValue(null);
+    campaignsApi.getRequestedRolls.mockResolvedValue([
+      {
+        id: 30,
+        rollLabel: "Stealth",
+        status: "PENDING",
+        dcVisible: false,
+        dc: 18,
+        rollExpression: "1d20",
+        characterName: "Ela",
+      },
+    ]);
+    campaignsApi.getCampaignEncounters.mockResolvedValue([]);
+    campaignsApi.getEncounter.mockResolvedValue(null);
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.queryByText("DC: 18")).not.toBeInTheDocument();
+    });
+  });
+
+  it("loads active encounter details when activeEncounterId is set", async () => {
+    campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "Dragonfall", owner: false });
+    campaignsApi.listCampaignSessions.mockResolvedValue([{ id: 2, title: "Session Two", status: "IN_PROGRESS" }]);
+    campaignsApi.getCampaignCharacters.mockResolvedValue([]);
+    campaignsApi.getCampaignDiceRolls.mockResolvedValue([]);
+    campaignsApi.getSessionLiveState.mockResolvedValue({ activeEncounterId: 12 });
+    campaignsApi.getRequestedRolls.mockResolvedValue([]);
+    campaignsApi.getCampaignEncounters.mockResolvedValue([{ id: 12, name: "Bridge" }]);
+    campaignsApi.getEncounter.mockResolvedValue({
+      id: 12,
+      name: "Bridge",
+      status: "ACTIVE",
+      roundNumber: 3,
+      currentParticipantId: 1,
+      participants: [{ id: 1, name: "Ela", participantType: "PLAYER_CHARACTER", sortOrder: 0 }],
+    });
+    renderPage();
+
+    await waitFor(() => {
+      expect(campaignsApi.getEncounter).toHaveBeenCalledWith("test-token", "10", 12);
+      expect(screen.getByText("Runda: 3")).toBeInTheDocument();
     });
   });
 });

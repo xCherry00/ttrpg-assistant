@@ -1,21 +1,21 @@
 # Live Session Workspace Architecture (v0.6.9 Live State + Scene Panel)
 
-## 0. Current Implementation Status (v0.6.9)
+## 0. Current Implementation Status (updated through v0.7.6)
 
 - Route implemented: `/campaigns/:campaignId/sessions/:sessionId/live`.
-- LiveSessionPage foundation implemented with:
+- LiveSessionPage implemented with:
   - header + back link to campaign workspace,
   - party/players list based on campaign characters,
   - role-sensitive MVP split (GM/owner vs member/player),
   - session roll history preview (best-effort read),
-  - placeholders for Requested Rolls and Initiative Preview.
+  - embedded Requested Rolls and embedded Initiative Preview.
 - Scene Panel is now connected to persisted `session_live_state`:
   - owner can edit `sceneTitle`, `sceneImageUrl`, `sceneDescription`,
   - member sees read-only scene content.
 - Scene image in MVP is URL/data-url only (no upload pipeline).
 - `/dice` and `/initiative` remain global tools and are not replaced.
 - No WebSockets/SSE in this stage.
-- No requested-roll persistence in this stage.
+- Requested-roll persistence is implemented (`requested_rolls` + `dice_rolls` integration).
 
 ## 1. Screen Responsibility Split
 
@@ -38,13 +38,13 @@
 - Full persistent encounter tracker: queue, HP/states, participant mutations, encounter controls.
 - Not a player-facing active-session screen.
 
-### LiveSessionPage (SessionRoomPage foundation in v0.6.8)
+### LiveSessionPage
 - Main active play screen for currently running campaign session.
 - Separate GM and player views over the same live session state.
-- Shared scene context (location image + session focus) is currently a placeholder.
-- Requested rolls workflow from GM to selected players/characters is currently a placeholder.
-- Lightweight initiative awareness for players; full oversight for GM is currently a placeholder.
-- Short live roll history focused on session context is foundation-only in v0.6.8.
+- Shared scene context (location image + session focus) is implemented through `session_live_state`.
+- Requested rolls workflow from GM to selected players/characters is implemented.
+- Initiative awareness is embedded with owner/member visibility split.
+- Short live roll history focused on session context is implemented as lightweight preview.
 - Does not require redirecting users to `/dice` or `/initiative` for core session actions.
 - Contains embedded dice/requested-roll panel and embedded initiative preview.
 - Reuses the same backend data domains (`dice_rolls`, `combat_encounters`, `combat_participants`, HP/state), but presents them in active-session UX context.
@@ -233,3 +233,34 @@ No schema migration is introduced in v0.6.6; this section is design-only.
 - `ALL` targeting creates multiple requested roll records (one per target character).
 - Character/system-specific modifiers are MVP/fallback based (future stage for deeper CoC/system rollers).
 
+
+## Update v0.7.6 - Embedded Live Initiative Preview
+
+- Embedded initiative preview is now implemented directly in `LiveSessionPage`.
+- Binding source remains existing `session_live_state.activeEncounterId`.
+- No new backend endpoints are required for MVP preview.
+- `PLANNED` session: initiative preview locked (not started message).
+- `IN_PROGRESS` session: preview active.
+- `FINISHED` session: read-only ended preview state.
+
+Visibility policy:
+
+- GM/owner:
+  - full queue preview,
+  - encounter status + current participant,
+  - round number,
+  - HP/current/max/temp,
+  - conditions + defeated state,
+  - optional link to full `/initiative` tracker.
+- Member/player:
+  - read-only subset only,
+  - current participant + next 1-2,
+  - participant type/allegiance badges,
+  - no HP details,
+  - no turn controls/damage/heal.
+
+Scope boundaries preserved:
+
+- `/initiative` stays the full global combat manager.
+- LiveSession embedded preview is contextual and lightweight.
+- No WebSockets, no redesign, no full combat manager inside `LiveSessionPage`.

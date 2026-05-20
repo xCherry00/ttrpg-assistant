@@ -22,6 +22,20 @@ describe("CampaignPlayerNotesPanel", () => {
     expect(screen.getByText("Autor: User")).toBeInTheDocument();
   });
 
+  it("does not show author details for member view", () => {
+    render(
+      <CampaignPlayerNotesPanel
+        notes={[{ id: 1, title: "T", content: "C", updatedAt: "2026-05-20T10:00:00Z", displayName: "User", username: "u" }]}
+        campaign={{ owner: false }}
+        busy={false}
+        onCreate={vi.fn()}
+        onUpdate={vi.fn()}
+        onDelete={vi.fn()}
+      />,
+    );
+    expect(screen.queryByText("Autor: User")).not.toBeInTheDocument();
+  });
+
   it("create/edit/delete call handlers", () => {
     const onCreate = vi.fn();
     const onUpdate = vi.fn();

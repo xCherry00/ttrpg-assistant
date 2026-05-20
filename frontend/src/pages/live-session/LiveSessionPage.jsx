@@ -14,8 +14,11 @@ import {
   fulfillRequestedRoll,
   cancelRequestedRoll,
   updateSessionLiveState,
+  getCampaignEncounters,
+  getEncounter,
 } from "../../api/campaigns";
 import "../../styles/live-session.css";
+import LiveInitiativePreviewPanel from "./components/LiveInitiativePreviewPanel";
 
 function sessionStatusLabel(status) {
   if (status === "IN_PROGRESS") return "IN_PROGRESS";
@@ -45,6 +48,9 @@ export default function LiveSessionPage() {
   const [notice, setNotice] = useState("");
   const [sessionActionBusy, setSessionActionBusy] = useState(false);
   const [requestedRolls, setRequestedRolls] = useState([]);
+  const [encounters, setEncounters] = useState([]);
+  const [activeEncounter, setActiveEncounter] = useState(null);
+  const [initiativeLoading, setInitiativeLoading] = useState(false);
 
   const isGmView = Boolean(campaign?.owner);
 
@@ -58,13 +64,14 @@ export default function LiveSessionPage() {
       setLoading(true);
       setError("");
       try {
-        const [campaignData, sessionsData, campaignCharactersData, rollsData, liveStateData, requestedRollsData] = await Promise.all([
+        const [campaignData, sessionsData, campaignCharactersData, rollsData, liveStateData, requestedRollsData, encountersData] = await Promise.all([
           getCampaignById(token, campaignId),
           listCampaignSessions(token, campaignId),
           getCampaignCharacters(token, campaignId),
           getCampaignDiceRolls(token, campaignId, { sessionId, limit: 10 }).catch(() => []),
           getSessionLiveState(token, campaignId, sessionId).catch(() => null),
           getRequestedRolls(token, campaignId, sessionId).catch(() => []),
+          getCampaignEncounters(token, campaignId).catch(() => []),
         ]);
         const resolvedSession = Array.isArray(sessionsData)
           ? sessionsData.find((item) => String(item.id) === String(sessionId)) || null
@@ -75,6 +82,20 @@ export default function LiveSessionPage() {
         setRecentRolls(Array.isArray(rollsData) ? rollsData : []);
         setLiveState(liveStateData);
         setRequestedRolls(Array.isArray(requestedRollsData) ? requestedRollsData : []);
+        setEncounters(Array.isArray(encountersData) ? encountersData : []);
+        if (liveStateData?.activeEncounterId) {
+          setInitiativeLoading(true);
+          try {
+            const details = await getEncounter(token, campaignId, liveStateData.activeEncounterId);
+            setActiveEncounter(details || null);
+          } catch {
+            setActiveEncounter(null);
+          } finally {
+            setInitiativeLoading(false);
+          }
+        } else {
+          setActiveEncounter(null);
+        }
       } catch (err) {
         setError(err?.message || "Nie udalo sie zaladowac live session.");
       } finally {
@@ -93,6 +114,22 @@ export default function LiveSessionPage() {
     setSession(resolvedSession);
     const requested = await getRequestedRolls(token, campaignId, sessionId).catch(() => []);
     setRequestedRolls(Array.isArray(requested) ? requested : []);
+  }
+
+  async function loadActiveEncounterById(encounterId) {
+    if (!encounterId) {
+      setActiveEncounter(null);
+      return;
+    }
+    setInitiativeLoading(true);
+    try {
+      const details = await getEncounter(token, campaignId, encounterId);
+      setActiveEncounter(details || null);
+    } catch {
+      setActiveEncounter(null);
+    } finally {
+      setInitiativeLoading(false);
+    }
   }
 
   async function handleStartSession() {
@@ -184,6 +221,25 @@ export default function LiveSessionPage() {
       setNotice("Requested roll anulowany.");
     } catch (err) {
       setError(err?.message || "Nie udalo sie anulowac requested roll.");
+    }
+  }
+
+  async function handleSelectActiveEncounter(encounterIdOrNull) {
+    if (!isGmView) return;
+    setError("");
+    setNotice("");
+    try {
+      const updated = await updateSessionLiveState(token, campaignId, sessionId, {
+        sceneTitle: liveState?.sceneTitle || "",
+        sceneImageUrl: liveState?.sceneImageUrl || "",
+        sceneDescription: liveState?.sceneDescription || "",
+        activeEncounterId: encounterIdOrNull,
+      });
+      setLiveState(updated || null);
+      await loadActiveEncounterById(updated?.activeEncounterId || null);
+      setNotice("Active encounter updated.");
+    } catch (err) {
+      setError(err?.message || "Nie udalo sie ustawic aktywnego encountera.");
     }
   }
 
@@ -358,14 +414,15 @@ export default function LiveSessionPage() {
             </div>
           </section>
 
-          <section className="campaignDetailsCard panel-soft">
-            <h2 className="campaignDetailsCardTitle">Initiative Preview</h2>
-            <p className="liveSessionPlaceholder">
-              {isInProgress
-                ? "Initiative preview placeholder (embedded panel in next stage)."
-                : "Initiative preview is available only for active session (IN_PROGRESS)."}
-            </p>
-          </section>
+          <LiveInitiativePreviewPanel
+            sessionStatus={session?.status}
+            isOwner={isGmView}
+            liveState={liveState}
+            encounter={activeEncounter}
+            encounters={encounters}
+            onSelectActiveEncounter={handleSelectActiveEncounter}
+            loading={initiativeLoading}
+          />
 
           <section className="campaignDetailsCard panel-soft">
             <h2 className="campaignDetailsCardTitle">Session Roll History</h2>
@@ -385,9 +442,9 @@ export default function LiveSessionPage() {
           <section className="campaignDetailsCard panel-soft">
             <h2 className="campaignDetailsCardTitle">Role View</h2>
             {isGmView ? (
-              <p className="liveSessionPlaceholder">GM controls (placeholder): full session management view.</p>
+              <p className="liveSessionPlaceholder">GM view: zarzadzanie scena, requested rolls i podgladem inicjatywy.</p>
             ) : (
-              <p className="liveSessionPlaceholder">Player view is read-only in this MVP foundation.</p>
+              <p className="liveSessionPlaceholder">Player view: tylko akcje przypisane do gracza i read-only podglad sesji.</p>
             )}
           </section>
         </div>

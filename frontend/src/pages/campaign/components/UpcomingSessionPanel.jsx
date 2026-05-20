@@ -22,6 +22,7 @@ export default function UpcomingSessionPanel({
   const session = pickUpcomingOrActiveSession(sessions);
   const sessionId = session?.id;
   const [attendance, setAttendance] = useState(null);
+  const [attendanceLoading, setAttendanceLoading] = useState(false);
   const [note, setNote] = useState("");
   const [savingStatus, setSavingStatus] = useState("");
   const [attendanceError, setAttendanceError] = useState("");
@@ -39,6 +40,7 @@ export default function UpcomingSessionPanel({
         return;
       }
       try {
+        setAttendanceLoading(true);
         setAttendanceError("");
         const data = await getSessionAttendance(token, campaignId, sessionId);
         setAttendance(data);
@@ -46,6 +48,8 @@ export default function UpcomingSessionPanel({
         setNote(self?.note || "");
       } catch (err) {
         setAttendanceError(err?.message || "Nie udalo sie pobrac frekwencji.");
+      } finally {
+        setAttendanceLoading(false);
       }
     }
     void loadAttendance();
@@ -116,19 +120,21 @@ export default function UpcomingSessionPanel({
           <hr />
           <div>
             <strong>Frekwencja</strong>
-            {!attendance ? (
+            {attendanceLoading ? (
+              <p>Ladowanie frekwencji...</p>
+            ) : !attendance ? (
               <p>Brak sesji do glosowania.</p>
             ) : (
               <>
                 <p>Twoj status: {myResponse?.status || "NO_RESPONSE"}</p>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
-                  <button className="campaignDetailsPrimaryBtn" type="button" disabled={savingStatus === "AVAILABLE"} onClick={() => vote("AVAILABLE")}>Bede</button>
-                  <button className="campaignDetailsGhostBtn" type="button" disabled={savingStatus === "MAYBE"} onClick={() => vote("MAYBE")}>Moze</button>
-                  <button className="campaignDetailsDangerBtn" type="button" disabled={savingStatus === "UNAVAILABLE"} onClick={() => vote("UNAVAILABLE")}>Nie bede</button>
+                  <button className="campaignDetailsPrimaryBtn" type="button" disabled={Boolean(savingStatus)} onClick={() => vote("AVAILABLE")}>Bede</button>
+                  <button className="campaignDetailsGhostBtn" type="button" disabled={Boolean(savingStatus)} onClick={() => vote("MAYBE")}>Moze</button>
+                  <button className="campaignDetailsDangerBtn" type="button" disabled={Boolean(savingStatus)} onClick={() => vote("UNAVAILABLE")}>Nie bede</button>
                 </div>
                 <label className="campaignField">
                   <span>Notatka (opcjonalna)</span>
-                  <textarea value={note} maxLength={1000} onChange={(event) => setNote(event.target.value)} rows={2} />
+                  <textarea value={note} maxLength={1000} onChange={(event) => setNote(event.target.value)} rows={2} disabled={Boolean(savingStatus)} />
                 </label>
                 <div className="campaignMaterialMeta">
                   <span>available: {attendance.availableCount}</span>
