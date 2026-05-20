@@ -32,4 +32,26 @@ describe("CampaignSessionsPanel", () => {
     expect(screen.getByRole("button", { name: /Sesja jeszcze nie rozpocz/ })).toBeDisabled();
     expect(screen.getByText("Sesja zakonczona (archiwalna).")).toBeInTheDocument();
   });
+
+  it("shows owner lifecycle actions for planned and in-progress", () => {
+    render(
+      <MemoryRouter>
+        <CampaignSessionsPanel
+          campaignId="10"
+          sessions={[
+            { id: 2, title: "S1", status: "PLANNED", description: "x" },
+            { id: 3, title: "S2", status: "IN_PROGRESS", description: "y" },
+          ]}
+          isOwner
+          busy={false}
+          onCreate={() => {}}
+          onStart={() => {}}
+          onFinish={() => {}}
+        />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole("button", { name: "Start" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Finish" })).toBeInTheDocument();
+  });
 });

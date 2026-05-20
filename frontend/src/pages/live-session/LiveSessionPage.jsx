@@ -7,6 +7,8 @@ import {
   getCampaignDiceRolls,
   getSessionLiveState,
   listCampaignSessions,
+  startCampaignSession,
+  finishCampaignSession,
   updateSessionLiveState,
 } from "../../api/campaigns";
 import "../../styles/live-session.css";
@@ -37,6 +39,7 @@ export default function LiveSessionPage() {
   const [liveState, setLiveState] = useState(null);
   const [savingScene, setSavingScene] = useState(false);
   const [notice, setNotice] = useState("");
+  const [sessionActionBusy, setSessionActionBusy] = useState(false);
 
   const isGmView = Boolean(campaign?.owner);
 
@@ -75,6 +78,48 @@ export default function LiveSessionPage() {
     void load();
   }, [token, campaignId, sessionId]);
 
+  async function reloadSessionData() {
+    const sessionsData = await listCampaignSessions(token, campaignId);
+    const resolvedSession = Array.isArray(sessionsData)
+      ? sessionsData.find((item) => String(item.id) === String(sessionId)) || null
+      : null;
+    setSession(resolvedSession);
+  }
+
+  async function handleStartSession() {
+    setSessionActionBusy(true);
+    setError("");
+    setNotice("");
+    try {
+      await startCampaignSession(token, campaignId, sessionId);
+      await reloadSessionData();
+      setNotice("Session started.");
+    } catch (err) {
+      setError(err?.message || "Nie udalo sie rozpoczac sesji.");
+    } finally {
+      setSessionActionBusy(false);
+    }
+  }
+
+  async function handleFinishSession() {
+    setSessionActionBusy(true);
+    setError("");
+    setNotice("");
+    try {
+      await finishCampaignSession(token, campaignId, sessionId);
+      await reloadSessionData();
+      setNotice("Session finished.");
+    } catch (err) {
+      setError(err?.message || "Nie udalo sie zakonczyc sesji.");
+    } finally {
+      setSessionActionBusy(false);
+    }
+  }
+
+  const isPlanned = session?.status === "PLANNED";
+  const isInProgress = session?.status === "IN_PROGRESS";
+  const isFinished = session?.status === "FINISHED";
+
   return (
     <div className="page liveSessionPage">
       <div className="pageHeader">
@@ -84,11 +129,27 @@ export default function LiveSessionPage() {
           <p className="pageSubtitle">
             Sesja: {session?.title || `#${sessionId}`} ({sessionStatusLabel(session?.status)}) | Widok: {roleLabel}
           </p>
+          {isPlanned && (
+            <p className="campaignDetailsEmpty">
+              {isGmView ? "Session has not started yet." : "Session has not started yet."}
+            </p>
+          )}
+          {isFinished && <p className="campaignDetailsEmpty">Session ended. Read-only view.</p>}
         </div>
         <div>
           <Link className="campaignDetailsGhostBtn" to={`/campaigns/${campaignId}`}>
             Wroc do campaign workspace
           </Link>
+          {isPlanned && isGmView && (
+            <button className="campaignDetailsPrimaryBtn" type="button" onClick={handleStartSession} disabled={sessionActionBusy}>
+              Rozpocznij sesje
+            </button>
+          )}
+          {isInProgress && isGmView && (
+            <button className="campaignDetailsDangerBtn" type="button" onClick={handleFinishSession} disabled={sessionActionBusy}>
+              Zakoncz sesje
+            </button>
+          )}
         </div>
       </div>
 
@@ -132,7 +193,7 @@ export default function LiveSessionPage() {
 
           <section className="campaignDetailsCard panel-soft">
             <h2 className="campaignDetailsCardTitle">Scene Panel</h2>
-            {isGmView ? (
+            {isGmView && isInProgress ? (
               <form
                 className="liveSessionSceneForm"
                 onSubmit={async (event) => {
@@ -189,12 +250,20 @@ export default function LiveSessionPage() {
 
           <section className="campaignDetailsCard panel-soft">
             <h2 className="campaignDetailsCardTitle">Requested Rolls</h2>
-            <p className="liveSessionPlaceholder">Requested rolls panel will be implemented in a next stage.</p>
+            <p className="liveSessionPlaceholder">
+              {isInProgress
+                ? "Requested rolls panel will be implemented in a next stage."
+                : "Requested rolls are available only for active session (IN_PROGRESS)."}
+            </p>
           </section>
 
           <section className="campaignDetailsCard panel-soft">
             <h2 className="campaignDetailsCardTitle">Initiative Preview</h2>
-            <p className="liveSessionPlaceholder">Initiative preview placeholder (embedded panel in next stage).</p>
+            <p className="liveSessionPlaceholder">
+              {isInProgress
+                ? "Initiative preview placeholder (embedded panel in next stage)."
+                : "Initiative preview is available only for active session (IN_PROGRESS)."}
+            </p>
           </section>
 
           <section className="campaignDetailsCard panel-soft">

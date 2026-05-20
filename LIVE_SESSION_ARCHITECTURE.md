@@ -225,4 +225,8 @@ No schema migration is introduced in v0.6.6; this section is design-only.
 - Player campaign notes are now implemented on Campaign Dashboard (v0.7.3).
 - Notes are campaign-level in current MVP, not session-specific.
 - Session-specific notes remain a future stage.
+- Live mechanics lifecycle gate (v0.7.4):
+  - `PLANNED`: read-only / blocked for requested rolls and embedded initiative preview.
+  - `IN_PROGRESS`: active lifecycle state for live mechanics.
+  - `FINISHED`: read-only / blocked for live mechanics.
 

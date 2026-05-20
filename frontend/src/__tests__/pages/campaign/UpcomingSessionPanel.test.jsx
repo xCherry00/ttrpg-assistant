@@ -37,7 +37,7 @@ describe("UpcomingSessionPanel attendance", () => {
     });
     render(
       <MemoryRouter>
-        <UpcomingSessionPanel campaignId={10} sessions={[{ id: 5, title: "S", status: "PLANNED" }]} />
+        <UpcomingSessionPanel campaignId={10} sessions={[{ id: 5, title: "S", status: "PLANNED" }]} isOwner />
       </MemoryRouter>,
     );
 
@@ -67,7 +67,7 @@ describe("UpcomingSessionPanel attendance", () => {
     });
     render(
       <MemoryRouter>
-        <UpcomingSessionPanel campaignId={10} sessions={[{ id: 5, title: "S", status: "PLANNED" }]} />
+        <UpcomingSessionPanel campaignId={10} sessions={[{ id: 5, title: "S", status: "PLANNED" }]} isOwner />
       </MemoryRouter>,
     );
 
@@ -81,5 +81,46 @@ describe("UpcomingSessionPanel attendance", () => {
       );
       expect(screen.getByText("available: 1")).toBeInTheDocument();
     });
+  });
+
+  it("shows start for owner when planned and no enter-live for member", async () => {
+    campaignsApi.getSessionAttendance.mockResolvedValue({
+      availableCount: 0,
+      maybeCount: 0,
+      unavailableCount: 0,
+      noResponseCount: 1,
+      responses: [],
+    });
+    const onStart = vi.fn();
+    const { rerender } = render(
+      <MemoryRouter>
+        <UpcomingSessionPanel campaignId={10} sessions={[{ id: 5, title: "S", status: "PLANNED" }]} isOwner onStart={onStart} />
+      </MemoryRouter>,
+    );
+    expect(await screen.findByRole("button", { name: "Rozpocznij sesje" })).toBeInTheDocument();
+    rerender(
+      <MemoryRouter>
+        <UpcomingSessionPanel campaignId={10} sessions={[{ id: 5, title: "S", status: "PLANNED" }]} isOwner={false} />
+      </MemoryRouter>,
+    );
+    expect(screen.queryByRole("link", { name: "Dolacz do aktywnej sesji" })).not.toBeInTheDocument();
+  });
+
+  it("shows enter-live and finish for owner when in progress", async () => {
+    campaignsApi.getSessionAttendance.mockResolvedValue({
+      availableCount: 0,
+      maybeCount: 0,
+      unavailableCount: 0,
+      noResponseCount: 1,
+      responses: [],
+    });
+    const onFinish = vi.fn();
+    render(
+      <MemoryRouter>
+        <UpcomingSessionPanel campaignId={10} sessions={[{ id: 5, title: "S", status: "IN_PROGRESS" }]} isOwner onFinish={onFinish} />
+      </MemoryRouter>,
+    );
+    expect(await screen.findByRole("link", { name: "Dolacz do aktywnej sesji" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Zakoncz sesje" })).toBeInTheDocument();
   });
 });

@@ -13,6 +13,8 @@ vi.mock("../../../api/campaigns", () => ({
   getCampaignCharacters: vi.fn(),
   getCampaignDiceRolls: vi.fn(),
   getSessionLiveState: vi.fn(),
+  startCampaignSession: vi.fn(),
+  finishCampaignSession: vi.fn(),
   updateSessionLiveState: vi.fn(),
 }));
 
@@ -97,6 +99,33 @@ describe("LiveSessionPage", () => {
       expect(screen.getByText("Wieczorny deszcz.")).toBeInTheDocument();
       expect(screen.getByRole("img", { name: "Port" })).toBeInTheDocument();
       expect(screen.queryByRole("button", { name: "Save scene" })).not.toBeInTheDocument();
+    });
+  });
+
+  it("shows not started state for planned session", async () => {
+    campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "Dragonfall", owner: false });
+    campaignsApi.listCampaignSessions.mockResolvedValue([{ id: 2, title: "Session Two", status: "PLANNED" }]);
+    campaignsApi.getCampaignCharacters.mockResolvedValue([]);
+    campaignsApi.getCampaignDiceRolls.mockResolvedValue([]);
+    campaignsApi.getSessionLiveState.mockResolvedValue(null);
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Session has not started yet.")).toBeInTheDocument();
+    });
+  });
+
+  it("shows ended read-only state for finished session", async () => {
+    campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "Dragonfall", owner: false });
+    campaignsApi.listCampaignSessions.mockResolvedValue([{ id: 2, title: "Session Two", status: "FINISHED" }]);
+    campaignsApi.getCampaignCharacters.mockResolvedValue([]);
+    campaignsApi.getCampaignDiceRolls.mockResolvedValue([]);
+    campaignsApi.getSessionLiveState.mockResolvedValue(null);
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Session ended. Read-only view.")).toBeInTheDocument();
+      expect(screen.getAllByText(/only for active session \(IN_PROGRESS\)/).length).toBeGreaterThan(0);
     });
   });
 });

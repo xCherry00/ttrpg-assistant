@@ -694,6 +694,14 @@ Refactor note (v0.6.6):
   - plain textarea editor only,
   - no rich text formatting.
 
+### Active Session Lifecycle (v0.7.4)
+
+- Campaign sessions follow lifecycle:
+  - `PLANNED -> IN_PROGRESS -> FINISHED`.
+- Only GM/owner can start and finish session lifecycle transitions.
+- Live session mechanics are active only for `IN_PROGRESS` sessions.
+- `PLANNED` and `FINISHED` sessions are treated as not-active for live mechanics.
+
 ## Security (MVP v0.5.4)
 
 - JWT is currently stored in localStorage (`ttrpg_token`) for MVP simplicity.

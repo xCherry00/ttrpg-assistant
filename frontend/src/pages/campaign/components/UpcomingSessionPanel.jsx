@@ -10,7 +10,14 @@ function pickUpcomingOrActiveSession(sessions) {
   return planned || null;
 }
 
-export default function UpcomingSessionPanel({ campaignId, sessions }) {
+export default function UpcomingSessionPanel({
+  campaignId,
+  sessions,
+  isOwner,
+  busy,
+  onStart,
+  onFinish,
+}) {
   const { token } = useAuth();
   const session = pickUpcomingOrActiveSession(sessions);
   const sessionId = session?.id;
@@ -74,15 +81,38 @@ export default function UpcomingSessionPanel({ campaignId, sessions }) {
             <span>Termin: {session.scheduledFor ? new Date(session.scheduledFor).toLocaleString("pl-PL") : "-"}</span>
             <span>ID: {session.id}</span>
           </div>
-          {session.status === "IN_PROGRESS" ? (
-            <Link className="campaignDetailsPrimaryBtn" to={`/campaigns/${campaignId}/sessions/${session.id}/live`}>
-              Dolacz do aktywnej sesji
-            </Link>
-          ) : (
-            <button className="campaignDetailsGhostBtn" type="button" disabled>
-              Sesja jeszcze nie rozpoczeta
-            </button>
-          )}
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {session.status === "PLANNED" && isOwner && (
+              <button
+                className="campaignDetailsPrimaryBtn"
+                type="button"
+                disabled={busy}
+                onClick={() => onStart?.(session.id)}
+              >
+                Rozpocznij sesje
+              </button>
+            )}
+            {session.status === "PLANNED" && !isOwner && (
+              <button className="campaignDetailsGhostBtn" type="button" disabled>
+                Sesja jeszcze sie nie rozpoczela
+              </button>
+            )}
+            {session.status === "IN_PROGRESS" && (
+              <Link className="campaignDetailsPrimaryBtn" to={`/campaigns/${campaignId}/sessions/${session.id}/live`}>
+                Dolacz do aktywnej sesji
+              </Link>
+            )}
+            {session.status === "IN_PROGRESS" && isOwner && (
+              <button
+                className="campaignDetailsDangerBtn"
+                type="button"
+                disabled={busy}
+                onClick={() => onFinish?.(session.id)}
+              >
+                Zakoncz sesje
+              </button>
+            )}
+          </div>
           <hr />
           <div>
             <strong>Frekwencja</strong>

@@ -191,7 +191,14 @@ export default function CampaignDetailPage() {
               onUpdate={handleUpdateCampaign}
               onDelete={handleDeleteCampaign}
             />
-            <UpcomingSessionPanel campaignId={campaignId} sessions={sessions} />
+            <UpcomingSessionPanel
+              campaignId={campaignId}
+              sessions={sessions}
+              isOwner={Boolean(campaign.owner)}
+              busy={busy}
+              onStart={handleStartSession}
+              onFinish={handleFinishSession}
+            />
             <CampaignPlayersPanel members={members} />
           </div>
 
