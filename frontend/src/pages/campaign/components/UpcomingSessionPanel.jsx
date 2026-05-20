@@ -1,4 +1,7 @@
 import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "../../../auth/AuthContext";
+import { getSessionAttendance, updateMySessionAttendance } from "../../../api/campaigns";
 
 function pickUpcomingOrActiveSession(sessions) {
   const active = sessions.find((session) => session.status === "IN_PROGRESS");
@@ -8,7 +11,52 @@ function pickUpcomingOrActiveSession(sessions) {
 }
 
 export default function UpcomingSessionPanel({ campaignId, sessions }) {
+  const { token } = useAuth();
   const session = pickUpcomingOrActiveSession(sessions);
+  const sessionId = session?.id;
+  const [attendance, setAttendance] = useState(null);
+  const [note, setNote] = useState("");
+  const [savingStatus, setSavingStatus] = useState("");
+  const [attendanceError, setAttendanceError] = useState("");
+
+  const myResponse = useMemo(
+    () => attendance?.responses?.find((item) => item.self),
+    [attendance],
+  );
+
+  useEffect(() => {
+    async function loadAttendance() {
+      if (!session) {
+        setAttendance(null);
+        setAttendanceError("");
+        return;
+      }
+      try {
+        setAttendanceError("");
+        const data = await getSessionAttendance(token, campaignId, sessionId);
+        setAttendance(data);
+        const self = data?.responses?.find((item) => item.self);
+        setNote(self?.note || "");
+      } catch (err) {
+        setAttendanceError(err?.message || "Nie udalo sie pobrac frekwencji.");
+      }
+    }
+    void loadAttendance();
+  }, [token, campaignId, session, sessionId]);
+
+  async function vote(status) {
+    if (!sessionId) return;
+    setSavingStatus(status);
+    setAttendanceError("");
+    try {
+      const data = await updateMySessionAttendance(token, campaignId, sessionId, { status, note });
+      setAttendance(data);
+    } catch (err) {
+      setAttendanceError(err?.message || "Nie udalo sie zapisac odpowiedzi.");
+    } finally {
+      setSavingStatus("");
+    }
+  }
 
   return (
     <section className="campaignDetailsCard panel-soft">
@@ -35,6 +83,33 @@ export default function UpcomingSessionPanel({ campaignId, sessions }) {
               Sesja jeszcze nie rozpoczeta
             </button>
           )}
+          <hr />
+          <div>
+            <strong>Frekwencja</strong>
+            {!attendance ? (
+              <p>Brak sesji do glosowania.</p>
+            ) : (
+              <>
+                <p>Twoj status: {myResponse?.status || "NO_RESPONSE"}</p>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+                  <button className="campaignDetailsPrimaryBtn" type="button" disabled={savingStatus === "AVAILABLE"} onClick={() => vote("AVAILABLE")}>Bede</button>
+                  <button className="campaignDetailsGhostBtn" type="button" disabled={savingStatus === "MAYBE"} onClick={() => vote("MAYBE")}>Moze</button>
+                  <button className="campaignDetailsDangerBtn" type="button" disabled={savingStatus === "UNAVAILABLE"} onClick={() => vote("UNAVAILABLE")}>Nie bede</button>
+                </div>
+                <label className="campaignField">
+                  <span>Notatka (opcjonalna)</span>
+                  <textarea value={note} maxLength={1000} onChange={(event) => setNote(event.target.value)} rows={2} />
+                </label>
+                <div className="campaignMaterialMeta">
+                  <span>available: {attendance.availableCount}</span>
+                  <span>maybe: {attendance.maybeCount}</span>
+                  <span>unavailable: {attendance.unavailableCount}</span>
+                  <span>no response: {attendance.noResponseCount}</span>
+                </div>
+              </>
+            )}
+            {attendanceError && <div className="campaignDetailsError">{attendanceError}</div>}
+          </div>
         </>
       )}
     </section>

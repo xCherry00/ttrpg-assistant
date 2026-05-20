@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignMaterialResponse;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignNotificationResponse;
-import pl.ttrpgassistant.backend.campaign.dto.CampaignSessionAttendanceResponse;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignSessionMessageResponse;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignSessionNoteResponse;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignSessionSummaryResponse;
@@ -14,7 +13,6 @@ import pl.ttrpgassistant.backend.campaign.dto.CreateCampaignMaterialRequest;
 import pl.ttrpgassistant.backend.campaign.dto.CreateCampaignSessionMessageRequest;
 import pl.ttrpgassistant.backend.campaign.dto.CreateCampaignSessionRequest;
 import pl.ttrpgassistant.backend.campaign.dto.UpdateCampaignRequest;
-import pl.ttrpgassistant.backend.campaign.dto.UpdateSessionAttendanceRequest;
 import pl.ttrpgassistant.backend.campaign.dto.UpsertCampaignSessionNoteRequest;
 import pl.ttrpgassistant.backend.common.error.ResourceNotFoundException;
 import pl.ttrpgassistant.backend.user.UserEntity;
@@ -25,7 +23,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -91,9 +88,12 @@ public class CampaignWorkspaceService {
     public List<CampaignSessionSummaryResponse> listSessions(Long userId, Long campaignId) {
         requireMemberAccess(userId, campaignId);
         List<CampaignSessionEntity> sessions = campaignSessionRepository.findByCampaignIdOrderByCreatedAtDesc(campaignId);
-        Map<Long, List<CampaignSessionAttendanceEntity>> attendanceBySession = campaignSessionAttendanceRepository.findAll().stream()
-                .filter(item -> sessions.stream().anyMatch(session -> session.getId().equals(item.getId().getSessionId())))
-                .collect(Collectors.groupingBy(item -> item.getId().getSessionId()));
+        List<Long> sessionIds = sessions.stream().map(CampaignSessionEntity::getId).toList();
+        List<CampaignSessionAttendanceEntity> allAttendance = sessionIds.isEmpty()
+                ? List.of()
+                : campaignSessionAttendanceRepository.findBySessionIdIn(sessionIds);
+        Map<Long, List<CampaignSessionAttendanceEntity>> attendanceBySession = allAttendance.stream()
+                .collect(Collectors.groupingBy(CampaignSessionAttendanceEntity::getSessionId));
         Map<Long, Integer> messageCounts = campaignSessionMessageRepository.findAll().stream()
                 .filter(item -> sessions.stream().anyMatch(session -> session.getId().equals(item.getSessionId())))
                 .collect(Collectors.groupingBy(CampaignSessionMessageEntity::getSessionId, Collectors.summingInt(item -> 1)));
@@ -115,9 +115,8 @@ public class CampaignWorkspaceService {
                 .createdByUserId(userId)
                 .build());
 
-        seedAttendanceForCampaignMembers(campaignId, session.getId());
         notifyCampaignMembers(campaignId, userId, "SESSION_CREATED", "Dodano nowa sesje: " + session.getTitle(), false);
-        return toSessionSummary(userId, session, campaignSessionAttendanceRepository.findByIdSessionId(session.getId()), 0);
+        return toSessionSummary(userId, session, campaignSessionAttendanceRepository.findBySessionId(session.getId()), 0);
     }
 
     @Transactional
@@ -134,7 +133,7 @@ public class CampaignWorkspaceService {
         session.setStartedAt(Instant.now());
         CampaignSessionEntity saved = campaignSessionRepository.save(session);
         notifyCampaignMembers(campaignId, userId, "SESSION_STARTED", "MG rozpoczal sesje: " + saved.getTitle(), true);
-        return toSessionSummary(userId, saved, campaignSessionAttendanceRepository.findByIdSessionId(saved.getId()), countMessages(saved.getId()));
+        return toSessionSummary(userId, saved, campaignSessionAttendanceRepository.findBySessionId(saved.getId()), countMessages(saved.getId()));
     }
 
     @Transactional
@@ -162,46 +161,7 @@ public class CampaignWorkspaceService {
         );
 
         notifyCampaignMembers(campaignId, userId, "SESSION_FINISHED", "Zakonczono sesje: " + saved.getTitle(), true);
-        return toSessionSummary(userId, saved, campaignSessionAttendanceRepository.findByIdSessionId(saved.getId()), countMessages(saved.getId()));
-    }
-
-    @Transactional(readOnly = true)
-    public List<CampaignSessionAttendanceResponse> listAttendance(Long userId, Long campaignId, Long sessionId) {
-        requireMemberSession(userId, campaignId, sessionId);
-        List<CampaignSessionAttendanceEntity> attendance = campaignSessionAttendanceRepository.findByIdSessionId(sessionId);
-        Map<Long, UserEntity> usersById = userRepository.findAllById(
-                attendance.stream().map(item -> item.getId().getUserId()).toList()
-        ).stream().collect(Collectors.toMap(UserEntity::getId, Function.identity()));
-
-        return attendance.stream()
-                .map(item -> {
-                    UserEntity user = usersById.get(item.getId().getUserId());
-                    if (user == null) return null;
-                    return new CampaignSessionAttendanceResponse(
-                            user.getId(),
-                            displayNameFor(user),
-                            user.getUsername(),
-                            user.getTagCode(),
-                            item.getStatus(),
-                            user.getId().equals(userId),
-                            item.getUpdatedAt()
-                    );
-                })
-                .filter(item -> item != null)
-                .sorted(Comparator.comparing(CampaignSessionAttendanceResponse::displayName, String.CASE_INSENSITIVE_ORDER))
-                .toList();
-    }
-
-    @Transactional
-    public List<CampaignSessionAttendanceResponse> updateAttendance(Long userId, Long campaignId, Long sessionId, UpdateSessionAttendanceRequest request) {
-        requireMemberSession(userId, campaignId, sessionId);
-        String normalized = normalizeAttendance(request.status());
-        CampaignSessionAttendanceId id = new CampaignSessionAttendanceId(sessionId, userId);
-        CampaignSessionAttendanceEntity entity = campaignSessionAttendanceRepository.findById(id)
-                .orElse(CampaignSessionAttendanceEntity.builder().id(id).build());
-        entity.setStatus(normalized);
-        campaignSessionAttendanceRepository.save(entity);
-        return listAttendance(userId, campaignId, sessionId);
+        return toSessionSummary(userId, saved, campaignSessionAttendanceRepository.findBySessionId(saved.getId()), countMessages(saved.getId()));
     }
 
     @Transactional(readOnly = true)
@@ -371,16 +331,6 @@ public class CampaignWorkspaceService {
         }
     }
 
-    private void seedAttendanceForCampaignMembers(Long campaignId, Long sessionId) {
-        List<CampaignSessionAttendanceEntity> rows = campaignMemberRepository.findByIdCampaignId(campaignId).stream()
-                .map(member -> CampaignSessionAttendanceEntity.builder()
-                        .id(new CampaignSessionAttendanceId(sessionId, member.getId().getUserId()))
-                        .status("MAYBE")
-                        .build())
-                .toList();
-        campaignSessionAttendanceRepository.saveAll(rows);
-    }
-
     private CampaignSessionSummaryResponse toSessionSummary(
             Long currentUserId,
             CampaignSessionEntity session,
@@ -390,15 +340,15 @@ public class CampaignWorkspaceService {
         int yesCount = 0;
         int maybeCount = 0;
         int noCount = 0;
-        String myAttendance = "MAYBE";
+        String myAttendance = "NO_RESPONSE";
         for (CampaignSessionAttendanceEntity item : attendance) {
             String status = normalizeAttendance(item.getStatus());
             switch (status) {
-                case "YES" -> yesCount++;
-                case "NO" -> noCount++;
+                case "AVAILABLE" -> yesCount++;
+                case "UNAVAILABLE" -> noCount++;
                 default -> maybeCount++;
             }
-            if (item.getId().getUserId().equals(currentUserId)) {
+            if (item.getUserId().equals(currentUserId)) {
                 myAttendance = status;
             }
         }
@@ -487,8 +437,10 @@ public class CampaignWorkspaceService {
     private String normalizeAttendance(String rawStatus) {
         String value = rawStatus == null ? "" : rawStatus.trim().toUpperCase(Locale.ROOT);
         return switch (value) {
-            case "YES", "NO", "MAYBE" -> value;
-            default -> throw new IllegalArgumentException("Attendance status must be YES, NO or MAYBE");
+            case "AVAILABLE", "MAYBE", "UNAVAILABLE" -> value;
+            case "YES" -> "AVAILABLE";
+            case "NO" -> "UNAVAILABLE";
+            default -> throw new IllegalArgumentException("Attendance status must be AVAILABLE, MAYBE or UNAVAILABLE");
         };
     }
 

@@ -9,13 +9,12 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 
 @Entity
-@Table(name = "campaign_session_attendance")
+@Table(name = "campaign_player_notes")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CampaignSessionAttendanceEntity {
-
+public class CampaignPlayerNoteEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,18 +22,14 @@ public class CampaignSessionAttendanceEntity {
     @Column(name = "campaign_id", nullable = false)
     private Long campaignId;
 
-    @Column(name = "session_id", nullable = false)
-    private Long sessionId;
-
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "status", nullable = false, length = 30)
-    @Builder.Default
-    private String status = "MAYBE";
+    @Column(name = "title", nullable = false, length = 160)
+    private String title;
 
-    @Column(name = "note")
-    private String note;
+    @Column(name = "content", nullable = false)
+    private String content;
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
@@ -45,16 +40,12 @@ public class CampaignSessionAttendanceEntity {
     @PrePersist
     void onCreate() {
         Instant now = Instant.now();
-        if (createdAt == null) {
-            createdAt = now;
-        }
-        if (updatedAt == null) {
-            updatedAt = now;
-        }
+        if (createdAt == null) createdAt = now;
+        if (updatedAt == null) updatedAt = now;
     }
 
     @PreUpdate
-    void touch() {
+    void onUpdate() {
         updatedAt = Instant.now();
     }
 }

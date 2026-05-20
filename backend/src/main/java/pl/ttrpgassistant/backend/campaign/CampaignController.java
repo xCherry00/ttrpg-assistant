@@ -18,11 +18,11 @@ import pl.ttrpgassistant.backend.campaign.dto.CampaignMaterialResponse;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignMemberActionResponse;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignMemberResponse;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignNotificationResponse;
-import pl.ttrpgassistant.backend.campaign.dto.CampaignSessionAttendanceResponse;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignSessionMessageResponse;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignSessionNoteResponse;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignSessionSummaryResponse;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignSummaryResponse;
+import pl.ttrpgassistant.backend.campaign.dto.CampaignPlayerNoteResponse;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignFriendCandidateResponse;
 import pl.ttrpgassistant.backend.campaign.dto.AssignCharacterToCampaignRequest;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignCharacterResponse;
@@ -47,7 +47,10 @@ import pl.ttrpgassistant.backend.campaign.dto.UpdateCampaignRequest;
 import pl.ttrpgassistant.backend.campaign.dto.DiceRollResponse;
 import pl.ttrpgassistant.backend.campaign.dto.UpdateSessionLiveStateRequest;
 import pl.ttrpgassistant.backend.campaign.dto.UpdateSessionAttendanceRequest;
+import pl.ttrpgassistant.backend.campaign.dto.SessionAttendanceSummaryResponse;
 import pl.ttrpgassistant.backend.campaign.dto.UpsertCampaignSessionNoteRequest;
+import pl.ttrpgassistant.backend.campaign.dto.CreateCampaignPlayerNoteRequest;
+import pl.ttrpgassistant.backend.campaign.dto.UpdateCampaignPlayerNoteRequest;
 import pl.ttrpgassistant.backend.common.pagination.PagedResponse;
 
 import java.util.List;
@@ -60,6 +63,8 @@ public class CampaignController {
 
     private final CampaignService campaignService;
     private final CampaignWorkspaceService campaignWorkspaceService;
+    private final CampaignSessionAttendanceService campaignSessionAttendanceService;
+    private final CampaignPlayerNoteService campaignPlayerNoteService;
     private final CampaignCharacterService campaignCharacterService;
     private final CombatEncounterService combatEncounterService;
     private final DiceRollService diceRollService;
@@ -214,20 +219,20 @@ public class CampaignController {
     }
 
     @GetMapping("/{id}/sessions/{sessionId}/attendance")
-    public List<CampaignSessionAttendanceResponse> listAttendance(Authentication auth, @PathVariable Long id, @PathVariable Long sessionId) {
+    public SessionAttendanceSummaryResponse listAttendance(Authentication auth, @PathVariable Long id, @PathVariable Long sessionId) {
         Long userId = (Long) auth.getPrincipal();
-        return campaignWorkspaceService.listAttendance(userId, id, sessionId);
+        return campaignSessionAttendanceService.getAttendance(userId, id, sessionId);
     }
 
-    @PostMapping("/{id}/sessions/{sessionId}/attendance")
-    public List<CampaignSessionAttendanceResponse> updateAttendance(
+    @PutMapping("/{id}/sessions/{sessionId}/attendance/me")
+    public SessionAttendanceSummaryResponse updateAttendance(
             Authentication auth,
             @PathVariable Long id,
             @PathVariable Long sessionId,
             @Valid @RequestBody UpdateSessionAttendanceRequest request
     ) {
         Long userId = (Long) auth.getPrincipal();
-        return campaignWorkspaceService.updateAttendance(userId, id, sessionId, request);
+        return campaignSessionAttendanceService.upsertMyAttendance(userId, id, sessionId, request);
     }
 
     @GetMapping("/{id}/sessions/{sessionId}/messages")
@@ -279,6 +284,40 @@ public class CampaignController {
     ) {
         Long userId = (Long) auth.getPrincipal();
         return campaignWorkspaceService.upsertNote(userId, id, sessionId, request);
+    }
+
+    @GetMapping("/{id}/player-notes")
+    public List<CampaignPlayerNoteResponse> listPlayerNotes(Authentication auth, @PathVariable Long id) {
+        Long userId = (Long) auth.getPrincipal();
+        return campaignPlayerNoteService.list(userId, id);
+    }
+
+    @PostMapping("/{id}/player-notes")
+    public CampaignPlayerNoteResponse createPlayerNote(
+            Authentication auth,
+            @PathVariable Long id,
+            @Valid @RequestBody CreateCampaignPlayerNoteRequest request
+    ) {
+        Long userId = (Long) auth.getPrincipal();
+        return campaignPlayerNoteService.create(userId, id, request);
+    }
+
+    @PatchMapping("/{id}/player-notes/{noteId}")
+    public CampaignPlayerNoteResponse updatePlayerNote(
+            Authentication auth,
+            @PathVariable Long id,
+            @PathVariable Long noteId,
+            @Valid @RequestBody UpdateCampaignPlayerNoteRequest request
+    ) {
+        Long userId = (Long) auth.getPrincipal();
+        return campaignPlayerNoteService.update(userId, id, noteId, request);
+    }
+
+    @DeleteMapping("/{id}/player-notes/{noteId}")
+    @ResponseStatus(NO_CONTENT)
+    public void deletePlayerNote(Authentication auth, @PathVariable Long id, @PathVariable Long noteId) {
+        Long userId = (Long) auth.getPrincipal();
+        campaignPlayerNoteService.delete(userId, id, noteId);
     }
 
     @GetMapping("/{id}/notifications")

@@ -5,9 +5,15 @@ import {
   createEncounter,
   getSessionLiveState,
   getCampaignDiceRolls,
+  getSessionAttendance,
+  getCampaignPlayerNotes,
   getCampaignEncounters,
   healParticipant,
   nextEncounterTurn,
+  createCampaignPlayerNote,
+  updateCampaignPlayerNote,
+  deleteCampaignPlayerNote,
+  updateMySessionAttendance,
   updateSessionLiveState,
 } from "../../api/campaigns";
 
@@ -76,6 +82,28 @@ describe("campaigns api helpers", () => {
     expect(patchUrl).toContain("/api/campaigns/8/sessions/4/live-state");
     expect(patchOptions.method).toBe("PATCH");
     expect(JSON.parse(patchOptions.body)).toEqual({ sceneTitle: "Harbor" });
+  });
+
+  it("attendance helpers use expected endpoints", async () => {
+    await getSessionAttendance("token", 8, 4);
+    await updateMySessionAttendance("token", 8, 4, { status: "MAYBE", note: "late" });
+    const [getUrl, getOptions] = global.fetch.mock.calls[0];
+    const [putUrl, putOptions] = global.fetch.mock.calls[1];
+    expect(getUrl).toContain("/api/campaigns/8/sessions/4/attendance");
+    expect(getOptions.method).toBe("GET");
+    expect(putUrl).toContain("/api/campaigns/8/sessions/4/attendance/me");
+    expect(putOptions.method).toBe("PUT");
+    expect(JSON.parse(putOptions.body)).toEqual({ status: "MAYBE", note: "late" });
+  });
+
+  it("player notes helpers use expected endpoints", async () => {
+    await getCampaignPlayerNotes("token", 8);
+    await createCampaignPlayerNote("token", 8, { title: "a", content: "b" });
+    await updateCampaignPlayerNote("token", 8, 3, { title: "c", content: "d" });
+    await deleteCampaignPlayerNote("token", 8, 3);
+    const urls = global.fetch.mock.calls.map((call) => call[0]);
+    expect(urls.some((u) => u.includes("/api/campaigns/8/player-notes"))).toBe(true);
+    expect(urls.some((u) => u.includes("/api/campaigns/8/player-notes/3"))).toBe(true);
   });
 
   it("propagates user-friendly error from http", async () => {

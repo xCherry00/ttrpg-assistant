@@ -12,6 +12,10 @@ import {
   getCampaignCharacters,
   listCampaignMembers,
   listCampaignMaterials,
+  getCampaignPlayerNotes,
+  createCampaignPlayerNote,
+  updateCampaignPlayerNote,
+  deleteCampaignPlayerNote,
   listCampaignSessions,
   startCampaignSession,
   updateCampaign,
@@ -24,6 +28,7 @@ import CampaignCharactersPanel from "./components/CampaignCharactersPanel";
 import CampaignSessionsPanel from "./components/CampaignSessionsPanel";
 import CampaignMaterialsPanel from "./components/CampaignMaterialsPanel";
 import CampaignPlaceholderPanel from "./components/CampaignPlaceholderPanel";
+import CampaignPlayerNotesPanel from "./components/CampaignPlayerNotesPanel";
 
 export default function CampaignDetailPage() {
   const { token } = useAuth();
@@ -41,18 +46,20 @@ export default function CampaignDetailPage() {
   const [members, setMembers] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [materials, setMaterials] = useState([]);
+  const [playerNotes, setPlayerNotes] = useState([]);
 
   async function loadAll() {
     setLoading(true);
     setError("");
     try {
-      const [campaignData, campaignCharactersData, ownCharacters, membersData, sessionsData, materialsData] = await Promise.all([
+      const [campaignData, campaignCharactersData, ownCharacters, membersData, sessionsData, materialsData, playerNotesData] = await Promise.all([
         getCampaignById(token, campaignId),
         getCampaignCharacters(token, campaignId),
         listCharacters(token),
         listCampaignMembers(token, campaignId).catch(() => []),
         listCampaignSessions(token, campaignId),
         listCampaignMaterials(token, campaignId),
+        getCampaignPlayerNotes(token, campaignId).catch(() => []),
       ]);
       setCampaign(campaignData);
       setCampaignCharacters(Array.isArray(campaignCharactersData) ? campaignCharactersData : []);
@@ -60,6 +67,7 @@ export default function CampaignDetailPage() {
       setMembers(Array.isArray(membersData) ? membersData : []);
       setSessions(Array.isArray(sessionsData) ? sessionsData : []);
       setMaterials(Array.isArray(materialsData) ? materialsData : []);
+      setPlayerNotes(Array.isArray(playerNotesData) ? playerNotesData : []);
     } catch (err) {
       setError(err?.message || "Nie udalo sie pobrac workspace kampanii.");
     } finally {
@@ -136,6 +144,27 @@ export default function CampaignDetailPage() {
     });
   }
 
+  function handleCreatePlayerNote(payload) {
+    return runAction(async () => {
+      await createCampaignPlayerNote(token, campaignId, payload);
+      setNotice("Dodano notatke.");
+    });
+  }
+
+  function handleUpdatePlayerNote(noteId, payload) {
+    return runAction(async () => {
+      await updateCampaignPlayerNote(token, campaignId, noteId, payload);
+      setNotice("Zapisano notatke.");
+    });
+  }
+
+  function handleDeletePlayerNote(noteId) {
+    return runAction(async () => {
+      await deleteCampaignPlayerNote(token, campaignId, noteId);
+      setNotice("Usunieto notatke.");
+    });
+  }
+
   return (
     <div className="page campaignDetailsPage">
       <div className="pageHeader">
@@ -196,10 +225,13 @@ export default function CampaignDetailPage() {
               text="Brak aktywnego glosowania. Placeholder pod przyszly attendance/voting panel."
               actionLabel="Utworz glosowanie"
             />
-            <CampaignPlaceholderPanel
-              title="Notatki graczy"
-              text="Brak notatek. Placeholder pod prywatne notatki graczy i widok GM."
-              actionLabel="Dodaj notatke"
+            <CampaignPlayerNotesPanel
+              notes={playerNotes}
+              campaign={campaign}
+              busy={busy}
+              onCreate={handleCreatePlayerNote}
+              onUpdate={handleUpdatePlayerNote}
+              onDelete={handleDeletePlayerNote}
             />
           </div>
         </div>

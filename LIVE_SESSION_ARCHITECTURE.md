@@ -220,5 +220,9 @@ No schema migration is introduced in v0.6.6; this section is design-only.
   - `maybe`,
   - `no response`.
 - Active session entry appears when GM starts a session.
-- Voting and notes implementation are intentionally deferred.
+- Attendance voting is now implemented on Campaign Dashboard for campaign sessions (v0.7.2).
+- Active session/live room remains a separate stage and route.
+- Player campaign notes are now implemented on Campaign Dashboard (v0.7.3).
+- Notes are campaign-level in current MVP, not session-specific.
+- Session-specific notes remain a future stage.
 

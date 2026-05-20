@@ -21,6 +21,12 @@ vi.mock("../../../api/campaigns", () => ({
   createCampaignSession: vi.fn(),
   startCampaignSession: vi.fn(),
   finishCampaignSession: vi.fn(),
+  getSessionAttendance: vi.fn(),
+  updateMySessionAttendance: vi.fn(),
+  getCampaignPlayerNotes: vi.fn(),
+  createCampaignPlayerNote: vi.fn(),
+  updateCampaignPlayerNote: vi.fn(),
+  deleteCampaignPlayerNote: vi.fn(),
 }));
 
 vi.mock("../../../api/characters", () => ({
@@ -51,6 +57,8 @@ describe("CampaignDetailPage smoke", () => {
     campaignsApi.listCampaignMembers.mockResolvedValue([]);
     campaignsApi.listCampaignSessions.mockResolvedValue([]);
     campaignsApi.listCampaignMaterials.mockResolvedValue([]);
+    campaignsApi.getSessionAttendance.mockResolvedValue({ responses: [], availableCount: 0, maybeCount: 0, unavailableCount: 0, noResponseCount: 0 });
+    campaignsApi.getCampaignPlayerNotes.mockResolvedValue([]);
     charactersApi.listCharacters.mockResolvedValue([]);
     renderPage();
     expect(screen.getByText("Ladowanie workspace kampanii...")).toBeInTheDocument();
@@ -62,6 +70,8 @@ describe("CampaignDetailPage smoke", () => {
     campaignsApi.listCampaignMembers.mockResolvedValue([]);
     campaignsApi.listCampaignSessions.mockResolvedValue([{ id: 2, title: "Live S", status: "IN_PROGRESS", description: "test" }]);
     campaignsApi.listCampaignMaterials.mockResolvedValue([]);
+    campaignsApi.getSessionAttendance.mockResolvedValue({ responses: [], availableCount: 0, maybeCount: 0, unavailableCount: 0, noResponseCount: 0 });
+    campaignsApi.getCampaignPlayerNotes.mockResolvedValue([]);
     charactersApi.listCharacters.mockResolvedValue([]);
     renderPage();
 
@@ -82,6 +92,8 @@ describe("CampaignDetailPage smoke", () => {
     campaignsApi.listCampaignMembers.mockResolvedValue([]);
     campaignsApi.listCampaignSessions.mockResolvedValue([{ id: 2, title: "Live S", status: "IN_PROGRESS", description: "test" }]);
     campaignsApi.listCampaignMaterials.mockResolvedValue([]);
+    campaignsApi.getSessionAttendance.mockResolvedValue({ responses: [], availableCount: 0, maybeCount: 0, unavailableCount: 0, noResponseCount: 0 });
+    campaignsApi.getCampaignPlayerNotes.mockResolvedValue([]);
     charactersApi.listCharacters.mockResolvedValue([]);
     renderPage();
 
@@ -99,6 +111,8 @@ describe("CampaignDetailPage smoke", () => {
     campaignsApi.listCampaignMembers.mockResolvedValue([]);
     campaignsApi.listCampaignSessions.mockResolvedValue([]);
     campaignsApi.listCampaignMaterials.mockResolvedValue([]);
+    campaignsApi.getSessionAttendance.mockResolvedValue({ responses: [], availableCount: 0, maybeCount: 0, unavailableCount: 0, noResponseCount: 0 });
+    campaignsApi.getCampaignPlayerNotes.mockResolvedValue([]);
     charactersApi.listCharacters.mockResolvedValue([]);
     renderPage();
 

@@ -123,18 +123,18 @@ export async function finishCampaignSession(token, campaignId, sessionId) {
   });
 }
 
-export async function listSessionAttendance(token, campaignId, sessionId) {
+export async function getSessionAttendance(token, campaignId, sessionId) {
   return http(`/api/campaigns/${campaignId}/sessions/${sessionId}/attendance`, {
     method: "GET",
     token,
   });
 }
 
-export async function updateSessionAttendance(token, campaignId, sessionId, status) {
-  return http(`/api/campaigns/${campaignId}/sessions/${sessionId}/attendance`, {
-    method: "POST",
+export async function updateMySessionAttendance(token, campaignId, sessionId, payload) {
+  return http(`/api/campaigns/${campaignId}/sessions/${sessionId}/attendance/me`, {
+    method: "PUT",
     token,
-    body: { status },
+    body: payload,
   });
 }
 
@@ -209,6 +209,36 @@ export async function createCampaignMaterial(token, campaignId, body) {
     method: "POST",
     token,
     body,
+  });
+}
+
+export async function getCampaignPlayerNotes(token, campaignId) {
+  return http(`/api/campaigns/${campaignId}/player-notes`, {
+    method: "GET",
+    token,
+  });
+}
+
+export async function createCampaignPlayerNote(token, campaignId, payload) {
+  return http(`/api/campaigns/${campaignId}/player-notes`, {
+    method: "POST",
+    token,
+    body: payload,
+  });
+}
+
+export async function updateCampaignPlayerNote(token, campaignId, noteId, payload) {
+  return http(`/api/campaigns/${campaignId}/player-notes/${noteId}`, {
+    method: "PATCH",
+    token,
+    body: payload,
+  });
+}
+
+export async function deleteCampaignPlayerNote(token, campaignId, noteId) {
+  return http(`/api/campaigns/${campaignId}/player-notes/${noteId}`, {
+    method: "DELETE",
+    token,
   });
 }
 

@@ -670,6 +670,30 @@ Refactor note (v0.6.6):
   - active session entrypoint.
 - Global tools (`/dice`, `/initiative`) stay in app sidebar and are not duplicated as a campaign dashboard panel.
 
+### Session Attendance Voting (v0.7.2)
+
+- Added attendance voting per campaign session.
+- Player/member can set own status:
+  - `AVAILABLE`
+  - `MAYBE`
+  - `UNAVAILABLE`
+- Lack of response is represented as `no response` (no attendance row for that user/session).
+- GM/owner and members can read attendance summary for campaign session context.
+- Attendance endpoints:
+  - `GET /api/campaigns/{campaignId}/sessions/{sessionId}/attendance`
+  - `PUT /api/campaigns/{campaignId}/sessions/{sessionId}/attendance/me`
+
+### Player Campaign Notes (v0.7.3)
+
+- Campaign dashboard now supports player campaign notes.
+- Visibility:
+  - player/member sees only own notes,
+  - GM/owner sees all notes in campaign.
+- Notes are campaign-scoped (not session-scoped yet).
+- MVP limitations:
+  - plain textarea editor only,
+  - no rich text formatting.
+
 ## Security (MVP v0.5.4)
 
 - JWT is currently stored in localStorage (`ttrpg_token`) for MVP simplicity.
