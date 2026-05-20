@@ -1,81 +1,170 @@
-# Live Session Workspace Architecture (Draft v0.6.7)
+﻿# Live Session Workspace Architecture (v0.6.6 Draft)
 
-## Goal
-Prepare a clear MVP path for a future `LiveSessionPage` without changing current backend contracts for campaigns, dice, and initiative.
+## 1. Screen Responsibility Split
 
-## Responsibility Split (Pages)
-- `CampaignDetailsPage`: long-term campaign management (sessions, materials, notes, members).
-- `DicePage`: generic/global dice utility (not session-context-first).
-- `InitiativePage`: persistent encounter tracker (encounters, turns, participant state, encounter-scoped roll history).
-- `LiveSessionPage` (future): one runtime GM workspace combining scene context, requested rolls, quick initiative visibility, and session flow actions.
+### CampaignDetailPage
+- Campaign management and ownership controls.
+- Campaign roster and character assignment overview.
+- Session planning and session lifecycle entrypoint.
+- Materials, notes, and campaign-level settings.
+- Primary navigation entry into active session room.
 
-## Routing Proposal
-- Keep existing:
-  - `/campaigns/:campaignId`
-  - `/dice`
-  - `/initiative`
-- Add future:
-  - `/campaigns/:campaignId/live`
-  - optional nested tabs later: `/campaigns/:campaignId/live/:tab`
+### DicePage
+- Global free-form roller available from anywhere in the app.
+- Used for quick standalone rolls outside active live session flow.
+- Can optionally persist roll into campaign context.
+- Does not treat live requested-roll queue as the primary UX flow.
 
-## Live Views (MVP)
-- GM view:
-  - session stage controls,
-  - quick encounter picker/status,
-  - request-roll broadcast form,
-  - scene image + short scene note,
-  - compact initiative preview (read-mostly, with shortcut to full initiative page).
-- Player view:
-  - currently active requested rolls,
-  - scene image and scene note,
-  - own quick roll submission flow,
-  - simplified initiative snapshot (turn owner + top order rows).
+### InitiativePage
+- Global GM/off-session tool available from anywhere in the app.
+- Useful for in-person sessions or fast combat handling outside live room UX.
+- Full persistent encounter tracker: queue, HP/states, participant mutations, encounter controls.
+- Not a player-facing active-session screen.
 
-## Requested Rolls Model (Future Backend)
-- Proposed table: `session_requested_rolls`
-- Suggested fields:
-  - `id`, `campaign_id`, `session_id`,
-  - `requested_by_user_id`, `target_scope` (`ALL`, `USER`, `CHARACTER`),
-  - `target_user_id` nullable, `target_character_id` nullable,
-  - `roll_expression`, `roll_type`, `label`, `note`,
-  - `status` (`OPEN`, `FULFILLED`, `CANCELLED`, `EXPIRED`),
-  - `expires_at` nullable, `created_at`, `closed_at`.
-- Fulfillment can reference existing `dice_rolls` row id.
+### LiveSessionPage (future SessionRoomPage)
+- Main active play screen for currently running campaign session.
+- Separate GM and player views over the same live session state.
+- Shared scene context (location image + session focus).
+- Requested rolls workflow from GM to selected players/characters.
+- Lightweight initiative awareness for players; full oversight for GM.
+- Short live roll history focused on session context.
+- Does not require redirecting users to `/dice` or `/initiative` for core session actions.
+- Contains embedded dice/requested-roll panel and embedded initiative preview.
+- Reuses the same backend data domains (`dice_rolls`, `combat_encounters`, `combat_participants`, HP/state), but presents them in active-session UX context.
 
-## Scene Image Model (Future Backend)
-- Proposed table: `session_scene_assets`
-- Suggested fields:
-  - `id`, `campaign_id`, `session_id`,
-  - `image_url` or storage pointer,
-  - `caption`, `is_active`,
-  - `created_by_user_id`, `created_at`, `updated_at`.
-- MVP rule: one active scene image at a time per session.
+## 2. Routing Proposal (Aligned With Current Routing)
 
-## Live Initiative Preview Model
-- Reuse existing initiative backend read endpoints.
-- `LiveSessionPage` should consume current active encounter summary only:
-  - encounter id/name/status/round/current participant,
-  - top N ordered participants with `isDefeated` marker.
-- Full mutations remain in `InitiativePage` for MVP.
+### Current routes already present
+- `/campaigns/:campaignId`
+- `/initiative`
+- `/dice`
 
-## Missing Backend Data for Live Session MVP
-- Session runtime state marker (e.g. `session_runtime_state`: `PREP`, `LIVE`, `PAUSED`, `WRAPUP`).
-- Requested roll queue (`session_requested_rolls`).
-- Scene asset binding (`session_scene_assets`).
-- Optional lightweight event feed table for live UX refresh.
+### Proposed session routes
+- `/campaigns/:campaignId/sessions/:sessionId`
+  - Session details/control surface (non-live summary and controls).
+- `/campaigns/:campaignId/sessions/:sessionId/live`
+  - Live session room entrypoint (role-sensitive rendering).
 
-No migrations are introduced in v0.6.7; this is an architecture preparation document only.
+### Notes on compatibility
+- Keep `/campaigns/:campaignId` as primary campaign workspace.
+- Keep `/initiative` and `/dice` as independent specialist tools.
+- Do not remove existing routes; extend navigation progressively.
+- `/dice` and `/initiative` remain global tools.
+- `/campaigns/:campaignId/sessions/:sessionId/live` is the primary active-session workspace.
+- LiveSessionPage may provide links to full tools, but base rolls, requested rolls, and initiative preview must work inline on the same page.
 
-## Proposed Implementation Sequence
-1. Add backend read models and minimal tables for requested rolls + scene assets.
-2. Add write endpoints for GM (create/cancel requests, set active scene).
-3. Add player-facing read endpoint for pending requested rolls.
-4. Implement `LiveSessionPage` with GM layout first.
-5. Add player-focused live view mode.
-6. Add lightweight polling or SSE/WebSocket as a later optimization.
+## 2a. Embedded Session Tools
 
-## MVP Constraints (Explicit)
-- No replacement of current `InitiativePage`.
-- No combat automation rules (D&D/CoC logic remains manual).
-- No redesign of existing campaign or initiative workflows in this stage.
-- No auth model migration in this stage.
+### Embedded Dice / Requested Rolls Panel
+- GM can request roll from selected player/character.
+- Player executes requested roll without leaving LiveSessionPage.
+- Result is stored in existing `dice_rolls`.
+- GM sees DC and result comparison.
+- Player visibility remains policy-based (only what should be visible).
+
+### Embedded Initiative Preview
+- Data source: `combat_encounters` and `combat_participants`.
+- GM sees full queue and encounter context.
+- Player sees current participant plus next 1/2 participants.
+- Player mode is read-only.
+- No forced navigation to `/initiative` for basic live-session awareness.
+
+### Embedded Scene Panel
+- GM sets/updates active scene image.
+- Players see the same active scene image on the same live page.
+
+## 3. LiveSessionPage: GM View
+
+- Player/character roster for the active session.
+- Full HP/conditions visibility and quick state checks.
+- Full initiative order preview (or embedded compact tracker with jump-to-initiative option).
+- Scene image panel (current location/scene context).
+- Requested rolls control panel:
+  - target selection,
+  - roll intent metadata,
+  - hidden/public DC behavior.
+- Session roll history panel (recent requested and free rolls).
+- Encounter control shortcuts (select active encounter, finish/advance context actions).
+- Hidden DC support:
+  - GM can keep DC private while still evaluating outcome.
+- Private GM notes area (visible only to GM).
+
+## 4. LiveSessionPage: Player View
+
+- Own character focus card (identity + key state).
+- Team avatar strip/party visibility.
+- HP/conditions in player-appropriate range (no GM-only internals).
+- Shared scene image panel.
+- Active requested-roll tasks assigned to the player.
+- Explicit action button to execute required roll.
+- Initiative awareness limited to:
+  - current turn owner,
+  - next 1-2 participants.
+- Roll history scope limited to:
+  - own rolls,
+  - public session rolls.
+
+## 5. Requested Rolls Model (Behavior)
+
+1. GM selects target player and/or character.
+2. GM chooses roll type/category.
+3. GM sets label (example: `Wiedza Tajemna`).
+4. GM enters DC value.
+5. GM toggles DC visibility (`hidden` vs `visible`).
+6. GM may set optional skill/ability context.
+7. Player executes roll from LiveSessionPage.
+8. System persists result in existing `dice_rolls` history.
+9. GM sees evaluation vs DC (raw + success/failure interpretation).
+10. Player sees roll result and sees success/failure only according to visibility policy.
+
+## 6. Scene Image Model (Behavior)
+
+- GM sets the current scene/location image.
+- All players in the live room see the same active scene image.
+- MVP transport can be URL-based scene image reference.
+- Future phase can add file upload/storage pipeline.
+
+## 7. Live Initiative Preview Model
+
+- Source of truth remains existing `combat_encounters` and participants data.
+- GM view shows full initiative queue and encounter status context.
+- Player view is read-only and trimmed (current + next 1/2 turns).
+- Player side does not mutate initiative state in MVP.
+
+## 8. Missing Backend Data (Future, No Migration In This Stage)
+
+Potential future data units/tables:
+- `session_live_state`
+  - active scene/session mode metadata,
+  - current encounter linkage,
+  - refresh/version marker.
+- `requested_rolls`
+  - target, metadata, dc policy, status lifecycle.
+- `session_scene`
+  - active scene image metadata (URL first, upload later).
+
+Optional later additions:
+- lightweight `session_events` feed for efficient UI refresh.
+
+No schema migration is introduced in v0.6.6; this section is design-only.
+
+## 9. Recommended Future Implementation Order
+
+1. Refactor CampaignDetailPage / Campaign Panel.
+2. LiveSessionPage foundation.
+3. Session live state + embedded scene panel.
+4. Requested rolls embedded panel.
+5. Embedded live initiative preview.
+6. DicePage persistent campaign mode as independent global tool.
+7. Optional links from LiveSessionPage to full DicePage/InitiativePage tools.
+
+## 10. MVP Constraints
+
+- No WebSocket requirement for first MVP.
+- Polling/manual refresh is acceptable initially.
+- No image upload pipeline at start (URL only for scene image).
+- No full D&D/CoC automation for rules outcomes.
+- No replacement of InitiativePage with LiveSessionPage in first rollout.
+- DicePage and InitiativePage are not replaced by LiveSessionPage.
+- LiveSessionPage does not require opening separate pages for basic session rolls and initiative awareness.
+- Global tools and embedded session panels may share backend data, but they have different UX context.

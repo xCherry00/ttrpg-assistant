@@ -44,26 +44,26 @@ Auth: po zalogowaniu backend zwraca JWT. Frontend trzyma go w pamięci (AuthCont
 
 ### Stack — dlaczego akurat to
 
-| Co | Czym | Dlaczego |
-|----|------|----------|
-| Frontend | React 19 + Vite 7 | SPA, szybkie HMR podczas developmentu, lazy loading stron |
-| Styling | Custom CSS + CSS variables | Pełna kontrola nad motywem, dark/light bez biblioteki |
-| Backend | Spring Boot 3.5.x, Java 17 | Sprawdzony enterprise stack, dużo gotowych mechanizmów (security, walidacja, JPA) |
-| ORM | Spring Data JPA + Hibernate | Nie chciałem pisać SQL ręcznie dla podstawowych operacji |
-| Migracje | Flyway | Wersjonowanie schematu, rollback, historia zmian |
-| Auth | JWT (JJWT 0.12) | Bezstanowe, nie trzeba trzymać sesji po stronie serwera |
-| Baza | PostgreSQL 16 | JSONB dla elastycznych danych postaci, solidne FK i indeksy |
-| Infra | Docker Compose | Żeby backend + baza działały jedną komendą lokalnie |
+| Co       | Czym                        | Dlaczego                                                                          |
+| -------- | --------------------------- | --------------------------------------------------------------------------------- |
+| Frontend | React 19 + Vite 7           | SPA, szybkie HMR podczas developmentu, lazy loading stron                         |
+| Styling  | Custom CSS + CSS variables  | Pełna kontrola nad motywem, dark/light bez biblioteki                             |
+| Backend  | Spring Boot 3.5.x, Java 17  | Sprawdzony enterprise stack, dużo gotowych mechanizmów (security, walidacja, JPA) |
+| ORM      | Spring Data JPA + Hibernate | Nie chciałem pisać SQL ręcznie dla podstawowych operacji                          |
+| Migracje | Flyway                      | Wersjonowanie schematu, rollback, historia zmian                                  |
+| Auth     | JWT (JJWT 0.12)             | Bezstanowe, nie trzeba trzymać sesji po stronie serwera                           |
+| Baza     | PostgreSQL 16               | JSONB dla elastycznych danych postaci, solidne FK i indeksy                       |
+| Infra    | Docker Compose              | Żeby backend + baza działały jedną komendą lokalnie                               |
 
 ### Uruchomienie lokalne
 
 **Wymagania:**
 
-| Narzędzie | Wersja |
-|-----------|--------|
-| Node.js | 20+ |
-| Java JDK | 17+ |
-| Docker + Compose v2 | 24+ |
+| Narzędzie           | Wersja |
+| ------------------- | ------ |
+| Node.js             | 20+    |
+| Java JDK            | 17+    |
+| Docker + Compose v2 | 24+    |
 
 **Setup:**
 
@@ -184,13 +184,13 @@ monsters / glossary_terms dane statyczne (baza potworów, słownik)
 
 ### Typowe błędy przy uruchamianiu
 
-| Błąd | Przyczyna | Fix |
-|------|-----------|-----|
-| `Invalid CORS request` | Port frontendu nie zgadza się z `CORS_ALLOWED_ORIGINS` w `.env` | Zaktualizuj `.env`, zrestartuj backend |
-| `HTTP 500` przy rejestracji | Backend nie działa lub baza nie jest gotowa | `docker ps`, sprawdź logi |
-| Biała pusta strona | Błąd JS | F12 → Console |
-| `401 Unauthorized` wszędzie | Wygasły token | Wyloguj i zaloguj ponownie |
-| Flyway error przy starcie | Konflikt wersji migracji | `SELECT * FROM flyway_schema_history` — znajdź co się nie zgadza |
+| Błąd                            | Przyczyna                                                        | Fix                                                                                     |
+| ------------------------------- | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `Invalid CORS request`          | Port frontendu nie zgadza się z `CORS_ALLOWED_ORIGINS` w `.env`  | Zaktualizuj `.env`, zrestartuj backend                                                  |
+| `HTTP 500` przy rejestracji     | Backend nie działa lub baza nie jest gotowa                      | `docker ps`, sprawdź logi                                                               |
+| Biała pusta strona              | Błąd JS                                                          | F12 → Console                                                                           |
+| `401 Unauthorized` wszędzie     | Wygasły token                                                    | Wyloguj i zaloguj ponownie                                                              |
+| Flyway error przy starcie       | Konflikt wersji migracji                                         | `SELECT * FROM flyway_schema_history` — znajdź co się nie zgadza                        |
 | Backend działa na starym kodzie | Dockerfile kopiuje `target/*.jar`, a JAR nie został przebudowany | Przed `docker compose up -d --build` uruchom `cd backend && mvn -q -DskipTests package` |
 
 ### Znane ograniczenia i TODO techniczne
@@ -244,26 +244,26 @@ Auth: on login, the backend returns a JWT. The frontend stores it in memory (Aut
 
 ### Tech stack — why these choices
 
-| Layer | Tech | Why |
-|-------|------|-----|
-| Frontend | React 19 + Vite 7 | SPA, fast HMR during development, lazy-loaded pages |
-| Styling | Custom CSS + CSS variables | Full control over theming, dark/light mode without a library |
-| Backend | Spring Boot 3.5.x, Java 17 | Battle-tested enterprise stack, lots of built-in mechanisms (security, validation, JPA) |
-| ORM | Spring Data JPA + Hibernate | Didn't want to write raw SQL for every basic operation |
-| Migrations | Flyway | Schema versioning, migration history, predictable state |
-| Auth | JWT (JJWT 0.12) | Stateless — no server-side session storage needed |
-| Database | PostgreSQL 16 | JSONB for flexible character data, solid FK support and indexing |
-| Infra | Docker Compose | One command to spin up the database and backend locally |
+| Layer      | Tech                        | Why                                                                                     |
+| ---------- | --------------------------- | --------------------------------------------------------------------------------------- |
+| Frontend   | React 19 + Vite 7           | SPA, fast HMR during development, lazy-loaded pages                                     |
+| Styling    | Custom CSS + CSS variables  | Full control over theming, dark/light mode without a library                            |
+| Backend    | Spring Boot 3.5.x, Java 17  | Battle-tested enterprise stack, lots of built-in mechanisms (security, validation, JPA) |
+| ORM        | Spring Data JPA + Hibernate | Didn't want to write raw SQL for every basic operation                                  |
+| Migrations | Flyway                      | Schema versioning, migration history, predictable state                                 |
+| Auth       | JWT (JJWT 0.12)             | Stateless — no server-side session storage needed                                       |
+| Database   | PostgreSQL 16               | JSONB for flexible character data, solid FK support and indexing                        |
+| Infra      | Docker Compose              | One command to spin up the database and backend locally                                 |
 
 ### Running it locally
 
 **Requirements:**
 
-| Tool | Version |
-|------|---------|
-| Node.js | 20+ |
-| Java JDK | 17+ |
-| Docker + Compose v2 | 24+ |
+| Tool                | Version |
+| ------------------- | ------- |
+| Node.js             | 20+     |
+| Java JDK            | 17+     |
+| Docker + Compose v2 | 24+     |
 
 **Setup:**
 
@@ -407,14 +407,14 @@ monsters / glossary_terms static data (monster db, TTRPG glossary)
 
 ### Common startup issues
 
-| Error | Cause | Fix |
-|-------|-------|-----|
-| `Invalid CORS request` | Frontend port doesn't match `CORS_ALLOWED_ORIGINS` in `.env` | Update `.env`, restart backend |
-| `HTTP 500` on register | Backend down or database not ready | `docker ps`, check logs |
-| Blank white page | JS error | F12 → Console |
-| `401 Unauthorized` everywhere | Expired token | Log out and log back in |
-| Flyway error on startup | Migration version conflict | `SELECT * FROM flyway_schema_history` — find the mismatch |
-| Backend runs stale code | Dockerfile copies `target/*.jar` and the jar was not rebuilt | Before `docker compose up -d --build`, run `cd backend && mvn -q -DskipTests package` |
+| Error                         | Cause                                                        | Fix                                                                                   |
+| ----------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| `Invalid CORS request`        | Frontend port doesn't match `CORS_ALLOWED_ORIGINS` in `.env` | Update `.env`, restart backend                                                        |
+| `HTTP 500` on register        | Backend down or database not ready                           | `docker ps`, check logs                                                               |
+| Blank white page              | JS error                                                     | F12 → Console                                                                         |
+| `401 Unauthorized` everywhere | Expired token                                                | Log out and log back in                                                               |
+| Flyway error on startup       | Migration version conflict                                   | `SELECT * FROM flyway_schema_history` — find the mismatch                             |
+| Backend runs stale code       | Dockerfile copies `target/*.jar` and the jar was not rebuilt | Before `docker compose up -d --build`, run `cd backend && mvn -q -DskipTests package` |
 
 ### Known limitations and technical TODOs
 
@@ -427,7 +427,7 @@ monsters / glossary_terms static data (monster db, TTRPG glossary)
 
 ---
 
-*Engineering thesis project · 2025*
+_Engineering thesis project · 2025_
 
 ## Campaign Management Core (v0.6.0)
 
@@ -439,17 +439,20 @@ monsters / glossary_terms static data (monster db, TTRPG glossary)
 - `POST /api/campaigns/join` joins by code; deleted campaign codes return `404`.
 
 Role rules:
+
 - Owner can update/delete campaign and create/start/finish sessions.
 - Member can view campaign and workspace data.
 - Non-member cannot view private campaign details or modify campaign/session state.
 
 Soft-delete behavior:
+
 - API sets `campaigns.deleted_at` and keeps DB row.
 - Deleted campaigns disappear from list and details endpoints.
 - Session endpoints on deleted campaign return `404`.
 - Join code uniqueness is partial for active rows only (`deleted_at IS NULL`), so deleted code can be reused.
 
 Status rules:
+
 - Campaign status values: `active`, `finished`, `archived` (validated in DB + entity guard).
 - Session status values: `PLANNED`, `IN_PROGRESS`, `FINISHED`.
 - Allowed flow: `PLANNED -> IN_PROGRESS -> FINISHED`.
@@ -580,9 +583,17 @@ Status rules:
   - dice rolls are not auto-applying damage or initiative effects.
 
 Refactor note (v0.6.6):
+
 - `InitiativePage` was split into smaller components under `frontend/src/pages/initiative/components/`.
 - Persistent combat UI behavior remains functionally the same.
 - Frontend tests now cover basic initiative components and utility helpers.
+
+### Live Session Architecture Draft (v0.6.6)
+
+- Design document for future active-session workspace is available in `LIVE_SESSION_ARCHITECTURE.md`.
+- `DicePage` and `InitiativePage` remain global tools available across the app.
+- Future `LiveSessionPage` will use embedded roll/initiative panels in active-session context (instead of requiring navigation to `/dice` or `/initiative` for core session actions).
+- Scope is architecture/planning only (no migrations, no new endpoints, no LiveSessionPage implementation in this stage).
 
 ### Initiative Structure Simplification & Live Session Architecture Draft (v0.6.7)
 
@@ -598,18 +609,30 @@ Refactor note (v0.6.6):
 - A forward architecture draft for `LiveSessionPage` was added in `LIVE_SESSION_ARCHITECTURE.md`.
 - Test scope for initiative UI now targets these larger panels plus page smoke/utils tests.
 
+### Campaign Workspace Refactor (v0.6.8)
+
+- `CampaignDetailPage` is now organized as a campaign workspace orchestration layer with focused panels:
+  - overview,
+  - campaign characters,
+  - campaign sessions,
+  - campaign materials,
+  - campaign tools.
+- `/dice` and `/initiative` remain global tools available across the application.
+- Future `LiveSessionPage` remains a separate active-session room with embedded session panels (see `LIVE_SESSION_ARCHITECTURE.md`).
+
 ## Security (MVP v0.5.4)
-- JWT is currently stored in localStorage (	trpg_token) for MVP simplicity.
+
+- JWT is currently stored in localStorage ( trpg_token) for MVP simplicity.
 - Added hardening: CSP + frame deny + safe image/data URL validation + auth rate limiting + no token logging.
-- Rate limiter uses server-observed client IP (emoteAddr) and ignores spoofed X-Forwarded-For in current MVP mode.
+- Rate limiter uses server-observed client IP (
+  emoteAddr) and ignores spoofed X-Forwarded-For in current MVP mode.
 - HttpOnly cookie migration is intentionally postponed to a future phase to avoid breaking auth flow in this release.
 - Manual smoke: register (min 8 password), invalid login (generic 401), protected endpoint 401/200 checks, ownership checks for characters/campaigns.
 
-
 ### Password Reset (v0.5.5)
+
 - Added endpoints: POST /api/auth/forgot-password and POST /api/auth/reset-password.
 - Forgot password always returns a neutral response to avoid account enumeration.
 - Reset tokens are stored hashed in DB (password_reset_tokens) with expiration and single-use flag.
 - Token delivery by email is TODO for future infrastructure; for tests/dev it can be exposed via EXPOSE_RESET_TOKEN=true.
 - Added users.token_invalidated_at: after password change/reset, older JWTs (issued before invalidation time) are rejected.
-
