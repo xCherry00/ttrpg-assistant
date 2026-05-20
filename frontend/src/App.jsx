@@ -13,7 +13,7 @@ const DashboardPage = lazy(() => import("./pages/DashboardPage"));
 const GlossaryPage = lazy(() => import("./pages/GlossaryPage"));
 const RulesPage = lazy(() => import("./pages/RulesPage"));
 const DicePage = lazy(() => import("./pages/DicePage"));
-const InitiativePage = lazy(() => import("./pages/InitiativePage"));
+const InitiativePage = lazy(() => import("./pages/initiative/InitiativePage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 const GeneratorsPage = lazy(() => import("./pages/GeneratorsPage"));
 const CompendiumPage = lazy(() => import("./pages/CompendiumPage"));

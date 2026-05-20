@@ -1,4 +1,4 @@
-import { clearToken, getToken, setToken, STORAGE_KEY } from "./authstorage";
+import { clearToken, getToken, setToken, STORAGE_KEY } from "../../auth/authstorage";
 
 describe("authstorage", () => {
   beforeEach(() => {

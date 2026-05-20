@@ -1,12 +1,12 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import InitiativePage from "./InitiativePage";
-import * as campaignsApi from "../api/campaigns";
+import InitiativePage from "../../../pages/initiative/InitiativePage";
+import * as campaignsApi from "../../../api/campaigns";
 
-vi.mock("../auth/AuthContext", () => ({
+vi.mock("../../../auth/AuthContext", () => ({
   useAuth: () => ({ token: "test-token" }),
 }));
 
-vi.mock("../api/campaigns", () => ({
+vi.mock("../../../api/campaigns", () => ({
   listCampaigns: vi.fn(),
   createEncounter: vi.fn(),
   getCampaignEncounters: vi.fn(),
@@ -39,7 +39,7 @@ describe("InitiativePage smoke", () => {
   it("renders loading state while campaigns are fetched", () => {
     campaignsApi.listCampaigns.mockReturnValue(new Promise(() => {}));
     render(<InitiativePage />);
-    expect(screen.getByText("Ładowanie kampanii...")).toBeInTheDocument();
+    expect(screen.getByText("Ladowanie kampanii...")).toBeInTheDocument();
   });
 
   it("shows empty state when campaign has no encounters", async () => {
@@ -49,7 +49,7 @@ describe("InitiativePage smoke", () => {
     render(<InitiativePage />);
 
     await waitFor(() => {
-      expect(screen.getByText("Brak encounterów")).toBeInTheDocument();
+      expect(screen.getByText("Brak encounterow")).toBeInTheDocument();
     });
   });
 

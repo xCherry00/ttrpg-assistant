@@ -347,6 +347,10 @@ mvn test
 - Run:
   - `cd frontend`
   - `npm run test`
+- Test structure (`frontend/src/__tests__`), grouped by domain:
+  - `auth/` (`AuthContext.test.jsx`, `authstorage.test.js`)
+  - `api/` (`campaigns.test.js`)
+  - `pages/initiative/` (`InitiativePage`, `initiativeUtils`, and panel tests)
 - Current coverage:
   - auth storage helpers (`getToken`, `setToken`, `clearToken`)
   - AuthContext token initialization and unauthorized/logout handling
@@ -574,6 +578,25 @@ Status rules:
   - no global redesign,
   - no automatic D&D/CoC rules automation,
   - dice rolls are not auto-applying damage or initiative effects.
+
+Refactor note (v0.6.6):
+- `InitiativePage` was split into smaller components under `frontend/src/pages/initiative/components/`.
+- Persistent combat UI behavior remains functionally the same.
+- Frontend tests now cover basic initiative components and utility helpers.
+
+### Initiative Structure Simplification & Live Session Architecture Draft (v0.6.7)
+
+- Initiative frontend was reorganized into a simpler structure with 3 main panels:
+  - `CampaignEncounterPanel` (campaign + encounter controls),
+  - `ParticipantsPanel` (participants table + participant add forms),
+  - `DiceRollPanel` (quick roll + recent history).
+- Functionality and backend contract remain unchanged:
+  - same endpoints,
+  - same access rules,
+  - same persisted encounter/participant/dice behavior.
+- Legacy tiny initiative components were removed to reduce component fragmentation.
+- A forward architecture draft for `LiveSessionPage` was added in `LIVE_SESSION_ARCHITECTURE.md`.
+- Test scope for initiative UI now targets these larger panels plus page smoke/utils tests.
 
 ## Security (MVP v0.5.4)
 - JWT is currently stored in localStorage (	trpg_token) for MVP simplicity.

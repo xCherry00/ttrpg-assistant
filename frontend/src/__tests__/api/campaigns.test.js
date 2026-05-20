@@ -7,7 +7,7 @@ import {
   getCampaignEncounters,
   healParticipant,
   nextEncounterTurn,
-} from "./campaigns";
+} from "../../api/campaigns";
 
 describe("campaigns api helpers", () => {
   beforeEach(() => {

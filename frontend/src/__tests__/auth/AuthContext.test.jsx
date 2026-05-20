@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
-import { AuthProvider, useAuth } from "./AuthContext";
+import { AuthProvider, useAuth } from "../../auth/AuthContext";
 
 function Probe({ onSnapshot }) {
   const auth = useAuth();
