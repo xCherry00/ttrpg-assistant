@@ -11,6 +11,8 @@ import pl.ttrpgassistant.backend.character.dto.QuickCreateDndCharacterRequest;
 import pl.ttrpgassistant.backend.character.dto.UpdateCharacterSheetRequest;
 import pl.ttrpgassistant.backend.character.dto.CreateCocQuickCharacterRequest;
 import pl.ttrpgassistant.backend.common.error.ResourceNotFoundException;
+import pl.ttrpgassistant.backend.user.UserEntity;
+import pl.ttrpgassistant.backend.user.UserRepository;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,6 +26,8 @@ public class PlayerCharacterService {
     private final DndCharacterSheetService dndSheetService;
     private final CocCharacterSheetService cocSheetService;
     private final DndCompendiumService compendiumService;
+    private final CharacterSheetPdfService characterSheetPdfService;
+    private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
 
     @Transactional(readOnly = true)
@@ -152,6 +156,15 @@ public class PlayerCharacterService {
         playerCharacterRepository.delete(requireOwnedCharacter(userId, characterId));
     }
 
+    @Transactional(readOnly = true)
+    public CharacterPdfExport exportSheetPdf(Long userId, Long characterId) {
+        PlayerCharacterEntity entity = requireOwnedCharacter(userId, characterId);
+        String ownerLabel = ownerLabel(userId);
+        byte[] content = characterSheetPdfService.generate(entity, ownerLabel);
+        String filename = "character-sheet-" + entity.getId() + ".pdf";
+        return new CharacterPdfExport(filename, content);
+    }
+
     private PlayerCharacterEntity requireOwnedCharacter(Long userId, Long characterId) {
         return playerCharacterRepository.findByIdAndOwnerUserId(characterId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Character not found"));
@@ -248,4 +261,14 @@ public class PlayerCharacterService {
         }
         return value.trim();
     }
+
+    private String ownerLabel(Long ownerId) {
+        UserEntity user = userRepository.findById(ownerId).orElse(null);
+        if (user == null) return "Brak danych";
+        if (user.getDisplayName() != null && !user.getDisplayName().isBlank()) return user.getDisplayName().trim();
+        if (user.getUsername() != null && !user.getUsername().isBlank()) return user.getUsername().trim();
+        return user.getEmail();
+    }
+
+    public record CharacterPdfExport(String filename, byte[] content) {}
 }

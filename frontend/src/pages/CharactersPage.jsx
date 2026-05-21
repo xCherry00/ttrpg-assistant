@@ -6,6 +6,7 @@ import {
   listCharacters,
   quickCreateCharacter,
   quickCreateCocCharacter,
+  downloadCharacterSheetPdf,
   updateCharacterSheet,
 } from "../api/characters";
 import CharacterCreatorRouter from "../components/characters/CharacterCreatorRouter";
@@ -151,6 +152,21 @@ export default function CharactersPage() {
     }
   }
 
+  async function onDownloadPdf(characterId = detail?.id) {
+    if (!characterId) {
+      showNotice("error", "Brak ID postaci.");
+      return;
+    }
+    try {
+      await downloadCharacterSheetPdf(token, characterId);
+      showNotice("success", "Pobrano karte PDF.");
+    } catch (err) {
+      const message = err?.message || "Nie udalo sie pobrac PDF.";
+      setError(message);
+      showNotice("error", message);
+    }
+  }
+
   function openCreateFlow() {
     setError("");
     setSelectedCreationSystem(null);
@@ -185,7 +201,14 @@ export default function CharactersPage() {
 
       {!loading && (
         <div className="charactersLayout">
-          <CharacterSidebar items={items} loading={loading} selectedId={selectedId} onSelect={setSelectedId} onCreate={openCreateFlow} />
+          <CharacterSidebar
+            items={items}
+            loading={loading}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+            onCreate={openCreateFlow}
+            onDownloadPdf={onDownloadPdf}
+          />
 
           <section className="charactersDetail">
             {creatorOpen && (
@@ -232,6 +255,9 @@ export default function CharactersPage() {
                   </div>
                 )}
                 <div className="charactersActionsFooter">
+                  <button type="button" className="charactersPrimaryBtn" disabled={!detail?.id} onClick={() => onDownloadPdf()}>
+                    Pobierz karte PDF
+                  </button>
                   <button type="button" className="charactersDangerBtn" disabled={deleting} onClick={() => setConfirmDeleteOpen(true)}>Usun postac</button>
                 </div>
               </>

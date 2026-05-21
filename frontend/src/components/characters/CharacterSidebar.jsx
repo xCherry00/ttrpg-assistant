@@ -10,6 +10,7 @@ export default function CharacterSidebar({
   selectedId,
   onSelect,
   onCreate,
+  onDownloadPdf,
 }) {
   const [query, setQuery] = useState("");
   const filtered = useMemo(() => {
@@ -42,17 +43,26 @@ export default function CharacterSidebar({
         {!loading && items.length === 0 && <div className="charactersEmptyRow">Nie masz jeszcze zadnej postaci.</div>}
         {filtered.length === 0 && <div className="charactersEmptyRow">Brak wynikow.</div>}
         {!loading && filtered.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            className={`charactersCard${item.id === selectedId ? " is-active" : ""}`}
-            onClick={() => onSelect(item.id)}
-          >
-            <strong>{item.name || "Bez nazwy"}</strong>
-            <div>{item.systemCode?.toUpperCase() || "SYSTEM"}</div>
-            <div>{item.raceName || "-"} / {item.className || "-"}</div>
-            <div>Poziom {item.level ?? 1}</div>
-          </button>
+          <div key={item.id} className={`charactersCard${item.id === selectedId ? " is-active" : ""}`}>
+            <button
+              type="button"
+              className="charactersCardSelect"
+              onClick={() => onSelect(item.id)}
+            >
+              <strong>{item.name || "Bez nazwy"}</strong>
+              <div>{item.systemCode?.toUpperCase() || "SYSTEM"}</div>
+              <div>{item.raceName || "-"} / {item.className || "-"}</div>
+              <div>Poziom {item.level ?? 1}</div>
+            </button>
+            <button
+              type="button"
+              className="charactersGhostBtn"
+              disabled={!item.id}
+              onClick={() => onDownloadPdf?.(item.id)}
+            >
+              Pobierz PDF
+            </button>
+          </div>
         ))}
       </div>
     </aside>

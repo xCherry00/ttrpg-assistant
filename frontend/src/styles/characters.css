@@ -96,12 +96,21 @@
   border: 1px solid #2d323d;
   border-radius: 8px;
   background: #0f1218;
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+}
+
+.charactersCardSelect {
+  border: 0;
+  background: transparent;
   color: #dbe0ea;
   text-align: left;
-  padding: 10px;
+  padding: 0;
   display: grid;
   gap: 5px;
   cursor: pointer;
+  font: inherit;
 }
 
 .charactersCard.is-active {

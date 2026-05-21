@@ -2,6 +2,10 @@ package pl.ttrpgassistant.backend.character;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,6 +52,19 @@ public class PlayerCharacterController {
     public void delete(Authentication auth, @PathVariable Long characterId) {
         Long userId = (Long) auth.getPrincipal();
         playerCharacterService.delete(userId, characterId);
+    }
+
+    @GetMapping("/api/characters/{characterId}/sheet.pdf")
+    public ResponseEntity<byte[]> downloadSheetPdf(Authentication auth, @PathVariable Long characterId) {
+        Long userId = (Long) auth.getPrincipal();
+        PlayerCharacterService.CharacterPdfExport pdf = playerCharacterService.exportSheetPdf(userId, characterId);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        ContentDisposition.attachment().filename(pdf.filename()).build().toString()
+                )
+                .body(pdf.content());
     }
 
     @PutMapping("/api/characters/{characterId}/sheet")

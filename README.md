@@ -425,6 +425,22 @@ monsters / glossary_terms static data (monster db, TTRPG glossary)
 - The backend uses stable Spring Boot `3.4.1`; keep future upgrades on stable releases instead of snapshots
 - JWT is stored in frontend `localStorage`, which is convenient locally but needs XSS care in production
 
+### Initiative and Rules scope (v0.7.5)
+
+- `/initiative` is the global GM combat tool (full encounter management).
+- `LiveSessionPage` contains only embedded initiative preview, not full combat management.
+- `/rules` and `/compendium` are safe MVP foundations that prioritize legal sources and links over full rulebook replication.
+- Multi-system full compendium coverage is future work.
+- Compendium legal-source analysis: `docs/COMPENDIUM_DATA_SOURCES.md`.
+
+### Rules Unification (v0.7.6)
+
+- `RulesPage` has a unified structure across supported systems as a \"basic rules to start playing\" module.
+- The app presents only local summaries, legal links, and minimal onboarding context.
+- Full rulebooks are not copied or replicated inside the app.
+- Systems without verified licensing/data status are marked as `requires-verification` and shown with neutral guidance.
+- Source/legal strategy and risk notes are tracked in `docs/COMPENDIUM_DATA_SOURCES.md`.
+
 ---
 
 _Engineering thesis project · 2025_
@@ -764,3 +780,22 @@ Refactor note (v0.6.6):
   - GM/owner view: full queue preview, current participant, round, encounter status, HP/temp HP, conditions, defeated state.
   - player/member view: limited read-only preview (current + next participants, type/allegiance badges), no HP/details controls.
 - `/initiative` remains the full global combat tool; embedded preview in live session does not replace it.
+
+### Character Sheet PDF Export (v0.7.4)
+
+- Uzytkownik moze pobrac wlasna karte postaci jako PDF (`/api/characters/{characterId}/sheet.pdf`).
+- PDF jest generowany przez aplikacje (wlasny, uniwersalny szablon MVP).
+- Eksport nie uzywa oficjalnych szablonow kart D&D/CoC.
+- Generator jest odporny na brakujace pola w `sheet_json` i zwraca czytelny dokument zamiast bledu.
+- Pelne oficjalne layouty kart pozostaja jako future work.
+
+### RulesPage Cleanup (v0.7.6.1)
+
+- MVP `RulesPage` currently supports only:
+  - D&D 5e
+  - Call of Cthulhu 7e
+  - Warhammer 4e
+  - Pathfinder 2e
+  - Mork Borg
+- Legacy local reference entries list and its search UI were removed from `RulesPage` to keep the view focused on unified basic summaries.
+- Savage Worlds and Alien RPG were intentionally disabled on `RulesPage` until source/licensing verification and support scope are confirmed.

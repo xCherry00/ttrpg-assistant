@@ -291,8 +291,10 @@ export default function InitiativePage() {
       <div className="pageHeader">
         <div>
           <span className="pageEyebrow">Combat</span>
-          <h1 className="pageTitle">Persistent Initiative Tracker</h1>
-          <p className="pageSubtitle">Encountery, uczestnicy, tury, HP/stany oraz podstawowa historia rzutow zapisywane w backendzie.</p>
+          <h1 className="pageTitle">Globalny tracker inicjatywy MG</h1>
+          <p className="pageSubtitle">
+            Globalne narzedzie MG do prowadzenia walki. Pelne zarzadzanie encounterem odbywa sie tutaj, a LiveSessionPage pokazuje tylko osadzony podglad.
+          </p>
         </div>
       </div>
 
@@ -353,9 +355,6 @@ export default function InitiativePage() {
       )}
 
       {stateError && <div className="campaignDetailsError">{stateError}</div>}
-      <div className="initMeta">
-        Lokalny tracker (sessionStorage-only) zostal zastapiony trybem persistent opartym o backend.
-      </div>
     </div>
   );
 }

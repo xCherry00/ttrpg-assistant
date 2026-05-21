@@ -88,4 +88,18 @@ describe("InitiativePage smoke", () => {
       expect(screen.getByText(/Encounter: Ruins Fight/)).toBeInTheDocument();
     });
   });
+
+  it("renders MG global tool description and no live-prep placeholder text", async () => {
+    campaignsApi.listCampaigns.mockResolvedValue([{ id: 1, title: "Campaign A" }]);
+    campaignsApi.getCampaignEncounters.mockResolvedValue([]);
+
+    render(<InitiativePage />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Globalne narzedzie MG do prowadzenia walki/)).toBeInTheDocument();
+    });
+    expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/TODO/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/przygotowanie pod live session/i)).not.toBeInTheDocument();
+  });
 });

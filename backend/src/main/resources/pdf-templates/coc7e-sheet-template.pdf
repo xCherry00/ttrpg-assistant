@@ -1,0 +1,161 @@
+%PDF-1.4
+1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj
+2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj
+3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >> endobj
+4 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj
+5 0 obj << /Length 4249 >> stream
+BT
+/F1 11 Tf
+50 800 Td
+(Character Sheet PDF) Tj
+0 -14 Td
+(Brak danych) Tj
+0 -14 Td
+(Nazwa postaci: Helen Blackwood) Tj
+0 -14 Td
+(System: Call of Cthulhu 7e) Tj
+0 -14 Td
+(Wlasciciel: test) Tj
+0 -14 Td
+(Status: ACTIVE) Tj
+0 -14 Td
+(Data wygenerowania: 2026-05-20 20:36 UTC) Tj
+0 -14 Td
+(Brak danych) Tj
+0 -14 Td
+([Podstawowe informacje]) Tj
+0 -14 Td
+(Imie: Helen Blackwood) Tj
+0 -14 Td
+(Rasa: Human) Tj
+0 -14 Td
+(Klasa/Profesja: Artist) Tj
+0 -14 Td
+(Poziom: 0) Tj
+0 -14 Td
+(Opis: Brak danych) Tj
+0 -14 Td
+(Brak danych) Tj
+0 -14 Td
+([Call of Cthulhu 7e]) Tj
+0 -14 Td
+(Imie postaci: Helen Blackwood) Tj
+0 -14 Td
+(Profesja: Artist) Tj
+0 -14 Td
+(Wiek: 30) Tj
+0 -14 Td
+(Cechy: APP: {half=15, fifth=6, value=30}, CON: {half=42, fifth=17, value=85}, DEX: {half=45,) Tj
+0 -14 Td
+(fifth=18, value=90}, EDU: {half=22, fifth=9, value=45}, INT: {half=27, fifth=11, value=55},) Tj
+0 -14 Td
+(POW: {half=32, fifth=13, value=65}, SIZ: {half=27, fifth=11, value=55}, STR: {half=45,) Tj
+0 -14 Td
+(fifth=18, value=90}) Tj
+0 -14 Td
+(Umiejetnosci: {key=listen, half=10, name=listen, fifth=4, value=20}, {key=cthulhu-mythos,) Tj
+0 -14 Td
+(half=0, name=Cthulhu Mythos, fifth=1, value=0}, {key=first-aid, half=15, name=First Aid,) Tj
+0 -14 Td
+(fifth=6, value=30}, {key=library-use, half=10, name=Library Use, fifth=4, value=20},) Tj
+0 -14 Td
+({key=fighting-brawl, half=12, name=Fighting \(Brawl\), fifth=5, value=25}, {key=firearms-handgun,) Tj
+0 -14 Td
+(half=10, name=Firearms \(Handgun\), fifth=4, value=20}, {key=spot-hidden, half=12, name=Spot) Tj
+0 -14 Td
+(Hidden, fifth=5, value=25}, {key=dodge, half=22, name=dodge, fifth=9, value=45},) Tj
+0 -14 Td
+({key=language-own, half=22, name=Language \(Own\), fifth=9, value=45}, {key=credit-rating,) Tj
+0 -14 Td
+(half=7, name=Credit Rating, fifth=2, value=14}, {key=art-craft, half=20, name=art craft,) Tj
+0 -14 Td
+(fifth=8, value=40}, {key=psychology, half=20, name=psychology, fifth=8, value=40}, {key=charm,) Tj
+0 -14 Td
+(half=20, name=charm, fifth=8, value=40}, {key=history, half=20, name=history, fifth=8,) Tj
+0 -14 Td
+(value=40}) Tj
+0 -14 Td
+(Sanity: 65) Tj
+0 -14 Td
+(HP: 14) Tj
+0 -14 Td
+(MP: 13) Tj
+0 -14 Td
+(Ekwipunek: Brak danych) Tj
+0 -14 Td
+(Notatki: Brak danych) Tj
+0 -14 Td
+(Brak danych) Tj
+0 -14 Td
+([Atrybuty i statystyki]) Tj
+0 -14 Td
+(Atrybuty: Brak danych) Tj
+0 -14 Td
+(Cechy: APP: {half=15, fifth=6, value=30}, CON: {half=42, fifth=17, value=85}, DEX: {half=45,) Tj
+0 -14 Td
+(fifth=18, value=90}, EDU: {half=22, fifth=9, value=45}, INT: {half=27, fifth=11, value=55},) Tj
+0 -14 Td
+(POW: {half=32, fifth=13, value=65}, SIZ: {half=27, fifth=11, value=55}, STR: {half=45,) Tj
+0 -14 Td
+(fifth=18, value=90}) Tj
+0 -14 Td
+(Combat: dodge: 45, weapons: [{name=Fighting \(Brawl\), skill=25, damage=1d3 + DB}, {name=Handgun,) Tj
+0 -14 Td
+(skill=20, damage=1d10}]) Tj
+0 -14 Td
+(Derived: hp: 14, mp: 13, san: 65, luck: 90, move: 9, build: 1, damageBonus: +1d4) Tj
+0 -14 Td
+(Brak danych) Tj
+0 -14 Td
+([Umiejetnosci]) Tj
+0 -14 Td
+(Skills: {key=listen, half=10, name=listen, fifth=4, value=20}, {key=cthulhu-mythos, half=0,) Tj
+0 -14 Td
+(name=Cthulhu Mythos, fifth=1, value=0}, {key=first-aid, half=15, name=First Aid, fifth=6,) Tj
+0 -14 Td
+(value=30}, {key=library-use, half=10, name=Library Use, fifth=4, value=20},) Tj
+0 -14 Td
+({key=fighting-brawl, half=12, name=Fighting \(Brawl\), fifth=5, value=25}, {key=firearms-handgun,) Tj
+0 -14 Td
+(half=10, name=Firearms \(Handgun\), fifth=4, value=20}, {key=spot-hidden, half=12, name=Spot) Tj
+0 -14 Td
+(Hidden, fifth=5, value=25}, {key=dodge, half=22, name=dodge, fifth=9, value=45},) Tj
+0 -14 Td
+({key=language-own, half=22, name=Language \(Own\), fifth=9, value=45}, {key=credit-rating,) Tj
+0 -14 Td
+(half=7, name=Credit Rating, fifth=2, value=14}, {key=art-craft, half=20, name=art craft,) Tj
+0 -14 Td
+(fifth=8, value=40}, {key=psychology, half=20, name=psychology, fifth=8, value=40}, {key=charm,) Tj
+0 -14 Td
+(half=20, name=charm, fifth=8, value=40}, {key=history, half=20, name=history, fifth=8,) Tj
+0 -14 Td
+(value=40}) Tj
+0 -14 Td
+(Brak danych) Tj
+0 -14 Td
+([Ekwipunek]) Tj
+0 -14 Td
+(Inventory: Brak danych) Tj
+0 -14 Td
+(Brak danych) Tj
+0 -14 Td
+([Notatki i opis]) Tj
+0 -14 Td
+(Notes: keeperNotes: , privateNotes:) Tj
+0 -14 Td
+(Notatki prywatne: Brak danych) Tj
+ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000311 00000 n 
+trailer << /Size 6 /Root 1 0 R >>
+startxref
+4611
+%%EOF
