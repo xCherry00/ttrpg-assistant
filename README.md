@@ -829,3 +829,15 @@ Refactor note (v0.6.6):
 - Panel Zalegle notatki przygotowuje miejsce pod przyszle archiwum notatek sesyjnych.
 - Panel Ostatnio wygenerowane pozostaje na Dashboardzie i korzysta z `localStorage` (`ttrpg.generatorHistory`).
 
+### v0.7.5 - Session notes archive and dashboard backlog
+- Dodano prywatne notatki posesyjne uzytkownika (`session_player_notes`) per sesja i per uzytkownik.
+- API notatek posesyjnych:
+  - `GET /api/campaigns/{campaignId}/sessions/{sessionId}/notes/me`
+  - `PUT /api/campaigns/{campaignId}/sessions/{sessionId}/notes/me`
+  - `DELETE /api/campaigns/{campaignId}/sessions/{sessionId}/notes/me`
+- Dodano dashboard backlog:
+  - `GET /api/dashboard/session-note-backlog`
+  - zwraca zakonczone sesje (`FINISHED`) bez notatki biezacego uzytkownika.
+- W `CampaignSessionsPanel` sesje `FINISHED` maja akcje `Moje notatki` (modal zapisu/usuwania).
+- Dane notatek sa prywatne dla uzytkownika i nie sa udostepniane innym czlonkom kampanii.
+

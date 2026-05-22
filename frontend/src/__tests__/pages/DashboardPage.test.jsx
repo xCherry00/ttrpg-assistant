@@ -16,6 +16,7 @@ vi.mock("../../api/me", () => ({
 vi.mock("../../api/campaigns", () => ({
   listCampaigns: vi.fn(),
   listCampaignSessions: vi.fn(),
+  getSessionNoteBacklog: vi.fn(),
 }));
 
 vi.mock("../../api/characters", () => ({
@@ -36,6 +37,7 @@ describe("DashboardPage", () => {
     window.localStorage.clear();
     meApi.getMe.mockResolvedValue({ id: 1, displayName: "Tester" });
     charactersApi.listCharacters.mockResolvedValue([{ id: 10, name: "Aria" }]);
+    campaignsApi.getSessionNoteBacklog.mockResolvedValue([]);
   });
 
   it("renders target KPI set and removes Materialy/Szybkie akcje", async () => {
@@ -129,7 +131,41 @@ describe("DashboardPage", () => {
       expect(screen.getByText("Zaległe notatki")).toBeInTheDocument();
     });
 
-    expect(screen.getByText("Notatki sesyjne pojawią się tutaj po wdrożeniu archiwum sesji.")).toBeInTheDocument();
+    expect(screen.getByText("Brak zaległych notatek")).toBeInTheDocument();
+  });
+
+  it("renders backlog items from API", async () => {
+    campaignsApi.listCampaigns.mockResolvedValue([]);
+    campaignsApi.listCampaignSessions.mockResolvedValue([]);
+    campaignsApi.getSessionNoteBacklog.mockResolvedValue([
+      {
+        campaignId: 7,
+        campaignTitle: "Kampania Cieni",
+        sessionId: 55,
+        sessionTitle: "Final konfrontacji",
+        finishedAt: "2026-05-20T18:00:00Z",
+        status: "FINISHED",
+      },
+    ]);
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Final konfrontacji")).toBeInTheDocument();
+    });
+    expect(screen.getByText("Kampania Cieni")).toBeInTheDocument();
+  });
+
+  it("shows neutral error when backlog API fails", async () => {
+    campaignsApi.listCampaigns.mockResolvedValue([]);
+    campaignsApi.listCampaignSessions.mockResolvedValue([]);
+    campaignsApi.getSessionNoteBacklog.mockRejectedValue(new Error("Boom"));
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Nie udalo sie pobrac zaleglych notatek.")).toBeInTheDocument();
+    });
   });
 
   it("shows empty state for recently generated when history is missing", async () => {

@@ -2,7 +2,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { getMe } from "../api/me";
-import { listCampaignSessions, listCampaigns } from "../api/campaigns";
+import { getSessionNoteBacklog, listCampaignSessions, listCampaigns } from "../api/campaigns";
 import { listCharacters } from "../api/characters";
 import "../styles/dashboard.css";
 
@@ -74,6 +74,8 @@ export default function DashboardPage() {
   const [characters, setCharacters] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [recent, setRecent] = useState([]);
+  const [sessionNoteBacklog, setSessionNoteBacklog] = useState([]);
+  const [sessionNoteBacklogError, setSessionNoteBacklogError] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -110,6 +112,19 @@ export default function DashboardPage() {
 
         setCampaigns(campaignRows);
         setCharacters(characterRows);
+
+        try {
+          const backlogRows = await getSessionNoteBacklog(token);
+          if (!cancelled) {
+            setSessionNoteBacklog(Array.isArray(backlogRows) ? backlogRows.slice(0, 5) : []);
+            setSessionNoteBacklogError("");
+          }
+        } catch (backlogErr) {
+          if (!cancelled) {
+            setSessionNoteBacklog([]);
+            setSessionNoteBacklogError(backlogErr?.message || "Nie udalo sie pobrac zaleglych notatek.");
+          }
+        }
 
         if (campaignRows.length > 0) {
           const sessionResults = await Promise.allSettled(
@@ -288,12 +303,33 @@ export default function DashboardPage() {
             </div>
           </header>
           <div className="dashboardMaterialList">
-            <div className="dashboardMaterialItem">
-              <span>
-                <strong>Notatki sesyjne pojawią się tutaj po wdrożeniu archiwum sesji.</strong>
-                <small>Docelowo panel będzie przypominał o zakończonych sesjach bez Twoich notatek.</small>
-              </span>
-            </div>
+            {sessionNoteBacklogError ? (
+              <div className="dashboardMaterialItem">
+                <span>
+                  <strong>Nie udalo sie pobrac zaleglych notatek.</strong>
+                  <small>Sprobuj odswiezyc dashboard za chwile.</small>
+                </span>
+              </div>
+            ) : null}
+            {!sessionNoteBacklogError && sessionNoteBacklog.length === 0 ? (
+              <div className="dashboardMaterialItem">
+                <span>
+                  <strong>Brak zaległych notatek</strong>
+                  <small>Wszystkie zakończone sesje mają Twoje notatki.</small>
+                </span>
+              </div>
+            ) : null}
+            {!sessionNoteBacklogError && sessionNoteBacklog.map((item) => (
+              <Link key={`${item.campaignId}-${item.sessionId}`} to={`/campaigns/${item.campaignId}`} className="dashboardMaterialItem">
+                <span className="dashboardMaterialItem__icon"><DashboardIcon name="file" /></span>
+                <span>
+                  <strong>{item.sessionTitle || "Sesja"}</strong>
+                  <small>{item.campaignTitle || "Kampania"}</small>
+                  <small>{item.finishedAt ? getDateParts(item.finishedAt).time : "Brak daty zakończenia"}</small>
+                </span>
+                <span className="dashboardTag">Dodaj notatkę</span>
+              </Link>
+            ))}
           </div>
         </article>
 

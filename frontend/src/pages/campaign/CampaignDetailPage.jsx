@@ -13,7 +13,10 @@ import {
   listCampaignMembers,
   listCampaignMaterials,
   getCampaignPlayerNotes,
+  getMySessionNote,
   createCampaignPlayerNote,
+  saveMySessionNote,
+  deleteMySessionNote,
   updateCampaignPlayerNote,
   deleteCampaignPlayerNote,
   listCampaignSessions,
@@ -165,6 +168,23 @@ export default function CampaignDetailPage() {
     });
   }
 
+  async function handleGetMySessionNote(sessionId) {
+    try {
+      return await getMySessionNote(token, campaignId, sessionId);
+    } catch (err) {
+      if (err?.status === 404) return null;
+      throw err;
+    }
+  }
+
+  async function handleSaveMySessionNote(sessionId, payload) {
+    return saveMySessionNote(token, campaignId, sessionId, payload);
+  }
+
+  async function handleDeleteMySessionNote(sessionId) {
+    return deleteMySessionNote(token, campaignId, sessionId);
+  }
+
   return (
     <div className="page campaignDetailsPage">
       <div className="pageHeader">
@@ -221,6 +241,9 @@ export default function CampaignDetailPage() {
               onCreate={handleCreateSession}
               onStart={handleStartSession}
               onFinish={handleFinishSession}
+              onGetMySessionNote={handleGetMySessionNote}
+              onSaveMySessionNote={handleSaveMySessionNote}
+              onDeleteMySessionNote={handleDeleteMySessionNote}
             />
 
             <CampaignMaterialsPanel materials={materials} materialsAvailable />

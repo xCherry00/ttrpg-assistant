@@ -51,7 +51,9 @@ import pl.ttrpgassistant.backend.campaign.dto.UpdateSessionLiveStateRequest;
 import pl.ttrpgassistant.backend.campaign.dto.UpdateSessionAttendanceRequest;
 import pl.ttrpgassistant.backend.campaign.dto.SessionAttendanceSummaryResponse;
 import pl.ttrpgassistant.backend.campaign.dto.RequestedRollResponse;
+import pl.ttrpgassistant.backend.campaign.dto.SessionPlayerNoteResponse;
 import pl.ttrpgassistant.backend.campaign.dto.UpsertCampaignSessionNoteRequest;
+import pl.ttrpgassistant.backend.campaign.dto.UpsertSessionPlayerNoteRequest;
 import pl.ttrpgassistant.backend.campaign.dto.CreateCampaignPlayerNoteRequest;
 import pl.ttrpgassistant.backend.campaign.dto.UpdateCampaignPlayerNoteRequest;
 import pl.ttrpgassistant.backend.common.pagination.PagedResponse;
@@ -68,6 +70,7 @@ public class CampaignController {
     private final CampaignWorkspaceService campaignWorkspaceService;
     private final CampaignSessionAttendanceService campaignSessionAttendanceService;
     private final CampaignPlayerNoteService campaignPlayerNoteService;
+    private final SessionPlayerNoteService sessionPlayerNoteService;
     private final RequestedRollService requestedRollService;
     private final CampaignCharacterService campaignCharacterService;
     private final CombatEncounterService combatEncounterService;
@@ -332,6 +335,30 @@ public class CampaignController {
     ) {
         Long userId = (Long) auth.getPrincipal();
         return campaignWorkspaceService.upsertNote(userId, id, sessionId, request);
+    }
+
+    @GetMapping("/{id}/sessions/{sessionId}/notes/me")
+    public SessionPlayerNoteResponse getMySessionNote(Authentication auth, @PathVariable Long id, @PathVariable Long sessionId) {
+        Long userId = (Long) auth.getPrincipal();
+        return sessionPlayerNoteService.getMyNote(userId, id, sessionId);
+    }
+
+    @PutMapping("/{id}/sessions/{sessionId}/notes/me")
+    public SessionPlayerNoteResponse upsertMySessionNote(
+            Authentication auth,
+            @PathVariable Long id,
+            @PathVariable Long sessionId,
+            @Valid @RequestBody UpsertSessionPlayerNoteRequest request
+    ) {
+        Long userId = (Long) auth.getPrincipal();
+        return sessionPlayerNoteService.upsertMyNote(userId, id, sessionId, request);
+    }
+
+    @DeleteMapping("/{id}/sessions/{sessionId}/notes/me")
+    @ResponseStatus(NO_CONTENT)
+    public void deleteMySessionNote(Authentication auth, @PathVariable Long id, @PathVariable Long sessionId) {
+        Long userId = (Long) auth.getPrincipal();
+        sessionPlayerNoteService.deleteMyNote(userId, id, sessionId);
     }
 
     @GetMapping("/{id}/player-notes")
