@@ -62,7 +62,7 @@ export default function LiveInitiativePreviewPanel({
         <h2 className="campaignDetailsCardTitle">Initiative Preview</h2>
         {isOwner && (
           <Link className="campaignDetailsGhostBtn" to="/initiative">
-            Otworz pelny tracker inicjatywy
+            Otworz szybki tracker MG
           </Link>
         )}
       </div>
@@ -95,7 +95,7 @@ export default function LiveInitiativePreviewPanel({
         <p className="liveSessionPlaceholder">
           Brak aktywnego starcia dla tej sesji.
           {isOwner && encounters.length > 0 ? " Wybierz encounter z listy powyzej." : ""}
-          {isOwner && encounters.length === 0 ? " Najpierw utworz encounter w globalnym /initiative." : ""}
+          {isOwner && encounters.length === 0 ? " Globalny /initiative dziala jako szybki lokalny tracker i nie zapisuje encounterow kampanijnych." : ""}
         </p>
       )}
 

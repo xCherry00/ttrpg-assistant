@@ -1,6 +1,6 @@
 # Live Session Workspace Architecture (v0.6.9 Live State + Scene Panel)
 
-## 0. Current Implementation Status (updated through v0.7.6)
+## 0. Current Implementation Status (updated through v0.7.5)
 
 - Route implemented: `/campaigns/:campaignId/sessions/:sessionId/live`.
 - LiveSessionPage implemented with:
@@ -8,12 +8,16 @@
   - party/players list based on campaign characters,
   - role-sensitive MVP split (GM/owner vs member/player),
   - session roll history preview (best-effort read),
-  - embedded Requested Rolls and embedded Initiative Preview.
+  - embedded Requested Rolls.
 - Scene Panel is now connected to persisted `session_live_state`:
   - owner can edit `sceneTitle`, `sceneImageUrl`, `sceneDescription`,
   - member sees read-only scene content.
 - Scene image in MVP is URL/data-url only (no upload pipeline).
-- `/dice` and `/initiative` remain global tools and are not replaced.
+- `/dice` remains a global roller.
+- `/initiative` is a quick local GM tracker stored in browser localStorage; it does not create or persist campaign encounters.
+- Initiative preview is disabled in LiveSessionPage for MVP.
+- Backend combat encounter endpoints remain legacy/future API for campaign/live-session flows.
+- v0.7.6 tracker improvements apply only to standalone `/initiative` page and do not re-enable live-session initiative preview.
 - No WebSockets/SSE in this stage.
 - Requested-roll persistence is implemented (`requested_rolls` + `dice_rolls` integration).
 
@@ -35,7 +39,8 @@
 ### InitiativePage
 - Global GM/off-session tool available from anywhere in the app.
 - Useful for in-person sessions or fast combat handling outside live room UX.
-- Full persistent encounter tracker: queue, HP/states, participant mutations, encounter controls.
+- Quick local combat tracker in browser storage (no campaign/session assignment, no backend encounter persistence).
+- Not a source for LiveSession active encounters in current MVP.
 - Not a player-facing active-session screen.
 
 ### LiveSessionPage
@@ -66,7 +71,8 @@
 - Keep `/campaigns/:campaignId` as primary campaign workspace.
 - Keep `/initiative` and `/dice` as independent specialist tools.
 - Do not remove existing routes; extend navigation progressively.
-- `/dice` and `/initiative` remain global tools.
+- `/dice` remains a global tool.
+- `/initiative` remains a quick local tracker, separate from campaign encounter persistence.
 - Campaign dashboard must not duplicate global tools links from sidebar.
 - `/campaigns/:campaignId/sessions/:sessionId/live` is the primary active-session workspace.
 - LiveSessionPage may provide links to full tools, but base rolls, requested rolls, and initiative preview must work inline on the same page.
@@ -81,11 +87,8 @@
 - Player visibility remains policy-based (only what should be visible).
 
 ### Embedded Initiative Preview
-- Data source: `combat_encounters` and `combat_participants`.
-- GM sees full queue and encounter context.
-- Player sees current participant plus next 1/2 participants.
-- Player mode is read-only.
-- No forced navigation to `/initiative` for basic live-session awareness.
+- Disabled in current MVP.
+- Reserved as future/legacy architecture direction only.
 
 ### Embedded Scene Panel
 - GM sets/updates active scene image.
@@ -174,7 +177,7 @@ No schema migration is introduced in v0.6.6; this section is design-only.
 4. Requested rolls embedded panel.
 5. Embedded live initiative preview.
 6. DicePage persistent campaign mode as independent global tool.
-7. Optional links from LiveSessionPage to full DicePage/InitiativePage tools.
+7. Optional links from LiveSessionPage to standalone DicePage/quick InitiativePage tools.
 
 ## 10. MVP Constraints
 
@@ -234,33 +237,9 @@ No schema migration is introduced in v0.6.6; this section is design-only.
 - Character/system-specific modifiers are MVP/fallback based (future stage for deeper CoC/system rollers).
 
 
-## Update v0.7.6 - Embedded Live Initiative Preview
+## Update v0.7.5 - Initiative Removed From Live Session
 
-- Embedded initiative preview is now implemented directly in `LiveSessionPage`.
-- Binding source remains existing `session_live_state.activeEncounterId`.
-- No new backend endpoints are required for MVP preview.
-- `PLANNED` session: initiative preview locked (not started message).
-- `IN_PROGRESS` session: preview active.
-- `FINISHED` session: read-only ended preview state.
-
-Visibility policy:
-
-- GM/owner:
-  - full queue preview,
-  - encounter status + current participant,
-  - round number,
-  - HP/current/max/temp,
-  - conditions + defeated state,
-  - optional link to full `/initiative` tracker.
-- Member/player:
-  - read-only subset only,
-  - current participant + next 1-2,
-  - participant type/allegiance badges,
-  - no HP details,
-  - no turn controls/damage/heal.
-
-Scope boundaries preserved:
-
-- `/initiative` stays the full global combat manager.
-- LiveSession embedded preview is contextual and lightweight.
-- No WebSockets, no redesign, no full combat manager inside `LiveSessionPage`.
+- Initiative preview was removed from `LiveSessionPage` in MVP scope.
+- `/initiative` is a standalone local GM tracker (`localStorage` only).
+- No encounter linking, no campaign/session assignment, and no backend persistence in `/initiative`.
+- Existing backend encounter endpoints remain untouched for future work.

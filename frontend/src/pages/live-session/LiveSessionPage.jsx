@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 import {
@@ -14,11 +14,8 @@ import {
   fulfillRequestedRoll,
   cancelRequestedRoll,
   updateSessionLiveState,
-  getCampaignEncounters,
-  getEncounter,
 } from "../../api/campaigns";
 import "../../styles/live-session.css";
-import LiveInitiativePreviewPanel from "./components/LiveInitiativePreviewPanel";
 
 function sessionStatusLabel(status) {
   if (status === "IN_PROGRESS") return "IN_PROGRESS";
@@ -49,9 +46,6 @@ export default function LiveSessionPage() {
   const [sessionActionBusy, setSessionActionBusy] = useState(false);
   const [requestedRolls, setRequestedRolls] = useState([]);
   const [requestedActionBusy, setRequestedActionBusy] = useState(false);
-  const [encounters, setEncounters] = useState([]);
-  const [activeEncounter, setActiveEncounter] = useState(null);
-  const [initiativeLoading, setInitiativeLoading] = useState(false);
 
   const isGmView = Boolean(campaign?.owner);
 
@@ -65,14 +59,13 @@ export default function LiveSessionPage() {
       setLoading(true);
       setError("");
       try {
-        const [campaignData, sessionsData, campaignCharactersData, rollsData, liveStateData, requestedRollsData, encountersData] = await Promise.all([
+        const [campaignData, sessionsData, campaignCharactersData, rollsData, liveStateData, requestedRollsData] = await Promise.all([
           getCampaignById(token, campaignId),
           listCampaignSessions(token, campaignId),
           getCampaignCharacters(token, campaignId),
           getCampaignDiceRolls(token, campaignId, { sessionId, limit: 10 }).catch(() => []),
           getSessionLiveState(token, campaignId, sessionId).catch(() => null),
           getRequestedRolls(token, campaignId, sessionId).catch(() => []),
-          getCampaignEncounters(token, campaignId).catch(() => []),
         ]);
         const resolvedSession = Array.isArray(sessionsData)
           ? sessionsData.find((item) => String(item.id) === String(sessionId)) || null
@@ -83,20 +76,6 @@ export default function LiveSessionPage() {
         setRecentRolls(Array.isArray(rollsData) ? rollsData : []);
         setLiveState(liveStateData);
         setRequestedRolls(Array.isArray(requestedRollsData) ? requestedRollsData : []);
-        setEncounters(Array.isArray(encountersData) ? encountersData : []);
-        if (liveStateData?.activeEncounterId) {
-          setInitiativeLoading(true);
-          try {
-            const details = await getEncounter(token, campaignId, liveStateData.activeEncounterId);
-            setActiveEncounter(details || null);
-          } catch {
-            setActiveEncounter(null);
-          } finally {
-            setInitiativeLoading(false);
-          }
-        } else {
-          setActiveEncounter(null);
-        }
       } catch (err) {
         setError(err?.message || "Nie udalo sie zaladowac live session.");
       } finally {
@@ -108,12 +87,11 @@ export default function LiveSessionPage() {
   }, [token, campaignId, sessionId]);
 
   async function reloadSessionData() {
-    const [sessionsData, requested, rollsData, liveStateData, encountersData] = await Promise.all([
+    const [sessionsData, requested, rollsData, liveStateData] = await Promise.all([
       listCampaignSessions(token, campaignId),
       getRequestedRolls(token, campaignId, sessionId).catch(() => []),
       getCampaignDiceRolls(token, campaignId, { sessionId, limit: 10 }).catch(() => []),
       getSessionLiveState(token, campaignId, sessionId).catch(() => null),
-      getCampaignEncounters(token, campaignId).catch(() => []),
     ]);
 
     const resolvedSession = Array.isArray(sessionsData)
@@ -123,24 +101,6 @@ export default function LiveSessionPage() {
     setRequestedRolls(Array.isArray(requested) ? requested : []);
     setRecentRolls(Array.isArray(rollsData) ? rollsData : []);
     setLiveState(liveStateData || null);
-    setEncounters(Array.isArray(encountersData) ? encountersData : []);
-    await loadActiveEncounterById(liveStateData?.activeEncounterId || null);
-  }
-
-  async function loadActiveEncounterById(encounterId) {
-    if (!encounterId) {
-      setActiveEncounter(null);
-      return;
-    }
-    setInitiativeLoading(true);
-    try {
-      const details = await getEncounter(token, campaignId, encounterId);
-      setActiveEncounter(details || null);
-    } catch {
-      setActiveEncounter(null);
-    } finally {
-      setInitiativeLoading(false);
-    }
   }
 
   async function handleStartSession() {
@@ -150,7 +110,7 @@ export default function LiveSessionPage() {
     try {
       await startCampaignSession(token, campaignId, sessionId);
       await reloadSessionData();
-      setNotice("Session started.");
+      setNotice("Sesja rozpoczeta.");
     } catch (err) {
       setError(err?.message || "Nie udalo sie rozpoczac sesji.");
     } finally {
@@ -165,7 +125,7 @@ export default function LiveSessionPage() {
     try {
       await finishCampaignSession(token, campaignId, sessionId);
       await reloadSessionData();
-      setNotice("Session finished.");
+      setNotice("Sesja zakonczona.");
     } catch (err) {
       setError(err?.message || "Nie udalo sie zakonczyc sesji.");
     } finally {
@@ -244,25 +204,6 @@ export default function LiveSessionPage() {
     }
   }
 
-  async function handleSelectActiveEncounter(encounterIdOrNull) {
-    if (!isGmView) return;
-    setError("");
-    setNotice("");
-    try {
-      const updated = await updateSessionLiveState(token, campaignId, sessionId, {
-        sceneTitle: liveState?.sceneTitle || "",
-        sceneImageUrl: liveState?.sceneImageUrl || "",
-        sceneDescription: liveState?.sceneDescription || "",
-        activeEncounterId: encounterIdOrNull,
-      });
-      setLiveState(updated || null);
-      await loadActiveEncounterById(updated?.activeEncounterId || null);
-      setNotice("Active encounter updated.");
-    } catch (err) {
-      setError(err?.message || "Nie udalo sie ustawic aktywnego encountera.");
-    }
-  }
-
   return (
     <div className="page liveSessionPage">
       <div className="pageHeader">
@@ -274,10 +215,10 @@ export default function LiveSessionPage() {
           </p>
           {isPlanned && (
             <p className="campaignDetailsEmpty">
-              {isGmView ? "Session has not started yet." : "Session has not started yet."}
+              Sesja nie zostala jeszcze rozpoczeta.
             </p>
           )}
-          {isFinished && <p className="campaignDetailsEmpty">Session ended. Read-only view.</p>}
+          {isFinished && <p className="campaignDetailsEmpty">Sesja zakonczona. Widok tylko do odczytu.</p>}
         </div>
         <div>
           <Link className="campaignDetailsGhostBtn" to={`/campaigns/${campaignId}`}>
@@ -325,7 +266,7 @@ export default function LiveSessionPage() {
                           alt={`Portrait: ${character.characterName || "character"}`}
                         />
                       ) : (
-                        <div className="liveSessionPortraitPlaceholder">No portrait</div>
+                        <div className="liveSessionPortraitPlaceholder">Brak portretu</div>
                       )}
                     </div>
                   </article>
@@ -346,7 +287,7 @@ export default function LiveSessionPage() {
                     sceneTitle: String(formData.get("sceneTitle") || "").trim(),
                     sceneImageUrl: String(formData.get("sceneImageUrl") || "").trim(),
                     sceneDescription: String(formData.get("sceneDescription") || "").trim(),
-                    activeEncounterId: liveState?.activeEncounterId || null,
+                    activeEncounterId: null,
                   };
                   setSavingScene(true);
                   setNotice("");
@@ -354,7 +295,7 @@ export default function LiveSessionPage() {
                   try {
                     const updated = await updateSessionLiveState(token, campaignId, sessionId, payload);
                     setLiveState(updated);
-                    setNotice("Scene saved.");
+                    setNotice("Scena zapisana.");
                   } catch (err) {
                     setError(err?.message || "Nie udalo sie zapisac sceny.");
                   } finally {
@@ -363,30 +304,30 @@ export default function LiveSessionPage() {
                 }}
               >
                 <label className="campaignField">
-                  <span>Scene title</span>
+                  <span>Tytul sceny</span>
                   <input name="sceneTitle" defaultValue={liveState?.sceneTitle || ""} maxLength={160} />
                 </label>
                 <label className="campaignField">
-                  <span>Scene image URL</span>
+                  <span>URL obrazu sceny</span>
                   <input name="sceneImageUrl" defaultValue={liveState?.sceneImageUrl || ""} />
                 </label>
                 <label className="campaignField">
-                  <span>Scene description</span>
+                  <span>Opis sceny</span>
                   <textarea name="sceneDescription" defaultValue={liveState?.sceneDescription || ""} rows={4} maxLength={5000} />
                 </label>
                 <button type="submit" className="campaignDetailsPrimaryBtn" disabled={savingScene}>
-                  Save scene
+                  Zapisz scene
                 </button>
               </form>
             ) : (
               <div className="liveSessionSceneReadonly">
-                <h3>{liveState?.sceneTitle || "Scene title not set"}</h3>
+                <h3>{liveState?.sceneTitle || "Tytul sceny nie jest ustawiony"}</h3>
                 {liveState?.sceneImageUrl ? (
                   <img src={liveState.sceneImageUrl} alt={liveState.sceneTitle || "Scene image"} className="liveSessionSceneImage" />
                 ) : (
-                  <div className="liveSessionSceneImagePlaceholder">No scene image yet</div>
+                  <div className="liveSessionSceneImagePlaceholder">Brak obrazu sceny</div>
                 )}
-                <p>{liveState?.sceneDescription || "Scene description is not available yet."}</p>
+                <p>{liveState?.sceneDescription || "Opis sceny nie jest jeszcze dostepny."}</p>
               </div>
             )}
           </section>
@@ -397,18 +338,18 @@ export default function LiveSessionPage() {
             {isFinished && <p className="liveSessionPlaceholder">Sesja zakonczona. Requested rolls w trybie read-only.</p>}
             {isInProgress && isGmView && (
               <form className="campaignFormCard" onSubmit={handleCreateRequestedRoll}>
-                <label className="campaignField"><span>Target mode</span><select name="targetMode" defaultValue="ALL"><option value="ALL">ALL</option><option value="CHARACTER">CHARACTER</option><option value="USER">USER</option></select></label>
-                <label className="campaignField"><span>Target character IDs (comma)</span><input name="targetCharacterIds" placeholder="1,2,3" /></label>
-                <label className="campaignField"><span>Target user IDs (comma)</span><input name="targetUserIds" placeholder="10,11" /></label>
-                <label className="campaignField"><span>Label</span><input name="rollLabel" maxLength={160} required /></label>
-                <label className="campaignField"><span>Roll type</span><input name="rollType" defaultValue="SKILL" maxLength={40} /></label>
-                <label className="campaignField"><span>Roll expression</span><input name="rollExpression" defaultValue={campaign?.systemCode === "dnd5e" ? "1d20" : ""} maxLength={120} /></label>
+                <label className="campaignField"><span>Tryb celu</span><select name="targetMode" defaultValue="ALL"><option value="ALL">ALL</option><option value="CHARACTER">CHARACTER</option><option value="USER">USER</option></select></label>
+                <label className="campaignField"><span>ID postaci celu (po przecinku)</span><input name="targetCharacterIds" placeholder="1,2,3" /></label>
+                <label className="campaignField"><span>ID uzytkownikow celu (po przecinku)</span><input name="targetUserIds" placeholder="10,11" /></label>
+                <label className="campaignField"><span>Etykieta</span><input name="rollLabel" maxLength={160} required /></label>
+                <label className="campaignField"><span>Typ rzutu</span><input name="rollType" defaultValue="SKILL" maxLength={40} /></label>
+                <label className="campaignField"><span>Wyrazenie rzutu</span><input name="rollExpression" defaultValue={campaign?.systemCode === "dnd5e" ? "1d20" : ""} maxLength={120} /></label>
                 <label className="campaignField"><span>Ability key</span><input name="abilityKey" maxLength={80} /></label>
                 <label className="campaignField"><span>Skill key</span><input name="skillKey" maxLength={80} /></label>
                 <label className="campaignField"><span>DC</span><input name="dc" type="number" min="0" /></label>
-                <label className="campaignField"><span><input name="isDcHidden" type="checkbox" defaultChecked /> Hide DC</span></label>
-                <label className="campaignField"><span><input name="showSuccessToPlayer" type="checkbox" /> Show success to player</span></label>
-                <button className="campaignDetailsPrimaryBtn" type="submit" disabled={requestedActionBusy}>Create requested roll</button>
+                <label className="campaignField"><span><input name="isDcHidden" type="checkbox" defaultChecked /> Ukryj DC</span></label>
+                <label className="campaignField"><span><input name="showSuccessToPlayer" type="checkbox" /> Pokaz sukces graczowi</span></label>
+                <button className="campaignDetailsPrimaryBtn" type="submit" disabled={requestedActionBusy}>Utworz requested roll</button>
               </form>
             )}
             <div className="campaignMaterialList">
@@ -423,10 +364,10 @@ export default function LiveSessionPage() {
                   {roll.dcVisible && roll.dc != null && <p>DC: {roll.dc}</p>}
                   {roll.resultTotal != null && <p>Result: {roll.resultTotal}{roll.success != null ? ` (${roll.success ? "SUCCESS" : "FAIL"})` : ""}</p>}
                   {isInProgress && !isGmView && roll.status === "PENDING" && (
-                    <button className="campaignDetailsPrimaryBtn" type="button" disabled={requestedActionBusy} onClick={() => handleFulfillRequestedRoll(roll.id)}>🎲 Roll</button>
+                    <button className="campaignDetailsPrimaryBtn" type="button" disabled={requestedActionBusy} onClick={() => handleFulfillRequestedRoll(roll.id)}>Wykonaj rzut</button>
                   )}
                   {isInProgress && isGmView && roll.status === "PENDING" && (
-                    <button className="campaignDetailsDangerBtn" type="button" disabled={requestedActionBusy} onClick={() => handleCancelRequestedRoll(roll.id)}>Cancel</button>
+                    <button className="campaignDetailsDangerBtn" type="button" disabled={requestedActionBusy} onClick={() => handleCancelRequestedRoll(roll.id)}>Anuluj</button>
                   )}
                 </article>
               ))}
@@ -434,20 +375,10 @@ export default function LiveSessionPage() {
             </div>
           </section>
 
-          <LiveInitiativePreviewPanel
-            sessionStatus={session?.status}
-            isOwner={isGmView}
-            liveState={liveState}
-            encounter={activeEncounter}
-            encounters={encounters}
-            onSelectActiveEncounter={handleSelectActiveEncounter}
-            loading={initiativeLoading}
-          />
-
           <section className="campaignDetailsCard panel-soft">
             <h2 className="campaignDetailsCardTitle">Session Roll History</h2>
             {recentRolls.length === 0 ? (
-              <p className="liveSessionPlaceholder">No session rolls yet or history preview not available.</p>
+              <p className="liveSessionPlaceholder">Brak rzutow sesji albo podglad historii jest niedostepny.</p>
             ) : (
               <ul className="liveSessionRollHistoryList">
                 {recentRolls.map((roll) => (
@@ -460,11 +391,11 @@ export default function LiveSessionPage() {
           </section>
 
           <section className="campaignDetailsCard panel-soft">
-            <h2 className="campaignDetailsCardTitle">Role View</h2>
+            <h2 className="campaignDetailsCardTitle">Widok roli</h2>
             {isGmView ? (
-              <p className="liveSessionPlaceholder">GM view: zarzadzanie scena, requested rolls i podgladem inicjatywy.</p>
+              <p className="liveSessionPlaceholder">Widok MG: zarzadzanie scena i requested rolls.</p>
             ) : (
-              <p className="liveSessionPlaceholder">Player view: tylko akcje przypisane do gracza i read-only podglad sesji.</p>
+              <p className="liveSessionPlaceholder">Widok gracza: tylko akcje przypisane do gracza i read-only podglad sesji.</p>
             )}
           </section>
         </div>

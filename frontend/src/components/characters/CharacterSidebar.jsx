@@ -10,7 +10,6 @@ export default function CharacterSidebar({
   selectedId,
   onSelect,
   onCreate,
-  onDownloadPdf,
 }) {
   const [query, setQuery] = useState("");
   const filtered = useMemo(() => {
@@ -53,14 +52,6 @@ export default function CharacterSidebar({
               <div>{item.systemCode?.toUpperCase() || "SYSTEM"}</div>
               <div>{item.raceName || "-"} / {item.className || "-"}</div>
               <div>Poziom {item.level ?? 1}</div>
-            </button>
-            <button
-              type="button"
-              className="charactersGhostBtn"
-              disabled={!item.id}
-              onClick={() => onDownloadPdf?.(item.id)}
-            >
-              Pobierz PDF
             </button>
           </div>
         ))}

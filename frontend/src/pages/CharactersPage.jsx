@@ -6,7 +6,6 @@ import {
   listCharacters,
   quickCreateCharacter,
   quickCreateCocCharacter,
-  downloadCharacterSheetPdf,
   updateCharacterSheet,
 } from "../api/characters";
 import CharacterCreatorRouter from "../components/characters/CharacterCreatorRouter";
@@ -152,21 +151,6 @@ export default function CharactersPage() {
     }
   }
 
-  async function onDownloadPdf(characterId = detail?.id) {
-    if (!characterId) {
-      showNotice("error", "Brak ID postaci.");
-      return;
-    }
-    try {
-      await downloadCharacterSheetPdf(token, characterId);
-      showNotice("success", "Pobrano karte PDF.");
-    } catch (err) {
-      const message = err?.message || "Nie udalo sie pobrac PDF.";
-      setError(message);
-      showNotice("error", message);
-    }
-  }
-
   function openCreateFlow() {
     setError("");
     setSelectedCreationSystem(null);
@@ -190,7 +174,7 @@ export default function CharactersPage() {
         <div>
           <span className="pageEyebrow">bohaterowie</span>
           <h1 className="pageTitle">Postacie</h1>
-          <p className="pageSubtitle">MVP quick creator D&D 5e.</p>
+          <p className="pageSubtitle">Tworzenie i zarzadzanie postaciami do wspieranych systemow.</p>
         </div>
         <button type="button" className="charactersPrimaryBtn" onClick={openCreateFlow}>+ Nowa postac</button>
       </div>
@@ -207,7 +191,6 @@ export default function CharactersPage() {
             selectedId={selectedId}
             onSelect={setSelectedId}
             onCreate={openCreateFlow}
-            onDownloadPdf={onDownloadPdf}
           />
 
           <section className="charactersDetail">
@@ -255,9 +238,6 @@ export default function CharactersPage() {
                   </div>
                 )}
                 <div className="charactersActionsFooter">
-                  <button type="button" className="charactersPrimaryBtn" disabled={!detail?.id} onClick={() => onDownloadPdf()}>
-                    Pobierz karte PDF
-                  </button>
                   <button type="button" className="charactersDangerBtn" disabled={deleting} onClick={() => setConfirmDeleteOpen(true)}>Usun postac</button>
                 </div>
               </>

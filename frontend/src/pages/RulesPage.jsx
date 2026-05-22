@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { BASIC_RULES, BASIC_RULES_BY_API_CODE, STATUS_LABELS } from "../data/basicRules";
+import { RULES_STARTER_RESOURCES } from "../data/rulesResources";
 import "../styles/rules.css";
 
 const SECTION_DEFS = [
@@ -35,6 +36,7 @@ export default function RulesPage() {
   }, [selectedSystem]);
 
   const statusLabel = STATUS_LABELS[selectedProfile.legalStatus] || selectedProfile.legalStatus;
+  const starterResources = [...(RULES_STARTER_RESOURCES[selectedSystem] || [])].sort((a, b) => (a.priority || 999) - (b.priority || 999));
 
   return (
     <div className="page rulesPage">
@@ -95,6 +97,36 @@ export default function RulesPage() {
           </div>
 
           <div className="rulesSource">{selectedProfile.legalNote}</div>
+
+          <h3 className="rulesSystemTitle">Oficjalne materialy startowe</h3>
+          {selectedSystem === "wh4e" && (
+            <p className="rulesSummary">
+              Dla WFRP 4e nie dodano pelnego darmowego SRD. Ponizsze linki prowadza do oficjalnych darmowych materialow pomocniczych.
+            </p>
+          )}
+          <section className="rulesCards" aria-label="Starter resources">
+            {starterResources.map((resource) => (
+              <article className="rulesCard is-open" key={resource.url}>
+                <div className="rulesCardHeader">
+                  <span className="rulesCardTitle">{resource.label}</span>
+                  <span className="rulesCategoryBadge">{resource.type}</span>
+                </div>
+                <div className="rulesCardBody">
+                  <p className="rulesSummary"><strong>Zrodlo:</strong> {resource.sourceName}</p>
+                  <p className="rulesSummary">{resource.description}</p>
+                  <p className="rulesSummary"><strong>Uwagi:</strong> {resource.usageNote}</p>
+                  <a
+                    className="rulesExpandAllBtn"
+                    href={resource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {String(resource.type).includes("pdf") ? "Pobierz / otworz PDF" : "Otworz zrodlo"}
+                  </a>
+                </div>
+              </article>
+            ))}
+          </section>
         </div>
       </div>
     </div>

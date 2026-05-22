@@ -1,105 +1,204 @@
-import { render, screen, waitFor } from "@testing-library/react";
+﻿import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import InitiativePage from "../../../pages/initiative/InitiativePage";
-import * as campaignsApi from "../../../api/campaigns";
+import * as initiativeApi from "../../../api/initiative";
+
+const STORAGE_KEY = "ttrpg.quickInitiativeTracker";
 
 vi.mock("../../../auth/AuthContext", () => ({
   useAuth: () => ({ token: "test-token" }),
 }));
 
-vi.mock("../../../api/campaigns", () => ({
-  listCampaigns: vi.fn(),
-  createEncounter: vi.fn(),
-  getCampaignEncounters: vi.fn(),
-  getCampaignCharacters: vi.fn(),
-  getCampaignDiceRolls: vi.fn(),
-  addEncounterParticipant: vi.fn(),
-  applyParticipantDamage: vi.fn(),
-  healParticipant: vi.fn(),
-  setParticipantTemporaryHp: vi.fn(),
-  setParticipantConditions: vi.fn(),
-  defeatParticipant: vi.fn(),
-  restoreParticipant: vi.fn(),
-  removeEncounterParticipant: vi.fn(),
-  nextEncounterTurn: vi.fn(),
-  previousEncounterTurn: vi.fn(),
-  finishEncounter: vi.fn(),
-  deleteEncounter: vi.fn(),
-  createDiceRoll: vi.fn(),
+vi.mock("../../../api/initiative", () => ({
+  getDndConditions: vi.fn(),
+  searchDndMonsters: vi.fn(),
+  getDndMonsterDetails: vi.fn(),
 }));
 
-describe("InitiativePage smoke", () => {
+async function openCustomModalAndAdd({ name = "Hero", initiative = "15", ac = "16", hp = "20", maxHp = "20", mod = "2" } = {}) {
+  fireEvent.click(screen.getByRole("button", { name: "Dodaj uczestnika" }));
+  const dialog = screen.getByRole("dialog");
+  expect(dialog).toBeInTheDocument();
+  fireEvent.change(within(dialog).getByLabelText("Nazwa uczestnika"), { target: { value: name } });
+  fireEvent.change(within(dialog).getByLabelText("Modyfikator inicjatywy"), { target: { value: mod } });
+  fireEvent.change(within(dialog).getByLabelText("Inicjatywa"), { target: { value: initiative } });
+  fireEvent.change(within(dialog).getByLabelText("AC"), { target: { value: ac } });
+  fireEvent.change(within(dialog).getByLabelText("HP"), { target: { value: hp } });
+  fireEvent.change(within(dialog).getByLabelText("Max HP"), { target: { value: maxHp } });
+  fireEvent.click(within(dialog).getByRole("button", { name: "Dodaj do walki" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+}
+
+describe("InitiativePage DnD tracker v0.7.6", () => {
   beforeEach(() => {
-    Object.values(campaignsApi).forEach((fn) => {
-      if (typeof fn === "function" && "mockReset" in fn) fn.mockReset();
-    });
-    campaignsApi.getCampaignCharacters.mockResolvedValue([]);
-    campaignsApi.getCampaignDiceRolls.mockResolvedValue([]);
+    window.localStorage.clear();
+    initiativeApi.getDndConditions.mockResolvedValue([{ index: "blinded", name: "Blinded", url: "/x" }]);
+    initiativeApi.searchDndMonsters.mockResolvedValue([]);
+    initiativeApi.getDndMonsterDetails.mockResolvedValue(null);
   });
 
-  it("renders loading state while campaigns are fetched", () => {
-    campaignsApi.listCampaigns.mockReturnValue(new Promise(() => {}));
+  it("opens add participant modal", async () => {
     render(<InitiativePage />);
-    expect(screen.getByText("Ladowanie kampanii...")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Dodaj uczestnika" }));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByLabelText("Pula potworow")).toBeInTheDocument();
   });
 
-  it("shows empty state when campaign has no encounters", async () => {
-    campaignsApi.listCampaigns.mockResolvedValue([{ id: 1, title: "Campaign A" }]);
-    campaignsApi.getCampaignEncounters.mockResolvedValue([]);
+  it("adds custom participant via modal", async () => {
+    render(<InitiativePage />);
+    await openCustomModalAndAdd({ name: "Rogue", initiative: "17", ac: "15", hp: "14", maxHp: "14", mod: "3" });
+    expect(screen.getByText("Rogue")).toBeInTheDocument();
+    expect(screen.getByText("14 / 14")).toBeInTheDocument();
+  });
+
+  it("searches monster and adds it with mapped stats", async () => {
+    initiativeApi.searchDndMonsters.mockResolvedValue([{ index: "goblin", name: "Goblin", url: "/api/2014/monsters/goblin" }]);
+    initiativeApi.getDndMonsterDetails.mockResolvedValue({
+      index: "goblin",
+      name: "Goblin",
+      armorClass: 15,
+      hitPoints: 7,
+      dexterity: 14,
+      initiativeModifier: 2,
+      challengeRating: 0.25,
+      type: "humanoid",
+    });
 
     render(<InitiativePage />);
+    fireEvent.click(screen.getByRole("button", { name: "Dodaj uczestnika" }));
+    await waitFor(() => expect(initiativeApi.searchDndMonsters).toHaveBeenCalledWith("test-token", ""));
+    fireEvent.change(screen.getByLabelText("Pula potworow"), { target: { value: "goblin" } });
+    await waitFor(() => expect(initiativeApi.getDndMonsterDetails).toHaveBeenCalledWith("test-token", "goblin"));
+    fireEvent.click(screen.getByRole("button", { name: "Dodaj do walki" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
 
-    await waitFor(() => {
-      expect(screen.getByText("Brak encounterow")).toBeInTheDocument();
-    });
+    expect(screen.getByText("Goblin")).toBeInTheDocument();
+    expect(screen.getByText("15")).toBeInTheDocument();
+    expect(screen.getByText("7 / 7")).toBeInTheDocument();
+    expect(screen.getByText(/mod \+2/)).toBeInTheDocument();
   });
 
-  it("shows participants when encounter is returned", async () => {
-    campaignsApi.listCampaigns.mockResolvedValue([{ id: 1, title: "Campaign A" }]);
-    campaignsApi.getCampaignEncounters.mockResolvedValue([
-      {
-        id: 99,
-        name: "Ruins Fight",
-        status: "ACTIVE",
-        roundNumber: 2,
-        currentParticipantId: 501,
-        participants: [
-          {
-            id: 501,
-            name: "Hero",
-            participantType: "PLAYER_CHARACTER",
-            initiativeValue: 15,
-            initiativeModifier: 2,
-            isActive: true,
-            isDefeated: false,
-            currentHp: 18,
-            maxHp: 20,
-            tempHp: 0,
-            armorClass: 16,
-            conditions: "",
-          },
-        ],
-      },
+  it("loads conditions from API and can add condition", async () => {
+    initiativeApi.getDndConditions.mockResolvedValue([
+      { index: "blinded", name: "Blinded", url: "/x" },
+      { index: "stunned", name: "Stunned", url: "/x" },
     ]);
-
     render(<InitiativePage />);
+    await openCustomModalAndAdd({ name: "Hero" });
 
+    const select = screen.getByLabelText("Stan Hero");
+    fireEvent.change(select, { target: { value: "Stunned" } });
+    fireEvent.click(screen.getByRole("button", { name: "Dodaj stan" }));
+
+    expect(screen.getByRole("button", { name: "Stunned x" })).toBeInTheDocument();
+  });
+
+  it("uses fallback conditions when API fails", async () => {
+    initiativeApi.getDndConditions.mockRejectedValue(new Error("fail"));
+    render(<InitiativePage />);
     await waitFor(() => {
-      expect(screen.getByText("Hero")).toBeInTheDocument();
-      expect(screen.getByText(/Encounter: Ruins Fight/)).toBeInTheDocument();
+      expect(screen.getByText(/Uzyto listy lokalnej/)).toBeInTheDocument();
     });
   });
 
-  it("renders MG global tool description and no live-prep placeholder text", async () => {
-    campaignsApi.listCampaigns.mockResolvedValue([{ id: 1, title: "Campaign A" }]);
-    campaignsApi.getCampaignEncounters.mockResolvedValue([]);
+  it("rolls initiative as d20 + modifier and locks button", async () => {
+    const randomSpy = vi.spyOn(Math, "random")
+      .mockReturnValueOnce(0.0)
+      .mockReturnValueOnce(0.5);
 
     render(<InitiativePage />);
+    await openCustomModalAndAdd({ name: "A", mod: "2", initiative: "" });
+    await openCustomModalAndAdd({ name: "B", mod: "1", initiative: "" });
 
-    await waitFor(() => {
-      expect(screen.getByText(/Globalne narzedzie MG do prowadzenia walki/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Losuj inicjatywe" }));
+
+    expect(screen.getByText(/Inicjatywa zostala wylosowana/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Losuj inicjatywe" })).toBeDisabled();
+
+    const rows = screen.getAllByRole("row");
+    expect(rows[1]).toHaveTextContent("B");
+
+    randomSpy.mockRestore();
+  });
+
+  it("end combat unlocks initiative roll", async () => {
+    const randomSpy = vi.spyOn(Math, "random").mockReturnValue(0.1);
+    render(<InitiativePage />);
+    await openCustomModalAndAdd({ name: "A", mod: "1", initiative: "" });
+    fireEvent.click(screen.getByRole("button", { name: "Losuj inicjatywe" }));
+    expect(screen.getByRole("button", { name: "Losuj inicjatywe" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "Zakoncz walke" }));
+    expect(screen.getByRole("button", { name: "Losuj inicjatywe" })).not.toBeDisabled();
+    randomSpy.mockRestore();
+  });
+
+  it("sorts participants by initiative", async () => {
+    render(<InitiativePage />);
+    await openCustomModalAndAdd({ name: "Low", initiative: "10", mod: "0" });
+    await openCustomModalAndAdd({ name: "High", initiative: "18", mod: "0" });
+    fireEvent.click(screen.getByRole("button", { name: "Sortuj po inicjatywie" }));
+    const rows = screen.getAllByRole("row");
+    expect(rows[1]).toHaveTextContent("High");
+    expect(rows[2]).toHaveTextContent("Low");
+  });
+
+  it("moves participant up/down manually", async () => {
+    render(<InitiativePage />);
+    await openCustomModalAndAdd({ name: "First", initiative: "10" });
+    await openCustomModalAndAdd({ name: "Second", initiative: "10" });
+
+    let rows = screen.getAllByRole("row");
+    expect(rows[1]).toHaveTextContent("First");
+
+    const secondRow = rows[2];
+    const firstRow = rows[1];
+    fireEvent.dragStart(secondRow);
+    fireEvent.dragOver(firstRow);
+    fireEvent.drop(firstRow);
+
+    rows = screen.getAllByRole("row");
+    expect(rows[1]).toHaveTextContent("Second");
+  });
+
+  it("damage/heal/set HP works", async () => {
+    render(<InitiativePage />);
+    await openCustomModalAndAdd({ name: "Tank", hp: "20", maxHp: "20" });
+
+    fireEvent.change(screen.getByLabelText("Amount Tank"), { target: { value: "5" } });
+    fireEvent.click(screen.getByRole("button", { name: "Obrazenia" }));
+    expect(screen.getByText("15 / 20")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Leczenie" }));
+    expect(screen.getByText("20 / 20")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Set HP Tank"), { target: { value: "3" } });
+    fireEvent.click(screen.getByRole("button", { name: "Ustaw HP" }));
+    expect(screen.getByText("3 / 20")).toBeInTheDocument();
+  });
+
+  it("persists new participant fields in localStorage", async () => {
+    initiativeApi.searchDndMonsters.mockResolvedValue([{ index: "goblin", name: "Goblin", url: "/api/2014/monsters/goblin" }]);
+    initiativeApi.getDndMonsterDetails.mockResolvedValue({
+      index: "goblin",
+      name: "Goblin",
+      armorClass: 15,
+      hitPoints: 7,
+      dexterity: 14,
+      initiativeModifier: 2,
+      challengeRating: 0.25,
+      type: "humanoid",
     });
-    expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/TODO/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/przygotowanie pod live session/i)).not.toBeInTheDocument();
+
+    render(<InitiativePage />);
+    fireEvent.click(screen.getByRole("button", { name: "Dodaj uczestnika" }));
+    await waitFor(() => expect(initiativeApi.searchDndMonsters).toHaveBeenCalledWith("test-token", ""));
+    fireEvent.change(screen.getByLabelText("Pula potworow"), { target: { value: "goblin" } });
+    await waitFor(() => expect(initiativeApi.getDndMonsterDetails).toHaveBeenCalledWith("test-token", "goblin"));
+    fireEvent.click(screen.getByRole("button", { name: "Dodaj do walki" }));
+
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const parsed = JSON.parse(raw);
+    expect(parsed.participants[0].sourceType).toBe("DND_MONSTER");
+    expect(parsed.participants[0].sourceIndex).toBe("goblin");
+    expect(parsed.participants[0].initiativeModifier).toBe(2);
   });
 });

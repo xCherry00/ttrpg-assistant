@@ -425,10 +425,13 @@ monsters / glossary_terms static data (monster db, TTRPG glossary)
 - The backend uses stable Spring Boot `3.4.1`; keep future upgrades on stable releases instead of snapshots
 - JWT is stored in frontend `localStorage`, which is convenient locally but needs XSS care in production
 
-### Initiative and Rules scope (v0.7.5)
+### Initiative and Rules scope (v0.7.5+)
 
-- `/initiative` is the global GM combat tool (full encounter management).
-- `LiveSessionPage` contains only embedded initiative preview, not full combat management.
+- `/initiative` is now a quick local GM combat tracker (browser localStorage only).
+- `/initiative` does not require campaign or session context and does not persist encounters to backend.
+- `LiveSessionPage` does not contain initiative preview in MVP.
+- Backend combat encounter endpoints remain available as legacy/future API, but the global `/initiative` page no longer manages them.
+- Character sheet PDF export is deferred/future work in the current MVP.
 - `/rules` and `/compendium` are safe MVP foundations that prioritize legal sources and links over full rulebook replication.
 - Multi-system full compendium coverage is future work.
 - Compendium legal-source analysis: `docs/COMPENDIUM_DATA_SOURCES.md`.
@@ -764,30 +767,34 @@ Refactor note (v0.6.6):
 - Added users.token_invalidated_at: after password change/reset, older JWTs (issued before invalidation time) are rejected.
 
 
-### Embedded Live Initiative Preview (v0.7.6)
+### Live Session Initiative Scope (v0.7.5)
 
-- `LiveSessionPage` now contains real embedded initiative preview based on existing `combat_encounters` and `combat_participants`.
-- Data source:
-  - `GET /api/campaigns/{campaignId}/sessions/{sessionId}/live-state` (`activeEncounterId`),
-  - `GET /api/campaigns/{campaignId}/encounters`,
-  - `GET /api/campaigns/{campaignId}/encounters/{encounterId}`.
-- No new backend combat model and no new initiative endpoints were added.
-- Session gating:
-  - `PLANNED`: preview locked with not-started message,
-  - `IN_PROGRESS`: full embedded preview available,
-  - `FINISHED`: read-only ended state.
-- Visibility split:
-  - GM/owner view: full queue preview, current participant, round, encounter status, HP/temp HP, conditions, defeated state.
-  - player/member view: limited read-only preview (current + next participants, type/allegiance badges), no HP/details controls.
-- `/initiative` remains the full global combat tool; embedded preview in live session does not replace it.
+- Embedded initiative preview in `LiveSessionPage` is disabled in MVP.
+- `/initiative` is the only initiative UI in current MVP and works locally (`localStorage`).
+- Backend encounter endpoints remain available for future campaign-linked initiative work.
 
-### Character Sheet PDF Export (v0.7.4)
+### Quick Initiative Tracker (v0.7.3)
 
-- Uzytkownik moze pobrac wlasna karte postaci jako PDF (`/api/characters/{characterId}/sheet.pdf`).
-- PDF jest generowany przez aplikacje (wlasny, uniwersalny szablon MVP).
-- Eksport nie uzywa oficjalnych szablonow kart D&D/CoC.
-- Generator jest odporny na brakujace pola w `sheet_json` i zwraca czytelny dokument zamiast bledu.
-- Pelne oficjalne layouty kart pozostaja jako future work.
+- `/initiative` is a global MG tool for fast at-table combat tracking.
+- Works locally in browser storage (`localStorage`) and restores after page refresh.
+- Does not require campaign selection.
+- Does not require session selection.
+- Does not save encounters to backend API.
+- Intended as fast initiative/HP/conditions/notes helper during play.
+
+### D&D Initiative Tracker Upgrade (v0.7.6)
+
+- `/initiative` now uses modal-based participant creation (custom participant or D&D monster lookup).
+- D&D monster lookup is powered by backend proxy endpoints (SRD API source), not direct frontend external calls.
+- Conditions list is loaded from D&D API via backend and falls back to local condition list if unavailable.
+- Added initiative roll (`d20 + initiative modifier`) for all participants.
+- Added manual queue controls (`Sortuj po inicjatywie`, `↑`, `↓`) and improved HP operations (`Obrazenia`, `Leczenie`, `Ustaw HP`).
+
+### Character Sheet PDF Export (deferred)
+
+- Export karty postaci do PDF jest tymczasowo wylaczony z aktualnego MVP.
+- Endpoint `/api/characters/{characterId}/sheet.pdf` i zaleznosc PDFBox zostaly usuniete, zeby utrzymac zielona walidacje backendu.
+- PDF export pozostaje future work po ustaleniu stabilnego generatora i szablonow.
 
 ### RulesPage Cleanup (v0.7.6.1)
 
@@ -799,3 +806,9 @@ Refactor note (v0.6.6):
   - Mork Borg
 - Legacy local reference entries list and its search UI were removed from `RulesPage` to keep the view focused on unified basic summaries.
 - Savage Worlds and Alien RPG were intentionally disabled on `RulesPage` until source/licensing verification and support scope are confirmed.
+
+### Official Starter Resources (v0.7.3)
+
+- `RulesPage` now links to official starter resources for each supported MVP system instead of hosting external rulebook PDFs locally.
+- The app provides link-based access to legal starter materials (SRD, quickstart pages, official resource hubs) and keeps local content as summaries.
+- WFRP 4e is explicitly presented as official resources only (no full free SRD in MVP).
