@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import DashboardPage from "../../pages/DashboardPage";
 import * as meApi from "../../api/me";
@@ -16,7 +16,6 @@ vi.mock("../../api/me", () => ({
 vi.mock("../../api/campaigns", () => ({
   listCampaigns: vi.fn(),
   listCampaignSessions: vi.fn(),
-  listCampaignMaterials: vi.fn(),
 }));
 
 vi.mock("../../api/characters", () => ({
@@ -34,47 +33,55 @@ function renderPage() {
 describe("DashboardPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.localStorage.clear();
     meApi.getMe.mockResolvedValue({ id: 1, displayName: "Tester" });
     charactersApi.listCharacters.mockResolvedValue([{ id: 10, name: "Aria" }]);
-    campaignsApi.listCampaignMaterials.mockResolvedValue([]);
   });
 
-  it("renders real upcoming sessions, active session and keeps quick actions valid", async () => {
-    campaignsApi.listCampaigns.mockResolvedValue([
-      { id: 1, title: "Kampania A" },
-      { id: 2, title: "Kampania B" },
+  it("renders target KPI set and removes Materialy/Szybkie akcje", async () => {
+    campaignsApi.listCampaigns.mockResolvedValue([{ id: 1, title: "Kampania A" }]);
+    campaignsApi.listCampaignSessions.mockResolvedValue([
+      { id: 1, title: "Planowana", status: "PLANNED", scheduledFor: "2026-06-19T18:00:00Z" },
+      { id: 2, title: "Zakonczona", status: "FINISHED", scheduledFor: "2026-06-10T18:00:00Z" },
     ]);
-    campaignsApi.listCampaignSessions.mockImplementation((_token, campaignId) => {
-      if (campaignId === 1) {
-        return Promise.resolve([
-          { id: 101, title: "Sesja A", status: "PLANNED", scheduledFor: "2026-06-20T18:00:00Z" },
-          { id: 102, title: "Sesja B", status: "IN_PROGRESS", scheduledFor: "2026-06-18T18:00:00Z" },
-        ]);
-      }
-      return Promise.resolve([
-        { id: 201, title: "Sesja C", status: "PLANNED", scheduledFor: "2026-06-19T18:00:00Z" },
-      ]);
-    });
 
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByText("Sesja A")).toBeInTheDocument();
+      expect(screen.getByText("Kampanie")).toBeInTheDocument();
     });
 
-    expect(screen.getByText("Sesja C")).toBeInTheDocument();
-    expect(screen.getByText("Dołącz do aktywnej sesji")).toBeInTheDocument();
-    expect(screen.queryByText("Rozpocznij walkę")).not.toBeInTheDocument();
-    expect(screen.queryByText("Brak aktywnej walki")).not.toBeInTheDocument();
-
-    expect(screen.getByRole("link", { name: /Rzuć kośćmi/i })).toHaveAttribute("href", "/dice");
-    expect(screen.getByRole("link", { name: /Dodaj notatkę/i })).toHaveAttribute("href", "/campaigns");
+    const kpiSection = screen.getByLabelText("Podsumowanie");
+    const kpi = within(kpiSection);
+    expect(kpi.getByText("Postacie")).toBeInTheDocument();
+    expect(kpi.getByText("Nadchodzące sesje")).toBeInTheDocument();
+    expect(kpi.getByText("Sesje")).toBeInTheDocument();
+    expect(screen.queryByText("Materiały")).not.toBeInTheDocument();
+    expect(screen.queryByText("Szybkie akcje")).not.toBeInTheDocument();
   });
 
-  it("shows neutral state when there is no in-progress and no planned sessions", async () => {
+  it("active session hero shows only IN_PROGRESS and proper CTA labels", async () => {
     campaignsApi.listCampaigns.mockResolvedValue([{ id: 1, title: "Kampania A" }]);
     campaignsApi.listCampaignSessions.mockResolvedValue([
-      { id: 900, title: "Zakończona", status: "DONE", scheduledFor: "2026-06-10T18:00:00Z" },
+      { id: 101, title: "Sesja Aktywna", status: "IN_PROGRESS", scheduledFor: "2026-06-18T18:00:00Z" },
+      { id: 102, title: "Sesja Planowana", status: "PLANNED", scheduledFor: "2026-06-20T18:00:00Z" },
+    ]);
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Sesja Aktywna")).toBeInTheDocument();
+    });
+
+    expect(screen.getByRole("link", { name: /Dołącz do sesji/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Otwórz kampanię/i })).toBeInTheDocument();
+    expect(screen.queryByText("Brak aktywnej sesji")).not.toBeInTheDocument();
+  });
+
+  it("shows neutral hero state when IN_PROGRESS is missing", async () => {
+    campaignsApi.listCampaigns.mockResolvedValue([{ id: 1, title: "Kampania A" }]);
+    campaignsApi.listCampaignSessions.mockResolvedValue([
+      { id: 900, title: "Zakonczylo sie", status: "FINISHED", scheduledFor: "2026-06-10T18:00:00Z" },
     ]);
 
     renderPage();
@@ -83,6 +90,77 @@ describe("DashboardPage", () => {
       expect(screen.getByText("Brak aktywnej sesji")).toBeInTheDocument();
     });
 
-    expect(screen.getByText("Brak zaplanowanych sesji")).toBeInTheDocument();
+    expect(screen.getByText("Nie prowadzisz teraz żadnej sesji na żywo.")).toBeInTheDocument();
+  });
+
+  it("upcoming panel shows only PLANNED sessions and max 3", async () => {
+    campaignsApi.listCampaigns.mockResolvedValue([{ id: 1, title: "Kampania A" }]);
+    campaignsApi.listCampaignSessions.mockResolvedValue([
+      { id: 1, title: "S1", status: "PLANNED", scheduledFor: "2026-06-18T18:00:00Z" },
+      { id: 2, title: "S2", status: "PLANNED", scheduledFor: "2026-06-19T18:00:00Z" },
+      { id: 3, title: "S3", status: "PLANNED", scheduledFor: "2026-06-20T18:00:00Z" },
+      { id: 4, title: "S4", status: "PLANNED", scheduledFor: "2026-06-21T18:00:00Z" },
+      { id: 5, title: "S-IN", status: "IN_PROGRESS", scheduledFor: "2026-06-17T18:00:00Z" },
+      { id: 6, title: "S-FIN", status: "FINISHED", scheduledFor: "2026-06-16T18:00:00Z" },
+    ]);
+
+    renderPage();
+
+    const panelHeading = await screen.findByRole("heading", { name: "Nadchodzące sesje" });
+    const panel = panelHeading.closest("article");
+    expect(panel).toBeTruthy();
+
+    const scoped = within(panel);
+    expect(scoped.getByText("S1")).toBeInTheDocument();
+    expect(scoped.getByText("S2")).toBeInTheDocument();
+    expect(scoped.getByText("S3")).toBeInTheDocument();
+    expect(scoped.queryByText("S4")).not.toBeInTheDocument();
+    expect(scoped.queryByText("S-IN")).not.toBeInTheDocument();
+    expect(scoped.queryByText("S-FIN")).not.toBeInTheDocument();
+  });
+
+  it("renders neutral Zalegle notatki panel", async () => {
+    campaignsApi.listCampaigns.mockResolvedValue([]);
+    campaignsApi.listCampaignSessions.mockResolvedValue([]);
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Zaległe notatki")).toBeInTheDocument();
+    });
+
+    expect(screen.getByText("Notatki sesyjne pojawią się tutaj po wdrożeniu archiwum sesji.")).toBeInTheDocument();
+  });
+
+  it("shows empty state for recently generated when history is missing", async () => {
+    campaignsApi.listCampaigns.mockResolvedValue([]);
+    campaignsApi.listCampaignSessions.mockResolvedValue([]);
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Brak ostatnio wygenerowanych treści")).toBeInTheDocument();
+    });
+  });
+
+  it("shows recently generated items from localStorage history", async () => {
+    window.localStorage.setItem("ttrpg.generatorHistory", JSON.stringify([
+      {
+        id: "g-1",
+        generatorCode: "npc",
+        label: "Generator NPC",
+        createdAt: "2026-05-22T10:00:00.000Z",
+        result: { title: "Kupiec z sekretami", summary: "Wie duzo o porcie." },
+      },
+    ]));
+    campaignsApi.listCampaigns.mockResolvedValue([]);
+    campaignsApi.listCampaignSessions.mockResolvedValue([]);
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Kupiec z sekretami")).toBeInTheDocument();
+    });
+    expect(screen.getByText(/Generator NPC/i)).toBeInTheDocument();
   });
 });

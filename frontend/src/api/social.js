@@ -9,6 +9,10 @@ export async function discoverUsers(token, query = "") {
   return http(`/api/social/discover?q=${encoded}`, { method: "GET", token });
 }
 
+export async function getFriendSuggestions(token) {
+  return http("/api/social/suggestions", { method: "GET", token });
+}
+
 export async function getPublicProfile(token, handle) {
   return http(`/api/social/users/${encodeURIComponent(handle)}`, { method: "GET", token });
 }

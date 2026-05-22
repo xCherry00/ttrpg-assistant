@@ -2,58 +2,30 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { getMe } from "../api/me";
-import { listCampaignMaterials, listCampaignSessions, listCampaigns } from "../api/campaigns";
+import { listCampaignSessions, listCampaigns } from "../api/campaigns";
 import { listCharacters } from "../api/characters";
 import "../styles/dashboard.css";
 
-const RECENT_GENERATIONS_KEY = "ttrpg_recent_generations_v1";
+const RECENT_GENERATIONS_KEY = "ttrpg.generatorHistory";
 
-const QUICK_ACTIONS = [
-  {
-    title: "Przygotuj sesję",
-    description: "Utwórz scenariusz, notatki i plan sesji",
-    to: "/campaigns",
-    icon: "book-plus",
-    tone: "purple",
-  },
-  {
-    title: "Dodaj postać",
-    description: "Stwórz nową postać do kampanii",
-    to: "/characters",
-    icon: "user-plus",
-    tone: "green",
-  },
-  {
-    title: "Rzuć kośćmi",
-    description: "Szybki rzut kośćmi online",
-    to: "/dice",
-    icon: "dice",
-    tone: "orange",
-  },
-  {
-    title: "Dodaj notatkę",
-    description: "Przejdz do notatek kampanii",
-    to: "/campaigns",
-    icon: "file-plus",
-    tone: "blue",
-  },
-];
-
-const FALLBACK_MATERIALS = [
-  { id: "material-1", type: "NOTE", title: "Notatki do sesji - Rozdział 2", updatedAt: "2026-04-30T08:00:00" },
-  { id: "material-2", type: "MAP", title: "Mapa - Północne Krainy", updatedAt: "2026-04-30T04:00:00" },
-  { id: "material-3", type: "NPC", title: "NPC - Strażnik Boru", updatedAt: "2026-04-29T16:00:00" },
-  { id: "material-4", type: "ITEM", title: "Przedmioty magiczne", updatedAt: "2026-04-28T18:00:00" },
-];
-
-function readRecentGenerations(userId) {
+function readRecentGenerations() {
   if (typeof window === "undefined") return [];
   try {
     const raw = window.localStorage.getItem(RECENT_GENERATIONS_KEY);
     const parsed = JSON.parse(raw || "[]");
     const list = Array.isArray(parsed) ? parsed : [];
-    if (!userId) return [];
-    return list.filter((entry) => String(entry?.userId || "") === String(userId));
+    return list
+      .filter((entry) => entry && typeof entry === "object")
+      .map((entry) => ({
+        id: entry.id || `${entry.generatorCode || "generator"}-${entry.createdAt || Math.random().toString(36).slice(2, 8)}`,
+        type: entry.generatorCode || "generator",
+        title: entry.result?.title || entry.label || "Wygenerowana treść",
+        preview: entry.result?.summary || entry.result?.description || entry.result?.hook || "",
+        createdAt: entry.createdAt || null,
+        sourceGenerator: entry.label || entry.generatorCode || "Generator",
+        generatorCode: entry.generatorCode || null,
+      }))
+      .slice(0, 20);
   } catch {
     return [];
   }
@@ -101,7 +73,6 @@ export default function DashboardPage() {
   const [campaigns, setCampaigns] = useState([]);
   const [characters, setCharacters] = useState([]);
   const [sessions, setSessions] = useState([]);
-  const [materials, setMaterials] = useState([]);
   const [recent, setRecent] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -118,8 +89,7 @@ export default function DashboardPage() {
         if (cancelled) return;
 
         setMe(meResponse);
-        const resolvedUserId = meResponse?.id ?? meResponse?.userId ?? meResponse?.sub ?? "";
-        setRecent(readRecentGenerations(resolvedUserId));
+        setRecent(readRecentGenerations());
 
         const [campaignResult, characterResult] = await Promise.allSettled([
           listCampaigns(token),
@@ -145,10 +115,6 @@ export default function DashboardPage() {
           const sessionResults = await Promise.allSettled(
             campaignRows.map((campaign) => listCampaignSessions(token, campaign.id))
           );
-          const materialResults = await Promise.allSettled(
-            campaignRows.slice(0, 6).map((campaign) => listCampaignMaterials(token, campaign.id))
-          );
-
           if (cancelled) return;
 
           const sessionRows = sessionResults.flatMap((result, index) => {
@@ -156,14 +122,7 @@ export default function DashboardPage() {
             const campaign = campaignRows[index];
             return normalizeArray(result.value).map((session) => ({ ...session, campaignTitle: campaign?.title, campaignId: campaign?.id }));
           });
-          const materialRows = materialResults.flatMap((result, index) => {
-            if (result.status !== "fulfilled") return [];
-            const campaign = campaignRows[index];
-            return normalizeArray(result.value).map((material) => ({ ...material, campaignTitle: campaign?.title }));
-          });
-
           setSessions(sessionRows);
-          setMaterials(materialRows);
         }
       } catch (err) {
         if (cancelled) return;
@@ -192,13 +151,16 @@ export default function DashboardPage() {
 
   const campaignCount = campaigns.length || pickNumber(me?.campaignCount ?? me?.campaignsCount ?? me?.counters?.campaigns);
   const characterCount = characters.length || pickNumber(me?.characterCount ?? me?.charactersCount ?? me?.counters?.characters);
-  const materialCount = materials.length || recent.length || pickNumber(me?.materialCount ?? me?.materialsCount ?? me?.counters?.materials);
+  const finishedSessionsCount = useMemo(
+    () => sessions.filter((session) => String(session.status).toUpperCase() === "FINISHED").length,
+    [sessions],
+  );
 
   const upcomingSessions = useMemo(() => {
     const rows = sessions
       .filter((session) => String(session.status).toUpperCase() === "PLANNED")
       .sort((a, b) => new Date(a.scheduledFor).getTime() - new Date(b.scheduledFor).getTime())
-      .slice(0, 5);
+      .slice(0, 3);
     return rows;
   }, [sessions]);
 
@@ -207,19 +169,16 @@ export default function DashboardPage() {
     [sessions],
   );
 
-  const recentMaterials = useMemo(() => {
-    const rows = materials
-      .slice()
-      .sort((a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime())
-      .slice(0, 4);
-    return rows.length > 0 ? rows : FALLBACK_MATERIALS;
-  }, [materials]);
+  const recentGenerated = useMemo(
+    () => recent.slice().sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()).slice(0, 5),
+    [recent],
+  );
 
   const kpiCards = [
     { title: "Kampanie", value: campaignCount, subtitle: "Łącznie kampanii", icon: "book", tone: "purple", to: "/campaigns" },
     { title: "Postacie", value: characterCount, subtitle: "Stworzonych postaci", icon: "users", tone: "green", to: "/characters" },
     { title: "Nadchodzące sesje", value: upcomingSessions.length, subtitle: "Sesji zaplanowanych", icon: "calendar", tone: "orange", to: "/campaigns" },
-    { title: "Materiały", value: materialCount, subtitle: "Notatek i zasobów", icon: "archive", tone: "blue", to: "/rules" },
+    { title: "Sesje", value: finishedSessionsCount, subtitle: "Zakończone sesje z Twoich kampanii", icon: "archive", tone: "blue", to: "/campaigns" },
   ];
 
   return (
@@ -263,7 +222,7 @@ export default function DashboardPage() {
                 <div className="dashboardHero__actions">
                   <Link className="dashboardHero__primary" to={`/campaigns/${activeSession.campaignId}/sessions/${activeSession.id}/live`}>
                     <DashboardIcon name="play" />
-                    Dołącz do aktywnej sesji
+                    Dołącz do sesji
                   </Link>
                   <Link className="dashboardHero__secondary" to={`/campaigns/${activeSession.campaignId}`}>
                     <DashboardIcon name="users" />
@@ -274,39 +233,12 @@ export default function DashboardPage() {
             ) : (
               <>
                 <h2>Brak aktywnej sesji</h2>
-                <p>Nie masz teraz sesji IN_PROGRESS. Sprawdź kampanie i nadchodzące terminy.</p>
-                <div className="dashboardHero__actions">
-                  <Link className="dashboardHero__primary" to="/campaigns">
-                    <DashboardIcon name="calendar" />
-                    Przejdź do kampanii
-                  </Link>
-                </div>
+                <p>Nie prowadzisz teraz żadnej sesji na żywo.</p>
               </>
             )}
           </div>
           <div className="dashboardHero__image" aria-hidden="true" />
         </article>
-
-        <aside className="dashboardQuickPanel">
-          <header>
-            <DashboardIcon name="bolt" />
-            <h2>Szybkie akcje</h2>
-          </header>
-          <div className="dashboardQuickList">
-            {QUICK_ACTIONS.map((item) => (
-              <Link key={item.title} to={item.to} className="dashboardQuickItem">
-                <span className={`dashboardQuickItem__icon dashboardQuickItem__icon--${item.tone}`}>
-                  <DashboardIcon name={item.icon} />
-                </span>
-                <span>
-                  <strong>{item.title}</strong>
-                  <small>{item.description}</small>
-                </span>
-                <DashboardIcon name="chevron-right" />
-              </Link>
-            ))}
-          </div>
-        </aside>
       </section>
 
       <section className="dashboardLowerGrid">
@@ -324,16 +256,13 @@ export default function DashboardPage() {
               <div className="dashboardMaterialItem">
                 <span className="dashboardMaterialItem__icon"><DashboardIcon name="calendar" /></span>
                 <span>
-                  <strong>Brak zaplanowanych sesji</strong>
-                  <small>Utwórz sesję w kampanii, aby zobaczyć ją tutaj.</small>
+                  <strong>Brak zaplanowanych sesji.</strong>
                 </span>
               </div>
             )}
             {upcomingSessions.map((session) => {
               const date = getDateParts(session.scheduledFor);
-              const to = String(session.status).toUpperCase() === "IN_PROGRESS"
-                ? `/campaigns/${session.campaignId}/sessions/${session.id}/live`
-                : `/campaigns/${session.campaignId || ""}`;
+              const to = `/campaigns/${session.campaignId || ""}`;
               return (
                 <Link key={session.id} to={to} className="dashboardSessionItem">
                   <span className="dashboardDateBadge">
@@ -351,24 +280,50 @@ export default function DashboardPage() {
           </div>
         </article>
 
+        <article className="dashboardPanel">
+          <header className="dashboardPanel__head">
+            <div>
+              <DashboardIcon name="file" />
+              <h2>Zaległe notatki</h2>
+            </div>
+          </header>
+          <div className="dashboardMaterialList">
+            <div className="dashboardMaterialItem">
+              <span>
+                <strong>Notatki sesyjne pojawią się tutaj po wdrożeniu archiwum sesji.</strong>
+                <small>Docelowo panel będzie przypominał o zakończonych sesjach bez Twoich notatek.</small>
+              </span>
+            </div>
+          </div>
+        </article>
+
         <article className="dashboardPanel dashboardPanel--materials">
           <header className="dashboardPanel__head">
             <div>
               <DashboardIcon name="folder" />
-              <h2>Ostatnie materiały</h2>
+              <h2>Ostatnio wygenerowane</h2>
             </div>
-            <Link to="/rules">Zobacz wszystkie</Link>
+            <Link to="/generators">Otwórz generator</Link>
           </header>
 
           <div className="dashboardMaterialList">
-            {recentMaterials.map((material) => (
-              <Link key={material.id} to="/rules" className="dashboardMaterialItem">
-                <span className="dashboardMaterialItem__icon"><DashboardIcon name={materialIcon(material.type)} /></span>
+            {recentGenerated.length === 0 && (
+              <div className="dashboardMaterialItem">
                 <span>
-                  <strong>{material.title}</strong>
-                  <small>{getRelativeTime(material.updatedAt || material.createdAt)}</small>
+                  <strong>Brak ostatnio wygenerowanych treści</strong>
+                  <small>Użyj generatora, aby zobaczyć tutaj historię.</small>
                 </span>
-                <DashboardIcon name="more" />
+              </div>
+            )}
+            {recentGenerated.map((item) => (
+              <Link key={item.id} to={item.generatorCode ? `/generators/${encodeURIComponent(item.generatorCode)}` : "/generators"} className="dashboardMaterialItem">
+                <span className="dashboardMaterialItem__icon"><DashboardIcon name="spark" /></span>
+                <span>
+                  <strong>{item.title}</strong>
+                  <small>{item.sourceGenerator} • {getRelativeTime(item.createdAt)}</small>
+                  {item.preview ? <small>{item.preview}</small> : null}
+                </span>
+                <DashboardIcon name="chevron-right" />
               </Link>
             ))}
           </div>
@@ -383,14 +338,6 @@ export default function DashboardPage() {
       )}
     </div>
   );
-}
-
-function materialIcon(type) {
-  const normalized = String(type || "").toUpperCase();
-  if (normalized.includes("MAP")) return "map";
-  if (normalized.includes("NPC")) return "user";
-  if (normalized.includes("ITEM")) return "briefcase";
-  return "file";
 }
 
 function DashboardIcon({ name }) {
@@ -509,6 +456,11 @@ function DashboardIcon({ name }) {
       <>
         <path d="M12 5v14" />
         <path d="M5 12h14" />
+      </>
+    ),
+    spark: (
+      <>
+        <path d="M12 2 9.6 8.2 3 10.8l6.6 2.6L12 20l2.4-6.6 6.6-2.6-6.6-2.6Z" />
       </>
     ),
     sword: (

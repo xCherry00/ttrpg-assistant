@@ -12,5 +12,7 @@ public record SocialUserCardResponse(
         boolean isMg,
         String activityLabel,
         String relationship,
-        long sharedCampaignsCount
+        long sharedCampaignsCount,
+        String suggestionReason,
+        long mutualFriendsCount
 ) {}

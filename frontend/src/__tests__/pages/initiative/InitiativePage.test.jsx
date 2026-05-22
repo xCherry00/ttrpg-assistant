@@ -47,7 +47,8 @@ describe("InitiativePage DnD tracker v0.7.6", () => {
     render(<InitiativePage />);
     await openCustomModalAndAdd({ name: "Rogue", initiative: "17", ac: "15", hp: "14", maxHp: "14", mod: "3" });
     expect(screen.getByText("Rogue")).toBeInTheDocument();
-    expect(screen.getByText("14 / 14")).toBeInTheDocument();
+    expect(screen.getByLabelText("HP Rogue")).toHaveValue(14);
+    expect(screen.getByText("/ 14")).toBeInTheDocument();
   });
 
   it("searches monster and adds it with mapped stats", async () => {
@@ -73,7 +74,8 @@ describe("InitiativePage DnD tracker v0.7.6", () => {
 
     expect(screen.getByText("Goblin")).toBeInTheDocument();
     expect(screen.getByText("15")).toBeInTheDocument();
-    expect(screen.getByText("7 / 7")).toBeInTheDocument();
+    expect(screen.getByLabelText("HP Goblin")).toHaveValue(7);
+    expect(screen.getByText("/ 7")).toBeInTheDocument();
     expect(screen.getByText(/mod \+2/)).toBeInTheDocument();
   });
 
@@ -159,20 +161,15 @@ describe("InitiativePage DnD tracker v0.7.6", () => {
     expect(rows[1]).toHaveTextContent("Second");
   });
 
-  it("damage/heal/set HP works", async () => {
+  it("updates HP from inline input and auto-defeats on zero", async () => {
     render(<InitiativePage />);
     await openCustomModalAndAdd({ name: "Tank", hp: "20", maxHp: "20" });
 
-    fireEvent.change(screen.getByLabelText("Amount Tank"), { target: { value: "5" } });
-    fireEvent.click(screen.getByRole("button", { name: "Obrazenia" }));
-    expect(screen.getByText("15 / 20")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "Leczenie" }));
-    expect(screen.getByText("20 / 20")).toBeInTheDocument();
-
-    fireEvent.change(screen.getByLabelText("Set HP Tank"), { target: { value: "3" } });
-    fireEvent.click(screen.getByRole("button", { name: "Ustaw HP" }));
-    expect(screen.getByText("3 / 20")).toBeInTheDocument();
+    const hpInput = screen.getByLabelText("HP Tank");
+    fireEvent.change(hpInput, { target: { value: "15" } });
+    expect(screen.getByLabelText("HP Tank")).toHaveValue(15);
+    fireEvent.change(hpInput, { target: { value: "0" } });
+    expect(screen.getByText("Pokonany")).toBeInTheDocument();
   });
 
   it("persists new participant fields in localStorage", async () => {

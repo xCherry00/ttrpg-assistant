@@ -104,22 +104,14 @@
 }
 
 .initiativeConditionAdd,
-.initiativeHpControls,
 .initiativeRowActions {
   display: flex;
   gap: 4px;
   flex-wrap: wrap;
 }
 
-.initiativeDragHint {
-  font-size: 12px;
-  color: rgba(226, 232, 255, 0.68);
-  padding: 5px 8px;
-}
-
 .initiativeConditionAdd input,
 .initiativeConditionAdd select,
-.initiativeHpControls input,
 .initiativeRowActions input,
 .initiativeModalBody input,
 .initiativeModalBody select {
@@ -129,6 +121,34 @@
   background: rgba(3, 7, 18, 0.6);
   color: rgba(244, 247, 255, 0.95);
   padding: 4px 8px;
+}
+
+.initiativeHpInlineInput {
+  width: 62px;
+  min-height: 26px;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(3, 7, 18, 0.55);
+  color: rgba(244, 247, 255, 0.95);
+  padding: 2px 6px;
+  margin-right: 6px;
+}
+
+.initiativeHpInlineMax {
+  color: rgba(226, 232, 255, 0.8);
+  font-size: 13px;
+}
+
+.initiativeDeleteBtn {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  background: rgba(127, 29, 29, 0.65);
+  color: #fff;
+  cursor: pointer;
+  line-height: 1;
+  font-weight: 700;
 }
 
 .initiativeModalOverlay {

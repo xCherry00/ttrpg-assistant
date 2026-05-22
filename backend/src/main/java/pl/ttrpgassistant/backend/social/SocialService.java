@@ -17,6 +17,7 @@ import pl.ttrpgassistant.backend.user.UserRepository;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -95,6 +96,41 @@ public class SocialService {
                 .filter(candidate -> !isBlockedEitherWay(userId, candidate.getId()))
                 .map(candidate -> buildUserCard(currentUser, candidate))
                 .limit(24)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<SocialUserCardResponse> friendSuggestions(Long userId) {
+        UserEntity currentUser = getUser(userId);
+        Set<Long> friendIds = friendshipRepository.findByIdUserIdOrderByCreatedAtDesc(userId).stream()
+                .map(link -> link.getId().getFriendUserId())
+                .collect(java.util.stream.Collectors.toSet());
+
+        Set<Long> candidateIds = new LinkedHashSet<>();
+        campaignMemberRepository.findConnectedUserIds(userId).forEach(candidateIds::add);
+        for (Long friendId : friendIds) {
+            friendshipRepository.findByIdUserIdOrderByCreatedAtDesc(friendId).stream()
+                    .map(link -> link.getId().getFriendUserId())
+                    .forEach(candidateIds::add);
+        }
+
+        return candidateIds.stream()
+                .filter(candidateId -> !candidateId.equals(userId))
+                .filter(candidateId -> !friendIds.contains(candidateId))
+                .filter(candidateId -> !isBlockedEitherWay(userId, candidateId))
+                .filter(candidateId -> "NONE".equals(relationshipFor(userId, candidateId)))
+                .map(this::getUser)
+                .map(candidate -> {
+                    long sharedCampaigns = campaignRepository.countSharedCampaigns(userId, candidate.getId());
+                    long mutualFriends = countMutualFriends(userId, candidate.getId());
+                    String reason = sharedCampaigns > 0 ? "Wspolna kampania" : (mutualFriends > 0 ? "Znajomy znajomego" : "Proponowany gracz");
+                    return withSuggestion(buildUserCard(currentUser, candidate), reason, mutualFriends);
+                })
+                .sorted(Comparator
+                        .comparingLong((SocialUserCardResponse card) -> card.sharedCampaignsCount() > 0 ? 0 : 1)
+                        .thenComparing(Comparator.comparingLong(SocialUserCardResponse::mutualFriendsCount).reversed())
+                        .thenComparing(card -> card.username().toLowerCase(Locale.ROOT)))
+                .limit(10)
                 .toList();
     }
 
@@ -246,8 +282,41 @@ public class SocialService {
                 target.isMg(),
                 formatActivityLabel(target),
                 relationshipFor(viewer.getId(), target.getId()),
-                viewer.getId().equals(target.getId()) ? 0 : campaignRepository.countSharedCampaigns(viewer.getId(), target.getId())
+                viewer.getId().equals(target.getId()) ? 0 : campaignRepository.countSharedCampaigns(viewer.getId(), target.getId()),
+                null,
+                0
         );
+    }
+
+    private SocialUserCardResponse withSuggestion(SocialUserCardResponse base, String reason, long mutualFriendsCount) {
+        return new SocialUserCardResponse(
+                base.id(),
+                base.handle(),
+                base.username(),
+                base.tagCode(),
+                base.displayName(),
+                base.bio(),
+                base.favoriteSystem(),
+                base.role(),
+                base.isMg(),
+                base.activityLabel(),
+                base.relationship(),
+                base.sharedCampaignsCount(),
+                reason,
+                mutualFriendsCount
+        );
+    }
+
+    private long countMutualFriends(Long userId, Long candidateId) {
+        Set<Long> viewerFriends = friendshipRepository.findByIdUserIdOrderByCreatedAtDesc(userId).stream()
+                .map(link -> link.getId().getFriendUserId())
+                .collect(java.util.stream.Collectors.toSet());
+        if (viewerFriends.isEmpty()) return 0;
+        Set<Long> candidateFriends = friendshipRepository.findByIdUserIdOrderByCreatedAtDesc(candidateId).stream()
+                .map(link -> link.getId().getFriendUserId())
+                .collect(java.util.stream.Collectors.toSet());
+        candidateFriends.retainAll(viewerFriends);
+        return candidateFriends.size();
     }
 
     private String relationshipFor(Long viewerUserId, Long targetUserId) {

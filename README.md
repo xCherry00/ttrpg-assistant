@@ -812,3 +812,20 @@ Refactor note (v0.6.6):
 - `RulesPage` now links to official starter resources for each supported MVP system instead of hosting external rulebook PDFs locally.
 - The app provides link-based access to legal starter materials (SRD, quickstart pages, official resource hubs) and keeps local content as summaries.
 - WFRP 4e is explicitly presented as official resources only (no full free SRD in MVP).
+
+### v0.7.4 - Dashboard content and social suggestions
+- Dashboard panel Ostatnio wygenerowane pokazuje ostatnie wpisy generatorow (MVP: localStorage, klucz 	trpg.generatorHistory).
+- Strona generatorow nie renderuje juz sekcji Ostatnio wygenerowane; historia jest przeniesiona na Dashboard.
+- Modul znajomych zawiera sekcje Proponowane z sugestiami relacji na podstawie wspolnych kampanii i znajomych znajomych.
+- Dodano endpoint GET /api/social/suggestions do pobierania sugestii dla zalogowanego uzytkownika.
+
+### v0.7.4 - Clean dashboard information architecture
+- Dashboard jest ekranem statusowym i nie dubluje globalnej nawigacji z sidebara.
+- KPI obejmuja: Kampanie, Postacie, Nadchodzace sesje, Sesje.
+- KPI Materialy zostalo usuniete do czasu wdrozenia realnego modulu materialow.
+- Hero aktywnej sesji pokazuje wylacznie sesje `IN_PROGRESS`; gdy brak, renderowany jest neutralny stan.
+- Panel Nadchodzace sesje pokazuje tylko `PLANNED`, posortowane rosnaco i ograniczone do 3 rekordow.
+- Panel Szybkie akcje zostal usuniety.
+- Panel Zalegle notatki przygotowuje miejsce pod przyszle archiwum notatek sesyjnych.
+- Panel Ostatnio wygenerowane pozostaje na Dashboardzie i korzysta z `localStorage` (`ttrpg.generatorHistory`).
+

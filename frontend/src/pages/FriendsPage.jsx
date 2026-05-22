@@ -6,6 +6,7 @@ import {
   blockUser,
   cancelFriendRequest,
   discoverUsers,
+  getFriendSuggestions,
   getSocialOverview,
   rejectFriendRequest,
   removeFriend,
@@ -16,11 +17,18 @@ import {
 const TABS = [
   { id: "friends", label: "Znajomi" },
   { id: "requests", label: "Zaproszenia" },
-  { id: "discover", label: "Odkrywaj" },
+  { id: "discover", label: "Proponowane" },
   { id: "blocked", label: "Blokady" },
 ];
 
-function UserCard({ user, actions = [] }) {
+function suggestionReason(user) {
+  if (user?.suggestionReason) return user.suggestionReason;
+  if (Number(user?.sharedCampaignsCount || 0) > 0) return "Wspolna kampania";
+  if (Number(user?.mutualFriendsCount || 0) > 0) return "Znajomy znajomego";
+  return "Proponowany gracz";
+}
+
+function UserCard({ user, actions = [], showSuggestionReason = false }) {
   return (
     <article className="socialCard panel-soft">
       <div className="socialCard__main">
@@ -30,11 +38,12 @@ function UserCard({ user, actions = [] }) {
             <h3>{user.displayName}</h3>
             <span className="socialCard__tag">{user.username}#{String(user.tagCode).padStart(4, "0")}</span>
           </div>
-          <p>{user.bio || "Ten użytkownik nie dodał jeszcze opisu."}</p>
+          <p>{user.bio || "Ten uzytkownik nie dodal jeszcze opisu."}</p>
           <div className="socialCard__meta">
             <span>{user.role}{user.isMg ? " + MG" : ""}</span>
             <span>{user.activityLabel}</span>
-            <span>Wspólne kampanie: {user.sharedCampaignsCount}</span>
+            <span>Wspolne kampanie: {user.sharedCampaignsCount}</span>
+            {showSuggestionReason ? <span>Powod: {suggestionReason(user)}</span> : null}
           </div>
         </div>
       </div>
@@ -53,6 +62,7 @@ export default function FriendsPage() {
   const { token } = useAuth();
   const [tab, setTab] = useState("friends");
   const [overview, setOverview] = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -64,10 +74,14 @@ export default function FriendsPage() {
     setLoading(true);
     setError("");
     try {
-      const data = await getSocialOverview(token);
-      setOverview(data);
+      const [overviewData, suggestionsData] = await Promise.all([
+        getSocialOverview(token),
+        getFriendSuggestions(token),
+      ]);
+      setOverview(overviewData);
+      setSuggestions(Array.isArray(suggestionsData) ? suggestionsData : []);
     } catch (err) {
-      setError(err?.message || "Nie udało się pobrać sekcji znajomych.");
+      setError(err?.message || "Nie udalo sie pobrac sekcji znajomych.");
     } finally {
       setLoading(false);
     }
@@ -84,11 +98,11 @@ export default function FriendsPage() {
       try {
         const results = await discoverUsers(token, search);
         if (active) {
-          setSearchResults(results);
+          setSearchResults(Array.isArray(results) ? results : []);
         }
       } catch (err) {
         if (active) {
-          setError(err?.message || "Nie udało się wyszukać użytkowników.");
+          setError(err?.message || "Nie udalo sie wyszukac uzytkownikow.");
         }
       } finally {
         if (active) {
@@ -105,8 +119,8 @@ export default function FriendsPage() {
 
   const visibleDiscover = useMemo(() => {
     if (search.trim()) return searchResults;
-    return overview?.suggestions || [];
-  }, [overview, search, searchResults]);
+    return suggestions;
+  }, [suggestions, search, searchResults]);
 
   async function runAction(key, handler) {
     setBusyKey(key);
@@ -116,10 +130,10 @@ export default function FriendsPage() {
       await loadOverview();
       if (tab === "discover" || search.trim()) {
         const results = await discoverUsers(token, search);
-        setSearchResults(results);
+        setSearchResults(Array.isArray(results) ? results : []);
       }
     } catch (err) {
-      setError(err?.message || "Akcja nie powiodła się.");
+      setError(err?.message || "Akcja nie powiodla sie.");
     } finally {
       setBusyKey("");
     }
@@ -131,7 +145,7 @@ export default function FriendsPage() {
         <div>
           <span className="pageEyebrow">spolecznosc</span>
           <h1 className="pageTitle">Znajomi</h1>
-          <p className="pageSubtitle">Zaproszenia, odkrywanie graczy i zarzadzanie relacjami.</p>
+          <p className="pageSubtitle">Zaproszenia, proponowane kontakty i zarzadzanie relacjami.</p>
         </div>
       </div>
 
@@ -143,16 +157,16 @@ export default function FriendsPage() {
           </div>
           <div className="friendsHero__stat">
             <strong>{overview?.incomingRequests?.length || 0}</strong>
-            <span>Przychodzące</span>
+            <span>Przychodzace</span>
           </div>
           <div className="friendsHero__stat">
             <strong>{overview?.outgoingRequests?.length || 0}</strong>
-            <span>Wysłane</span>
+            <span>Wyslane</span>
           </div>
         </div>
 
         <div className="friendsSearch">
-          <label className="friendsSearch__label">Szukaj po nicku lub tagu</label>
+          <label className="friendsSearch__label">Szukaj uzytkownikow po nicku lub tagu</label>
           <input
             className="friendsSearch__input"
             value={search}
@@ -176,11 +190,11 @@ export default function FriendsPage() {
       </section>
 
       {error && <div className="friendsState friendsState--error">{error}</div>}
-      {loading && <div className="friendsState">Ładowanie sekcji znajomych...</div>}
+      {loading && <div className="friendsState">Ladowanie sekcji znajomych...</div>}
 
       {!loading && tab === "friends" && (
         <section className="friendsList">
-          {(overview?.friends || []).length === 0 && <div className="friendsState">Nie masz jeszcze żadnych znajomych.</div>}
+          {(overview?.friends || []).length === 0 && <div className="friendsState">Nie masz jeszcze zadnych znajomych.</div>}
           {(overview?.friends || []).map((user) => (
             <UserCard
               key={user.id}
@@ -193,7 +207,7 @@ export default function FriendsPage() {
                   disabled={busyKey === `remove-${user.id}`}
                   onClick={() => runAction(`remove-${user.id}`, () => removeFriend(token, user.id))}
                 >
-                  Usuń
+                  Usun
                 </button>,
                 <button
                   key="block"
@@ -213,8 +227,8 @@ export default function FriendsPage() {
       {!loading && tab === "requests" && (
         <section className="friendsColumns">
           <div className="friendsColumn">
-            <h2>Przychodzące</h2>
-            {(overview?.incomingRequests || []).length === 0 && <div className="friendsState">Brak przychodzących zaproszeń.</div>}
+            <h2>Przychodzace</h2>
+            {(overview?.incomingRequests || []).length === 0 && <div className="friendsState">Brak przychodzacych zaproszen.</div>}
             {(overview?.incomingRequests || []).map((request) => (
               <UserCard
                 key={request.id}
@@ -236,7 +250,7 @@ export default function FriendsPage() {
                     disabled={busyKey === `reject-${request.id}`}
                     onClick={() => runAction(`reject-${request.id}`, () => rejectFriendRequest(token, request.id))}
                   >
-                    Odrzuć
+                    Odrzuc
                   </button>,
                 ]}
               />
@@ -244,8 +258,8 @@ export default function FriendsPage() {
           </div>
 
           <div className="friendsColumn">
-            <h2>Wysłane</h2>
-            {(overview?.outgoingRequests || []).length === 0 && <div className="friendsState">Brak wysłanych zaproszeń.</div>}
+            <h2>Wyslane</h2>
+            {(overview?.outgoingRequests || []).length === 0 && <div className="friendsState">Brak wyslanych zaproszen.</div>}
             {(overview?.outgoingRequests || []).map((request) => (
               <UserCard
                 key={request.id}
@@ -269,12 +283,16 @@ export default function FriendsPage() {
 
       {!loading && tab === "discover" && (
         <section className="friendsList">
-          {searching && <div className="friendsState">Szukam użytkowników...</div>}
-          {!searching && visibleDiscover.length === 0 && <div className="friendsState">Brak pasujących użytkowników.</div>}
+          <h2>Proponowane</h2>
+          {searching && <div className="friendsState">Szukam uzytkownikow...</div>}
+          {!searching && visibleDiscover.length === 0 && (
+            <div className="friendsState">{search.trim() ? "Brak pasujacych uzytkownikow." : "Brak propozycji. Dolacz do kampanii lub rozbuduj siec znajomych."}</div>
+          )}
           {!searching && visibleDiscover.map((user) => (
             <UserCard
               key={user.id}
               user={user}
+              showSuggestionReason={!search.trim()}
               actions={[
                 user.relationship === "NONE" ? (
                   <button
@@ -284,11 +302,11 @@ export default function FriendsPage() {
                     disabled={busyKey === `invite-${user.id}`}
                     onClick={() => runAction(`invite-${user.id}`, () => sendFriendRequest(token, user.id))}
                   >
-                    Dodaj
+                    Dodaj znajomego
                   </button>
                 ) : (
                   <span key="state" className="socialBadge">
-                    {user.relationship === "FRIENDS" ? "Znajomy" : user.relationship === "OUTGOING_REQUEST" ? "Zaproszenie wysłane" : user.relationship === "INCOMING_REQUEST" ? "Czeka na akceptację" : "Relacja niedostępna"}
+                    {user.relationship === "FRIENDS" ? "Znajomy" : user.relationship === "OUTGOING_REQUEST" ? "Zaproszenie wyslane" : user.relationship === "INCOMING_REQUEST" ? "Czeka na akceptacje" : "Relacja niedostepna"}
                   </span>
                 ),
                 <button
@@ -308,7 +326,7 @@ export default function FriendsPage() {
 
       {!loading && tab === "blocked" && (
         <section className="friendsList">
-          {(overview?.blockedUsers || []).length === 0 && <div className="friendsState">Nie zablokowałeś jeszcze żadnych użytkowników.</div>}
+          {(overview?.blockedUsers || []).length === 0 && <div className="friendsState">Nie zablokowales jeszcze zadnych uzytkownikow.</div>}
           {(overview?.blockedUsers || []).map((user) => (
             <UserCard
               key={user.id}

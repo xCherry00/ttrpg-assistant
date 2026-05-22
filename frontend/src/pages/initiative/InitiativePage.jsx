@@ -126,8 +126,6 @@ export default function InitiativePage() {
   const [selectedMonsterIndex, setSelectedMonsterIndex] = useState("");
 
   const [conditionDrafts, setConditionDrafts] = useState({});
-  const [hpAmountDrafts, setHpAmountDrafts] = useState({});
-  const [hpSetDrafts, setHpSetDrafts] = useState({});
   const [draggedId, setDraggedId] = useState(null);
   const [dragOverId, setDragOverId] = useState(null);
 
@@ -338,8 +336,6 @@ export default function InitiativePage() {
   function clearAll() {
     setState({ participants: [], started: false, round: 1, activeParticipantId: null, orderCounter: 1, initiativeRolled: false });
     setConditionDrafts({});
-    setHpAmountDrafts({});
-    setHpSetDrafts({});
     setDraggedId(null);
     setDragOverId(null);
     setNotice("");
@@ -386,35 +382,6 @@ export default function InitiativePage() {
         participants: reindexed,
         activeParticipantId: hasActive ? prev.activeParticipantId : reindexed[0]?.id || null,
       };
-    });
-  }
-
-  function applyDamage(participant) {
-    const amount = toOptionalNumber(hpAmountDrafts[participant.id]) ?? 0;
-    if (amount <= 0) return;
-    patchParticipant(participant.id, (item) => {
-      const nextHp = Math.max(0, (item.hp ?? 0) - amount);
-      return { ...item, hp: nextHp, defeated: nextHp <= 0 };
-    });
-  }
-
-  function applyHeal(participant) {
-    const amount = toOptionalNumber(hpAmountDrafts[participant.id]) ?? 0;
-    if (amount <= 0) return;
-    patchParticipant(participant.id, (item) => {
-      const base = (item.hp ?? 0) + amount;
-      const max = item.maxHp == null ? base : Math.min(base, item.maxHp);
-      const nextHp = Math.max(0, max);
-      return { ...item, hp: nextHp, defeated: nextHp <= 0 };
-    });
-  }
-
-  function setHp(participant) {
-    const next = toOptionalNumber(hpSetDrafts[participant.id]);
-    if (next === null) return;
-    patchParticipant(participant.id, (item) => {
-      const nextHp = Math.max(0, next);
-      return { ...item, hp: nextHp, defeated: nextHp <= 0 };
     });
   }
 
@@ -478,7 +445,7 @@ export default function InitiativePage() {
             <table className="initiativeTable">
               <thead>
                 <tr>
-                  <th>Marker</th><th>Typ</th><th>Nazwa</th><th>Inicjatywa</th><th>AC</th><th>HP</th><th>Stany</th><th>Akcje</th>
+                  <th>Marker</th><th>Typ</th><th>Nazwa</th><th>Inicjatywa</th><th>AC</th><th>HP</th><th>Stany</th><th></th>
                 </tr>
               </thead>
               <tbody>
@@ -511,16 +478,18 @@ export default function InitiativePage() {
                       <td>{participant.initiative ?? "-"} <small>(mod {participant.initiativeModifier >= 0 ? `+${participant.initiativeModifier}` : participant.initiativeModifier})</small></td>
                       <td>{participant.ac ?? "-"}</td>
                       <td>
-                        <div>{participant.hp ?? "-"} / {participant.maxHp ?? "-"}</div>
-                        <div className="initiativeHpControls">
-                          <input aria-label={`Amount ${participant.name}`} type="number" placeholder="amount" value={hpAmountDrafts[participant.id] ?? ""} onChange={(e) => setHpAmountDrafts((prev) => ({ ...prev, [participant.id]: e.target.value }))} />
-                          <button type="button" className="btn" onClick={() => applyDamage(participant)}>Obrazenia</button>
-                          <button type="button" className="btn" onClick={() => applyHeal(participant)}>Leczenie</button>
-                        </div>
-                        <div className="initiativeHpControls">
-                          <input aria-label={`Set HP ${participant.name}`} type="number" placeholder="ustaw hp" value={hpSetDrafts[participant.id] ?? ""} onChange={(e) => setHpSetDrafts((prev) => ({ ...prev, [participant.id]: e.target.value }))} />
-                          <button type="button" className="btn" onClick={() => setHp(participant)}>Ustaw HP</button>
-                        </div>
+                        <input
+                          className="initiativeHpInlineInput"
+                          aria-label={`HP ${participant.name}`}
+                          type="number"
+                          min="0"
+                          value={participant.hp ?? 0}
+                          onChange={(e) => {
+                            const nextHp = Math.max(0, Number(e.target.value || 0));
+                            patchParticipant(participant.id, (item) => ({ ...item, hp: nextHp, defeated: nextHp <= 0 }));
+                          }}
+                        />
+                        <span className="initiativeHpInlineMax">/ {participant.maxHp ?? "-"}</span>
                       </td>
                       <td>
                         <div className="initiativeConditionList">
@@ -543,8 +512,7 @@ export default function InitiativePage() {
                       </td>
                       <td>
                         <div className="initiativeRowActions">
-                          <span className="initiativeDragHint">Przeciagnij</span>
-                          <button type="button" className="btn" onClick={() => removeParticipant(participant.id)}>Usun</button>
+                          <button type="button" className="initiativeDeleteBtn" aria-label={`Usun ${participant.name}`} onClick={() => removeParticipant(participant.id)}>x</button>
                         </div>
                       </td>
                     </tr>

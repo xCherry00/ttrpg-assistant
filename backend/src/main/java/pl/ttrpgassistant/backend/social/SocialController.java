@@ -29,6 +29,12 @@ public class SocialController {
         return socialService.discoverUsers(userId, q);
     }
 
+    @GetMapping("/suggestions")
+    public List<SocialUserCardResponse> suggestions(Authentication auth) {
+        Long userId = (Long) auth.getPrincipal();
+        return socialService.friendSuggestions(userId);
+    }
+
     @GetMapping("/users/{handle}")
     public PublicProfileResponse publicProfile(Authentication auth, @PathVariable String handle) {
         Long userId = (Long) auth.getPrincipal();

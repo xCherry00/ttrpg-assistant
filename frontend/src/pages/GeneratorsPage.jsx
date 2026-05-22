@@ -968,7 +968,6 @@ export default function GeneratorsPage() {
   const [catalogFallback, setCatalogFallback] = useState(false);
   const [catalogError, setCatalogError] = useState("");
   const [catalogReloadKey, setCatalogReloadKey] = useState(0);
-  const [resultHistory, setResultHistory] = useState(readGeneratorHistory);
   const [copyStatus, setCopyStatus] = useState("");
 
   useEffect(() => {
@@ -1164,24 +1163,9 @@ export default function GeneratorsPage() {
       result: generated,
       createdAt: new Date().toISOString(),
     };
-    setResultHistory((previous) => {
-      const next = [entry, ...previous].slice(0, GENERATOR_HISTORY_LIMIT);
-      writeGeneratorHistory(next);
-      return next;
-    });
-  }
-
-  function restoreHistoryItem(item) {
-    if (!item?.result) return;
-    setActiveKey(item.key);
-    setForms((previous) => ({
-      ...previous,
-      [item.key]: item.values || previous[item.key] || {},
-    }));
-    setResult(item.result);
-    setActiveDungeonFloor(0);
-    setError("");
-    if (!generatorCode && item.generatorCode) navigate(`/generators/${encodeURIComponent(item.generatorCode)}`);
+    const previous = readGeneratorHistory();
+    const next = [entry, ...previous].slice(0, GENERATOR_HISTORY_LIMIT);
+    writeGeneratorHistory(next);
   }
 
   async function copyResult() {
@@ -1455,20 +1439,6 @@ export default function GeneratorsPage() {
                 <strong>Wynik pojawi się tutaj</strong>
                 <span>Ustaw parametry po lewej i uruchom generator.</span>
               </div>
-            )}
-            {resultHistory.length > 0 && (
-              <section className="generatorRecentResults" aria-label="Ostatnio wygenerowane wyniki">
-                <h3>Ostatnio wygenerowane</h3>
-                <div className="generatorRecentList">
-                  {resultHistory.slice(0, 5).map((item) => (
-                    <button type="button" key={item.id} onClick={() => restoreHistoryItem(item)}>
-                      <span>{item.label}</span>
-                      <strong>{item.result?.title || "Wynik"}</strong>
-                      <small>{formatGeneratedAt(item.createdAt)}</small>
-                    </button>
-                  ))}
-                </div>
-              </section>
             )}
           </main>
         </div>
