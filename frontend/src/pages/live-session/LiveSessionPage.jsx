@@ -29,6 +29,13 @@ function normalizeText(value) {
   return String(value || "").trim().toLowerCase();
 }
 
+function formatDateTime(value) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleString();
+}
+
 export default function LiveSessionPage() {
   const { token } = useAuth();
   const { campaignId, sessionId } = useParams();
@@ -47,6 +54,10 @@ export default function LiveSessionPage() {
   const [requestedRolls, setRequestedRolls] = useState([]);
   const [requestedActionBusy, setRequestedActionBusy] = useState(false);
   const [showAdvancedRequested, setShowAdvancedRequested] = useState(false);
+  const [showQuickRollPanel, setShowQuickRollPanel] = useState(false);
+  const [targetMode, setTargetMode] = useState("ALL");
+  const [selectedCharacterIds, setSelectedCharacterIds] = useState([]);
+  const [selectedUserIds, setSelectedUserIds] = useState([]);
   const [sceneForm, setSceneForm] = useState({ sceneTitle: "", sceneImageUrl: "", sceneDescription: "" });
 
   const isGmView = Boolean(campaign?.owner);
@@ -76,6 +87,25 @@ export default function LiveSessionPage() {
     });
   }, [isGmView, requestedRolls, myUserId, myCharacterIds, myCharacterNameSet]);
 
+  const rollStats = useMemo(() => {
+    const totals = recentRolls.map((roll) => Number(roll?.total)).filter((value) => Number.isFinite(value));
+    const perPlayerRaw = recentRolls.reduce((acc, roll) => {
+      const key = roll?.rolledByUsername || `User #${roll?.rolledByUserId ?? "?"}`;
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
+    const perPlayer = Object.entries(perPlayerRaw).sort((a, b) => b[1] - a[1]);
+    const maxCount = perPlayer.reduce((max, [, count]) => Math.max(max, count), 1);
+    return {
+      count: recentRolls.length,
+      average: totals.length ? Math.round((totals.reduce((sum, n) => sum + n, 0) / totals.length) * 10) / 10 : null,
+      highest: totals.length ? Math.max(...totals) : null,
+      lowest: totals.length ? Math.min(...totals) : null,
+      perPlayer,
+      maxCount,
+    };
+  }, [recentRolls]);
+
   useEffect(() => {
     async function load() {
       setLoading(true);
@@ -86,7 +116,7 @@ export default function LiveSessionPage() {
           listCampaignSessions(token, campaignId),
           getCampaignCharacters(token, campaignId),
           listCampaignMembers(token, campaignId).catch(() => []),
-          getCampaignDiceRolls(token, campaignId, { sessionId, limit: 15 }).catch(() => []),
+          getCampaignDiceRolls(token, campaignId, { sessionId, limit: 200 }).catch(() => []),
           getSessionLiveState(token, campaignId, sessionId).catch(() => null),
           getRequestedRolls(token, campaignId, sessionId).catch(() => []),
         ]);
@@ -119,7 +149,7 @@ export default function LiveSessionPage() {
     const [sessionsData, requested, rollsData, liveStateData] = await Promise.all([
       listCampaignSessions(token, campaignId),
       getRequestedRolls(token, campaignId, sessionId).catch(() => []),
-      getCampaignDiceRolls(token, campaignId, { sessionId, limit: 15 }).catch(() => []),
+      getCampaignDiceRolls(token, campaignId, { sessionId, limit: 200 }).catch(() => []),
       getSessionLiveState(token, campaignId, sessionId).catch(() => null),
     ]);
 
@@ -162,22 +192,19 @@ export default function LiveSessionPage() {
     }
   }
 
+  function toggleSelected(setter, value) {
+    setter((prev) => (prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]));
+  }
+
   async function handleCreateRequestedRoll(event) {
     event.preventDefault();
     if (!isInProgress || !isGmView) return;
 
     const formData = new FormData(event.currentTarget);
-    const targetPreset = String(formData.get("targetPreset") || "ALL");
     const payload = {
-      targetMode: targetPreset,
-      targetCharacterIds: String(formData.get("targetCharacterIds") || "")
-        .split(",")
-        .map((value) => Number(value.trim()))
-        .filter((value) => Number.isFinite(value) && value > 0),
-      targetUserIds: String(formData.get("targetUserIds") || "")
-        .split(",")
-        .map((value) => Number(value.trim()))
-        .filter((value) => Number.isFinite(value) && value > 0),
+      targetMode,
+      targetCharacterIds: targetMode === "CHARACTER" ? selectedCharacterIds : [],
+      targetUserIds: targetMode === "USER" ? selectedUserIds : [],
       rollLabel: String(formData.get("rollLabel") || "").trim(),
       rollType: String(formData.get("rollType") || "SKILL").trim(),
       rollExpression: String(formData.get("rollExpression") || "").trim() || null,
@@ -188,13 +215,26 @@ export default function LiveSessionPage() {
       showSuccessToPlayer: formData.get("showSuccessToPlayer") === "on",
     };
 
+    if (targetMode === "CHARACTER" && payload.targetCharacterIds.length === 0) {
+      setError("Wybierz co najmniej jedna postac.");
+      return;
+    }
+    if (targetMode === "USER" && payload.targetUserIds.length === 0) {
+      setError("Wybierz co najmniej jednego gracza.");
+      return;
+    }
+
     setError("");
     setNotice("");
     setRequestedActionBusy(true);
     try {
       await createRequestedRoll(token, campaignId, sessionId, payload);
       await reloadSessionData();
-      setNotice("Requested roll utworzony.");
+      setNotice("Rzut zostal wyslany do graczy.");
+      setShowQuickRollPanel(false);
+      setTargetMode("ALL");
+      setSelectedCharacterIds([]);
+      setSelectedUserIds([]);
       event.currentTarget.reset();
     } catch (err) {
       setError(err?.message || "Nie udalo sie utworzyc requested roll.");
@@ -375,17 +415,20 @@ export default function LiveSessionPage() {
             <section className="campaignDetailsCard panel-soft">
               <h2 className="campaignDetailsCardTitle">Moja postac</h2>
               {myCharacters.length === 0 ? (
-                <div className="campaignDetailsEmpty">Brak przypisanej postaci do tej kampanii.</div>
+                <div className="campaignDetailsEmpty">Nie masz przypisanej postaci w tej kampanii.</div>
               ) : (
                 <div className="campaignMaterialList">
                   {myCharacters.map((character) => (
-                    <article key={character.characterId} className="campaignMaterialCard">
-                      <div className="campaignMaterialCard__top">
-                        <strong>{character.characterName || "Postac"}</strong>
-                        <span className="campaignMemberBadge">{character.systemCode || "-"}</span>
-                      </div>
+                    <article key={character.characterId} className="campaignMaterialCard liveSessionCharacterCard">
+                      {character.portraitUrl ? (
+                        <img src={character.portraitUrl} alt={character.characterName || "Postac"} className="liveSessionCharacterAvatar" />
+                      ) : (
+                        <div className="liveSessionCharacterAvatarPlaceholder">Brak avatara</div>
+                      )}
                       <div className="campaignMaterialMeta">
-                        <span>Rola: {character.role || "PLAYER"}</span>
+                        <strong>{character.characterName || "Postac"}</strong>
+                        <span>Poziom: {character.level ?? "-"}</span>
+                        <span>System: {character.systemCode || "-"}</span>
                       </div>
                     </article>
                   ))}
@@ -400,33 +443,81 @@ export default function LiveSessionPage() {
             {isFinished && <p className="liveSessionPlaceholder">Sesja zakonczona. Lista rzutow pozostaje tylko do odczytu.</p>}
 
             {isInProgress && isGmView && (
-              <form className="campaignFormCard" onSubmit={handleCreateRequestedRoll}>
-                <label className="campaignField"><span>Dla kogo?</span><select name="targetPreset" defaultValue="ALL"><option value="ALL">Wszyscy</option><option value="CHARACTER">Konkretna postac</option><option value="USER">Konkretny gracz</option></select></label>
-                <label className="campaignField"><span>Etykieta</span><input name="rollLabel" maxLength={160} required /></label>
-                <label className="campaignField"><span>Typ rzutu</span><input name="rollType" defaultValue="SKILL" maxLength={40} /></label>
-                <label className="campaignField"><span>Wyrazenie rzutu</span><input name="rollExpression" defaultValue={campaign?.systemCode === "dnd5e" ? "1d20" : ""} maxLength={120} /></label>
-                <label className="campaignField"><span>DC</span><input name="dc" type="number" min="0" /></label>
-
-                <button className="campaignDetailsGhostBtn" type="button" onClick={() => setShowAdvancedRequested((prev) => !prev)}>
-                  {showAdvancedRequested ? "Ukryj zaawansowane" : "Pokaz zaawansowane"}
+              <>
+                <button
+                  className="campaignDetailsPrimaryBtn"
+                  type="button"
+                  onClick={() => setShowQuickRollPanel((prev) => !prev)}
+                >
+                  {showQuickRollPanel ? "Zamknij panel rzutu" : "Zadaj rzut"}
                 </button>
 
-                {showAdvancedRequested ? (
-                  <div className="campaignFormCard">
-                    <label className="campaignField"><span>target mode</span><input value="ALL/CHARACTER/USER (z sekcji podstawowej)" disabled /></label>
-                    <label className="campaignField"><span>character ID (po przecinku)</span><input name="targetCharacterIds" placeholder="1,2,3" /></label>
-                    <label className="campaignField"><span>user IDs (po przecinku)</span><input name="targetUserIds" placeholder="10,11" /></label>
-                    <label className="campaignField"><span>ability key</span><input name="abilityKey" maxLength={80} /></label>
-                    <label className="campaignField"><span>skill key</span><input name="skillKey" maxLength={80} /></label>
-                    <label className="campaignField"><span><input name="isDcHidden" type="checkbox" defaultChecked /> hide DC</span></label>
-                    <label className="campaignField"><span><input name="showSuccessToPlayer" type="checkbox" /> show success to player</span></label>
-                  </div>
-                ) : null}
+                {showQuickRollPanel && (
+                  <form className="campaignFormCard liveSessionQuickRollPanel" onSubmit={handleCreateRequestedRoll}>
+                    <label className="campaignField"><span>Etykieta rzutu</span><input name="rollLabel" maxLength={160} required /></label>
+                    <label className="campaignField"><span>Trudnosc / DC</span><input name="dc" type="number" min="0" /></label>
+                    <label className="campaignField"><span>Typ rzutu</span><input name="rollType" defaultValue="SKILL" maxLength={40} /></label>
+                    <label className="campaignField"><span>Wyrazenie rzutu</span><input name="rollExpression" defaultValue={campaign?.systemCode === "dnd5e" ? "1d20" : ""} maxLength={120} /></label>
+                    <label className="campaignField">
+                      <span>Do kogo?</span>
+                      <select value={targetMode} onChange={(event) => setTargetMode(event.target.value)}>
+                        <option value="ALL">Wszyscy</option>
+                        <option value="CHARACTER">Wybrane postacie</option>
+                        <option value="USER">Wybrani gracze</option>
+                      </select>
+                    </label>
 
-                <button className="campaignDetailsPrimaryBtn" type="submit" disabled={requestedActionBusy}>
-                  Utworz requested roll
-                </button>
-              </form>
+                    {targetMode === "CHARACTER" && (
+                      <div className="liveSessionTargetList" aria-label="Lista postaci">
+                        {campaignCharacters.map((character) => (
+                          <label key={character.characterId} className="liveSessionTargetItem">
+                            <input
+                              type="checkbox"
+                              checked={selectedCharacterIds.includes(Number(character.characterId))}
+                              onChange={() => toggleSelected(setSelectedCharacterIds, Number(character.characterId))}
+                            />
+                            <span>{character.characterName || `Postac #${character.characterId}`}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+
+                    {targetMode === "USER" && (
+                      <div className="liveSessionTargetList" aria-label="Lista graczy">
+                        {members.map((member) => (
+                          <label key={member.id} className="liveSessionTargetItem">
+                            <input
+                              type="checkbox"
+                              checked={selectedUserIds.includes(Number(member.id))}
+                              onChange={() => toggleSelected(setSelectedUserIds, Number(member.id))}
+                            />
+                            <span>{member.displayName || member.username || `User #${member.id}`}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+
+                    <button className="campaignDetailsGhostBtn" type="button" onClick={() => setShowAdvancedRequested((prev) => !prev)}>
+                      {showAdvancedRequested ? "Ukryj opcje zaawansowane" : "Pokaz opcje zaawansowane"}
+                    </button>
+
+                    {showAdvancedRequested ? (
+                      <div className="campaignFormCard">
+                        <label className="campaignField"><span>ability key</span><input name="abilityKey" maxLength={80} /></label>
+                        <label className="campaignField"><span>skill key</span><input name="skillKey" maxLength={80} /></label>
+                        <label className="campaignField"><span><input name="isDcHidden" type="checkbox" defaultChecked /> ukryj DC</span></label>
+                        <label className="campaignField"><span><input name="showSuccessToPlayer" type="checkbox" /> pokaz sukces graczowi</span></label>
+                        <label className="campaignField"><span>targetCharacterIds (fallback)</span><input value={selectedCharacterIds.join(",")} disabled /></label>
+                        <label className="campaignField"><span>targetUserIds (fallback)</span><input value={selectedUserIds.join(",")} disabled /></label>
+                      </div>
+                    ) : null}
+
+                    <button className="campaignDetailsPrimaryBtn" type="submit" disabled={requestedActionBusy}>
+                      Wyslij do graczy
+                    </button>
+                  </form>
+                )}
+              </>
             )}
 
             <div className="campaignMaterialList">
@@ -436,10 +527,9 @@ export default function LiveSessionPage() {
                     <strong>{roll.rollLabel}</strong>
                     <span className="campaignMemberBadge">{roll.status}</span>
                   </div>
-                  {isGmView ? <p>Target: {roll.characterName || roll.targetName || "-"}</p> : null}
-                  <p>Expression: {roll.rollExpression || "fallback"}</p>
-                  {roll.dcVisible && roll.dc != null && <p>DC: {roll.dc}</p>}
-                  {roll.resultTotal != null && <p>Result: {roll.resultTotal}{roll.success != null ? ` (${roll.success ? "SUCCESS" : "FAIL"})` : ""}</p>}
+                  {isGmView ? <p>Cel: {roll.characterName || roll.targetName || "-"}</p> : null}
+                  {roll.dcVisible && roll.dc != null && <p>Trudnosc: {roll.dc}</p>}
+                  {roll.resultTotal != null && <p>Wynik: {roll.resultTotal}{roll.success != null ? ` (${roll.success ? "SUCCESS" : "FAIL"})` : ""}</p>}
 
                   {isInProgress && !isGmView && roll.status === "PENDING" && (
                     <button className="campaignDetailsPrimaryBtn" type="button" disabled={requestedActionBusy} onClick={() => handleFulfillRequestedRoll(roll.id)}>Wykonaj rzut</button>
@@ -458,13 +548,42 @@ export default function LiveSessionPage() {
             {recentRolls.length === 0 ? (
               <p className="liveSessionPlaceholder">Brak rzutow sesji albo podglad historii jest niedostepny.</p>
             ) : (
-              <ul className="liveSessionRollHistoryList">
+              <div className="campaignMaterialList">
                 {recentRolls.map((roll) => (
-                  <li key={roll.id || `${roll.createdAt}-${roll.expression}`}>
-                    {roll.expression || "roll"} = {roll.total ?? "?"} ({roll.rollType || "GENERIC"})
-                  </li>
+                  <article key={roll.id || `${roll.createdAt}-${roll.rollExpression}`} className="campaignMaterialCard">
+                    <strong>{roll.rollLabel || roll.rollType || "Rzut"}</strong>
+                    <p>Rzucal: {roll.rolledByUsername || `User #${roll.rolledByUserId ?? "-"}`}</p>
+                    <p>Postac: {roll.characterName || roll.characterId || "-"}</p>
+                    <p>Wynik: {roll.total ?? "?"}</p>
+                    <p>Data: {formatDateTime(roll.createdAt)}</p>
+                  </article>
                 ))}
-              </ul>
+              </div>
+            )}
+          </section>
+
+          <section className="campaignDetailsCard panel-soft">
+            <h2 className="campaignDetailsCardTitle">Statystyki rzutow</h2>
+            <div className="liveSessionStatsGrid">
+              <p>Liczba rzutow: <strong>{rollStats.count}</strong></p>
+              <p>Sredni wynik: <strong>{rollStats.average ?? "-"}</strong></p>
+              <p>Najwyzszy wynik: <strong>{rollStats.highest ?? "-"}</strong></p>
+              <p>Najnizszy wynik: <strong>{rollStats.lowest ?? "-"}</strong></p>
+            </div>
+            {rollStats.perPlayer.length === 0 ? (
+              <p className="liveSessionPlaceholder">Brak danych per gracz.</p>
+            ) : (
+              <div className="liveSessionBars">
+                {rollStats.perPlayer.map(([name, count]) => (
+                  <div key={name} className="liveSessionBarRow">
+                    <span>{name}</span>
+                    <div className="liveSessionBarTrack">
+                      <div className="liveSessionBarFill" style={{ width: `${Math.max(8, Math.round((count / rollStats.maxCount) * 100))}%` }} />
+                    </div>
+                    <strong>{count}</strong>
+                  </div>
+                ))}
+              </div>
             )}
           </section>
 

@@ -1011,3 +1011,14 @@ Refactor note (v0.6.6):
 - `DicePage` zmienia etykiete typu rzutu z `Przewaga` na `Ulatwienie` bez zmiany mechaniki.
 - `CompendiumPage` pokazuje neutralny empty state przy braku danych zamiast traktowac kazdy brak jako krytyczny blad.
 
+
+---
+
+### Live Session Update (v0.8.6)
+
+- Requested rolls in Live Session are now GM-first quick tasks (button `Zadaj rzut`) instead of a technical-only form.
+- GM selects targets from players/characters directly (no manual ID entry in basic flow).
+- Advanced technical fields stay available under advanced options.
+- Live Session now includes a richer `Historia rzutow` panel (who, label, result, timestamp).
+- Live Session now includes a `Statystyki rzutow` panel (count, average, min, max, per-player split with lightweight CSS bars).
+- Player view now includes a small assigned-character panel (avatar, name, level/basic info, system) with empty state fallback.

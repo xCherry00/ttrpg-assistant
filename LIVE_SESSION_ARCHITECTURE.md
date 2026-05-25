@@ -1,6 +1,6 @@
-# Live Session Workspace Architecture (v0.7.8 GM/Player Split)
+# Live Session Workspace Architecture (v0.8.6 Quick Requested Rolls & Roll Analytics)
 
-## 0. Current Implementation Status (updated through v0.7.5)
+## 0. Current Implementation Status (updated through v0.8.6)
 
 - Route implemented: `/campaigns/:campaignId/sessions/:sessionId/live`.
 - LiveSessionPage implemented with clear role-sensitive split:
@@ -22,6 +22,13 @@
 - v0.7.6 tracker improvements apply only to standalone `/initiative` page and do not re-enable live-session initiative preview.
 - No WebSockets/SSE in this stage.
 - Requested-roll persistence is implemented (`requested_rolls` + `dice_rolls` integration).
+- GM requested-roll creation is now optimized as a quick task panel:
+  - action button `Zadaj rzut`,
+  - target selection by players/characters (without manual IDs),
+  - optional advanced technical options hidden behind dedicated toggle.
+- LiveSession now includes:
+  - full session roll history panel,
+  - lightweight roll analytics panel (count/avg/min/max + per-player bars).
 
 ## 1. Screen Responsibility Split
 
@@ -82,7 +89,7 @@
 ## 2a. Embedded Session Tools
 
 ### Embedded Dice / Requested Rolls Panel
-- GM can request roll from selected player/character.
+- GM can request roll from selected player/character from quick panel (`Zadaj rzut`).
 - Player executes requested roll without leaving LiveSessionPage.
 - Result is stored in existing `dice_rolls`.
 - GM sees DC and result comparison.
@@ -105,10 +112,12 @@
   - save action.
 - Party/players panel with campaign character roster and owner metadata.
 - Requested rolls:
-  - basic section (`dla kogo`, `etykieta`, `typ`, `wyrazenie`, `DC`),
-  - advanced section (target IDs, ability/skill keys, visibility toggles).
+  - quick panel opened from `Zadaj rzut`,
+  - basic section (`etykieta`, `trudnosc/DC`, `typ`, `wyrazenie`, target picker),
+  - advanced section (ability/skill keys, visibility toggles, technical target fields in read-only/fallback mode).
 - Active requested rolls list with pending status and cancel action.
-- Session roll history panel.
+- Session roll history panel (who rolled, label, result, timestamp).
+- Roll analytics panel (count, average, highest, lowest, per-player split).
 - Session lifecycle actions in header:
   - start (`PLANNED`),
   - finish (`IN_PROGRESS`).
@@ -117,27 +126,26 @@
 
 - Shared scene panel in read-only mode.
 - My character panel:
-  - assigned character in campaign context,
+  - assigned character in campaign context (`avatar`, `name`, `level/basic info`, `system`),
   - neutral empty state when no character is assigned.
 - My requested rolls:
   - only rolls targeted to player/user or player's character,
   - action `Wykonaj rzut` for pending rolls.
 - Session roll history panel (read-only).
+- Roll analytics panel (read-only).
 - No access to GM session lifecycle actions.
 - No access to technical requested-roll fields.
 
 ## 5. Requested Rolls Model (Behavior)
 
-1. GM selects target player and/or character.
-2. GM chooses roll type/category.
-3. GM sets label (example: `Wiedza Tajemna`).
-4. GM enters DC value.
-5. GM toggles DC visibility (`hidden` vs `visible`).
-6. GM may set optional skill/ability context.
-7. Player executes roll from LiveSessionPage.
-8. System persists result in existing `dice_rolls` history.
-9. GM sees evaluation vs DC (raw + success/failure interpretation).
-10. Player sees roll result and sees success/failure only according to visibility policy.
+1. GM clicks `Zadaj rzut`.
+2. GM selects target mode: `ALL`, selected characters, or selected players.
+3. GM sets label, difficulty/DC, and optional roll type/expression.
+4. Technical fields remain under advanced options.
+5. GM sends request to players.
+6. Player executes roll from LiveSessionPage.
+7. System persists result in existing `dice_rolls` history.
+8. GM and players see result per visibility policy.
 
 ## 6. Scene Image Model (Behavior)
 

@@ -51,7 +51,7 @@ describe("LiveSessionPage role split", () => {
     seedDefaults();
   });
 
-  it("MG sees scene form and requested roll form", async () => {
+  it("MG sees scene form and quick requested roll action", async () => {
     campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "Dragonfall", owner: true, systemCode: "dnd5e" });
 
     renderPage();
@@ -59,17 +59,51 @@ describe("LiveSessionPage role split", () => {
     await waitFor(() => {
       expect(screen.getByRole("heading", { name: "Scene Panel" })).toBeInTheDocument();
       expect(screen.getByLabelText("Tytul sceny")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "Utworz requested roll" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Zadaj rzut" })).toBeInTheDocument();
     });
   });
 
-  it("player sees read-only scene and no requested roll form", async () => {
+  it("player sees read-only scene and no requested roll GM panel", async () => {
     renderPage();
 
     await waitFor(() => {
       expect(screen.getByRole("heading", { name: "Aktualna scena" })).toBeInTheDocument();
       expect(screen.queryByLabelText("Tytul sceny")).not.toBeInTheDocument();
-      expect(screen.queryByRole("button", { name: "Utworz requested roll" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Zadaj rzut" })).not.toBeInTheDocument();
+    });
+  });
+
+  it("clicking Zadaj rzut opens quick panel", async () => {
+    campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "Dragonfall", owner: true, systemCode: "dnd5e" });
+    renderPage();
+
+    fireEvent.click(await screen.findByRole("button", { name: "Zadaj rzut" }));
+    expect(await screen.findByRole("button", { name: "Wyslij do graczy" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Trudnosc / DC")).toBeInTheDocument();
+  });
+
+  it("MG can choose players without entering IDs", async () => {
+    campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "Dragonfall", owner: true, systemCode: "dnd5e" });
+    campaignsApi.getCampaignCharacters.mockResolvedValue([{ characterId: 100, characterName: "Ela", userId: 33, systemCode: "dnd5e" }]);
+    campaignsApi.createRequestedRoll.mockResolvedValue({});
+    renderPage();
+
+    fireEvent.click(await screen.findByRole("button", { name: "Zadaj rzut" }));
+    fireEvent.change(screen.getByLabelText("Do kogo?"), { target: { value: "CHARACTER" } });
+    fireEvent.click(screen.getByRole("checkbox"));
+    fireEvent.change(screen.getByLabelText("Etykieta rzutu"), { target: { value: "Percepcja" } });
+    fireEvent.click(screen.getByRole("button", { name: "Wyslij do graczy" }));
+
+    await waitFor(() => {
+      expect(campaignsApi.createRequestedRoll).toHaveBeenCalledWith(
+        "test-token",
+        "10",
+        "2",
+        expect.objectContaining({
+          targetMode: "CHARACTER",
+          targetCharacterIds: [100],
+        }),
+      );
     });
   });
 
@@ -119,7 +153,7 @@ describe("LiveSessionPage role split", () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.queryByRole("button", { name: "Utworz requested roll" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Zadaj rzut" })).not.toBeInTheDocument();
       expect(screen.getByRole("link", { name: "Dodaj notatki po sesji" })).toBeInTheDocument();
     });
   });
@@ -154,5 +188,32 @@ describe("LiveSessionPage role split", () => {
     await waitFor(() => {
       expect(campaignsApi.fulfillRequestedRoll).toHaveBeenCalledWith("test-token", "10", "2", 22, {});
     });
+  });
+
+  it("renders roll history and stats panel from data", async () => {
+    campaignsApi.getCampaignDiceRolls.mockResolvedValue([
+      { id: 1, total: 12, rolledByUsername: "ela", rollLabel: "Perception", createdAt: "2026-05-24T10:00:00Z" },
+      { id: 2, total: 18, rolledByUsername: "ela", rollLabel: "Attack", createdAt: "2026-05-24T10:05:00Z" },
+      { id: 3, total: 5, rolledByUsername: "arek", rollLabel: "Save", createdAt: "2026-05-24T10:06:00Z" },
+    ]);
+    renderPage();
+
+    expect(await screen.findByRole("heading", { name: "Historia rzutow" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Statystyki rzutow" })).toBeInTheDocument();
+    expect(screen.getByText("Liczba rzutow:")).toBeInTheDocument();
+    expect(screen.getByText("3")).toBeInTheDocument();
+  });
+
+  it("shows character mini panel with avatar/name/level and empty state when missing", async () => {
+    campaignsApi.getCampaignCharacters.mockResolvedValue([
+      { characterId: 100, characterName: "Ela", userId: 33, level: 4, systemCode: "dnd5e", portraitUrl: "https://img.test/ela.png" },
+    ]);
+    renderPage();
+    expect(await screen.findByText("Ela")).toBeInTheDocument();
+    expect(screen.getByText("Poziom: 4")).toBeInTheDocument();
+
+    campaignsApi.getCampaignCharacters.mockResolvedValue([]);
+    renderPage();
+    expect(await screen.findByText("Nie masz przypisanej postaci w tej kampanii.")).toBeInTheDocument();
   });
 });
