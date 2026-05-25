@@ -10,6 +10,8 @@ export default function CharacterSidebar({
   selectedId,
   onSelect,
   onCreate,
+  onExport,
+  onImport,
 }) {
   const [query, setQuery] = useState("");
   const filtered = useMemo(() => {
@@ -26,6 +28,10 @@ export default function CharacterSidebar({
           <p>{items.length} zapisanych</p>
         </div>
         <button type="button" className="charactersPrimaryBtn" onClick={onCreate}>+ Nowa postac</button>
+      </div>
+      <div style={{ display: "flex", gap: 8 }}>
+        <button type="button" className="charactersGhostBtn" onClick={onImport}>Importuj JSON</button>
+        <button type="button" className="charactersGhostBtn" onClick={onExport} disabled={!selectedId}>Eksportuj JSON</button>
       </div>
 
       <label className="charactersSearch">

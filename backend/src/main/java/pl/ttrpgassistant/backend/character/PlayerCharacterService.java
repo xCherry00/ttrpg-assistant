@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.ttrpgassistant.backend.character.dto.CharacterExportResponse;
+import pl.ttrpgassistant.backend.character.dto.CharacterImportRequest;
+import pl.ttrpgassistant.backend.character.dto.CharacterImportResponse;
 import pl.ttrpgassistant.backend.character.dto.PlayerCharacterDetailsResponse;
 import pl.ttrpgassistant.backend.character.dto.PlayerCharacterSummaryResponse;
 import pl.ttrpgassistant.backend.character.dto.QuickCreateDndCharacterRequest;
@@ -12,6 +15,7 @@ import pl.ttrpgassistant.backend.character.dto.UpdateCharacterSheetRequest;
 import pl.ttrpgassistant.backend.character.dto.CreateCocQuickCharacterRequest;
 import pl.ttrpgassistant.backend.common.error.ResourceNotFoundException;
 
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +23,8 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class PlayerCharacterService {
+    private static final String EXPORT_VERSION = "v1";
+    private static final int MAX_IMPORT_SHEET_BYTES = 400_000;
 
     private final PlayerCharacterRepository playerCharacterRepository;
     private final DndCharacterSheetService dndSheetService;
@@ -36,6 +42,76 @@ public class PlayerCharacterService {
     @Transactional(readOnly = true)
     public PlayerCharacterDetailsResponse getForUser(Long userId, Long characterId) {
         return toDetails(requireOwnedCharacter(userId, characterId));
+    }
+
+    @Transactional(readOnly = true)
+    public CharacterExportResponse exportForUser(Long userId, Long characterId) {
+        PlayerCharacterEntity entity = requireOwnedCharacter(userId, characterId);
+        Map<String, Object> metadata = new LinkedHashMap<>();
+        metadata.put("status", entity.getStatus());
+        metadata.put("maxHp", entity.getMaxHp());
+        metadata.put("currentHp", entity.getCurrentHp());
+        metadata.put("tempHp", entity.getTempHp());
+        metadata.put("privateNotes", entity.getPrivateNotes() == null ? "" : entity.getPrivateNotes());
+
+        return new CharacterExportResponse(
+                EXPORT_VERSION,
+                Instant.now(),
+                new CharacterExportResponse.CharacterExportPayload(
+                        entity.getName(),
+                        entity.getSystemCode(),
+                        entity.getRaceName(),
+                        entity.getClassName(),
+                        entity.getBackgroundName(),
+                        entity.getLevel(),
+                        entity.getPortraitUrl(),
+                        readSheet(entity.getSheetJson()),
+                        metadata
+                )
+        );
+    }
+
+    @Transactional
+    public CharacterImportResponse importForUser(Long userId, CharacterImportRequest request) {
+        CharacterImportRequest.CharacterImportPayload payload = request.character();
+        if (payload == null) {
+            throw new IllegalArgumentException("character is required");
+        }
+        String systemCode = normalizeSystemCode(payload.systemCode());
+        if (!systemCode.equals("dnd5e") && !systemCode.equals("coc7e")) {
+            throw new IllegalArgumentException("Unsupported character system.");
+        }
+        validateSheetJson(payload.sheetJson());
+
+        Map<String, Object> metadata = payload.metadata() == null ? Map.of() : payload.metadata();
+        int maxHp = intValue(metadata.get("maxHp"), 1);
+        int currentHp = intValue(metadata.get("currentHp"), maxHp);
+        int tempHp = intValue(metadata.get("tempHp"), 0);
+        String status = metadata.get("status") == null ? "ACTIVE" : String.valueOf(metadata.get("status"));
+        String privateNotes = metadata.get("privateNotes") == null ? "" : String.valueOf(metadata.get("privateNotes"));
+
+        String baseName = payload.name().trim();
+        String finalName = uniqueName(userId, baseName);
+
+        PlayerCharacterEntity entity = PlayerCharacterEntity.builder()
+                .ownerUserId(userId)
+                .systemCode(systemCode)
+                .status(status.isBlank() ? "ACTIVE" : status)
+                .name(finalName)
+                .portraitUrl(normalizeNullable(payload.portraitUrl()))
+                .raceName(nullToEmpty(payload.raceName()))
+                .className(nullToEmpty(payload.className()))
+                .backgroundName(nullToEmpty(payload.backgroundName()))
+                .level(payload.level() == null ? ("coc7e".equals(systemCode) ? 0 : 1) : payload.level())
+                .maxHp(Math.max(1, maxHp))
+                .currentHp(Math.max(0, currentHp))
+                .tempHp(Math.max(0, tempHp))
+                .privateNotes(privateNotes)
+                .sheetJson(writeSheet(payload.sheetJson()))
+                .build();
+
+        PlayerCharacterEntity saved = playerCharacterRepository.save(entity);
+        return new CharacterImportResponse(saved.getId(), saved.getName(), saved.getSystemCode(), saved.getCreatedAt());
     }
 
     @Transactional
@@ -247,6 +323,45 @@ public class PlayerCharacterService {
             return null;
         }
         return value.trim();
+    }
+
+    private String normalizeSystemCode(String raw) {
+        return raw == null ? "" : raw.trim().toLowerCase();
+    }
+
+    private void validateSheetJson(Map<String, Object> sheetJson) {
+        if (sheetJson == null) {
+            throw new IllegalArgumentException("sheetJson is required");
+        }
+        try {
+            int size = objectMapper.writeValueAsBytes(sheetJson).length;
+            if (size > MAX_IMPORT_SHEET_BYTES) {
+                throw new IllegalArgumentException("sheetJson payload too large");
+            }
+        } catch (IllegalArgumentException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("Invalid sheetJson payload");
+        }
+    }
+
+    private String uniqueName(Long userId, String baseName) {
+        if (!playerCharacterRepository.existsByOwnerUserIdAndNameIgnoreCase(userId, baseName)) {
+            return baseName;
+        }
+        int suffix = 1;
+        while (suffix < 1000) {
+            String candidate = baseName + " (import " + suffix + ")";
+            if (!playerCharacterRepository.existsByOwnerUserIdAndNameIgnoreCase(userId, candidate)) {
+                return candidate;
+            }
+            suffix++;
+        }
+        return baseName + " (import)";
+    }
+
+    private String nullToEmpty(String value) {
+        return value == null ? "" : value.trim();
     }
 
 }

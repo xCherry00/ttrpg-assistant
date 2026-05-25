@@ -896,3 +896,17 @@ Refactor note (v0.6.6):
   - po `FINISHED` CTA `Dodaj notatki po sesji`.
 - Initiative preview pozostaje poza MVP i nie jest renderowane w LiveSession.
 
+### v0.7.9 - Add character JSON import and export
+- Dodano eksport postaci do JSON:
+  - `GET /api/characters/{characterId}/export`
+  - payload zawiera wersje eksportu, timestamp i dane postaci (w tym `sheetJson`).
+- Dodano import postaci z JSON:
+  - `POST /api/characters/import`
+  - import tworzy nowa postac na koncie aktualnego uzytkownika (bez nadpisywania istniejacej).
+- Walidacja importu obejmuje:
+  - wymagane pola (`character`, `name`, `systemCode`, `sheetJson`),
+  - obslugiwane systemy: `dnd5e`, `coc7e`,
+  - limit rozmiaru `sheetJson` payload.
+- Frontend dodaje akcje `Eksportuj JSON` i `Importuj JSON` w module postaci.
+- Import z zewnetrznych serwisow (np. D&D Beyond) pozostaje poza MVP.
+

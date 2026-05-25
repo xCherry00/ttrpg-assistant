@@ -10,4 +10,6 @@ public interface PlayerCharacterRepository extends JpaRepository<PlayerCharacter
     List<PlayerCharacterEntity> findByOwnerUserIdOrderByUpdatedAtDesc(Long ownerUserId);
 
     Optional<PlayerCharacterEntity> findByIdAndOwnerUserId(Long id, Long ownerUserId);
+
+    boolean existsByOwnerUserIdAndNameIgnoreCase(Long ownerUserId, String name);
 }

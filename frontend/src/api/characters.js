@@ -39,3 +39,11 @@ export function quickCreateCocCharacter(token, body) {
 export function updateCharacterSheet(token, characterId, body) {
   return http(`/api/characters/${characterId}/sheet`, { method: "PUT", token, body });
 }
+
+export function exportCharacter(token, characterId) {
+  return http(`/api/characters/${characterId}/export`, { method: "GET", token });
+}
+
+export function importCharacter(token, payload) {
+  return http("/api/characters/import", { method: "POST", token, body: payload });
+}

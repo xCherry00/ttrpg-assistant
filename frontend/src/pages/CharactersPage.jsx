@@ -1,8 +1,10 @@
-﻿import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import {
   deleteCharacter,
+  exportCharacter,
   getCharacter,
+  importCharacter,
   listCharacters,
   quickCreateCharacter,
   quickCreateCocCharacter,
@@ -29,6 +31,7 @@ export default function CharactersPage() {
   const [selectedCreationSystem, setSelectedCreationSystem] = useState(null);
   const [notice, setNotice] = useState(null);
   const [error, setError] = useState("");
+  const importInputRef = useRef(null);
 
   const showNotice = useCallback((type, text) => {
     setNotice({ type, text });
@@ -151,6 +154,57 @@ export default function CharactersPage() {
     }
   }
 
+  async function handleExportJson() {
+    if (!selectedId) return;
+    try {
+      const payload = await exportCharacter(token, selectedId);
+      const baseName = String(detail?.name || "character")
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || "character";
+      const filename = `${baseName}-ttrpg-assistant.json`;
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      window.URL.revokeObjectURL(url);
+      showNotice("success", "Wyeksportowano postac do JSON.");
+    } catch (err) {
+      const message = err?.message || "Nie udalo sie wyeksportowac postaci.";
+      setError(message);
+      showNotice("error", message);
+    }
+  }
+
+  function handleImportClick() {
+    importInputRef.current?.click();
+  }
+
+  async function handleImportFile(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    try {
+      const raw = await file.text();
+      const payload = JSON.parse(raw);
+      const imported = await importCharacter(token, payload);
+      await loadList({ preserveSelection: true });
+      if (imported?.characterId) {
+        setSelectedId(imported.characterId);
+      }
+      showNotice("success", "Postac zaimportowana.");
+    } catch (err) {
+      const message = err?.message || "Nie udalo sie zaimportowac postaci.";
+      setError(message);
+      showNotice("error", message);
+    }
+  }
+
   function openCreateFlow() {
     setError("");
     setSelectedCreationSystem(null);
@@ -191,6 +245,15 @@ export default function CharactersPage() {
             selectedId={selectedId}
             onSelect={setSelectedId}
             onCreate={openCreateFlow}
+            onExport={handleExportJson}
+            onImport={handleImportClick}
+          />
+          <input
+            ref={importInputRef}
+            type="file"
+            accept=".json,application/json"
+            style={{ display: "none" }}
+            onChange={handleImportFile}
           />
 
           <section className="charactersDetail">
@@ -248,3 +311,4 @@ export default function CharactersPage() {
     </div>
   );
 }
+

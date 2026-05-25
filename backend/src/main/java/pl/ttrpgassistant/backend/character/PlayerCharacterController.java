@@ -17,6 +17,9 @@ import pl.ttrpgassistant.backend.character.dto.PlayerCharacterSummaryResponse;
 import pl.ttrpgassistant.backend.character.dto.QuickCreateDndCharacterRequest;
 import pl.ttrpgassistant.backend.character.dto.UpdateCharacterSheetRequest;
 import pl.ttrpgassistant.backend.character.dto.CreateCocQuickCharacterRequest;
+import pl.ttrpgassistant.backend.character.dto.CharacterExportResponse;
+import pl.ttrpgassistant.backend.character.dto.CharacterImportRequest;
+import pl.ttrpgassistant.backend.character.dto.CharacterImportResponse;
 import pl.ttrpgassistant.backend.common.pagination.PagedResponse;
 
 import java.util.List;
@@ -42,6 +45,21 @@ public class PlayerCharacterController {
     public PlayerCharacterDetailsResponse get(Authentication auth, @PathVariable Long characterId) {
         Long userId = (Long) auth.getPrincipal();
         return playerCharacterService.getForUser(userId, characterId);
+    }
+
+    @GetMapping("/api/characters/{characterId}/export")
+    public CharacterExportResponse export(Authentication auth, @PathVariable Long characterId) {
+        Long userId = (Long) auth.getPrincipal();
+        return playerCharacterService.exportForUser(userId, characterId);
+    }
+
+    @PostMapping("/api/characters/import")
+    public CharacterImportResponse importCharacter(
+            Authentication auth,
+            @Valid @RequestBody CharacterImportRequest request
+    ) {
+        Long userId = (Long) auth.getPrincipal();
+        return playerCharacterService.importForUser(userId, request);
     }
 
     @DeleteMapping("/api/characters/{characterId}")

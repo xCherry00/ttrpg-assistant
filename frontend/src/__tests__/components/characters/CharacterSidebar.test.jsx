@@ -11,6 +11,8 @@ describe("CharacterSidebar", () => {
         selectedId={7}
         onSelect={onSelect}
         onCreate={vi.fn()}
+        onExport={vi.fn()}
+        onImport={vi.fn()}
       />,
     );
 
