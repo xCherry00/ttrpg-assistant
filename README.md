@@ -664,7 +664,7 @@ Refactor note (v0.6.6):
 - LiveSessionPage Scene Panel now uses backend live state:
   - owner: inline scene form (`sceneTitle`, `sceneImageUrl`, `sceneDescription`),
   - member: read-only scene view.
-- MVP image model is URL/data-url only (no file upload).
+- MVP image model supports unified local file upload (`/api/uploads/images`) and URL fallback.
 - No WebSocket/SSE live sync in this stage (future polling/SSE/WebSocket planned).
 
 ### Campaign System Compatibility (v0.7.0)
@@ -840,4 +840,20 @@ Refactor note (v0.6.6):
   - zwraca zakonczone sesje (`FINISHED`) bez notatki biezacego uzytkownika.
 - W `CampaignSessionsPanel` sesje `FINISHED` maja akcje `Moje notatki` (modal zapisu/usuwania).
 - Dane notatek sa prywatne dla uzytkownika i nie sa udostepniane innym czlonkom kampanii.
+
+### v0.7.5 - Add unified image upload support
+- Dodano endpoint uploadu obrazow: `POST /api/uploads/images` (multipart/form-data, field `file`).
+- Publiczny odczyt obrazow jest dostepny przez `GET /uploads/images/{filename}`.
+- Walidacja uploadu:
+  - typy: `image/jpeg`, `image/png`, `image/webp`
+  - limit rozmiaru: 5 MB
+  - nazwa pliku: bezpieczna (`UUID + rozszerzenie`).
+- Storage: lokalny katalog backendu (`uploads/images`).
+- Upload zostal podlaczony do kluczowych miejsc UI:
+  - avatar profilu,
+  - okladka kampanii (tworzenie/edycja),
+  - portret postaci (D&D i CoC),
+  - obraz sceny Live Session.
+- Wklejenie URL obrazu pozostaje dostepne jako opcjonalna sciezka.
+- Integracje z zewnetrznym storage (S3/Cloudinary) sa celowo odlozone (future work).
 

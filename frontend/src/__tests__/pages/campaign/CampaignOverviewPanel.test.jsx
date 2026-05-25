@@ -1,6 +1,10 @@
 ﻿import { render, screen } from "@testing-library/react";
 import CampaignOverviewPanel from "../../../pages/campaign/components/CampaignOverviewPanel";
 
+vi.mock("../../../auth/AuthContext", () => ({
+  useAuth: () => ({ token: "test-token" }),
+}));
+
 describe("CampaignOverviewPanel", () => {
   it("renders campaign overview data", () => {
     render(
@@ -10,7 +14,7 @@ describe("CampaignOverviewPanel", () => {
         busy={false}
         onUpdate={() => {}}
         onDelete={() => {}}
-      />
+      />,
     );
 
     expect(screen.getByText("Storm")).toBeInTheDocument();

@@ -1,3 +1,5 @@
+import ImageUpload from "../../common/ImageUpload";
+
 export default function CharacterHeader({
   detail,
   identity,
@@ -24,6 +26,15 @@ export default function CharacterHeader({
             <span>Portrait</span>
             <input value={portraitUrl} onChange={(e) => onPortraitUrlChange(e.target.value)} placeholder="URL lub data:image/..." />
           </label>
+          <div className="sheetField" style={{ gridColumn: "1 / -1" }}>
+            <ImageUpload
+              label="Wgraj portret"
+              value={portrait}
+              onChange={onPortraitUrlChange}
+              onRemove={() => onPortraitUrlChange("")}
+              previewAlt="Portret postaci"
+            />
+          </div>
           <label className="sheetField">
             <span>Race</span>
             <input value={identity?.race || detail?.raceName || "-"} readOnly />

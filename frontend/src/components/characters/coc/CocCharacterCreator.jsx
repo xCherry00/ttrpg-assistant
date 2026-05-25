@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../../auth/AuthContext";
 import { getCocOccupations } from "../../../api/characters";
+import ImageUpload from "../../common/ImageUpload";
 
 export default function CocCharacterCreator({ onCreate, creating, onBack }) {
   const { token } = useAuth();
@@ -53,6 +54,13 @@ export default function CocCharacterCreator({ onCreate, creating, onBack }) {
             <label className="charactersField"><span>Sex</span><input value={form.sex} onChange={(e) => setForm((p) => ({ ...p, sex: e.target.value }))} /></label>
             <label className="charactersField"><span>Occupation</span><select value={form.occupationIndex} onChange={(e) => setForm((p) => ({ ...p, occupationIndex: e.target.value }))}>{occupations.map((item) => <option key={item.index} value={item.index}>{item.name}</option>)}</select></label>
             <label className="charactersField"><span>Portrait URL</span><input value={form.portraitUrl} onChange={(e) => setForm((p) => ({ ...p, portraitUrl: e.target.value }))} placeholder="Optional" /></label>
+            <ImageUpload
+              label="Wgraj portret"
+              value={form.portraitUrl}
+              onChange={(url) => setForm((p) => ({ ...p, portraitUrl: url }))}
+              onRemove={() => setForm((p) => ({ ...p, portraitUrl: "" }))}
+              previewAlt="Portret badacza"
+            />
           </div>
           <div className="charactersActionsFooter">
             {onBack && <button type="button" className="charactersGhostBtn" disabled={creating} onClick={onBack}>Wroc do systemow</button>}

@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { clearToken, getToken, setToken as persistToken } from "./authstorage";
 
-const AuthContext = createContext(null);
+export const AuthContext = createContext(null);
 
 /**
  * AuthProvider component that manages authentication state.

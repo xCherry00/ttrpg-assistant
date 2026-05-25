@@ -4,6 +4,7 @@ import { useAuth } from "../auth/AuthContext";
 import { getMyProfile, updateDisplayName } from "../api/settings";
 import { listCampaigns, listCampaignSessions } from "../api/campaigns";
 import { getSocialOverview } from "../api/social";
+import ImageUpload from "../components/common/ImageUpload";
 import "../styles/profile.css";
 
 const RECENT_GENERATIONS_KEY = "ttrpg_recent_generations_v1";
@@ -282,28 +283,11 @@ export default function ProfilePage() {
     }
   }
 
-  function handleAvatarChange(event) {
+  function handleAvatarUploaded(url) {
     setAvatarError("");
-    const file = event.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      setAvatarError("Wybierz plik graficzny (PNG/JPG/WebP).");
-      return;
-    }
-    if (file.size > 2 * 1024 * 1024) {
-      setAvatarError("Maksymalny rozmiar avatara to 2 MB.");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = String(reader.result || "");
-      if (!dataUrl) return;
-      localStorage.setItem(getAvatarStorageKey(profile?.email), dataUrl);
-      setAvatarSrc(dataUrl);
-      window.dispatchEvent(new Event("ttrpg-profile-updated"));
-    };
-    reader.readAsDataURL(file);
+    localStorage.setItem(getAvatarStorageKey(profile?.email), url);
+    setAvatarSrc(url);
+    window.dispatchEvent(new Event("ttrpg-profile-updated"));
   }
 
   function handleRemoveAvatar() {
@@ -338,8 +322,7 @@ export default function ProfilePage() {
               <div className="profileIdentityAvatar" aria-hidden="true">
                 {avatarSrc ? <img src={avatarSrc} alt="Avatar" /> : avatarLabel}
               </div>
-              <label className="profileAvatarEditBtn" htmlFor="profile-avatar-input">edytuj</label>
-              <input id="profile-avatar-input" type="file" accept="image/*" onChange={handleAvatarChange} />
+              <div className="profileAvatarEditBtn">edytuj</div>
             </div>
 
             <h2>{displayName}</h2>
@@ -370,6 +353,13 @@ export default function ProfilePage() {
                 )}
               </div>
             </form>
+            <ImageUpload
+              label="Avatar"
+              value={avatarSrc}
+              onChange={handleAvatarUploaded}
+              onRemove={handleRemoveAvatar}
+              previewAlt="Avatar uzytkownika"
+            />
 
             {avatarError && <div className="profileInlineMsg is-error">{avatarError}</div>}
             {nameError && <div className="profileInlineMsg is-error">{nameError}</div>}

@@ -1,10 +1,12 @@
 ﻿import { useEffect, useMemo, useState } from "react";
+import ImageUpload from "../../../components/common/ImageUpload";
 
 export default function CampaignOverviewPanel({ campaign, isOwner, busy, onUpdate, onDelete }) {
   const [form, setForm] = useState({
     title: campaign?.title || "",
     description: campaign?.description || "",
     status: campaign?.status || "active",
+    coverImageUrl: campaign?.coverImageUrl || "",
   });
 
   useEffect(() => {
@@ -12,6 +14,7 @@ export default function CampaignOverviewPanel({ campaign, isOwner, busy, onUpdat
       title: campaign?.title || "",
       description: campaign?.description || "",
       status: campaign?.status || "active",
+      coverImageUrl: campaign?.coverImageUrl || "",
     });
   }, [campaign]);
 
@@ -19,7 +22,8 @@ export default function CampaignOverviewPanel({ campaign, isOwner, busy, onUpdat
     return (
       form.title !== (campaign?.title || "") ||
       form.description !== (campaign?.description || "") ||
-      form.status !== (campaign?.status || "active")
+      form.status !== (campaign?.status || "active") ||
+      form.coverImageUrl !== (campaign?.coverImageUrl || "")
     );
   }, [form, campaign]);
 
@@ -30,6 +34,7 @@ export default function CampaignOverviewPanel({ campaign, isOwner, busy, onUpdat
       title: form.title.trim(),
       description: form.description.trim(),
       status: form.status,
+      coverImageUrl: form.coverImageUrl || null,
     });
   }
 
@@ -59,6 +64,17 @@ export default function CampaignOverviewPanel({ campaign, isOwner, busy, onUpdat
               <option value="finished">finished</option>
               <option value="archived">archived</option>
             </select>
+          </label>
+          <ImageUpload
+            label="Okładka kampanii"
+            value={form.coverImageUrl}
+            onChange={(url) => setForm((prev) => ({ ...prev, coverImageUrl: url }))}
+            onRemove={() => setForm((prev) => ({ ...prev, coverImageUrl: "" }))}
+            previewAlt="Okładka kampanii"
+          />
+          <label className="campaignField">
+            <span>URL okładki (opcjonalnie)</span>
+            <input value={form.coverImageUrl} onChange={(e) => setForm((prev) => ({ ...prev, coverImageUrl: e.target.value }))} />
           </label>
           <div style={{ display: "flex", gap: 8 }}>
             <button className="campaignDetailsPrimaryBtn" type="submit" disabled={busy || !dirty}>Zapisz</button>

@@ -42,6 +42,7 @@ public class SecurityConfig {
 
                 // public
                 .requestMatchers("/api/health").permitAll()
+                .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/generators/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/generator-results/recent").permitAll()

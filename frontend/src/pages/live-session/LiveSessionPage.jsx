@@ -15,6 +15,7 @@ import {
   cancelRequestedRoll,
   updateSessionLiveState,
 } from "../../api/campaigns";
+import ImageUpload from "../../components/common/ImageUpload";
 import "../../styles/live-session.css";
 
 function sessionStatusLabel(status) {
@@ -46,6 +47,7 @@ export default function LiveSessionPage() {
   const [sessionActionBusy, setSessionActionBusy] = useState(false);
   const [requestedRolls, setRequestedRolls] = useState([]);
   const [requestedActionBusy, setRequestedActionBusy] = useState(false);
+  const [sceneForm, setSceneForm] = useState({ sceneTitle: "", sceneImageUrl: "", sceneDescription: "" });
 
   const isGmView = Boolean(campaign?.owner);
 
@@ -75,6 +77,11 @@ export default function LiveSessionPage() {
         setCampaignCharacters(Array.isArray(campaignCharactersData) ? campaignCharactersData : []);
         setRecentRolls(Array.isArray(rollsData) ? rollsData : []);
         setLiveState(liveStateData);
+        setSceneForm({
+          sceneTitle: liveStateData?.sceneTitle || "",
+          sceneImageUrl: liveStateData?.sceneImageUrl || "",
+          sceneDescription: liveStateData?.sceneDescription || "",
+        });
         setRequestedRolls(Array.isArray(requestedRollsData) ? requestedRollsData : []);
       } catch (err) {
         setError(err?.message || "Nie udalo sie zaladowac live session.");
@@ -282,11 +289,10 @@ export default function LiveSessionPage() {
                 className="liveSessionSceneForm"
                 onSubmit={async (event) => {
                   event.preventDefault();
-                  const formData = new FormData(event.currentTarget);
                   const payload = {
-                    sceneTitle: String(formData.get("sceneTitle") || "").trim(),
-                    sceneImageUrl: String(formData.get("sceneImageUrl") || "").trim(),
-                    sceneDescription: String(formData.get("sceneDescription") || "").trim(),
+                    sceneTitle: String(sceneForm.sceneTitle || "").trim(),
+                    sceneImageUrl: String(sceneForm.sceneImageUrl || "").trim(),
+                    sceneDescription: String(sceneForm.sceneDescription || "").trim(),
                     activeEncounterId: null,
                   };
                   setSavingScene(true);
@@ -295,6 +301,11 @@ export default function LiveSessionPage() {
                   try {
                     const updated = await updateSessionLiveState(token, campaignId, sessionId, payload);
                     setLiveState(updated);
+                    setSceneForm({
+                      sceneTitle: updated?.sceneTitle || "",
+                      sceneImageUrl: updated?.sceneImageUrl || "",
+                      sceneDescription: updated?.sceneDescription || "",
+                    });
                     setNotice("Scena zapisana.");
                   } catch (err) {
                     setError(err?.message || "Nie udalo sie zapisac sceny.");
@@ -305,15 +316,37 @@ export default function LiveSessionPage() {
               >
                 <label className="campaignField">
                   <span>Tytul sceny</span>
-                  <input name="sceneTitle" defaultValue={liveState?.sceneTitle || ""} maxLength={160} />
+                  <input
+                    name="sceneTitle"
+                    value={sceneForm.sceneTitle}
+                    onChange={(e) => setSceneForm((prev) => ({ ...prev, sceneTitle: e.target.value }))}
+                    maxLength={160}
+                  />
                 </label>
                 <label className="campaignField">
                   <span>URL obrazu sceny</span>
-                  <input name="sceneImageUrl" defaultValue={liveState?.sceneImageUrl || ""} />
+                  <input
+                    name="sceneImageUrl"
+                    value={sceneForm.sceneImageUrl}
+                    onChange={(e) => setSceneForm((prev) => ({ ...prev, sceneImageUrl: e.target.value }))}
+                  />
                 </label>
+                <ImageUpload
+                  label="Wgraj obraz sceny"
+                  value={sceneForm.sceneImageUrl}
+                  onChange={(url) => setSceneForm((prev) => ({ ...prev, sceneImageUrl: url }))}
+                  onRemove={() => setSceneForm((prev) => ({ ...prev, sceneImageUrl: "" }))}
+                  previewAlt="Obraz sceny"
+                />
                 <label className="campaignField">
                   <span>Opis sceny</span>
-                  <textarea name="sceneDescription" defaultValue={liveState?.sceneDescription || ""} rows={4} maxLength={5000} />
+                  <textarea
+                    name="sceneDescription"
+                    value={sceneForm.sceneDescription}
+                    onChange={(e) => setSceneForm((prev) => ({ ...prev, sceneDescription: e.target.value }))}
+                    rows={4}
+                    maxLength={5000}
+                  />
                 </label>
                 <button type="submit" className="campaignDetailsPrimaryBtn" disabled={savingScene}>
                   Zapisz scene
