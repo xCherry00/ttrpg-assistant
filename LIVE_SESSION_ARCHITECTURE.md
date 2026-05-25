@@ -1,21 +1,23 @@
-# Live Session Workspace Architecture (v0.6.9 Live State + Scene Panel)
+# Live Session Workspace Architecture (v0.7.8 GM/Player Split)
 
 ## 0. Current Implementation Status (updated through v0.7.5)
 
 - Route implemented: `/campaigns/:campaignId/sessions/:sessionId/live`.
-- LiveSessionPage implemented with:
-  - header + back link to campaign workspace,
-  - party/players list based on campaign characters,
-  - role-sensitive MVP split (GM/owner vs member/player),
-  - session roll history preview (best-effort read),
-  - embedded Requested Rolls.
+- LiveSessionPage implemented with clear role-sensitive split:
+  - `GM Live Session View`,
+  - `Player Live Session View`.
+- Shared header includes:
+  - campaign title,
+  - session title,
+  - session status,
+  - link back to campaign page.
 - Scene Panel is now connected to persisted `session_live_state`:
   - owner can edit `sceneTitle`, `sceneImageUrl`, `sceneDescription`,
   - member sees read-only scene content.
 - Scene image in MVP is URL/data-url only (no upload pipeline).
 - `/dice` remains a global roller.
 - `/initiative` is a quick local GM tracker stored in browser localStorage; it does not create or persist campaign encounters.
-- Initiative preview is disabled in LiveSessionPage for MVP.
+- Initiative preview is disabled in LiveSessionPage for MVP and remains outside this scope.
 - Backend combat encounter endpoints remain legacy/future API for campaign/live-session flows.
 - v0.7.6 tracker improvements apply only to standalone `/initiative` page and do not re-enable live-session initiative preview.
 - No WebSockets/SSE in this stage.
@@ -87,8 +89,8 @@
 - Player visibility remains policy-based (only what should be visible).
 
 ### Embedded Initiative Preview
-- Disabled in current MVP.
-- Reserved as future/legacy architecture direction only.
+- Out of MVP scope in LiveSessionPage.
+- `/initiative` remains standalone.
 
 ### Embedded Scene Panel
 - GM sets/updates active scene image.
@@ -96,34 +98,33 @@
 
 ## 3. LiveSessionPage: GM View
 
-- Player/character roster for the active session.
-- Full HP/conditions visibility and quick state checks.
-- Full initiative order preview (or embedded compact tracker with jump-to-initiative option).
-- Scene image panel (current location/scene context).
-- Requested rolls control panel:
-  - target selection,
-  - roll intent metadata,
-  - hidden/public DC behavior.
-- Session roll history panel (recent requested and free rolls).
-- Encounter control shortcuts (select active encounter, finish/advance context actions).
-- Hidden DC support:
-  - GM can keep DC private while still evaluating outcome.
-- Private GM notes area (visible only to GM).
+- Scene panel with editing:
+  - `sceneTitle`,
+  - `sceneImageUrl` + upload helper,
+  - `sceneDescription`,
+  - save action.
+- Party/players panel with campaign character roster and owner metadata.
+- Requested rolls:
+  - basic section (`dla kogo`, `etykieta`, `typ`, `wyrazenie`, `DC`),
+  - advanced section (target IDs, ability/skill keys, visibility toggles).
+- Active requested rolls list with pending status and cancel action.
+- Session roll history panel.
+- Session lifecycle actions in header:
+  - start (`PLANNED`),
+  - finish (`IN_PROGRESS`).
 
 ## 4. LiveSessionPage: Player View
 
-- Own character focus card (identity + key state).
-- Team avatar strip/party visibility.
-- HP/conditions in player-appropriate range (no GM-only internals).
-- Shared scene image panel.
-- Active requested-roll tasks assigned to the player.
-- Explicit action button to execute required roll.
-- Initiative awareness limited to:
-  - current turn owner,
-  - next 1-2 participants.
-- Roll history scope limited to:
-  - own rolls,
-  - public session rolls.
+- Shared scene panel in read-only mode.
+- My character panel:
+  - assigned character in campaign context,
+  - neutral empty state when no character is assigned.
+- My requested rolls:
+  - only rolls targeted to player/user or player's character,
+  - action `Wykonaj rzut` for pending rolls.
+- Session roll history panel (read-only).
+- No access to GM session lifecycle actions.
+- No access to technical requested-roll fields.
 
 ## 5. Requested Rolls Model (Behavior)
 
@@ -237,9 +238,9 @@ No schema migration is introduced in v0.6.6; this section is design-only.
 - Character/system-specific modifiers are MVP/fallback based (future stage for deeper CoC/system rollers).
 
 
-## Update v0.7.5 - Initiative Removed From Live Session
+## Update v0.7.8 - Initiative Stays Removed From Live Session
 
-- Initiative preview was removed from `LiveSessionPage` in MVP scope.
+- Initiative preview remains removed from `LiveSessionPage` in MVP scope.
 - `/initiative` is a standalone local GM tracker (`localStorage` only).
 - No encounter linking, no campaign/session assignment, and no backend persistence in `/initiative`.
 - Existing backend encounter endpoints remain untouched for future work.

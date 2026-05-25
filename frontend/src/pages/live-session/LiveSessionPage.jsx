@@ -1,18 +1,19 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 import {
+  cancelRequestedRoll,
+  createRequestedRoll,
+  finishCampaignSession,
+  fulfillRequestedRoll,
   getCampaignById,
   getCampaignCharacters,
   getCampaignDiceRolls,
+  getRequestedRolls,
   getSessionLiveState,
+  listCampaignMembers,
   listCampaignSessions,
   startCampaignSession,
-  finishCampaignSession,
-  createRequestedRoll,
-  getRequestedRolls,
-  fulfillRequestedRoll,
-  cancelRequestedRoll,
   updateSessionLiveState,
 } from "../../api/campaigns";
 import ImageUpload from "../../components/common/ImageUpload";
@@ -24,11 +25,8 @@ function sessionStatusLabel(status) {
   return "PLANNED";
 }
 
-function formatHp(character) {
-  if (character.currentHp == null && character.maxHp == null) return null;
-  const current = character.currentHp ?? "?";
-  const max = character.maxHp ?? "?";
-  return `${current}/${max}`;
+function normalizeText(value) {
+  return String(value || "").trim().toLowerCase();
 }
 
 export default function LiveSessionPage() {
@@ -40,6 +38,7 @@ export default function LiveSessionPage() {
   const [campaign, setCampaign] = useState(null);
   const [session, setSession] = useState(null);
   const [campaignCharacters, setCampaignCharacters] = useState([]);
+  const [members, setMembers] = useState([]);
   const [recentRolls, setRecentRolls] = useState([]);
   const [liveState, setLiveState] = useState(null);
   const [savingScene, setSavingScene] = useState(false);
@@ -47,25 +46,47 @@ export default function LiveSessionPage() {
   const [sessionActionBusy, setSessionActionBusy] = useState(false);
   const [requestedRolls, setRequestedRolls] = useState([]);
   const [requestedActionBusy, setRequestedActionBusy] = useState(false);
+  const [showAdvancedRequested, setShowAdvancedRequested] = useState(false);
   const [sceneForm, setSceneForm] = useState({ sceneTitle: "", sceneImageUrl: "", sceneDescription: "" });
 
   const isGmView = Boolean(campaign?.owner);
+  const myMember = members.find((member) => member?.self) || null;
+  const myUserId = myMember?.id ?? null;
 
-  const roleLabel = useMemo(() => {
-    if (isGmView) return "GM/owner";
-    return "member/player";
-  }, [isGmView]);
+  const myCharacters = useMemo(() => {
+    if (myUserId == null) return [];
+    return campaignCharacters.filter((character) => Number(character?.userId) === Number(myUserId));
+  }, [campaignCharacters, myUserId]);
+
+  const myCharacterIds = useMemo(() => new Set(myCharacters.map((character) => Number(character.characterId))), [myCharacters]);
+  const myCharacterNameSet = useMemo(() => new Set(myCharacters.map((character) => normalizeText(character.characterName))), [myCharacters]);
+
+  const isPlanned = session?.status === "PLANNED";
+  const isInProgress = session?.status === "IN_PROGRESS";
+  const isFinished = session?.status === "FINISHED";
+
+  const myRequestedRolls = useMemo(() => {
+    if (isGmView) return requestedRolls;
+    return requestedRolls.filter((roll) => {
+      const targetUserId = Number(roll?.targetUserId);
+      const targetCharacterId = Number(roll?.targetCharacterId);
+      if (Number.isFinite(targetUserId) && myUserId != null && targetUserId === Number(myUserId)) return true;
+      if (Number.isFinite(targetCharacterId) && myCharacterIds.has(targetCharacterId)) return true;
+      return myCharacterNameSet.has(normalizeText(roll?.characterName));
+    });
+  }, [isGmView, requestedRolls, myUserId, myCharacterIds, myCharacterNameSet]);
 
   useEffect(() => {
     async function load() {
       setLoading(true);
       setError("");
       try {
-        const [campaignData, sessionsData, campaignCharactersData, rollsData, liveStateData, requestedRollsData] = await Promise.all([
+        const [campaignData, sessionsData, campaignCharactersData, membersData, rollsData, liveStateData, requestedRollsData] = await Promise.all([
           getCampaignById(token, campaignId),
           listCampaignSessions(token, campaignId),
           getCampaignCharacters(token, campaignId),
-          getCampaignDiceRolls(token, campaignId, { sessionId, limit: 10 }).catch(() => []),
+          listCampaignMembers(token, campaignId).catch(() => []),
+          getCampaignDiceRolls(token, campaignId, { sessionId, limit: 15 }).catch(() => []),
           getSessionLiveState(token, campaignId, sessionId).catch(() => null),
           getRequestedRolls(token, campaignId, sessionId).catch(() => []),
         ]);
@@ -75,6 +96,7 @@ export default function LiveSessionPage() {
         setCampaign(campaignData);
         setSession(resolvedSession);
         setCampaignCharacters(Array.isArray(campaignCharactersData) ? campaignCharactersData : []);
+        setMembers(Array.isArray(membersData) ? membersData : []);
         setRecentRolls(Array.isArray(rollsData) ? rollsData : []);
         setLiveState(liveStateData);
         setSceneForm({
@@ -97,7 +119,7 @@ export default function LiveSessionPage() {
     const [sessionsData, requested, rollsData, liveStateData] = await Promise.all([
       listCampaignSessions(token, campaignId),
       getRequestedRolls(token, campaignId, sessionId).catch(() => []),
-      getCampaignDiceRolls(token, campaignId, { sessionId, limit: 10 }).catch(() => []),
+      getCampaignDiceRolls(token, campaignId, { sessionId, limit: 15 }).catch(() => []),
       getSessionLiveState(token, campaignId, sessionId).catch(() => null),
     ]);
 
@@ -140,32 +162,32 @@ export default function LiveSessionPage() {
     }
   }
 
-  const isPlanned = session?.status === "PLANNED";
-  const isInProgress = session?.status === "IN_PROGRESS";
-  const isFinished = session?.status === "FINISHED";
-
   async function handleCreateRequestedRoll(event) {
     event.preventDefault();
+    if (!isInProgress || !isGmView) return;
+
     const formData = new FormData(event.currentTarget);
+    const targetPreset = String(formData.get("targetPreset") || "ALL");
     const payload = {
-      targetMode: String(formData.get("targetMode") || "ALL"),
-      targetUserIds: String(formData.get("targetUserIds") || "")
+      targetMode: targetPreset,
+      targetCharacterIds: String(formData.get("targetCharacterIds") || "")
         .split(",")
         .map((value) => Number(value.trim()))
         .filter((value) => Number.isFinite(value) && value > 0),
-      targetCharacterIds: String(formData.get("targetCharacterIds") || "")
+      targetUserIds: String(formData.get("targetUserIds") || "")
         .split(",")
         .map((value) => Number(value.trim()))
         .filter((value) => Number.isFinite(value) && value > 0),
       rollLabel: String(formData.get("rollLabel") || "").trim(),
       rollType: String(formData.get("rollType") || "SKILL").trim(),
       rollExpression: String(formData.get("rollExpression") || "").trim() || null,
+      dc: String(formData.get("dc") || "").trim() ? Number(formData.get("dc")) : null,
       abilityKey: String(formData.get("abilityKey") || "").trim() || null,
       skillKey: String(formData.get("skillKey") || "").trim() || null,
-      dc: String(formData.get("dc") || "").trim() ? Number(formData.get("dc")) : null,
       isDcHidden: formData.get("isDcHidden") === "on",
       showSuccessToPlayer: formData.get("showSuccessToPlayer") === "on",
     };
+
     setError("");
     setNotice("");
     setRequestedActionBusy(true);
@@ -218,19 +240,13 @@ export default function LiveSessionPage() {
           <span className="pageEyebrow">Live Session Room</span>
           <h1 className="pageTitle">{campaign?.title || "Live session"}</h1>
           <p className="pageSubtitle">
-            Sesja: {session?.title || `#${sessionId}`} ({sessionStatusLabel(session?.status)}) | Widok: {roleLabel}
+            Sesja: {session?.title || `#${sessionId}`} ({sessionStatusLabel(session?.status)})
           </p>
-          {isPlanned && (
-            <p className="campaignDetailsEmpty">
-              Sesja nie zostala jeszcze rozpoczeta.
-            </p>
-          )}
+          {isPlanned && <p className="campaignDetailsEmpty">Sesja jest zaplanowana i jeszcze sie nie rozpoczela.</p>}
           {isFinished && <p className="campaignDetailsEmpty">Sesja zakonczona. Widok tylko do odczytu.</p>}
         </div>
         <div>
-          <Link className="campaignDetailsGhostBtn" to={`/campaigns/${campaignId}`}>
-            Wroc do campaign workspace
-          </Link>
+          <Link className="campaignDetailsGhostBtn" to={`/campaigns/${campaignId}`}>Wroc do kampanii</Link>
           {isPlanned && isGmView && (
             <button className="campaignDetailsPrimaryBtn" type="button" onClick={handleStartSession} disabled={sessionActionBusy}>
               Rozpocznij sesje
@@ -251,40 +267,8 @@ export default function LiveSessionPage() {
       {!loading && !error && (
         <div className="liveSessionGrid">
           <section className="campaignDetailsCard panel-soft">
-            <h2 className="campaignDetailsCardTitle">Party / Players</h2>
-            {campaignCharacters.length === 0 ? (
-              <div className="campaignDetailsEmpty">Brak przypisanych postaci w kampanii.</div>
-            ) : (
-              <div className="campaignMaterialList">
-                {campaignCharacters.map((character) => (
-                  <article key={character.characterId} className="campaignMaterialCard">
-                    <div className="campaignMaterialCard__top">
-                      <strong>{character.characterName || "Unnamed character"}</strong>
-                      <span className="campaignMemberBadge">{character.systemCode || "other"}</span>
-                    </div>
-                    <div className="campaignMaterialMeta">
-                      <span>Owner: {character.ownerDisplayName || character.ownerUsername || "-"}</span>
-                      {formatHp(character) ? <span>HP: {formatHp(character)}</span> : <span>HP: -</span>}
-                    </div>
-                    <div className="liveSessionCharacterPortrait">
-                      {character.avatarUrl || character.portraitUrl ? (
-                        <img
-                          src={character.avatarUrl || character.portraitUrl}
-                          alt={`Portrait: ${character.characterName || "character"}`}
-                        />
-                      ) : (
-                        <div className="liveSessionPortraitPlaceholder">Brak portretu</div>
-                      )}
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-          </section>
-
-          <section className="campaignDetailsCard panel-soft">
-            <h2 className="campaignDetailsCardTitle">Scene Panel</h2>
-            {isGmView && isInProgress ? (
+            <h2 className="campaignDetailsCardTitle">{isGmView ? "Scene Panel" : "Aktualna scena"}</h2>
+            {isGmView && !isFinished ? (
               <form
                 className="liveSessionSceneForm"
                 onSubmit={async (event) => {
@@ -365,37 +349,98 @@ export default function LiveSessionPage() {
             )}
           </section>
 
+          {isGmView ? (
+            <section className="campaignDetailsCard panel-soft">
+              <h2 className="campaignDetailsCardTitle">Party / Players</h2>
+              {campaignCharacters.length === 0 ? (
+                <div className="campaignDetailsEmpty">Brak przypisanych postaci w kampanii.</div>
+              ) : (
+                <div className="campaignMaterialList">
+                  {campaignCharacters.map((character) => (
+                    <article key={character.characterId} className="campaignMaterialCard">
+                      <div className="campaignMaterialCard__top">
+                        <strong>{character.characterName || "Unnamed character"}</strong>
+                        <span className="campaignMemberBadge">{character.systemCode || "other"}</span>
+                      </div>
+                      <div className="campaignMaterialMeta">
+                        <span>Gracz: {character.ownerDisplayName || character.ownerUsername || character.role || "-"}</span>
+                        <span>User: {character.userId ?? "-"}</span>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
+          ) : (
+            <section className="campaignDetailsCard panel-soft">
+              <h2 className="campaignDetailsCardTitle">Moja postac</h2>
+              {myCharacters.length === 0 ? (
+                <div className="campaignDetailsEmpty">Brak przypisanej postaci do tej kampanii.</div>
+              ) : (
+                <div className="campaignMaterialList">
+                  {myCharacters.map((character) => (
+                    <article key={character.characterId} className="campaignMaterialCard">
+                      <div className="campaignMaterialCard__top">
+                        <strong>{character.characterName || "Postac"}</strong>
+                        <span className="campaignMemberBadge">{character.systemCode || "-"}</span>
+                      </div>
+                      <div className="campaignMaterialMeta">
+                        <span>Rola: {character.role || "PLAYER"}</span>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+
           <section className="campaignDetailsCard panel-soft">
-            <h2 className="campaignDetailsCardTitle">Requested Rolls</h2>
-            {isPlanned && <p className="liveSessionPlaceholder">Mechanika bedzie dostepna po rozpoczeciu sesji.</p>}
-            {isFinished && <p className="liveSessionPlaceholder">Sesja zakonczona. Requested rolls w trybie read-only.</p>}
+            <h2 className="campaignDetailsCardTitle">{isGmView ? "Requested Rolls" : "Moje rzuty"}</h2>
+            {isPlanned && <p className="liveSessionPlaceholder">Rzuty beda dostepne po rozpoczeciu sesji przez MG.</p>}
+            {isFinished && <p className="liveSessionPlaceholder">Sesja zakonczona. Lista rzutow pozostaje tylko do odczytu.</p>}
+
             {isInProgress && isGmView && (
               <form className="campaignFormCard" onSubmit={handleCreateRequestedRoll}>
-                <label className="campaignField"><span>Tryb celu</span><select name="targetMode" defaultValue="ALL"><option value="ALL">ALL</option><option value="CHARACTER">CHARACTER</option><option value="USER">USER</option></select></label>
-                <label className="campaignField"><span>ID postaci celu (po przecinku)</span><input name="targetCharacterIds" placeholder="1,2,3" /></label>
-                <label className="campaignField"><span>ID uzytkownikow celu (po przecinku)</span><input name="targetUserIds" placeholder="10,11" /></label>
+                <label className="campaignField"><span>Dla kogo?</span><select name="targetPreset" defaultValue="ALL"><option value="ALL">Wszyscy</option><option value="CHARACTER">Konkretna postac</option><option value="USER">Konkretny gracz</option></select></label>
                 <label className="campaignField"><span>Etykieta</span><input name="rollLabel" maxLength={160} required /></label>
                 <label className="campaignField"><span>Typ rzutu</span><input name="rollType" defaultValue="SKILL" maxLength={40} /></label>
                 <label className="campaignField"><span>Wyrazenie rzutu</span><input name="rollExpression" defaultValue={campaign?.systemCode === "dnd5e" ? "1d20" : ""} maxLength={120} /></label>
-                <label className="campaignField"><span>Ability key</span><input name="abilityKey" maxLength={80} /></label>
-                <label className="campaignField"><span>Skill key</span><input name="skillKey" maxLength={80} /></label>
                 <label className="campaignField"><span>DC</span><input name="dc" type="number" min="0" /></label>
-                <label className="campaignField"><span><input name="isDcHidden" type="checkbox" defaultChecked /> Ukryj DC</span></label>
-                <label className="campaignField"><span><input name="showSuccessToPlayer" type="checkbox" /> Pokaz sukces graczowi</span></label>
-                <button className="campaignDetailsPrimaryBtn" type="submit" disabled={requestedActionBusy}>Utworz requested roll</button>
+
+                <button className="campaignDetailsGhostBtn" type="button" onClick={() => setShowAdvancedRequested((prev) => !prev)}>
+                  {showAdvancedRequested ? "Ukryj zaawansowane" : "Pokaz zaawansowane"}
+                </button>
+
+                {showAdvancedRequested ? (
+                  <div className="campaignFormCard">
+                    <label className="campaignField"><span>target mode</span><input value="ALL/CHARACTER/USER (z sekcji podstawowej)" disabled /></label>
+                    <label className="campaignField"><span>character ID (po przecinku)</span><input name="targetCharacterIds" placeholder="1,2,3" /></label>
+                    <label className="campaignField"><span>user IDs (po przecinku)</span><input name="targetUserIds" placeholder="10,11" /></label>
+                    <label className="campaignField"><span>ability key</span><input name="abilityKey" maxLength={80} /></label>
+                    <label className="campaignField"><span>skill key</span><input name="skillKey" maxLength={80} /></label>
+                    <label className="campaignField"><span><input name="isDcHidden" type="checkbox" defaultChecked /> hide DC</span></label>
+                    <label className="campaignField"><span><input name="showSuccessToPlayer" type="checkbox" /> show success to player</span></label>
+                  </div>
+                ) : null}
+
+                <button className="campaignDetailsPrimaryBtn" type="submit" disabled={requestedActionBusy}>
+                  Utworz requested roll
+                </button>
               </form>
             )}
+
             <div className="campaignMaterialList">
-              {requestedRolls.map((roll) => (
+              {myRequestedRolls.map((roll) => (
                 <article key={roll.id} className="campaignMaterialCard">
                   <div className="campaignMaterialCard__top">
                     <strong>{roll.rollLabel}</strong>
                     <span className="campaignMemberBadge">{roll.status}</span>
                   </div>
-                  <p>Target: {roll.characterName || roll.targetName || "-"}</p>
+                  {isGmView ? <p>Target: {roll.characterName || roll.targetName || "-"}</p> : null}
                   <p>Expression: {roll.rollExpression || "fallback"}</p>
                   {roll.dcVisible && roll.dc != null && <p>DC: {roll.dc}</p>}
                   {roll.resultTotal != null && <p>Result: {roll.resultTotal}{roll.success != null ? ` (${roll.success ? "SUCCESS" : "FAIL"})` : ""}</p>}
+
                   {isInProgress && !isGmView && roll.status === "PENDING" && (
                     <button className="campaignDetailsPrimaryBtn" type="button" disabled={requestedActionBusy} onClick={() => handleFulfillRequestedRoll(roll.id)}>Wykonaj rzut</button>
                   )}
@@ -404,12 +449,12 @@ export default function LiveSessionPage() {
                   )}
                 </article>
               ))}
-              {requestedRolls.length === 0 && <p className="liveSessionPlaceholder">Brak requested rolls.</p>}
+              {myRequestedRolls.length === 0 && <p className="liveSessionPlaceholder">Brak requested rolls.</p>}
             </div>
           </section>
 
           <section className="campaignDetailsCard panel-soft">
-            <h2 className="campaignDetailsCardTitle">Session Roll History</h2>
+            <h2 className="campaignDetailsCardTitle">Historia rzutow</h2>
             {recentRolls.length === 0 ? (
               <p className="liveSessionPlaceholder">Brak rzutow sesji albo podglad historii jest niedostepny.</p>
             ) : (
@@ -423,14 +468,13 @@ export default function LiveSessionPage() {
             )}
           </section>
 
-          <section className="campaignDetailsCard panel-soft">
-            <h2 className="campaignDetailsCardTitle">Widok roli</h2>
-            {isGmView ? (
-              <p className="liveSessionPlaceholder">Widok MG: zarzadzanie scena i requested rolls.</p>
-            ) : (
-              <p className="liveSessionPlaceholder">Widok gracza: tylko akcje przypisane do gracza i read-only podglad sesji.</p>
-            )}
-          </section>
+          {!isGmView && isFinished && (
+            <section className="campaignDetailsCard panel-soft">
+              <h2 className="campaignDetailsCardTitle">Po sesji</h2>
+              <p className="liveSessionPlaceholder">Sesja zostala zakonczona. Mozesz dodac notatki po sesji.</p>
+              <Link className="campaignDetailsPrimaryBtn" to={`/campaigns/${campaignId}`}>Dodaj notatki po sesji</Link>
+            </section>
+          )}
         </div>
       )}
     </div>

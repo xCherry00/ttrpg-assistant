@@ -874,3 +874,25 @@ Refactor note (v0.6.6):
   - uczestnicy i podstawowe informacje o kampanii.
 - Usunieto martwy panel placeholder `Frekwencja / Glosowanie` z widoku szczegolow kampanii.
 
+### v0.7.8 - Rework LiveSession into GM and player views
+- `LiveSessionPage` renderuje dwa czytelne warianty:
+  - `GM Live Session View` (owner),
+  - `Player Live Session View` (member).
+- Wspolny header pokazuje: kampanie, sesje, status (`PLANNED`/`IN_PROGRESS`/`FINISHED`) i powrot do kampanii.
+- Akcje lifecycle sesji:
+  - MG: `Rozpocznij sesje` dla `PLANNED`, `Zakoncz sesje` dla `IN_PROGRESS`,
+  - gracz: bez akcji start/finish.
+- Widok MG:
+  - edycja sceny (tytul, obraz URL/upload, opis),
+  - lista `Party / Players`,
+  - requested rolls z uproszczonym formularzem (basic + advanced),
+  - aktywne requested rolls i anulowanie,
+  - historia rzutow sesji.
+- Widok gracza:
+  - scena read-only,
+  - moja postac (lub neutralny empty state),
+  - tylko moje requested rolls + `Wykonaj rzut`,
+  - historia rzutow,
+  - po `FINISHED` CTA `Dodaj notatki po sesji`.
+- Initiative preview pozostaje poza MVP i nie jest renderowane w LiveSession.
+
