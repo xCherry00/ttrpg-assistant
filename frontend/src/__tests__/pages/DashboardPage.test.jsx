@@ -4,6 +4,7 @@ import DashboardPage from "../../pages/DashboardPage";
 import * as meApi from "../../api/me";
 import * as campaignsApi from "../../api/campaigns";
 import * as charactersApi from "../../api/characters";
+import * as sessionNotesApi from "../../api/sessionNotes";
 
 vi.mock("../../auth/AuthContext", () => ({
   useAuth: () => ({ token: "test-token", logout: vi.fn() }),
@@ -16,6 +17,9 @@ vi.mock("../../api/me", () => ({
 vi.mock("../../api/campaigns", () => ({
   listCampaigns: vi.fn(),
   listCampaignSessions: vi.fn(),
+}));
+
+vi.mock("../../api/sessionNotes", () => ({
   getSessionNoteBacklog: vi.fn(),
 }));
 
@@ -37,7 +41,7 @@ describe("DashboardPage", () => {
     window.localStorage.clear();
     meApi.getMe.mockResolvedValue({ id: 1, displayName: "Tester" });
     charactersApi.listCharacters.mockResolvedValue([{ id: 10, name: "Aria" }]);
-    campaignsApi.getSessionNoteBacklog.mockResolvedValue([]);
+    sessionNotesApi.getSessionNoteBacklog.mockResolvedValue([]);
   });
 
   it("renders target KPI set and removes Materialy/Szybkie akcje", async () => {
@@ -137,7 +141,7 @@ describe("DashboardPage", () => {
   it("renders backlog items from API", async () => {
     campaignsApi.listCampaigns.mockResolvedValue([]);
     campaignsApi.listCampaignSessions.mockResolvedValue([]);
-    campaignsApi.getSessionNoteBacklog.mockResolvedValue([
+    sessionNotesApi.getSessionNoteBacklog.mockResolvedValue([
       {
         campaignId: 7,
         campaignTitle: "Kampania Cieni",
@@ -159,7 +163,7 @@ describe("DashboardPage", () => {
   it("shows neutral error when backlog API fails", async () => {
     campaignsApi.listCampaigns.mockResolvedValue([]);
     campaignsApi.listCampaignSessions.mockResolvedValue([]);
-    campaignsApi.getSessionNoteBacklog.mockRejectedValue(new Error("Boom"));
+    sessionNotesApi.getSessionNoteBacklog.mockRejectedValue(new Error("Boom"));
 
     renderPage();
 

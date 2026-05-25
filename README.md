@@ -857,3 +857,20 @@ Refactor note (v0.6.6):
 - Wklejenie URL obrazu pozostaje dostepne jako opcjonalna sciezka.
 - Integracje z zewnetrznym storage (S3/Cloudinary) sa celowo odlozone (future work).
 
+### v0.7.7 - Rework campaign detail into GM and player dashboard
+- `CampaignDetailPage` renderuje dwa warianty widoku zalezne od roli uzytkownika:
+  - `MG Dashboard` dla wlasciciela kampanii,
+  - `Player Dashboard` dla uczestnika kampanii.
+- Wspolny header kampanii pokazuje kluczowe informacje: tytul, opis, system, status/widocznosc i okladke.
+- Widok MG skupia sie na zarzadzaniu:
+  - najblizsza sesja,
+  - pelna lista sesji i tworzenie sesji,
+  - gracze, postacie kampanii, notatki graczy,
+  - panel kodu zaproszenia.
+- Widok gracza jest uproszczony:
+  - najblizsza sesja,
+  - moja postac,
+  - ostatnie zakonczone sesje z akcja `Moje notatki`,
+  - uczestnicy i podstawowe informacje o kampanii.
+- Usunieto martwy panel placeholder `Frekwencja / Glosowanie` z widoku szczegolow kampanii.
+

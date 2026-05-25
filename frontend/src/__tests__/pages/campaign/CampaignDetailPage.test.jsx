@@ -1,8 +1,9 @@
-﻿import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import CampaignDetailPage from "../../../pages/campaign/CampaignDetailPage";
 import * as campaignsApi from "../../../api/campaigns";
 import * as charactersApi from "../../../api/characters";
+import * as sessionNotesApi from "../../../api/sessionNotes";
 
 vi.mock("../../../auth/AuthContext", () => ({
   useAuth: () => ({ token: "test-token" }),
@@ -29,6 +30,12 @@ vi.mock("../../../api/campaigns", () => ({
   deleteCampaignPlayerNote: vi.fn(),
 }));
 
+vi.mock("../../../api/sessionNotes", () => ({
+  getMySessionNote: vi.fn(),
+  saveMySessionNote: vi.fn(),
+  deleteMySessionNote: vi.fn(),
+}));
+
 vi.mock("../../../api/characters", () => ({
   listCharacters: vi.fn(),
 }));
@@ -39,85 +46,88 @@ function renderPage() {
       <Routes>
         <Route path="/campaigns/:campaignId" element={<CampaignDetailPage />} />
       </Routes>
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 }
 
-describe("CampaignDetailPage smoke", () => {
+function baseMocks() {
+  campaignsApi.getCampaignCharacters.mockResolvedValue([]);
+  campaignsApi.listCampaignMembers.mockResolvedValue([]);
+  campaignsApi.listCampaignSessions.mockResolvedValue([]);
+  campaignsApi.listCampaignMaterials.mockResolvedValue([]);
+  campaignsApi.getCampaignPlayerNotes.mockResolvedValue([]);
+  campaignsApi.getSessionAttendance.mockResolvedValue({ responses: [], availableCount: 0, maybeCount: 0, unavailableCount: 0, noResponseCount: 0 });
+  charactersApi.listCharacters.mockResolvedValue([]);
+  sessionNotesApi.getMySessionNote.mockResolvedValue(null);
+  sessionNotesApi.saveMySessionNote.mockResolvedValue({});
+  sessionNotesApi.deleteMySessionNote.mockResolvedValue({});
+}
+
+describe("CampaignDetailPage dashboard by role", () => {
   beforeEach(() => {
     Object.values(campaignsApi).forEach((fn) => {
       if (typeof fn === "function" && "mockReset" in fn) fn.mockReset();
     });
+    Object.values(sessionNotesApi).forEach((fn) => {
+      if (typeof fn === "function" && "mockReset" in fn) fn.mockReset();
+    });
     charactersApi.listCharacters.mockReset();
+    baseMocks();
   });
 
-  it("renders loading state", () => {
-    campaignsApi.getCampaignById.mockReturnValue(new Promise(() => {}));
-    campaignsApi.getCampaignCharacters.mockResolvedValue([]);
-    campaignsApi.listCampaignMembers.mockResolvedValue([]);
-    campaignsApi.listCampaignSessions.mockResolvedValue([]);
-    campaignsApi.listCampaignMaterials.mockResolvedValue([]);
-    campaignsApi.getSessionAttendance.mockResolvedValue({ responses: [], availableCount: 0, maybeCount: 0, unavailableCount: 0, noResponseCount: 0 });
-    campaignsApi.getCampaignPlayerNotes.mockResolvedValue([]);
-    charactersApi.listCharacters.mockResolvedValue([]);
-    renderPage();
-    expect(screen.getByText("Ladowanie workspace kampanii...")).toBeInTheDocument();
-  });
-
-  it("renders campaign data", async () => {
-    campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "A", owner: true, status: "active", systemCode: "dnd5e" });
-    campaignsApi.getCampaignCharacters.mockResolvedValue([]);
-    campaignsApi.listCampaignMembers.mockResolvedValue([]);
+  it("MG sees GM dashboard with session creation", async () => {
+    campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "A", owner: true, status: "active", systemCode: "dnd5e", joinCode: "ABC123" });
     campaignsApi.listCampaignSessions.mockResolvedValue([{ id: 2, title: "Live S", status: "IN_PROGRESS", description: "test" }]);
-    campaignsApi.listCampaignMaterials.mockResolvedValue([]);
-    campaignsApi.getSessionAttendance.mockResolvedValue({ responses: [], availableCount: 0, maybeCount: 0, unavailableCount: 0, noResponseCount: 0 });
-    campaignsApi.getCampaignPlayerNotes.mockResolvedValue([]);
-    charactersApi.listCharacters.mockResolvedValue([]);
+
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByText("Campaign Workspace")).toBeInTheDocument();
-      expect(screen.getByRole("heading", { name: "A" })).toBeInTheDocument();
-      expect(screen.getByRole("heading", { name: "Nadchodzaca sesja" })).toBeInTheDocument();
-      expect(screen.getByRole("heading", { name: "Gracze" })).toBeInTheDocument();
-      expect(screen.getByRole("heading", { name: "Frekwencja / Glosowanie" })).toBeInTheDocument();
-      expect(screen.getByRole("heading", { name: "Notatki graczy" })).toBeInTheDocument();
-      expect(screen.getAllByRole("link", { name: "Dolacz do aktywnej sesji" }).length).toBeGreaterThan(0);
+      expect(screen.getByText("MG Dashboard")).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Sesje kampanii" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Utworz sesje" })).toBeInTheDocument();
+      expect(screen.getByText("Kod zaproszenia")).toBeInTheDocument();
     });
   });
 
-  it("does not render global tools links in campaign dashboard", async () => {
-    campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "A", owner: true, status: "active", systemCode: "dnd5e" });
-    campaignsApi.getCampaignCharacters.mockResolvedValue([]);
-    campaignsApi.listCampaignMembers.mockResolvedValue([]);
-    campaignsApi.listCampaignSessions.mockResolvedValue([{ id: 2, title: "Live S", status: "IN_PROGRESS", description: "test" }]);
-    campaignsApi.listCampaignMaterials.mockResolvedValue([]);
-    campaignsApi.getSessionAttendance.mockResolvedValue({ responses: [], availableCount: 0, maybeCount: 0, unavailableCount: 0, noResponseCount: 0 });
-    campaignsApi.getCampaignPlayerNotes.mockResolvedValue([]);
-    charactersApi.listCharacters.mockResolvedValue([]);
+  it("player sees player dashboard and no session creation", async () => {
+    campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "A", owner: false, status: "active", systemCode: "dnd5e" });
+    campaignsApi.listCampaignMembers.mockResolvedValue([{ id: 22, self: true, owner: false, mg: false, displayName: "P1", username: "p1" }]);
+    campaignsApi.getCampaignCharacters.mockResolvedValue([{ characterId: 9, characterName: "Rogue", systemCode: "dnd5e", userId: 22 }]);
+    campaignsApi.listCampaignSessions.mockResolvedValue([
+      { id: 7, title: "Fin", status: "FINISHED", description: "done", finishedAt: "2026-05-20T12:00:00Z" },
+    ]);
+
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByRole("heading", { name: "A" })).toBeInTheDocument();
-      expect(screen.queryByText("Campaign Tools")).not.toBeInTheDocument();
-      expect(document.querySelector('a[href="/dice"]')).toBeNull();
-      expect(document.querySelector('a[href="/initiative"]')).toBeNull();
+      expect(screen.getByText("Player Dashboard")).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Moja postac" })).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Uczestnicy" })).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Utworz sesje" })).not.toBeInTheDocument();
     });
   });
 
-  it("renders error state", async () => {
-    campaignsApi.getCampaignById.mockRejectedValue(new Error("boom"));
-    campaignsApi.getCampaignCharacters.mockResolvedValue([]);
-    campaignsApi.listCampaignMembers.mockResolvedValue([]);
-    campaignsApi.listCampaignSessions.mockResolvedValue([]);
-    campaignsApi.listCampaignMaterials.mockResolvedValue([]);
-    campaignsApi.getSessionAttendance.mockResolvedValue({ responses: [], availableCount: 0, maybeCount: 0, unavailableCount: 0, noResponseCount: 0 });
-    campaignsApi.getCampaignPlayerNotes.mockResolvedValue([]);
-    charactersApi.listCharacters.mockResolvedValue([]);
+  it("does not render placeholder section anymore", async () => {
+    campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "A", owner: true, status: "active", systemCode: "dnd5e" });
+
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByText("boom")).toBeInTheDocument();
+      expect(screen.getByText("MG Dashboard")).toBeInTheDocument();
+      expect(screen.queryByRole("heading", { name: "Frekwencja / Glosowanie" })).not.toBeInTheDocument();
+    });
+  });
+
+  it("shows session notes action for finished sessions", async () => {
+    campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "A", owner: false, status: "active", systemCode: "dnd5e" });
+    campaignsApi.listCampaignSessions.mockResolvedValue([
+      { id: 7, title: "Fin", status: "FINISHED", description: "done", finishedAt: "2026-05-20T12:00:00Z" },
+    ]);
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Moje notatki" })).toBeInTheDocument();
     });
   });
 });

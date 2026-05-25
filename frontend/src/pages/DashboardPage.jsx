@@ -2,7 +2,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { getMe } from "../api/me";
-import { getSessionNoteBacklog, listCampaignSessions, listCampaigns } from "../api/campaigns";
+import { listCampaignSessions, listCampaigns } from "../api/campaigns";
+import { getSessionNoteBacklog } from "../api/sessionNotes";
 import { listCharacters } from "../api/characters";
 import "../styles/dashboard.css";
 

@@ -1,37 +1,38 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 import { listCharacters } from "../../api/characters";
 import {
   assignCharacterToCampaign,
+  createCampaignPlayerNote,
   createCampaignSession,
   deleteCampaign,
+  deleteCampaignPlayerNote,
   detachCharacterFromCampaign,
   finishCampaignSession,
   getCampaignById,
   getCampaignCharacters,
+  getCampaignPlayerNotes,
   listCampaignMembers,
   listCampaignMaterials,
-  getCampaignPlayerNotes,
-  getMySessionNote,
-  createCampaignPlayerNote,
-  saveMySessionNote,
-  deleteMySessionNote,
-  updateCampaignPlayerNote,
-  deleteCampaignPlayerNote,
   listCampaignSessions,
   startCampaignSession,
   updateCampaign,
+  updateCampaignPlayerNote,
 } from "../../api/campaigns";
+import {
+  deleteMySessionNote,
+  getMySessionNote,
+  saveMySessionNote,
+} from "../../api/sessionNotes";
 import "../../styles/campaign-details.css";
-import CampaignOverviewPanel from "./components/CampaignOverviewPanel";
-import UpcomingSessionPanel from "./components/UpcomingSessionPanel";
-import CampaignPlayersPanel from "./components/CampaignPlayersPanel";
 import CampaignCharactersPanel from "./components/CampaignCharactersPanel";
-import CampaignSessionsPanel from "./components/CampaignSessionsPanel";
 import CampaignMaterialsPanel from "./components/CampaignMaterialsPanel";
-import CampaignPlaceholderPanel from "./components/CampaignPlaceholderPanel";
+import CampaignOverviewPanel from "./components/CampaignOverviewPanel";
 import CampaignPlayerNotesPanel from "./components/CampaignPlayerNotesPanel";
+import CampaignPlayersPanel from "./components/CampaignPlayersPanel";
+import CampaignSessionsPanel from "./components/CampaignSessionsPanel";
+import UpcomingSessionPanel from "./components/UpcomingSessionPanel";
 
 export default function CampaignDetailPage() {
   const { token } = useAuth();
@@ -185,86 +186,193 @@ export default function CampaignDetailPage() {
     return deleteMySessionNote(token, campaignId, sessionId);
   }
 
+  const isOwner = Boolean(campaign?.owner);
+  const myMember = members.find((member) => member?.self) || null;
+  const myCharacter = campaignCharacters.find((character) => {
+    if (!myMember) return false;
+    return Number(character.userId) === Number(myMember.id);
+  }) || null;
+  const playerFinishedSessions = sessions
+    .filter((session) => String(session.status).toUpperCase() === "FINISHED")
+    .slice()
+    .sort((a, b) => new Date(b.finishedAt || b.updatedAt || 0).getTime() - new Date(a.finishedAt || a.updatedAt || 0).getTime())
+    .slice(0, 5);
+  const inviteCode = campaign?.joinCode || campaign?.inviteCode || "";
+  const showMaterialsPanel = materials.length > 0;
+
   return (
     <div className="page campaignDetailsPage">
-      <div className="pageHeader">
-        <div>
-          <span className="pageEyebrow">Campaign Workspace</span>
-          <h1 className="pageTitle">{campaign?.title || "Kampania"}</h1>
-          <p className="pageSubtitle">
-            Centrum zarzadzania kampania, sesjami, postaciami, materialami oraz wejsciami do aktywnej sesji.
-          </p>
-        </div>
-      </div>
+      <Link className="campaignDetailsGhostBtn" to="/campaigns">Powrot do kampanii</Link>
 
       {loading && <div className="campaignDetailsState">Ladowanie workspace kampanii...</div>}
       {error && <div className="campaignDetailsError">{error}</div>}
       {notice && <div className="campaignDetailsNotice">{notice}</div>}
 
       {!loading && campaign && (
-        <div className="campaignWorkspaceGrid">
-          <div className="campaignDashboardRow campaignDashboardRow--top">
-            <CampaignOverviewPanel
-              campaign={campaign}
-              isOwner={Boolean(campaign.owner)}
-              busy={busy}
-              onUpdate={handleUpdateCampaign}
-              onDelete={handleDeleteCampaign}
-            />
-            <UpcomingSessionPanel
-              campaignId={campaignId}
-              sessions={sessions}
-              isOwner={Boolean(campaign.owner)}
-              busy={busy}
-              onStart={handleStartSession}
-              onFinish={handleFinishSession}
-            />
-            <CampaignPlayersPanel members={members} />
-          </div>
+        <>
+          <section className="campaignDetailsCard panel-soft">
+            <div className="campaignMaterialCard__top">
+              <div>
+                <h1 className="campaignDetailsCardTitle">{campaign.title || "Kampania"}</h1>
+                <p className="campaignDetailsHelpText">{campaign.description || "Brak opisu kampanii."}</p>
+              </div>
+              <span className="campaignMemberBadge">{isOwner ? "MG Dashboard" : "Player Dashboard"}</span>
+            </div>
+            <div className="campaignMaterialMeta">
+              <span>System: {campaign.systemCode || "-"}</span>
+              <span>Status: {campaign.status || "-"}</span>
+              <span>Widocznosc: {campaign.visibility || "-"}</span>
+            </div>
+            {campaign.coverImageUrl ? (
+              <img
+                src={campaign.coverImageUrl}
+                alt={`Okladka kampanii ${campaign.title || ""}`}
+                style={{ width: "100%", maxHeight: 240, objectFit: "cover", borderRadius: 12 }}
+              />
+            ) : null}
+            {isOwner ? (
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <a href="#campaign-overview" className="campaignDetailsPrimaryBtn">Edytuj kampanie</a>
+                {inviteCode ? <span className="campaignMemberBadge">Kod: {inviteCode}</span> : null}
+              </div>
+            ) : null}
+          </section>
 
-          <div className="campaignDashboardRow">
-            <CampaignCharactersPanel
-              campaignCharacters={campaignCharacters}
-              myCharacters={myCharacters}
-              campaignSystemCode={campaign.systemCode}
-              canManage={Boolean(campaign.owner)}
-              busy={busy}
-              onAssign={handleAssignCharacter}
-              onDetach={handleDetachCharacter}
-            />
+          {isOwner ? (
+            <div className="campaignWorkspaceGrid">
+              <div className="campaignDashboardRow campaignDashboardRow--top">
+                <UpcomingSessionPanel
+                  campaignId={campaignId}
+                  sessions={sessions}
+                  isOwner={isOwner}
+                  busy={busy}
+                  onStart={handleStartSession}
+                  onFinish={handleFinishSession}
+                />
+                {inviteCode ? (
+                  <section className="campaignDetailsCard panel-soft">
+                    <h2 className="campaignDetailsCardTitle">Kod zaproszenia</h2>
+                    <p className="campaignDetailsHelpText">Udostepnij kod graczom, aby dolaczyli do kampanii.</p>
+                    <div className="campaignDetailsInfoRow">
+                      <span>Kod</span>
+                      <code>{inviteCode}</code>
+                    </div>
+                  </section>
+                ) : (
+                  <section className="campaignDetailsCard panel-soft">
+                    <h2 className="campaignDetailsCardTitle">Kod zaproszenia</h2>
+                    <div className="campaignDetailsEmpty">Brak aktywnego kodu dolaczenia.</div>
+                  </section>
+                )}
+                <CampaignPlayersPanel members={members} title="Gracze" />
+              </div>
 
-            <CampaignSessionsPanel
-              campaignId={campaignId}
-              sessions={sessions}
-              isOwner={Boolean(campaign.owner)}
-              busy={busy}
-              onCreate={handleCreateSession}
-              onStart={handleStartSession}
-              onFinish={handleFinishSession}
-              onGetMySessionNote={handleGetMySessionNote}
-              onSaveMySessionNote={handleSaveMySessionNote}
-              onDeleteMySessionNote={handleDeleteMySessionNote}
-            />
+              <div className="campaignDashboardRow">
+                <CampaignSessionsPanel
+                  campaignId={campaignId}
+                  sessions={sessions}
+                  title="Sesje kampanii"
+                  isOwner={isOwner}
+                  busy={busy}
+                  onCreate={handleCreateSession}
+                  onStart={handleStartSession}
+                  onFinish={handleFinishSession}
+                  onGetMySessionNote={handleGetMySessionNote}
+                  onSaveMySessionNote={handleSaveMySessionNote}
+                  onDeleteMySessionNote={handleDeleteMySessionNote}
+                />
 
-            <CampaignMaterialsPanel materials={materials} materialsAvailable />
-          </div>
+                <CampaignCharactersPanel
+                  campaignCharacters={campaignCharacters}
+                  myCharacters={myCharacters}
+                  campaignSystemCode={campaign.systemCode}
+                  canManage={isOwner}
+                  busy={busy}
+                  onAssign={handleAssignCharacter}
+                  onDetach={handleDetachCharacter}
+                />
 
-          <div className="campaignDashboardRow campaignDashboardRow--bottom">
-            <CampaignPlaceholderPanel
-              title="Frekwencja / Glosowanie"
-              text="Brak aktywnego glosowania. Placeholder pod przyszly attendance/voting panel."
-              actionLabel="Utworz glosowanie"
-            />
-            <CampaignPlayerNotesPanel
-              notes={playerNotes}
-              campaign={campaign}
-              busy={busy}
-              onCreate={handleCreatePlayerNote}
-              onUpdate={handleUpdatePlayerNote}
-              onDelete={handleDeletePlayerNote}
-            />
-          </div>
-        </div>
+                {showMaterialsPanel ? <CampaignMaterialsPanel materials={materials} materialsAvailable /> : null}
+              </div>
+
+              <div className="campaignDashboardRow campaignDashboardRow--bottom">
+                <section id="campaign-overview">
+                  <CampaignOverviewPanel
+                    campaign={campaign}
+                    isOwner={isOwner}
+                    busy={busy}
+                    onUpdate={handleUpdateCampaign}
+                    onDelete={handleDeleteCampaign}
+                  />
+                </section>
+                <CampaignPlayerNotesPanel
+                  notes={playerNotes}
+                  campaign={campaign}
+                  busy={busy}
+                  onCreate={handleCreatePlayerNote}
+                  onUpdate={handleUpdatePlayerNote}
+                  onDelete={handleDeletePlayerNote}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="campaignWorkspaceGrid">
+              <div className="campaignDashboardRow campaignDashboardRow--top">
+                <UpcomingSessionPanel
+                  campaignId={campaignId}
+                  sessions={sessions}
+                  isOwner={isOwner}
+                  busy={busy}
+                  onStart={handleStartSession}
+                  onFinish={handleFinishSession}
+                />
+                <section className="campaignDetailsCard panel-soft">
+                  <h2 className="campaignDetailsCardTitle">Moja postac</h2>
+                  {myCharacter ? (
+                    <>
+                      <div className="campaignMaterialCard__top">
+                        <strong>{myCharacter.characterName || "Postac"}</strong>
+                        <span className="campaignMemberBadge">{myCharacter.systemCode || "-"}</span>
+                      </div>
+                      <p>
+                        Rasa/klasa/tlo: {myCharacter.raceName || "-"} / {myCharacter.className || "-"} / {myCharacter.backgroundName || "-"}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="campaignDetailsEmpty">Brak przypisanej postaci do tej kampanii.</div>
+                      <Link className="campaignDetailsGhostBtn" to="/characters">Przejdz do postaci</Link>
+                    </>
+                  )}
+                </section>
+                <CampaignPlayersPanel members={members} title="Uczestnicy" />
+              </div>
+
+              <div className="campaignDashboardRow">
+                <CampaignSessionsPanel
+                  campaignId={campaignId}
+                  sessions={playerFinishedSessions}
+                  title="Ostatnie zakonczone sesje"
+                  isOwner={false}
+                  busy={busy}
+                  onCreate={handleCreateSession}
+                  onStart={handleStartSession}
+                  onFinish={handleFinishSession}
+                  onGetMySessionNote={handleGetMySessionNote}
+                  onSaveMySessionNote={handleSaveMySessionNote}
+                  onDeleteMySessionNote={handleDeleteMySessionNote}
+                />
+                <section className="campaignDetailsCard panel-soft">
+                  <h2 className="campaignDetailsCardTitle">Informacje o kampanii</h2>
+                  <div className="campaignDetailsInfoRow"><span>Tytul</span><strong>{campaign.title || "-"}</strong></div>
+                  <div className="campaignDetailsInfoRow"><span>System</span><strong>{campaign.systemCode || "-"}</strong></div>
+                  <div className="campaignDetailsInfoRow"><span>Status</span><strong>{campaign.status || "-"}</strong></div>
+                  <p className="campaignDetailsHelpText">{campaign.description || "Brak opisu kampanii."}</p>
+                </section>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {!loading && !campaign && !error && <div className="campaignDetailsEmpty">Nie znaleziono kampanii.</div>}

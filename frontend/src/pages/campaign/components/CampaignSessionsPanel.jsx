@@ -10,6 +10,7 @@ function statusLabel(status) {
 export default function CampaignSessionsPanel({
   campaignId,
   sessions,
+  title = "Sesje kampanii",
   isOwner,
   busy,
   onCreate,
@@ -86,7 +87,7 @@ export default function CampaignSessionsPanel({
   return (
     <>
       <section className="campaignDetailsCard panel-soft">
-        <h2 className="campaignDetailsCardTitle">Sesje kampanii</h2>
+        <h2 className="campaignDetailsCardTitle">{title}</h2>
 
         {isOwner && (
           <form

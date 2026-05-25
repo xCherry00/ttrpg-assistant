@@ -1,8 +1,8 @@
-export default function CampaignPlayersPanel({ members }) {
+export default function CampaignPlayersPanel({ members, title = "Gracze" }) {
   return (
     <section className="campaignDetailsCard panel-soft">
       <div className="campaignMaterialCard__top">
-        <h2 className="campaignDetailsCardTitle">Gracze</h2>
+        <h2 className="campaignDetailsCardTitle">{title}</h2>
         <span className="campaignMemberBadge">{members.length}</span>
       </div>
       {members.length === 0 ? (

@@ -27,6 +27,34 @@ describe("UpcomingSessionPanel attendance", () => {
     expect(screen.getByText("Brak zaplanowanej ani aktywnej sesji.")).toBeInTheDocument();
   });
 
+  it("shows only one nearest planned session for owner", async () => {
+    campaignsApi.getSessionAttendance.mockResolvedValue({
+      availableCount: 0,
+      maybeCount: 0,
+      unavailableCount: 0,
+      noResponseCount: 0,
+      responses: [],
+    });
+    render(
+      <MemoryRouter>
+        <UpcomingSessionPanel
+          campaignId={10}
+          isOwner
+          sessions={[
+            { id: 6, title: "Pozniejsza", status: "PLANNED", scheduledFor: "2026-06-20T18:00:00Z" },
+            { id: 5, title: "Najblizsza", status: "PLANNED", scheduledFor: "2026-06-10T18:00:00Z" },
+            { id: 4, title: "Archiwalna", status: "FINISHED", scheduledFor: "2026-06-01T18:00:00Z" },
+          ]}
+        />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Najblizsza")).toBeInTheDocument();
+      expect(screen.queryByText("Pozniejsza")).not.toBeInTheDocument();
+    });
+  });
+
   it("shows attendance controls for upcoming session", async () => {
     campaignsApi.getSessionAttendance.mockResolvedValue({
       availableCount: 1,

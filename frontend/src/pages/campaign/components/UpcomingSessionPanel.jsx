@@ -3,11 +3,28 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../../auth/AuthContext";
 import { getSessionAttendance, updateMySessionAttendance } from "../../../api/campaigns";
 
-function pickUpcomingOrActiveSession(sessions) {
+function toTimestamp(value) {
+  const ts = new Date(value).getTime();
+  return Number.isFinite(ts) ? ts : Number.MAX_SAFE_INTEGER;
+}
+
+function pickSessionForOwner(sessions) {
+  const planned = sessions
+    .filter((session) => session.status === "PLANNED")
+    .slice()
+    .sort((a, b) => toTimestamp(a.scheduledFor) - toTimestamp(b.scheduledFor));
+  if (planned.length > 0) return planned[0];
+  return sessions.find((session) => session.status === "IN_PROGRESS") || null;
+}
+
+function pickSessionForPlayer(sessions) {
   const active = sessions.find((session) => session.status === "IN_PROGRESS");
   if (active) return active;
-  const planned = sessions.find((session) => session.status === "PLANNED");
-  return planned || null;
+  const planned = sessions
+    .filter((session) => session.status === "PLANNED")
+    .slice()
+    .sort((a, b) => toTimestamp(a.scheduledFor) - toTimestamp(b.scheduledFor));
+  return planned[0] || null;
 }
 
 export default function UpcomingSessionPanel({
@@ -19,7 +36,7 @@ export default function UpcomingSessionPanel({
   onFinish,
 }) {
   const { token } = useAuth();
-  const session = pickUpcomingOrActiveSession(sessions);
+  const session = isOwner ? pickSessionForOwner(sessions) : pickSessionForPlayer(sessions);
   const sessionId = session?.id;
   const [attendance, setAttendance] = useState(null);
   const [attendanceLoading, setAttendanceLoading] = useState(false);
