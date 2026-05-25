@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { logout as logoutApi } from "../api/auth";
-import { getUnreadMessagesCount } from "../api/messages";
 import { getMyProfile } from "../api/settings";
 
 const INITIATIVE_CACHE_KEY = "ttrpg_initiative_rows_v1";
@@ -23,19 +22,6 @@ function Icon({ name }) {
         <path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.04.04a2.1 2.1 0 0 1-2.97 2.97l-.04-.04a1.8 1.8 0 0 0-1.98-.36 1.8 1.8 0 0 0-1.08 1.64V21.4a2.1 2.1 0 0 1-4.2 0v-.06A1.8 1.8 0 0 0 8.45 19.7a1.8 1.8 0 0 0-1.98.36l-.04.04a2.1 2.1 0 0 1-2.97-2.97l.04-.04a1.8 1.8 0 0 0 .36-1.98 1.8 1.8 0 0 0-1.64-1.08H2.1a2.1 2.1 0 0 1 0-4.2h.06A1.8 1.8 0 0 0 3.8 8.75a1.8 1.8 0 0 0-.36-1.98l-.04-.04a2.1 2.1 0 0 1 2.97-2.97l.04.04a1.8 1.8 0 0 0 1.98.36h.01A1.8 1.8 0 0 0 9.47 2.5V2.1a2.1 2.1 0 0 1 4.2 0v.06a1.8 1.8 0 0 0 1.08 1.64 1.8 1.8 0 0 0 1.98-.36l.04-.04a2.1 2.1 0 0 1 2.97 2.97l-.04.04a1.8 1.8 0 0 0-.36 1.98v.01a1.8 1.8 0 0 0 1.64 1.08h.42a2.1 2.1 0 0 1 0 4.2h-.06A1.8 1.8 0 0 0 19.4 15Z" />
       </>
     ),
-    friends: (
-      <>
-        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-      </>
-    ),
-    messages: (
-      <>
-        <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" />
-      </>
-    ),
     logout: (
       <>
         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -52,10 +38,13 @@ function Icon({ name }) {
   );
 }
 
-function toRoleLabel(user) {
+function getRoleBadges(user) {
+  const badges = [];
   const role = (user?.role || "PLAYER").toUpperCase();
-  const roleLabel = role === "PLAYER" ? "GRACZ" : role;
-  return user?.isMg ? `${roleLabel} + MG` : roleLabel;
+  if (role === "PLAYER") badges.push("Gracz");
+  if (role && role !== "PLAYER") badges.push(role);
+  if (user?.isMg) badges.push("MG");
+  return [...new Set(badges)];
 }
 
 function getAvatarStorageKey(email) {
@@ -72,7 +61,6 @@ export default function AccountMenu() {
   const [avatarSrc, setAvatarSrc] = useState("");
   const [loadingUser, setLoadingUser] = useState(true);
   const [userError, setUserError] = useState("");
-  const [messagesUnread, setMessagesUnread] = useState(0);
 
   const loadUser = useCallback(async () => {
     setLoadingUser(true);
@@ -84,26 +72,15 @@ export default function AccountMenu() {
     } catch {
       setUser(null);
       setAvatarSrc("");
-      setUserError("Nie udało się pobrać danych konta.");
+      setUserError("Nie udalo sie pobrac danych konta.");
     } finally {
       setLoadingUser(false);
     }
   }, [token]);
 
-  const loadUnreadMessages = useCallback(async () => {
-    if (!token) return;
-    try {
-      const unread = await getUnreadMessagesCount(token);
-      setMessagesUnread(unread?.unreadCount || 0);
-    } catch {
-      setMessagesUnread(0);
-    }
-  }, [token]);
-
   useEffect(() => {
-    loadUser();
-    loadUnreadMessages();
-  }, [loadUnreadMessages, loadUser]);
+    void loadUser();
+  }, [loadUser]);
 
   useEffect(() => {
     function onPointerDown(event) {
@@ -144,11 +121,11 @@ export default function AccountMenu() {
   const displayName = useMemo(() => {
     if (user?.displayName?.trim()) return user.displayName.trim();
     if (user?.email) return user.email.split("@")[0];
-    return "Użytkownik";
+    return "Uzytkownik";
   }, [user]);
 
   const avatarLabel = useMemo(() => displayName.slice(0, 1).toUpperCase(), [displayName]);
-  const roleLabel = toRoleLabel(user);
+  const roleBadges = getRoleBadges(user);
 
   function goTo(path) {
     setMenuOpen(false);
@@ -178,12 +155,12 @@ export default function AccountMenu() {
         aria-haspopup="menu"
       >
         {avatarSrc ? (
-          <img src={avatarSrc} alt="Avatar użytkownika" className="topNav__avatarImg" />
+          <img src={avatarSrc} alt="Avatar uzytkownika" className="topNav__avatarImg" />
         ) : (
           <span className="topNav__avatar">{avatarLabel}</span>
         )}
         <span className="topNav__avatarMeta">
-          <span className="topNav__avatarLabel">Użytkownik</span>
+          <span className="topNav__avatarLabel">Uzytkownik</span>
           <span className="topNav__avatarName">{displayName}</span>
         </span>
         <span className="topNav__avatarChevron" aria-hidden="true">
@@ -197,39 +174,30 @@ export default function AccountMenu() {
         <div className="topNav__menu" role="menu">
           <div className="topNav__menuHeader">
             {avatarSrc ? (
-              <img src={avatarSrc} alt="Avatar użytkownika" className="topNav__menuAvatarImg" />
+              <img src={avatarSrc} alt="Avatar uzytkownika" className="topNav__menuAvatarImg" />
             ) : (
               <div className="topNav__menuAvatar">{avatarLabel}</div>
             )}
             <div className="topNav__menuIdentity">
               <div className="topNav__menuName">{displayName}</div>
               <div className="topNav__menuEmail">{user?.email || "Brak emaila"}</div>
-              <div className="topNav__menuRole">{roleLabel}</div>
+              <div className="topNav__menuRoleList">
+                {roleBadges.map((badge) => (
+                  <span key={badge} className="topNav__menuRole">{badge}</span>
+                ))}
+              </div>
             </div>
           </div>
 
           <div className="topNav__menuSection">
             <div className="topNav__menuSectionTitle">Konto</div>
-            <button type="button" className="topNav__menuItem" onClick={() => goTo("/profile")}>
+            <button type="button" className="topNav__menuItem" onClick={() => goTo("/profile")}> 
               <Icon name="profile" />
               <span>Profil</span>
             </button>
-            <button type="button" className="topNav__menuItem" onClick={() => goTo("/settings")}>
+            <button type="button" className="topNav__menuItem" onClick={() => goTo("/settings")}> 
               <Icon name="settings" />
               <span>Ustawienia</span>
-            </button>
-          </div>
-
-          <div className="topNav__menuSection">
-            <div className="topNav__menuSectionTitle">Społeczność</div>
-            <button type="button" className="topNav__menuItem" onClick={() => goTo("/friends")}>
-              <Icon name="friends" />
-              <span>Znajomi</span>
-            </button>
-            <button type="button" className="topNav__menuItem" onClick={() => goTo("/messages")}>
-              <Icon name="messages" />
-              <span>Wiadomości</span>
-              {messagesUnread > 0 && <span className="topNav__menuBadge">{messagesUnread > 99 ? "99+" : messagesUnread}</span>}
             </button>
           </div>
 
@@ -241,7 +209,7 @@ export default function AccountMenu() {
           </div>
 
           {(loadingUser || userError) && (
-            <div className="topNav__menuStatus">{loadingUser ? "Ładowanie danych..." : userError}</div>
+            <div className="topNav__menuStatus">{loadingUser ? "Ladowanie danych..." : userError}</div>
           )}
         </div>
       )}

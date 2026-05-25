@@ -955,3 +955,9 @@ Refactor note (v0.6.6):
 - Sekcje ustawien sa skupione na realnych funkcjach: `Konto`, `Bezpieczenstwo`, `Wyglad`, `Chat sesji`, `Dane lokalne`, `Strefa ryzyka`.
 - Ustawienie koloru nicku pozostaje w `Chat sesji`, a `Wyglad` zawiera tylko wybor motywu aplikacji.
 
+### v0.8.1 - Clean global navigation and utility pages
+- Globalny Top Bar ma spojny layout i zmienia tylko kontekstowy `title/subtitle` zaleznie od aktywnej trasy.
+- Sidebar ma `Dashboard` jako staly glowny link nad sekcjami, a sekcja `Rozgrywka` zawiera tylko `Kampanie` i `Postacie`.
+- Menu uzytkownika jest bardziej kompaktowe, bez duplikowanej sekcji `Spolecznosc`.
+- Rola uzytkownika w dropdownie jest pokazywana jako osobne badge (np. `Gracz` i `MG`), zamiast laczonego tekstu.
+

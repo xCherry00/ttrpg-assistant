@@ -4,9 +4,9 @@ import { useAuth } from "../auth/AuthContext";
 import { logout as logoutApi } from "../api/auth";
 
 const INITIATIVE_CACHE_KEY = "ttrpg_initiative_rows_v1";
+const DASHBOARD_ITEM = { to: "/dashboard", label: "Dashboard", icon: <DashboardIcon /> };
 
 const SECTION_GAMEPLAY = [
-  { to: "/dashboard", label: "Dashboard", icon: <DashboardIcon /> },
   { to: "/campaigns", label: "Kampanie", icon: <MapIcon /> },
   { to: "/characters", label: "Postacie", icon: <CharacterIcon /> },
 ];
@@ -72,6 +72,9 @@ export default function Sidebar() {
         </div>
 
         <div className="sidebar__sections">
+          <nav className="sidebar__nav" aria-label="Glowne">
+            <SideItem to={DASHBOARD_ITEM.to} icon={DASHBOARD_ITEM.icon} label={DASHBOARD_ITEM.label} />
+          </nav>
           {sections.map((section) => (
             <Section
               key={section.id}
