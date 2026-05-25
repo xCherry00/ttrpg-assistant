@@ -961,3 +961,10 @@ Refactor note (v0.6.6):
 - Menu uzytkownika jest bardziej kompaktowe, bez duplikowanej sekcji `Spolecznosc`.
 - Rola uzytkownika w dropdownie jest pokazywana jako osobne badge (np. `Gracz` i `MG`), zamiast laczonego tekstu.
 
+### v0.8.2 - Clean rules, compendium and dice copy
+- `RulesPage` zawiera nowa kategorie `Ogolne zasady RPG` z podstawami dla poczatkujacych, w tym sekcje `Rzuty koscmi`.
+- Dla `Call of Cthulhu` dodano zrodlo startowe `Zew Cthulhu Starter (PL)` (Black Monk) jako link zewnetrzny.
+- Usunieto dominujacy techniczny komunikat o statusie/local summary z glownej tresci zasad.
+- `DicePage` zmienia etykiete typu rzutu z `Przewaga` na `Ulatwienie` bez zmiany mechaniki.
+- `CompendiumPage` pokazuje neutralny empty state przy braku danych zamiast traktowac kazdy brak jako krytyczny blad.
+

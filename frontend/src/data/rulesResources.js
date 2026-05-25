@@ -14,6 +14,17 @@ export const RULES_STARTER_RESOURCES = {
   ],
   cthulhu: [
     {
+      label: "Zew Cthulhu Starter (PL)",
+      type: "pdf",
+      sourceName: "Black Monk",
+      url: "https://blackmonk.pl/zew-cthulhu-pdf/68-pdf-zew-cthulhu-starter.html",
+      description:
+        "Polski starter Zewu Cthulhu jako material startowy dla nowych graczy.",
+      usageNote:
+        "Zewnetrzne zrodlo oficjalnego materialu startowego. Nie kopiowac tresci do aplikacji.",
+      priority: 1,
+    },
+    {
       label: "Call of Cthulhu 7th Edition Quick-Start Rules",
       type: "pdf",
       sourceName: "Chaosium",
@@ -22,7 +33,7 @@ export const RULES_STARTER_RESOURCES = {
         "Oficjalny darmowy quickstart zawierajacy podstawowe zasady, gotowe postacie i scenariusz The Haunting.",
       usageNote:
         "Linkowac do oficjalnej strony Chaosium. Nie kopiowac duzych fragmentow PDF do aplikacji.",
-      priority: 1,
+      priority: 2,
     },
   ],
   pf2e: [

@@ -288,17 +288,6 @@ export default function CampaignsPage() {
 
   return (
     <div className="page campaignsSaas">
-      <header className="campaignsHeader">
-        <div className="campaignsHeader__title">
-          <span className="campaignsHeader__icon"><CampaignIcon name="book" /></span>
-          <div>
-            <h1>Kampanie</h1>
-            <p>{tab === "my" ? "ZarzÄ…dzaj kampaniami lub doĹ‚Ä…cz do nowych przygĂłd." : "Odkryj publiczne kampanie i doĹ‚Ä…cz do przygody."}</p>
-          </div>
-        </div>
-
-      </header>
-
       <nav className="campaignListTabs" aria-label="Widoki kampanii">
         <button type="button" className={tab === "my" ? "is-active" : ""} onClick={() => setTab("my")}>
           <CampaignIcon name="users" />

@@ -123,25 +123,44 @@ select:focus-visible {
   z-index: 1;
 }
 
-.appTopBar {
-  margin: 2px 0 16px;
+.appPageHeader {
+  margin: 0 0 20px;
   padding-right: 246px;
 }
 
-.appTopBar__title {
+.appPageHeader__title {
   margin: 0;
-  color: #f4f0ff;
   font-family: var(--font-display);
-  font-size: 1.32rem;
+  color: #f4f0ff;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0;
   line-height: 1.1;
   text-transform: uppercase;
 }
 
-.appTopBar__subtitle {
+.appPageHeader__subtitle {
   margin: 8px 0 0;
-  color: rgba(225, 226, 238, 0.64);
-  font-size: 0.86rem;
+  color: rgba(225, 226, 238, 0.72);
+  font-size: 1rem;
 }
+
+.page .dashboardHeader,
+.page .campaignsHeader,
+.page .settingsHero {
+  display: none !important;
+}
+
+.page .pageHeader > :first-child {
+  display: none !important;
+}
+
+.page .pageHeader {
+  min-height: 0 !important;
+  margin: 0 0 12px !important;
+  padding-right: 246px;
+}
+
 
 .appContent * { min-width: 0; }
 
@@ -839,8 +858,14 @@ select option { color: #000; background: #fff; }
     flex-direction: column;
     padding-right: 64px;
   }
-  .appTopBar {
+  .appPageHeader {
     padding-right: 64px;
+  }
+  .appPageHeader__title {
+    font-size: 1.42rem;
+  }
+  .appPageHeader__subtitle {
+    font-size: 0.92rem;
   }
   .pageTitle  { font-size: 1.24rem; }
   .input { width: 100%; max-width: 100%; }

@@ -299,11 +299,6 @@ export default function ProfilePage() {
   return (
     <div className="page profileV2Page">
       <header className="profileV2Top panel">
-        <div>
-          <h1>Profil uzytkownika</h1>
-          <p>Zarzadzaj kontem, aktywnoscia i swoimi narzedziami.</p>
-        </div>
-
         <label className="profileV2Search">
           <input type="text" placeholder="Szukaj w aplikacji..." aria-label="Szukaj" />
           <kbd>Ctrl K</kbd>

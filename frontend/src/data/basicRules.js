@@ -1,5 +1,34 @@
 export const BASIC_RULES = [
   {
+    systemCode: "general-rpg",
+    rulesApiCode: "general",
+    name: "Ogolne zasady RPG",
+    legalStatus: "local-summary",
+    legalNote: "Skrot ogolnych zasad gry fabularnej dla poczatkujacych.",
+    sourcePolicy: "summary",
+    sources: [
+      { name: "TTRPG Assistant - skrot zasad ogolnych", url: "#" },
+    ],
+    sections: {
+      overview:
+        "Gry RPG to forma wspolnego tworzenia historii. Gracze wcielaja sie w fikcyjne postacie i decyduja, co one robia, mowia oraz do czego daza. Mistrz Gry opisuje swiat, miejsca, bohaterow niezaleznych, zagrozenia i skutki dzialan druzyny. W odroznieniu od gry planszowej RPG zwykle nie ma jednej planszy ani z gory ustalonej listy ruchow, a w odroznieniu od gry komputerowej nie ogranicza Cie kod programu. Najwazniejsze sa rozmowa, wyobraznia, decyzje przy stole i wspolne ustalanie, co dzieje sie dalej.",
+      "core-test":
+        "Test wykonuje sie wtedy, gdy postac probuje zrobic cos waznego, a wynik nie jest oczywisty. Jesli bohater spokojnie otwiera zwykle drzwi, test nie jest potrzebny. Jesli probuje sforsowac zamek pod presja czasu, przekonac straznika albo przeskoczyc nad przepascia, rzut pomaga rozstrzygnac sytuacje. Wynik testu nie musi dzielic swiata tylko na sukces i porazke. Nieudany rzut moze oznaczac komplikacje, koszt, utrate czasu, zwrocenie uwagi przeciwnikow albo nowy problem, ktory popycha historie naprzod.",
+      "character-creation":
+        "Gracz prowadzi swoja postac: opisuje jej decyzje, reakcje, zamiary i sposob dzialania. Postac gracza to bohater tej osoby w swiecie gry. Moze miec imie, wyglad, charakter, umiejetnosci, slabe strony, ekwipunek, relacje i wlasne cele. Nie trzeba od razu grac teatralnie ani mowic innym glosem. Wystarczy powiedziec, co postac robi i dlaczego. Z czasem wielu graczy zaczyna dodawac sposob mowienia, gesty, przekonania i emocje bohatera, bo pomaga to poczuc, ze postac jest czyms wiecej niz zestawem liczb na karcie.",
+      combat:
+        "Mistrz Gry prowadzi swiat gry. Opisuje sceny, miejsca, pogode, nastroj, przeciwnikow, sojusznikow i zwyklych mieszkancow swiata. Przedstawia wyzwania, zadaje pytania graczom, odgrywa postacie niezalezne i pomaga rozstrzygac konsekwencje dzialan. MG nie jest przeciwnikiem graczy. Jego zadaniem jest prowadzenie ciekawej, spojnej sytuacji, w ktorej decyzje druzyny maja znaczenie. Czasem oznacza to walke, czasem rozmowe, sledztwo, ucieczke, negocjacje albo trudny wybor bez idealnego rozwiazania.",
+      health:
+        "Typowa sesja to jedno spotkanie graczy i Mistrza Gry. Moze odbywac sie przy stole, online albo w mieszanej formie. Najczesciej MG opisuje sytuacje, gracze mowia, co robia ich postacie, a potem grupa ustala, jaki jest skutek. Gra przechodzi przez sceny: rozmowe w karczmie, badanie ruin, poscig, starcie, odpoczynek, narade albo spotkanie z wazna postacia. Nie kazda scena wymaga rzutu. Czasem wystarczy dobra decyzja, ciekawa rozmowa albo logiczny plan.",
+      progression:
+        "Odgrywanie postaci oznacza patrzenie na wydarzenia oczami bohatera. Gracz moze zadac sobie pytanie: czego moja postac chce, czego sie boi, komu ufa i co jest dla niej wazne? Nie chodzi o aktorstwo ani perfekcyjny wystep. Chodzi o podejmowanie decyzji, ktore pasuja do postaci i tworza ciekawa historie z reszta druzyny. RPG dziala najlepiej, gdy gracze sluchaja siebie nawzajem, daja innym miejsce przy stole i buduja sceny wspolnie zamiast probowac wygrac kosztem calej grupy.",
+      "game-flow":
+        "Kampania to seria polaczonych sesji, w ktorych wracaja te same postacie, watki, miejsca i konsekwencje dawnych wyborow. Jedna sesja moze byc osobna przygoda, ale kampania pozwala zobaczyc dluzszy rozwoj bohaterow i swiata. Historia zwykle sklada sie ze scen, a sceny z decyzji graczy i reakcji swiata. Druzyna moze zmienic plan, ominac walke, zaprzyjaznic sie z kims nieoczekiwanym albo stworzyc problem, ktorego nikt nie przewidzial. To wlasnie sprawia, ze RPG jest zywe.",
+      "dice-rolls":
+        "Kosci pomagaja rozstrzygac niepewne sytuacje w sposob bezstronny i emocjonujacy. Rozne gry uzywaja roznych kosci: d4, d6, d8, d10, d12, d20, d100, kosci Fate/Fudge albo specjalnych kosci symbolicznych. Zapis 2d6+3 oznacza rzut dwiema szesciennymi koscmi i dodanie 3 do wyniku. Same kosci nie sa jednak cala gra. System RPG okresla, kiedy rzucac, jakie cechy dodawac, jak interpretowac sukces, porazke, obrazenia, strach, magie, sledztwo czy rozwoj postaci. Dlatego D&D 5e, Call of Cthulhu, Warhammer, Pathfinder i Mork Borg moga opowiadac podobne przygody, ale robia to innymi zasadami i innym klimatem.",
+    },
+  },
+  {
     systemCode: "dnd5e",
     rulesApiCode: "dnd",
     name: "D&D 5e",

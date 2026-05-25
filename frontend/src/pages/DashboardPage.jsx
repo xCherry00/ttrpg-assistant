@@ -231,12 +231,6 @@ export default function DashboardPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, navigate]);
 
-  const displayName = useMemo(() => {
-    if (me?.displayName?.trim()) return me.displayName.trim();
-    if (me?.email) return me.email.split("@")[0];
-    return "Mistrz Gry";
-  }, [me]);
-
   const hero = useMemo(() => pickHeroSession(sessions), [sessions]);
 
   const plannedSessions = useMemo(
@@ -347,16 +341,6 @@ export default function DashboardPage() {
 
   return (
     <div className="page dashboardSaas">
-      <header className="dashboardHeader">
-        <div className="dashboardHeader__title">
-          <span className="dashboardHeader__icon"><DashboardIcon name="briefcase" /></span>
-          <div>
-            <h1>Dashboard</h1>
-            <p>Witaj ponownie, {displayName}! Twoj panel statusu sesji.</p>
-          </div>
-        </div>
-      </header>
-
       <section className="dashboardFeatureGrid">
         <article className="dashboardHero">
           <div className="dashboardHero__copy">

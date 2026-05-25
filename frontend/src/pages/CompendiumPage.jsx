@@ -79,6 +79,7 @@ export default function CompendiumPage() {
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
   const [error, setError] = useState("");
+  const [listNotice, setListNotice] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -106,6 +107,7 @@ export default function CompendiumPage() {
     async function loadList() {
       setLoading(true);
       setError("");
+      setListNotice("");
       setDetail(null);
       try {
         const data = await getCompendiumList(token, systemCode, category);
@@ -117,8 +119,11 @@ export default function CompendiumPage() {
         }
       } catch (e) {
         if (!cancelled) {
-          setListData(null);
-          setError(e?.message || "Nie udalo sie pobrac danych kompendium.");
+          setListData({ results: [], count: 0 });
+          setListNotice("Brak danych dla tej kategorii.");
+          if (e?.status && Number(e.status) >= 500) {
+            setError("Nie udalo sie pobrac danych kompendium.");
+          }
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -224,6 +229,11 @@ export default function CompendiumPage() {
                   </tr>
                 </thead>
                 <tbody>
+                  {rows.length === 0 ? (
+                    <tr>
+                      <td colSpan={3}>{listNotice || "Brak danych dla tej kategorii."}</td>
+                    </tr>
+                  ) : null}
                   {rows.map((item) => (
                     <tr key={item.index} className={detail?.index === item.index ? "is-active" : ""} onClick={() => selectDetail(item)}>
                       <td>{item.name}</td>

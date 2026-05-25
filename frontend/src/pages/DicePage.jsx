@@ -10,7 +10,7 @@ const MODES = [
 const STANDARD_DICE = [4, 6, 8, 10, 12, 20, 100];
 const ROLL_TYPES = [
   { value: "normal", label: "Zwykły" },
-  { value: "advantage", label: "Przewaga" },
+  { value: "advantage", label: "Ulatwienie" },
   { value: "disadvantage", label: "Utrudnienie" },
 ];
 

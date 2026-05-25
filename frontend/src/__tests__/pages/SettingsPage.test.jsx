@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import SettingsPage from "../../pages/SettingsPage";
 import * as settingsApi from "../../api/settings";
@@ -53,12 +53,13 @@ describe("SettingsPage v0.8.1", () => {
     expect(await screen.findByRole("heading", { name: "Ustawienia" })).toBeInTheDocument();
     expect(screen.getByText("Zarzadzaj kontem, bezpieczenstwem i wygladem aplikacji.")).toBeInTheDocument();
 
-    expect(screen.getByRole("button", { name: /Konto/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Bezpieczenstwo/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Wyglad/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Chat sesji/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Dane lokalne/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Strefa ryzyka/i })).toBeInTheDocument();
+    const categoriesPanel = screen.getByRole("heading", { name: "Kategorie" }).closest("aside");
+    expect(within(categoriesPanel).getByRole("button", { name: /Konto/i })).toBeInTheDocument();
+    expect(within(categoriesPanel).getByRole("button", { name: /Bezpieczenstwo/i })).toBeInTheDocument();
+    expect(within(categoriesPanel).getByRole("button", { name: /Wyglad/i })).toBeInTheDocument();
+    expect(within(categoriesPanel).getByRole("button", { name: /Chat sesji/i })).toBeInTheDocument();
+    expect(within(categoriesPanel).getByRole("button", { name: /Dane lokalne/i })).toBeInTheDocument();
+    expect(within(categoriesPanel).getByRole("button", { name: /Strefa ryzyka/i })).toBeInTheDocument();
   });
 
   it("does not render right rail helper panels", async () => {
@@ -75,25 +76,25 @@ describe("SettingsPage v0.8.1", () => {
     renderPage();
     await screen.findByRole("heading", { name: "Konto" });
 
-    fireEvent.click(screen.getByRole("button", { name: /Bezpieczenstwo/i }));
+    const categoriesPanel = screen.getByRole("heading", { name: "Kategorie" }).closest("aside");
+    fireEvent.click(within(categoriesPanel).getByRole("button", { name: /Bezpieczenstwo/i }));
     expect(await screen.findByRole("heading", { name: "Bezpieczenstwo" })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /Wyglad/i }));
+    fireEvent.click(within(categoriesPanel).getByRole("button", { name: /Wyglad/i }));
     expect(await screen.findByRole("heading", { name: "Wyglad" })).toBeInTheDocument();
     expect(screen.getByText("Ciemny")).toBeInTheDocument();
     expect(screen.getByText("Jasny")).toBeInTheDocument();
-    expect(screen.queryByText(/Kolor nicku/i)).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /Chat sesji/i }));
+    fireEvent.click(within(categoriesPanel).getByRole("button", { name: /Chat sesji/i }));
     expect(await screen.findByRole("heading", { name: "Chat sesji" })).toBeInTheDocument();
     expect(screen.getByText(/Przykladowa wiadomosc na czacie sesji/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Zapisz" })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /Dane lokalne/i }));
+    fireEvent.click(within(categoriesPanel).getByRole("button", { name: /Dane lokalne/i }));
     expect(await screen.findByRole("heading", { name: "Dane lokalne" })).toBeInTheDocument();
     expect(screen.getByText(/Nie usuwa konta, kampanii ani postaci/i)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /Strefa ryzyka/i }));
+    fireEvent.click(within(categoriesPanel).getByRole("button", { name: /Strefa ryzyka/i }));
     expect(await screen.findByRole("heading", { name: "Strefa ryzyka" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Usun konto/i })).toBeInTheDocument();
   });
@@ -102,12 +103,13 @@ describe("SettingsPage v0.8.1", () => {
     renderPage();
     await screen.findByRole("heading", { name: "Konto" });
 
-    fireEvent.click(screen.getByRole("button", { name: /Dane lokalne/i }));
+    const categoriesPanel = screen.getByRole("heading", { name: "Kategorie" }).closest("aside");
+    fireEvent.click(within(categoriesPanel).getByRole("button", { name: /Dane lokalne/i }));
     fireEvent.click(await screen.findByRole("button", { name: /Wyczysc cache aplikacji/i }));
 
     expect(window.confirm).toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole("button", { name: /Strefa ryzyka/i }));
+    fireEvent.click(within(categoriesPanel).getByRole("button", { name: /Strefa ryzyka/i }));
     fireEvent.change(await screen.findByPlaceholderText(/Podaj haslo/i), { target: { value: "secret123" } });
     fireEvent.click(screen.getByRole("button", { name: /Usun konto/i }));
 

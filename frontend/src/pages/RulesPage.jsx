@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
-import { BASIC_RULES, BASIC_RULES_BY_API_CODE, STATUS_LABELS } from "../data/basicRules";
+import { BASIC_RULES, BASIC_RULES_BY_API_CODE } from "../data/basicRules";
 import { RULES_STARTER_RESOURCES } from "../data/rulesResources";
 import "../styles/rules.css";
 
 const SECTION_DEFS = [
-  { key: "overview", label: "Czym jest ten system?" },
-  { key: "core-test", label: "Podstawowa mechanika testow" },
-  { key: "character-creation", label: "Tworzenie postaci w skrocie" },
-  { key: "combat", label: "Walka w skrocie" },
-  { key: "health", label: "Zdrowie i obrazenia" },
-  { key: "progression", label: "Rozwoj postaci" },
-  { key: "game-flow", label: "Minimalny flow gry" },
+  { key: "overview", label: "Czym jest ten system?", generalLabel: "Czym sa gry RPG?" },
+  { key: "core-test", label: "Podstawowa mechanika testow", generalLabel: "Testy, decyzje i konsekwencje" },
+  { key: "character-creation", label: "Tworzenie postaci w skrocie", generalLabel: "Rola gracza i postac gracza" },
+  { key: "combat", label: "Walka w skrocie", generalLabel: "Rola Mistrza Gry" },
+  { key: "health", label: "Zdrowie i obrazenia", generalLabel: "Jak wyglada typowa sesja?" },
+  { key: "progression", label: "Rozwoj postaci", generalLabel: "Odgrywanie postaci i wspolna historia" },
+  { key: "game-flow", label: "Minimalny flow gry", generalLabel: "Kampanie, sceny i dluzsza gra" },
+  { key: "dice-rolls", label: "Rzuty koscmi", generalLabel: "Kosci i rozne systemy RPG" },
 ];
 
 export default function RulesPage() {
@@ -35,7 +36,6 @@ export default function RulesPage() {
     return BASIC_RULES_BY_API_CODE[selectedSystem] || BASIC_RULES[0];
   }, [selectedSystem]);
 
-  const statusLabel = STATUS_LABELS[selectedProfile.legalStatus] || selectedProfile.legalStatus;
   const starterResources = [...(RULES_STARTER_RESOURCES[selectedSystem] || [])].sort((a, b) => (a.priority || 999) - (b.priority || 999));
 
   return (
@@ -69,21 +69,19 @@ export default function RulesPage() {
 
         <div>
           <h2 className="rulesSystemTitle">{selectedProfile.name}</h2>
-          <div className="rulesSource">Status danych: <strong>{statusLabel}</strong></div>
-          <p className="rulesSummary">
-            Ten system ma w aplikacji tylko podstawowy skrot zasad. Pelne zasady znajdziesz w oficjalnych materialach.
-          </p>
 
           <section className="rulesCards" aria-label="Basic rules sections">
             {SECTION_DEFS.map((section) => (
+              selectedProfile.sections?.[section.key] ? (
               <article className="rulesCard is-open" key={section.key}>
                 <div className="rulesCardHeader">
-                  <span className="rulesCardTitle">{section.label}</span>
+                  <span className="rulesCardTitle">{selectedProfile.rulesApiCode === "general" ? section.generalLabel : section.label}</span>
                 </div>
                 <div className="rulesCardBody">
                   <p className="rulesSummary">{selectedProfile.sections?.[section.key] || "Brak lokalnego opisu tej sekcji."}</p>
                 </div>
               </article>
+              ) : null
             ))}
           </section>
 
@@ -96,7 +94,7 @@ export default function RulesPage() {
             </ul>
           </div>
 
-          <div className="rulesSource">{selectedProfile.legalNote}</div>
+          <div className="rulesSource"><small>{selectedProfile.legalNote}</small></div>
 
           <h3 className="rulesSystemTitle">Oficjalne materialy startowe</h3>
           {selectedSystem === "wh4e" && (

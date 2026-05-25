@@ -289,18 +289,14 @@ export default function SettingsPage() {
 
   function jumpToSection(id) {
     setActiveSection(id);
-    document.getElementById(`settings-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const target = document.getElementById(`settings-${id}`);
+    if (target && typeof target.scrollIntoView === "function") {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   }
 
   return (
     <div className="page settingsPage">
-      <header className="settingsHero">
-        <div>
-          <h1>Ustawienia</h1>
-          <p>Zarzadzaj kontem, bezpieczenstwem i wygladem aplikacji.</p>
-        </div>
-      </header>
-
       <div className="settingsStudio">
         <aside className="settingsIndex settingsGlass">
           <h2>Kategorie</h2>
@@ -322,8 +318,7 @@ export default function SettingsPage() {
         </aside>
 
         <main className="settingsStack" aria-live="polite">
-          {activeSection === "account" && (
-            <section id="settings-account" className="settingsPanel settingsPanel--featured">
+          <section id="settings-account" className="settingsPanel settingsPanel--featured">
               <div className="settingsPanelHead">
                 <span className="settingsPanelIcon">
                   <Icon name="mail" />
@@ -365,11 +360,9 @@ export default function SettingsPage() {
                   </button>
                 </div>
               </form>
-            </section>
-          )}
+          </section>
 
-          {activeSection === "security" && (
-            <section id="settings-security" className="settingsPanel">
+          <section id="settings-security" className="settingsPanel">
               <div className="settingsPanelHead">
                 <span className="settingsPanelIcon">
                   <Icon name="lock" />
@@ -416,11 +409,9 @@ export default function SettingsPage() {
                   </button>
                 </div>
               </form>
-            </section>
-          )}
+          </section>
 
-          {activeSection === "appearance" && (
-            <section id="settings-appearance" className="settingsPanel">
+          <section id="settings-appearance" className="settingsPanel">
               <div className="settingsPanelHead">
                 <span className="settingsPanelIcon">
                   <Icon name="palette" />
@@ -448,11 +439,9 @@ export default function SettingsPage() {
                   <strong>Jasny</strong>
                 </button>
               </div>
-            </section>
-          )}
+          </section>
 
-          {activeSection === "chat" && (
-            <section id="settings-chat" className="settingsPanel">
+          <section id="settings-chat" className="settingsPanel">
               <div className="settingsPanelHead">
                 <span className="settingsPanelIcon">
                   <Icon name="sparkles" />
@@ -495,11 +484,9 @@ export default function SettingsPage() {
                   Zapisz
                 </button>
               </div>
-            </section>
-          )}
+          </section>
 
-          {activeSection === "local" && (
-            <section id="settings-local" className="settingsPanel">
+          <section id="settings-local" className="settingsPanel">
               <div className="settingsPanelHead">
                 <span className="settingsPanelIcon">
                   <Icon name="database" />
@@ -514,11 +501,9 @@ export default function SettingsPage() {
                 <Icon name="trash" />
                 Wyczysc cache aplikacji
               </button>
-            </section>
-          )}
+          </section>
 
-          {activeSection === "danger" && (
-            <section id="settings-danger" className="settingsPanel settingsPanel--danger">
+          <section id="settings-danger" className="settingsPanel settingsPanel--danger">
               <div className="settingsPanelHead">
                 <span className="settingsPanelIcon">
                   <Icon name="trash" />
@@ -542,8 +527,7 @@ export default function SettingsPage() {
                   Usun konto
                 </button>
               </div>
-            </section>
-          )}
+          </section>
         </main>
       </div>
     </div>
