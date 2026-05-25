@@ -113,6 +113,25 @@
   font: inherit;
 }
 
+.charactersCardPortrait {
+  width: 52px;
+  height: 52px;
+  border: 1px solid #2f3644;
+  border-radius: 8px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  color: #9ca8bc;
+  background: #0e1218;
+  font-weight: 700;
+}
+
+.charactersCardPortrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .charactersCard.is-active {
   border-color: #6f7e9b;
   background: #181d26;
@@ -308,6 +327,26 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.charactersActionBar {
+  border: 1px solid #2d323d;
+  border-radius: 8px;
+  background: #12151b;
+  padding: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.charactersReadonlyBadge {
+  border: 1px solid #47627f;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #c3ddfb;
+  background: #182433;
 }
 
 .charactersGhostBtn.is-active,

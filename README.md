@@ -917,6 +917,19 @@ Refactor note (v0.6.6):
   - po `FINISHED` CTA `Dodaj notatki po sesji`.
 - Initiative preview pozostaje poza MVP i nie jest renderowane w LiveSession.
 
+### v0.8.7 - Rework character navigation and read-only sheet preview
+- `/characters` jest teraz ekranem wyboru postaci (lista + `Nowa postac` + `Importuj JSON`), a otwarcie karty odbywa sie przez `/characters/:characterId`.
+- Widok karty ma osobny action bar (`Wroc do listy`, `Eksportuj JSON`, `Drukuj`, `Usun postac`) zamiast rozproszonych akcji.
+- Dodano read-only preview dla MG pod `/characters/:characterId?mode=preview`:
+  - brak pol edycji,
+  - brak `Zapisz zmiany`,
+  - brak `Usun postac`,
+  - badge `Podglad MG - tryb tylko do odczytu`.
+- `CampaignCharactersPanel` ma linki:
+  - gracz: `Otworz moja karte` -> `/characters/:characterId`,
+  - MG: `Podglad karty` -> `/characters/:characterId?mode=preview`.
+- Print-friendly flow i import/export JSON pozostaja aktywne.
+
 ### v0.8.5 - Rework campaign panel for GM and player
 - `CampaignDetailPage` rozpoznaje role po danych kampanii i membership (`owner/mg/self`), a nastepnie renderuje:
   - `MG Dashboard` (zarzadzanie),

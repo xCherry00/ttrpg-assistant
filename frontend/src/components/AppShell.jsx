@@ -7,7 +7,7 @@ import { Outlet, useLocation } from "react-router-dom";
 const PAGE_META = [
   { match: (path) => path === "/dashboard", title: "Dashboard", description: "Panel glowny aplikacji TTRPG Assistant." },
   { match: (path) => path.startsWith("/campaigns"), title: "Kampanie", description: "Zarzadzanie kampaniami i swiatami gry." },
-  { match: (path) => path === "/characters", title: "Postacie", description: "Zarzadzanie kartami postaci i danymi bohaterow." },
+  { match: (path) => path.startsWith("/characters"), title: "Postacie", description: "Zarzadzanie kartami postaci i danymi bohaterow." },
   { match: (path) => path === "/initiative" || path.includes("/sessions/"), title: "Sesje", description: "Planowanie i prowadzenie sesji RPG." },
   { match: (path) => path.startsWith("/generators"), title: "Generatory", description: "Narzedzia do tworzenia tresci RPG." },
   { match: (path) => path === "/settings", title: "Ustawienia", description: "Zarzadzaj kontem, bezpieczenstwem i wygladem aplikacji." },

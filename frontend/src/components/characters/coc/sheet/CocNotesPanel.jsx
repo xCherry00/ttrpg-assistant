@@ -1,10 +1,10 @@
-export default function CocNotesPanel({ privateNotes, onPrivateNotesChange }) {
+export default function CocNotesPanel({ privateNotes, onPrivateNotesChange, readOnly = false }) {
   return (
     <section className="sheetSection">
       <h3>Notatki</h3>
       <label className="sheetField">
         <span>Notatki prywatne</span>
-        <textarea rows="8" value={privateNotes} onChange={(e) => onPrivateNotesChange(e.target.value)} />
+        <textarea rows="8" value={privateNotes} readOnly={readOnly} onChange={(e) => onPrivateNotesChange(e.target.value)} />
       </label>
     </section>
   );

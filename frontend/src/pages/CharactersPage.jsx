@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import {
   deleteCharacter,
@@ -18,6 +19,9 @@ import "../styles/characters.css";
 
 export default function CharactersPage() {
   const { token } = useAuth();
+  const navigate = useNavigate();
+  const { characterId: routeCharacterId } = useParams();
+  const [searchParams] = useSearchParams();
   const [items, setItems] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [detail, setDetail] = useState(null);
@@ -32,6 +36,7 @@ export default function CharactersPage() {
   const [notice, setNotice] = useState(null);
   const [error, setError] = useState("");
   const importInputRef = useRef(null);
+  const readOnlyPreview = searchParams.get("mode") === "preview";
 
   const showNotice = useCallback((type, text) => {
     setNotice({ type, text });
@@ -45,8 +50,10 @@ export default function CharactersPage() {
       const next = Array.isArray(data) ? data : [];
       setItems(next);
       setSelectedId((prev) => {
+        const routeId = Number(routeCharacterId);
+        if (routeId && next.some((item) => item.id === routeId)) return routeId;
         if (preserveSelection && prev && next.some((item) => item.id === prev)) return prev;
-        return prev ?? next[0]?.id ?? null;
+        return prev ?? null;
       });
     } catch (err) {
       const message = err?.message || "Nie udalo sie pobrac postaci.";
@@ -55,11 +62,20 @@ export default function CharactersPage() {
     } finally {
       setLoading(false);
     }
-  }, [token, showNotice]);
+  }, [routeCharacterId, token, showNotice]);
 
   useEffect(() => {
     loadList({ preserveSelection: true });
   }, [loadList]);
+
+  useEffect(() => {
+    const routeId = Number(routeCharacterId);
+    if (routeId) {
+      setSelectedId(routeId);
+      return;
+    }
+    setSelectedId(null);
+  }, [routeCharacterId]);
 
   useEffect(() => {
     if (!selectedId) {
@@ -86,7 +102,7 @@ export default function CharactersPage() {
       setCreatorOpen(false);
       setSelectedCreationSystem(null);
       await loadList({ preserveSelection: true });
-      setSelectedId(created.id);
+      navigate(`/characters/${created.id}`);
       showNotice("success", "Postac utworzona.");
     } catch (err) {
       const message = err?.message || "Nie udalo sie utworzyc postaci.";
@@ -105,7 +121,7 @@ export default function CharactersPage() {
       setCreatorOpen(false);
       setSelectedCreationSystem(null);
       await loadList({ preserveSelection: true });
-      setSelectedId(created.id);
+      navigate(`/characters/${created.id}`);
       showNotice("success", "Badacz utworzony.");
     } catch (err) {
       const message = err?.message || "Nie udalo sie utworzyc badacza.";
@@ -143,6 +159,7 @@ export default function CharactersPage() {
       setDetail(null);
       setSelectedId(null);
       await loadList({ preserveSelection: true });
+      navigate("/characters");
       setConfirmDeleteOpen(false);
       showNotice("success", "Postac usunieta.");
     } catch (err) {
@@ -200,7 +217,7 @@ export default function CharactersPage() {
       const imported = await importCharacter(token, payload);
       await loadList({ preserveSelection: true });
       if (imported?.characterId) {
-        setSelectedId(imported.characterId);
+        navigate(`/characters/${imported.characterId}`);
       }
       showNotice("success", "Postac zaimportowana.");
     } catch (err) {
@@ -221,6 +238,14 @@ export default function CharactersPage() {
     setSelectedCreationSystem(null);
   }
 
+  function openCharacterSheet(characterId) {
+    navigate(`/characters/${characterId}`);
+  }
+
+  function handleBackToList() {
+    navigate("/characters");
+  }
+
   useEffect(() => {
     if (!notice) return;
     const timer = setTimeout(() => setNotice(null), 3500);
@@ -233,7 +258,7 @@ export default function CharactersPage() {
         <div>
           <span className="pageEyebrow">bohaterowie</span>
           <h1 className="pageTitle">Postacie</h1>
-          <p className="pageSubtitle">Tworzenie i zarzadzanie postaciami do wspieranych systemow.</p>
+          <p className="pageSubtitle">Wybierz postac z listy albo utworz nowa, aby przejsc do widoku karty.</p>
         </div>
         <button type="button" className="charactersPrimaryBtn" onClick={openCreateFlow}>+ Nowa postac</button>
       </div>
@@ -248,11 +273,9 @@ export default function CharactersPage() {
             items={items}
             loading={loading}
             selectedId={selectedId}
-            onSelect={setSelectedId}
+            onSelect={openCharacterSheet}
             onCreate={openCreateFlow}
-            onExport={handleExportJson}
             onImport={handleImportClick}
-            onPrint={handlePrint}
           />
           <input
             ref={importInputRef}
@@ -290,14 +313,21 @@ export default function CharactersPage() {
             )}
 
             {!creatorOpen && items.length === 0 && <div className="charactersEmpty">Nie masz jeszcze postaci. Uzyj przycisku + Nowa postac.</div>}
-            {!creatorOpen && items.length > 0 && !selectedId && <div className="charactersEmpty">Wybierz postac z listy po lewej.</div>}
+            {!creatorOpen && items.length > 0 && !selectedId && <div className="charactersEmpty">Wybierz postac z listy, aby otworzyc karte.</div>}
             {!creatorOpen && detailLoading && <div className="charactersState">Ladowanie karty...</div>}
 
             {!creatorOpen && detail && !detailLoading && (
               <>
+                <div className="charactersActionBar">
+                  <button type="button" className="charactersGhostBtn" onClick={handleBackToList}>Wroc do listy</button>
+                  {!readOnlyPreview && <button type="button" className="charactersGhostBtn" onClick={handleExportJson}>Eksportuj JSON</button>}
+                  <button type="button" className="charactersGhostBtn" onClick={handlePrint}>Drukuj</button>
+                  {!readOnlyPreview && <button type="button" className="charactersDangerBtn" disabled={deleting} onClick={() => setConfirmDeleteOpen(true)}>Usun postac</button>}
+                  {readOnlyPreview && <span className="charactersReadonlyBadge">Podglad MG - tryb tylko do odczytu</span>}
+                </div>
                 {saving && <div className="charactersState">Zapisywanie zmian...</div>}
-                <CharacterSheetRouter detail={detail} onSave={onSave} saving={saving} />
-                {confirmDeleteOpen && (
+                <CharacterSheetRouter detail={detail} onSave={onSave} saving={saving} readOnly={readOnlyPreview} />
+                {!readOnlyPreview && confirmDeleteOpen && (
                   <div className="charactersConfirmBox">
                     <p>Czy na pewno chcesz usunac postac: <strong>{detail.name}</strong>?</p>
                     <div className="charactersActionsFooter">
@@ -306,9 +336,6 @@ export default function CharactersPage() {
                     </div>
                   </div>
                 )}
-                <div className="charactersActionsFooter">
-                  <button type="button" className="charactersDangerBtn" disabled={deleting} onClick={() => setConfirmDeleteOpen(true)}>Usun postac</button>
-                </div>
               </>
             )}
           </section>
@@ -317,4 +344,3 @@ export default function CharactersPage() {
     </div>
   );
 }
-

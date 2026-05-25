@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import CharactersPage from "../../pages/CharactersPage";
 import * as charactersApi from "../../api/characters";
 
@@ -41,6 +42,17 @@ vi.mock("../../components/characters/CharacterSystemSelector", () => ({
 }));
 
 describe("CharactersPage", () => {
+  function renderPage(initialEntry = "/characters/1") {
+    render(
+      <MemoryRouter initialEntries={[initialEntry]}>
+        <Routes>
+          <Route path="/characters" element={<CharactersPage />} />
+          <Route path="/characters/:characterId" element={<CharactersPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+  }
+
   beforeEach(() => {
     vi.clearAllMocks();
     charactersApi.listCharacters.mockResolvedValue([{ id: 1, name: "Hero", systemCode: "dnd5e", raceName: "Human", className: "Fighter", level: 1 }]);
@@ -57,7 +69,7 @@ describe("CharactersPage", () => {
   });
 
   it("renders sidebar actions including print and no backend PDF button", async () => {
-    render(<CharactersPage />);
+    renderPage();
     expect(await screen.findByRole("button", { name: "Eksportuj JSON" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Importuj JSON" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Drukuj" })).toBeInTheDocument();
@@ -65,7 +77,7 @@ describe("CharactersPage", () => {
   });
 
   it("exports and imports JSON", async () => {
-    render(<CharactersPage />);
+    renderPage();
     fireEvent.click(await screen.findByRole("button", { name: "Eksportuj JSON" }));
     await waitFor(() => expect(charactersApi.exportCharacter).toHaveBeenCalledWith("test-token", 1));
 
@@ -76,21 +88,21 @@ describe("CharactersPage", () => {
   });
 
   it("creates D&D character and CoC character", async () => {
-    render(<CharactersPage />);
+    renderPage("/characters");
 
     fireEvent.click((await screen.findAllByRole("button", { name: /\+ Nowa postac/i }))[0]);
     fireEvent.click(screen.getByRole("button", { name: "wybierz-dnd" }));
     fireEvent.click(screen.getByRole("button", { name: "submit-dnd" }));
     await waitFor(() => expect(charactersApi.quickCreateCharacter).toHaveBeenCalled());
 
-    fireEvent.click(screen.getAllByRole("button", { name: /\+ Nowa postac/i })[0]);
-    fireEvent.click(screen.getByRole("button", { name: "wybierz-coc" }));
+    fireEvent.click((await screen.findAllByRole("button", { name: /\+ Nowa postac/i }))[0]);
+    fireEvent.click(await screen.findByRole("button", { name: "wybierz-coc" }));
     fireEvent.click(screen.getByRole("button", { name: "submit-coc" }));
     await waitFor(() => expect(charactersApi.quickCreateCocCharacter).toHaveBeenCalled());
   });
 
   it("supports save, delete and print flow", async () => {
-    render(<CharactersPage />);
+    renderPage();
     fireEvent.click(await screen.findByRole("button", { name: "save-sheet" }));
     await waitFor(() => expect(charactersApi.updateCharacterSheet).toHaveBeenCalled());
 
@@ -103,8 +115,15 @@ describe("CharactersPage", () => {
   });
 
   it("does not render legacy coming soon / MVP markers", async () => {
-    render(<CharactersPage />);
+    renderPage();
     await screen.findByRole("button", { name: "Eksportuj JSON" });
     expect(screen.queryByText(/coming soon|wkrotce|demo|mvp/i)).not.toBeInTheDocument();
+  });
+
+  it("read-only preview hides editing actions", async () => {
+    renderPage("/characters/1?mode=preview");
+    await screen.findByText(/tryb tylko do odczytu/i);
+    expect(screen.queryByRole("button", { name: "Usun postac" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Zapisz zmiany" })).not.toBeInTheDocument();
   });
 });

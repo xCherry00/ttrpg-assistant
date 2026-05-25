@@ -10,9 +10,7 @@ export default function CharacterSidebar({
   selectedId,
   onSelect,
   onCreate,
-  onExport,
   onImport,
-  onPrint,
 }) {
   const [query, setQuery] = useState("");
   const filtered = useMemo(() => {
@@ -32,8 +30,6 @@ export default function CharacterSidebar({
       </div>
       <div style={{ display: "flex", gap: 8 }}>
         <button type="button" className="charactersGhostBtn" onClick={onImport}>Importuj JSON</button>
-        <button type="button" className="charactersGhostBtn" onClick={onExport} disabled={!selectedId}>Eksportuj JSON</button>
-        <button type="button" className="charactersGhostBtn" onClick={onPrint} disabled={!selectedId}>Drukuj</button>
       </div>
 
       <label className="charactersSearch">
@@ -56,10 +52,14 @@ export default function CharacterSidebar({
               className="charactersCardSelect"
               onClick={() => onSelect(item.id)}
             >
+              <div className="charactersCardPortrait">
+                {item.portraitUrl ? <img src={item.portraitUrl} alt={`Portret ${item.name || "postaci"}`} /> : <span>{(item.name || "?").trim().charAt(0).toUpperCase() || "?"}</span>}
+              </div>
               <strong>{item.name || "Bez nazwy"}</strong>
               <div>{item.systemCode?.toUpperCase() || "SYSTEM"}</div>
               <div>{item.raceName || "-"} / {item.className || "-"}</div>
               <div>Poziom {item.level ?? 1}</div>
+              <div>Kampania: {item.campaignName || item.campaignTitle || "-"}</div>
             </button>
           </div>
         ))}

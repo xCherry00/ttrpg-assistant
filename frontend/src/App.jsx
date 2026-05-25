@@ -72,6 +72,7 @@ export default function App() {
             <Route path="/campaigns/:campaignId" element={<CampaignDetailsPage />} />
             <Route path="/campaigns/:campaignId/sessions/:sessionId/live" element={<LiveSessionPage />} />
             <Route path="/characters" element={<CharactersPage />} />
+            <Route path="/characters/:characterId" element={<CharactersPage />} />
             <Route path="/friends" element={<FriendsPage />} />
             <Route path="/messages" element={<MessagesPage />} />
             <Route path="/users/:handle" element={<PublicUserPage />} />

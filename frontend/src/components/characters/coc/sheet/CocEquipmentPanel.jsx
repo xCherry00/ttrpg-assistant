@@ -1,4 +1,4 @@
-export default function CocEquipmentPanel({ equipment, inventory, onInventoryChange }) {
+export default function CocEquipmentPanel({ equipment, inventory, onInventoryChange, readOnly = false }) {
   const items = Array.isArray(equipment?.items) ? equipment.items : [];
   return (
     <section className="sheetSection">
@@ -15,8 +15,8 @@ export default function CocEquipmentPanel({ equipment, inventory, onInventoryCha
         </ul>
       )}
       <label className="sheetField">
-        <span>Przedmioty (edytowalne)</span>
-        <textarea rows="7" value={inventory} onChange={(e) => onInventoryChange(e.target.value)} />
+        <span>{readOnly ? "Przedmioty" : "Przedmioty (edytowalne)"}</span>
+        <textarea rows="7" value={inventory} readOnly={readOnly} onChange={(e) => onInventoryChange(e.target.value)} />
       </label>
     </section>
   );

@@ -8,6 +8,7 @@ export default function CombatPanel({
   tempHp,
   onCurrentHpChange,
   onTempHpChange,
+  readOnly = false,
 }) {
   const stats = [
     { label: "Maks. HP", value: statValue(combat?.maxHp) },
@@ -32,11 +33,11 @@ export default function CombatPanel({
       <div className="sheetGrid">
         <label className="sheetField">
           <span>Aktualne HP</span>
-          <input type="number" min="0" value={currentHp} onChange={(e) => onCurrentHpChange(Number(e.target.value || 0))} />
+          <input type="number" min="0" value={currentHp} readOnly={readOnly} onChange={(e) => onCurrentHpChange(Number(e.target.value || 0))} />
         </label>
         <label className="sheetField">
           <span>Tymczasowe HP</span>
-          <input type="number" min="0" value={tempHp} onChange={(e) => onTempHpChange(Number(e.target.value || 0))} />
+          <input type="number" min="0" value={tempHp} readOnly={readOnly} onChange={(e) => onTempHpChange(Number(e.target.value || 0))} />
         </label>
       </div>
     </section>

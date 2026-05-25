@@ -8,7 +8,7 @@ import CocEquipmentPanel from "./sheet/CocEquipmentPanel";
 import CocBackstoryPanel from "./sheet/CocBackstoryPanel";
 import CocNotesPanel from "./sheet/CocNotesPanel";
 
-export default function CocCharacterSheetView({ detail, onSave, saving }) {
+export default function CocCharacterSheetView({ detail, onSave, saving, readOnly = false }) {
   const sheet = detail?.sheetJson && typeof detail.sheetJson === "object" ? detail.sheetJson : {};
   const identity = sheet.identity || {};
   const equipment = sheet.equipment || {};
@@ -38,29 +38,32 @@ export default function CocCharacterSheetView({ detail, onSave, saving }) {
         onNameChange={setName}
         portraitUrl={portraitUrl}
         onPortraitUrlChange={setPortraitUrl}
+        readOnly={readOnly}
       />
       <CocCharacteristicsPanel characteristics={sheet.characteristics} />
       <CocDerivedStatsPanel derived={sheet.derived} />
       <CocSkillsTable skills={sheet.skills} />
       <CocCombatPanel combat={sheet.combat} />
-      <CocEquipmentPanel equipment={equipment} inventory={inventory} onInventoryChange={setInventory} />
+      <CocEquipmentPanel equipment={equipment} inventory={inventory} onInventoryChange={setInventory} readOnly={readOnly} />
       <CocBackstoryPanel backstory={sheet.backstory} />
-      <CocNotesPanel privateNotes={privateNotes} onPrivateNotesChange={setPrivateNotes} />
-      <div className="sheetActions">
-        <button
-          type="button"
-          className="charactersPrimaryBtn"
-          disabled={saving}
-          onClick={() => onSave({
-            name,
-            portraitUrl,
-            privateNotes,
-            inventory: inventory.split("\n").map((line) => line.trim()).filter(Boolean),
-          })}
-        >
-          {saving ? "Zapisywanie..." : "Zapisz zmiany"}
-        </button>
-      </div>
+      <CocNotesPanel privateNotes={privateNotes} onPrivateNotesChange={setPrivateNotes} readOnly={readOnly} />
+      {!readOnly && (
+        <div className="sheetActions">
+          <button
+            type="button"
+            className="charactersPrimaryBtn"
+            disabled={saving}
+            onClick={() => onSave({
+              name,
+              portraitUrl,
+              privateNotes,
+              inventory: inventory.split("\n").map((line) => line.trim()).filter(Boolean),
+            })}
+          >
+            {saving ? "Zapisywanie..." : "Zapisz zmiany"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

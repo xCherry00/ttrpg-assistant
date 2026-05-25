@@ -132,4 +132,15 @@ describe("CampaignDetailPage dashboard by role", () => {
       expect(screen.getByRole("link", { name: "Otworz moja karte" })).toBeInTheDocument();
     });
   });
+
+  it("MG can open read-only preview link for campaign character", async () => {
+    campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "A", owner: true, status: "active", systemCode: "dnd5e" });
+    campaignsApi.getCampaignCharacters.mockResolvedValue([{ characterId: 9, characterName: "Rogue", systemCode: "dnd5e", userId: 22 }]);
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByRole("link", { name: "Podglad karty" })).toHaveAttribute("href", "/characters/9?mode=preview");
+    });
+  });
 });

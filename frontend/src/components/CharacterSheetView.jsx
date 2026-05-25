@@ -9,7 +9,7 @@ import FeaturesTraitsPanel from "./characters/sheet/FeaturesTraitsPanel";
 import SpellsPanel from "./characters/sheet/SpellsPanel";
 import NotesPanel from "./characters/sheet/NotesPanel";
 
-export default function CharacterSheetView({ detail, onSave, saving }) {
+export default function CharacterSheetView({ detail, onSave, saving, readOnly = false }) {
   const sheet = detail?.sheetJson && typeof detail.sheetJson === "object" ? detail.sheetJson : {};
   const sheetIsInvalid = !detail?.sheetJson || typeof detail.sheetJson !== "object";
   const identity = sheet.identity || {};
@@ -45,6 +45,7 @@ export default function CharacterSheetView({ detail, onSave, saving }) {
         onNameChange={setName}
         portraitUrl={portraitUrl}
         onPortraitUrlChange={setPortraitUrl}
+        readOnly={readOnly}
       />
       <CombatPanel
         combat={combat}
@@ -52,31 +53,34 @@ export default function CharacterSheetView({ detail, onSave, saving }) {
         tempHp={tempHp}
         onCurrentHpChange={setCurrentHp}
         onTempHpChange={setTempHp}
+        readOnly={readOnly}
       />
       <AbilityScoresPanel abilityScores={abilities} />
       <SavingThrowsPanel savingThrows={sheet.savingThrows} />
       <SkillsTable skills={sheet.skills} />
-      <InventoryPanel inventory={inventory} onInventoryChange={setInventory} />
+      <InventoryPanel inventory={inventory} onInventoryChange={setInventory} readOnly={readOnly} />
       <FeaturesTraitsPanel featuresTraits={sheet.featuresTraits} />
       <SpellsPanel spells={sheet.spells} />
-      <NotesPanel privateNotes={privateNotes} onPrivateNotesChange={setPrivateNotes} />
-      <div className="sheetActions">
-        <button
-          type="button"
-          className="charactersPrimaryBtn"
-          disabled={saving}
-          onClick={() => onSave({
-            name,
-            portraitUrl,
-            currentHp,
-            tempHp,
-            privateNotes,
-            inventory: inventory.split("\n").map((x) => x.trim()).filter(Boolean),
-          })}
-        >
-          {saving ? "Zapisywanie..." : "Zapisz zmiany"}
-        </button>
-      </div>
+      <NotesPanel privateNotes={privateNotes} onPrivateNotesChange={setPrivateNotes} readOnly={readOnly} />
+      {!readOnly && (
+        <div className="sheetActions">
+          <button
+            type="button"
+            className="charactersPrimaryBtn"
+            disabled={saving}
+            onClick={() => onSave({
+              name,
+              portraitUrl,
+              currentHp,
+              tempHp,
+              privateNotes,
+              inventory: inventory.split("\n").map((x) => x.trim()).filter(Boolean),
+            })}
+          >
+            {saving ? "Zapisywanie..." : "Zapisz zmiany"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -7,6 +7,7 @@ export default function CharacterHeader({
   onNameChange,
   portraitUrl,
   onPortraitUrlChange,
+  readOnly = false,
 }) {
   const portrait = portraitUrl || identity?.portraitUrl || "";
   const fallbackInitial = (name || detail?.name || "?").trim().charAt(0).toUpperCase() || "?";
@@ -20,21 +21,23 @@ export default function CharacterHeader({
         <div className="sheetIdentityGrid">
           <label className="sheetField">
             <span>Nazwa</span>
-            <input value={name} onChange={(e) => onNameChange(e.target.value)} />
+            <input value={name} readOnly={readOnly} onChange={(e) => onNameChange(e.target.value)} />
           </label>
           <label className="sheetField">
             <span>Portret</span>
-            <input value={portraitUrl} onChange={(e) => onPortraitUrlChange(e.target.value)} placeholder="URL lub data:image/..." />
+            <input value={portraitUrl} readOnly={readOnly} onChange={(e) => onPortraitUrlChange(e.target.value)} placeholder="URL lub data:image/..." />
           </label>
-          <div className="sheetField" style={{ gridColumn: "1 / -1" }}>
-            <ImageUpload
-              label="Wgraj portret"
-              value={portrait}
-              onChange={onPortraitUrlChange}
-              onRemove={() => onPortraitUrlChange("")}
-              previewAlt="Portret postaci"
-            />
-          </div>
+          {!readOnly && (
+            <div className="sheetField" style={{ gridColumn: "1 / -1" }}>
+              <ImageUpload
+                label="Wgraj portret"
+                value={portrait}
+                onChange={onPortraitUrlChange}
+                onRemove={() => onPortraitUrlChange("")}
+                previewAlt="Portret postaci"
+              />
+            </div>
+          )}
           <label className="sheetField">
             <span>Rasa</span>
             <input value={identity?.race || detail?.raceName || "-"} readOnly />
