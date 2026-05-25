@@ -1,15 +1,12 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../auth/AuthContext";
-import { getDndConditions, getDndMonsterDetails, searchDndMonsters } from "../../api/initiative";
+import { getDndMonsterDetails, searchDndMonsters } from "../../api/initiative";
 import "../../styles/initiative.css";
 
 const STORAGE_KEY = "ttrpg.quickInitiativeTracker";
 const LOOKUP_ERROR_MESSAGE = "Nie udalo sie pobrac danych z bazy D&D. Mozesz dodac uczestnika recznie.";
-
-const FALLBACK_CONDITIONS = [
-  "blinded", "charmed", "deafened", "frightened", "grappled", "incapacitated", "invisible",
-  "paralyzed", "petrified", "poisoned", "prone", "restrained", "stunned", "unconscious", "exhausted",
-];
+const SYSTEM_DND = "dnd5e";
+const SYSTEM_COC = "coc7e";
 
 const TYPE_OPTIONS = [
   { value: "PLAYER", label: "Gracz", color: "#2f78ff" },
@@ -24,6 +21,7 @@ const EMPTY_CUSTOM_FORM = {
   color: "#e5484d",
   initiativeModifier: "0",
   initiative: "",
+  dex: "",
   ac: "",
   hp: "",
   maxHp: "",
@@ -51,12 +49,12 @@ function sanitizeParticipant(raw, idx) {
     name: String(raw.name || "").trim(),
     initiative: toOptionalNumber(raw.initiative),
     initiativeModifier: toOptionalNumber(raw.initiativeModifier) ?? 0,
+    dex: toOptionalNumber(raw.dex),
     ac: toOptionalNumber(raw.ac),
     hp: toOptionalNumber(raw.hp),
     maxHp: toOptionalNumber(raw.maxHp),
     type,
     color: raw.color || colorForType(type),
-    conditions: Array.isArray(raw.conditions) ? raw.conditions.map(String) : [],
     note: String(raw.note || ""),
     defeated: Boolean(raw.defeated),
     order: Number.isFinite(Number(raw.order)) ? Number(raw.order) : idx + 1,
@@ -79,17 +77,33 @@ function byInitiative(list) {
   });
 }
 
+function byDex(list) {
+  return [...list].sort((a, b) => {
+    const ad = a.dex ?? Number.NEGATIVE_INFINITY;
+    const bd = b.dex ?? Number.NEGATIVE_INFINITY;
+    if (bd !== ad) return bd - ad;
+    return a.order - b.order;
+  });
+}
+
 function reindexOrder(list) {
   return list.map((item, index) => ({ ...item, order: index + 1 }));
 }
 
 function createInitialState() {
-  if (typeof window === "undefined") {
-    return { participants: [], started: false, round: 1, activeParticipantId: null, orderCounter: 1, initiativeRolled: false };
-  }
+  const fallback = {
+    systemCode: SYSTEM_DND,
+    participants: [],
+    started: false,
+    round: 1,
+    activeParticipantId: null,
+    orderCounter: 1,
+    initiativeRolled: false,
+  };
+  if (typeof window === "undefined") return fallback;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { participants: [], started: false, round: 1, activeParticipantId: null, orderCounter: 1, initiativeRolled: false };
+    if (!raw) return fallback;
     const parsed = JSON.parse(raw);
     const participants = Array.isArray(parsed.participants) ? parsed.participants.map(sanitizeParticipant) : [];
     const ordered = byOrder(participants);
@@ -97,6 +111,7 @@ function createInitialState() {
       ? ordered[parsed.currentTurnIndex].id
       : null;
     return {
+      systemCode: parsed.systemCode === SYSTEM_COC ? SYSTEM_COC : SYSTEM_DND,
       participants: ordered,
       started: Boolean(parsed.started),
       round: Number.isFinite(Number(parsed.round)) ? Math.max(1, Number(parsed.round)) : 1,
@@ -105,7 +120,7 @@ function createInitialState() {
       initiativeRolled: Boolean(parsed.initiativeRolled),
     };
   } catch {
-    return { participants: [], started: false, round: 1, activeParticipantId: null, orderCounter: 1, initiativeRolled: false };
+    return fallback;
   }
 }
 
@@ -115,20 +130,15 @@ export default function InitiativePage() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
-  const [conditions, setConditions] = useState(FALLBACK_CONDITIONS);
-  const [usedConditionsFallback, setUsedConditionsFallback] = useState(false);
-
   const [isAddModalOpen, setAddModalOpen] = useState(false);
   const [customForm, setCustomForm] = useState(EMPTY_CUSTOM_FORM);
-
   const [monsterResults, setMonsterResults] = useState([]);
   const [monsterLoading, setMonsterLoading] = useState(false);
   const [selectedMonsterIndex, setSelectedMonsterIndex] = useState("");
-
-  const [conditionDrafts, setConditionDrafts] = useState({});
   const [draggedId, setDraggedId] = useState(null);
   const [dragOverId, setDragOverId] = useState(null);
 
+  const isDndMode = state.systemCode === SYSTEM_DND;
   const orderedParticipants = useMemo(() => byOrder(state.participants), [state.participants]);
   const activeParticipant = orderedParticipants.find((item) => item.id === state.activeParticipantId) || null;
 
@@ -139,25 +149,6 @@ export default function InitiativePage() {
       // ignore localStorage failures
     }
   }, [state]);
-
-  useEffect(() => {
-    async function loadConditions() {
-      try {
-        const response = await getDndConditions(token);
-        if (!Array.isArray(response) || response.length === 0) {
-          setConditions(FALLBACK_CONDITIONS);
-          setUsedConditionsFallback(true);
-          return;
-        }
-        setConditions(response.map((item) => String(item.name || item.index || "")).filter(Boolean));
-        setUsedConditionsFallback(false);
-      } catch {
-        setConditions(FALLBACK_CONDITIONS);
-        setUsedConditionsFallback(true);
-      }
-    }
-    void loadConditions();
-  }, [token]);
 
   function addParticipant(partial) {
     const hp = partial.hp ?? null;
@@ -170,12 +161,12 @@ export default function InitiativePage() {
           name: partial.name,
           initiative: partial.initiative ?? null,
           initiativeModifier: partial.initiativeModifier ?? 0,
+          dex: partial.dex ?? null,
           ac: partial.ac ?? null,
           hp,
           maxHp: partial.maxHp ?? null,
           type: partial.type || "ENEMY",
           color: partial.color || colorForType(partial.type || "ENEMY"),
-          conditions: partial.conditions || [],
           note: partial.note || "",
           defeated: hp !== null ? hp <= 0 : Boolean(partial.defeated),
           order: prev.orderCounter,
@@ -186,6 +177,51 @@ export default function InitiativePage() {
       ],
       orderCounter: prev.orderCounter + 1,
     }));
+  }
+
+  async function loadMonsters() {
+    if (!isDndMode) return;
+    setMonsterLoading(true);
+    setError("");
+    try {
+      const results = await searchDndMonsters(token, "");
+      setMonsterResults(Array.isArray(results) ? results : []);
+    } catch {
+      setMonsterResults([]);
+      setError(LOOKUP_ERROR_MESSAGE);
+    } finally {
+      setMonsterLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (isAddModalOpen && isDndMode && monsterResults.length === 0) {
+      void loadMonsters();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAddModalOpen, isDndMode]);
+
+  async function handleSelectMonster(index) {
+    if (!index || !isDndMode) return;
+    setSelectedMonsterIndex(index);
+    setError("");
+    try {
+      const details = await getDndMonsterDetails(token, index);
+      if (!details) return;
+      setCustomForm((prev) => ({
+        ...prev,
+        name: details.name || prev.name,
+        type: "ENEMY",
+        color: colorForType("ENEMY"),
+        initiativeModifier: String(details.initiativeModifier ?? 0),
+        dex: details.dexterity == null ? "" : String(details.dexterity),
+        ac: details.armorClass == null ? "" : String(details.armorClass),
+        hp: details.hitPoints == null ? "" : String(details.hitPoints),
+        maxHp: details.hitPoints == null ? "" : String(details.hitPoints),
+      }));
+    } catch {
+      setError(LOOKUP_ERROR_MESSAGE);
+    }
   }
 
   function handleAddCustomParticipant(event) {
@@ -200,67 +236,28 @@ export default function InitiativePage() {
     const hp = toOptionalNumber(customForm.hp);
     let maxHp = toOptionalNumber(customForm.maxHp);
     if (hp !== null && maxHp === null) maxHp = hp;
-
     addParticipant({
       name,
       type: customForm.type,
       color: customForm.color,
       initiativeModifier: toOptionalNumber(customForm.initiativeModifier) ?? 0,
       initiative,
+      dex: toOptionalNumber(customForm.dex),
       ac: toOptionalNumber(customForm.ac),
       hp,
       maxHp,
-      note: "",
       sourceType: selectedMonsterIndex ? "DND_MONSTER" : "CUSTOM",
       sourceIndex: selectedMonsterIndex || null,
       sourceName: selectedMonsterIndex ? name : null,
     });
-
     setCustomForm((prev) => ({ ...EMPTY_CUSTOM_FORM, type: prev.type, color: colorForType(prev.type) }));
     setSelectedMonsterIndex("");
     setAddModalOpen(false);
   }
 
-  async function loadMonsters() {
-    setMonsterLoading(true);
-    setError("");
-    try {
-      const results = await searchDndMonsters(token, "");
-      setMonsterResults(Array.isArray(results) ? results : []);
-    } catch {
-      setMonsterResults([]);
-      setError(LOOKUP_ERROR_MESSAGE);
-    } finally {
-      setMonsterLoading(false);
-    }
-  }
-
-  async function handleSelectMonster(index) {
-    if (!index) return;
-    setSelectedMonsterIndex(index);
-    setError("");
-    try {
-      const details = await getDndMonsterDetails(token, index);
-      if (!details) return;
-      setCustomForm((prev) => ({
-        ...prev,
-        name: details.name || prev.name,
-        type: "ENEMY",
-        color: colorForType("ENEMY"),
-        initiativeModifier: String(details.initiativeModifier ?? 0),
-        ac: details.armorClass == null ? "" : String(details.armorClass),
-        hp: details.hitPoints == null ? "" : String(details.hitPoints),
-        maxHp: details.hitPoints == null ? "" : String(details.hitPoints),
-        note: `CR ${details.challengeRating ?? "-"}, ${details.type || "monster"}`,
-      }));
-    } catch {
-      setError(LOOKUP_ERROR_MESSAGE);
-    }
-  }
-
   function startCombat() {
     setState((prev) => {
-      const sorted = reindexOrder(byInitiative(prev.participants));
+      const sorted = reindexOrder(isDndMode ? byInitiative(prev.participants) : byDex(prev.participants));
       const firstActive = sorted.find((item) => !item.defeated) || null;
       return {
         ...prev,
@@ -273,6 +270,7 @@ export default function InitiativePage() {
   }
 
   function rollInitiative() {
+    if (!isDndMode) return;
     setState((prev) => {
       const rolled = prev.participants.map((item) => ({
         ...item,
@@ -292,30 +290,27 @@ export default function InitiativePage() {
     setNotice("Inicjatywa zostala wylosowana dla tej walki.");
   }
 
+  function sortBySystemAction() {
+    setState((prev) => {
+      const sorted = reindexOrder(isDndMode ? byInitiative(prev.participants) : byDex(prev.participants));
+      const activeId = prev.activeParticipantId;
+      const hasActive = sorted.some((item) => item.id === activeId);
+      return { ...prev, participants: sorted, activeParticipantId: hasActive ? activeId : sorted[0]?.id || null };
+    });
+  }
+
   function moveTurn(direction) {
     setState((prev) => {
       const queue = byOrder(prev.participants).filter((item) => !item.defeated);
       if (!queue.length) return { ...prev, started: true, activeParticipantId: null };
       const currentIndex = queue.findIndex((item) => item.id === prev.activeParticipantId);
-      if (currentIndex < 0) {
-        return { ...prev, started: true, activeParticipantId: queue[0].id };
-      }
+      if (currentIndex < 0) return { ...prev, started: true, activeParticipantId: queue[0].id };
       if (direction === "next") {
         const nextIndex = (currentIndex + 1) % queue.length;
-        return {
-          ...prev,
-          started: true,
-          activeParticipantId: queue[nextIndex].id,
-          round: nextIndex <= currentIndex ? prev.round + 1 : prev.round,
-        };
+        return { ...prev, started: true, activeParticipantId: queue[nextIndex].id, round: nextIndex <= currentIndex ? prev.round + 1 : prev.round };
       }
       const prevIndex = (currentIndex - 1 + queue.length) % queue.length;
-      return {
-        ...prev,
-        started: true,
-        activeParticipantId: queue[prevIndex].id,
-        round: prevIndex >= currentIndex ? Math.max(1, prev.round - 1) : prev.round,
-      };
+      return { ...prev, started: true, activeParticipantId: queue[prevIndex].id, round: prevIndex >= currentIndex ? Math.max(1, prev.round - 1) : prev.round };
     });
   }
 
@@ -324,18 +319,19 @@ export default function InitiativePage() {
   }
 
   function endCombat() {
-    setState((prev) => ({
-      ...prev,
-      started: false,
-      initiativeRolled: false,
-      round: 1,
-      activeParticipantId: byOrder(prev.participants)[0]?.id || null,
-    }));
+    setState((prev) => ({ ...prev, started: false, initiativeRolled: false, round: 1, activeParticipantId: byOrder(prev.participants)[0]?.id || null }));
   }
 
   function clearAll() {
-    setState({ participants: [], started: false, round: 1, activeParticipantId: null, orderCounter: 1, initiativeRolled: false });
-    setConditionDrafts({});
+    setState((prev) => ({
+      ...prev,
+      participants: [],
+      started: false,
+      round: 1,
+      activeParticipantId: null,
+      orderCounter: 1,
+      initiativeRolled: false,
+    }));
     setDraggedId(null);
     setDragOverId(null);
     setNotice("");
@@ -346,30 +342,8 @@ export default function InitiativePage() {
     }
   }
 
-  useEffect(() => {
-    if (isAddModalOpen && monsterResults.length === 0) {
-      void loadMonsters();
-    }
-  }, [isAddModalOpen]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  function sortByInitiativeAction() {
-    setState((prev) => {
-      const activeId = prev.activeParticipantId;
-      const sorted = reindexOrder(byInitiative(prev.participants));
-      const hasActive = sorted.some((item) => item.id === activeId);
-      return {
-        ...prev,
-        participants: sorted,
-        activeParticipantId: hasActive ? activeId : sorted[0]?.id || null,
-      };
-    });
-  }
-
   function patchParticipant(id, patchFn) {
-    setState((prev) => ({
-      ...prev,
-      participants: prev.participants.map((item) => (item.id === id ? patchFn(item) : item)),
-    }));
+    setState((prev) => ({ ...prev, participants: prev.participants.map((item) => (item.id === id ? patchFn(item) : item)) }));
   }
 
   function removeParticipant(id) {
@@ -377,11 +351,7 @@ export default function InitiativePage() {
       const next = prev.participants.filter((item) => item.id !== id);
       const reindexed = reindexOrder(byOrder(next));
       const hasActive = reindexed.some((item) => item.id === prev.activeParticipantId);
-      return {
-        ...prev,
-        participants: reindexed,
-        activeParticipantId: hasActive ? prev.activeParticipantId : reindexed[0]?.id || null,
-      };
+      return { ...prev, participants: reindexed, activeParticipantId: hasActive ? prev.activeParticipantId : reindexed[0]?.id || null };
     });
   }
 
@@ -395,13 +365,22 @@ export default function InitiativePage() {
       const moved = [...ordered];
       const [row] = moved.splice(from, 1);
       moved.splice(to, 0, row);
-      return {
-        ...prev,
-        participants: reindexOrder(moved),
-      };
+      return { ...prev, participants: reindexOrder(moved) };
     });
     setDraggedId(null);
     setDragOverId(null);
+  }
+
+  function handleSystemChange(nextSystemCode) {
+    setState((prev) => ({
+      ...prev,
+      systemCode: nextSystemCode,
+      started: false,
+      initiativeRolled: false,
+      round: 1,
+      activeParticipantId: byOrder(prev.participants)[0]?.id || null,
+    }));
+    setNotice("");
   }
 
   return (
@@ -409,8 +388,8 @@ export default function InitiativePage() {
       <div className="pageHeader">
         <div>
           <span className="pageEyebrow">Combat</span>
-          <h1 className="pageTitle">Inicjatywa D&D</h1>
-          <p className="pageSubtitle">Szybki tracker walki dla MG. Dodaj uczestnikow, ustaw inicjatywe, AC i HP, a nastepnie prowadz tury bez przypisywania walki do kampanii.</p>
+          <h1 className="pageTitle">{isDndMode ? "Inicjatywa D&D" : "Inicjatywa Zew Cthulhu"}</h1>
+          <p className="pageSubtitle">{isDndMode ? "Szybki tracker walki D&D bez przypisywania do kampanii." : "Szybki tracker kolejnosci dla Zewu Cthulhu bez przypisywania do kampanii."}</p>
         </div>
       </div>
 
@@ -420,10 +399,19 @@ export default function InitiativePage() {
           <p>Aktywna tura: <strong>{activeParticipant ? activeParticipant.name : "Brak"}</strong></p>
         </div>
         <div className="initiativeActions">
+          <label>
+            System
+            <select aria-label="System trackera" value={state.systemCode} onChange={(e) => handleSystemChange(e.target.value)}>
+              <option value={SYSTEM_DND}>D&D 5e</option>
+              <option value={SYSTEM_COC}>Zew Cthulhu 7e</option>
+            </select>
+          </label>
           <button className="btn btn-primary" type="button" onClick={() => setAddModalOpen(true)}>Dodaj uczestnika</button>
           <button className="btn btn-primary" type="button" onClick={startCombat}>Start walki</button>
-          <button className="btn" type="button" onClick={rollInitiative} disabled={state.initiativeRolled || state.participants.length === 0}>Losuj inicjatywe</button>
-          <button className="btn" type="button" onClick={sortByInitiativeAction}>Sortuj po inicjatywie</button>
+          {isDndMode ? (
+            <button className="btn" type="button" onClick={rollInitiative} disabled={state.initiativeRolled || state.participants.length === 0}>Losuj inicjatywe</button>
+          ) : null}
+          <button className="btn" type="button" onClick={sortBySystemAction}>{isDndMode ? "Sortuj po inicjatywie" : "Sortuj po ZR"}</button>
           <button className="btn" type="button" onClick={() => moveTurn("next")}>Nastepna tura</button>
           <button className="btn" type="button" onClick={() => moveTurn("prev")}>Poprzednia tura</button>
           <button className="btn" type="button" onClick={resetTurns}>Reset tur</button>
@@ -431,7 +419,6 @@ export default function InitiativePage() {
           <button className="btn" type="button" onClick={clearAll}>Wyczysc wszystko</button>
         </div>
         {notice && <p className="initiativeNotice">{notice}</p>}
-        {usedConditionsFallback && <p className="initiativeWarning">Lista stanow z API jest chwilowo niedostepna. Uzyto listy lokalnej.</p>}
       </section>
 
       {error && <div className="campaignDetailsError">{error}</div>}
@@ -445,7 +432,7 @@ export default function InitiativePage() {
             <table className="initiativeTable">
               <thead>
                 <tr>
-                  <th>Marker</th><th>Typ</th><th>Nazwa</th><th>Inicjatywa</th><th>AC</th><th>HP</th><th>Stany</th><th></th>
+                  <th>Typ / marker</th><th>Nazwa</th><th>{isDndMode ? "Inicjatywa" : "ZR / DEX"}</th>{isDndMode ? <th>AC</th> : null}<th>HP</th><th>Akcje</th>
                 </tr>
               </thead>
               <tbody>
@@ -457,26 +444,14 @@ export default function InitiativePage() {
                       className={`${isActive ? "is-active" : ""} ${participant.defeated ? "is-defeated" : ""} ${dragOverId === participant.id ? "is-drag-over" : ""}`.trim()}
                       draggable
                       onDragStart={() => setDraggedId(participant.id)}
-                      onDragOver={(event) => {
-                        event.preventDefault();
-                        setDragOverId(participant.id);
-                      }}
+                      onDragOver={(event) => { event.preventDefault(); setDragOverId(participant.id); }}
                       onDrop={() => handleDrop(participant.id)}
-                      onDragEnd={() => {
-                        setDraggedId(null);
-                        setDragOverId(null);
-                      }}
+                      onDragEnd={() => { setDraggedId(null); setDragOverId(null); }}
                     >
-                      <td><span className="initiativeColorDot" style={{ backgroundColor: participant.color || colorForType(participant.type) }} /></td>
-                      <td>{typeLabel(participant.type)}</td>
-                      <td>
-                        <strong>{participant.name}</strong>
-                        {participant.sourceType === "DND_MONSTER" && <span className="initiativeBadge initiativeBadgeMuted">D&D Monster</span>}
-                        {isActive && <span className="initiativeBadge">Aktywna tura</span>}
-                        {participant.defeated && <span className="initiativeBadge initiativeBadgeMuted">Pokonany</span>}
-                      </td>
-                      <td>{participant.initiative ?? "-"} <small>(mod {participant.initiativeModifier >= 0 ? `+${participant.initiativeModifier}` : participant.initiativeModifier})</small></td>
-                      <td>{participant.ac ?? "-"}</td>
+                      <td><span className="initiativeColorDot" style={{ backgroundColor: participant.color || colorForType(participant.type) }} /> {typeLabel(participant.type)}</td>
+                      <td><strong>{participant.name}</strong>{isActive && <span className="initiativeBadge">Aktywna tura</span>}{participant.defeated && <span className="initiativeBadge initiativeBadgeMuted">Pokonany</span>}</td>
+                      <td>{isDndMode ? (participant.initiative ?? "-") : (participant.dex ?? "-")}</td>
+                      {isDndMode ? <td>{participant.ac ?? "-"}</td> : null}
                       <td>
                         <input
                           className="initiativeHpInlineInput"
@@ -490,25 +465,6 @@ export default function InitiativePage() {
                           }}
                         />
                         <span className="initiativeHpInlineMax">/ {participant.maxHp ?? "-"}</span>
-                      </td>
-                      <td>
-                        <div className="initiativeConditionList">
-                          {participant.conditions.map((condition) => (
-                            <button key={`${participant.id}-${condition}`} type="button" className="initiativeTag" onClick={() => patchParticipant(participant.id, (item) => ({ ...item, conditions: item.conditions.filter((entry) => entry !== condition) }))}>{condition} x</button>
-                          ))}
-                        </div>
-                        <div className="initiativeConditionAdd">
-                          <select aria-label={`Stan ${participant.name}`} value={conditionDrafts[participant.id] || ""} onChange={(e) => setConditionDrafts((prev) => ({ ...prev, [participant.id]: e.target.value }))}>
-                            <option value="">Wybierz stan</option>
-                            {conditions.map((condition) => <option key={condition} value={condition}>{condition}</option>)}
-                          </select>
-                          <button type="button" className="btn" onClick={() => {
-                            const value = String(conditionDrafts[participant.id] || "").trim();
-                            if (!value) return;
-                            patchParticipant(participant.id, (item) => ({ ...item, conditions: [...item.conditions, value] }));
-                            setConditionDrafts((prev) => ({ ...prev, [participant.id]: "" }));
-                          }}>Dodaj stan</button>
-                        </div>
                       </td>
                       <td>
                         <div className="initiativeRowActions">
@@ -532,18 +488,26 @@ export default function InitiativePage() {
               <button type="button" className="btn" onClick={() => setAddModalOpen(false)}>Zamknij</button>
             </div>
             <form className="initiativeModalBody" onSubmit={handleAddCustomParticipant}>
-              <select aria-label="Pula potworow" value={selectedMonsterIndex} onChange={(e) => void handleSelectMonster(e.target.value)}>
-                <option value="">{monsterLoading ? "Ladowanie potworow..." : "Wybierz potwora (opcjonalnie)"}</option>
-                {monsterResults.map((monster) => <option key={monster.index} value={monster.index}>{monster.name}</option>)}
-              </select>
+              {isDndMode ? (
+                <select aria-label="Pula potworow" value={selectedMonsterIndex} onChange={(e) => void handleSelectMonster(e.target.value)}>
+                  <option value="">{monsterLoading ? "Ladowanie potworow..." : "Wybierz potwora (opcjonalnie)"}</option>
+                  {monsterResults.map((monster) => <option key={monster.index} value={monster.index}>{monster.name}</option>)}
+                </select>
+              ) : null}
               <input aria-label="Nazwa uczestnika" placeholder="Nazwa" value={customForm.name} onChange={(e) => setCustomForm((prev) => ({ ...prev, name: e.target.value }))} />
               <select aria-label="Typ" value={customForm.type} onChange={(e) => setCustomForm((prev) => ({ ...prev, type: e.target.value, color: colorForType(e.target.value) }))}>
                 {TYPE_OPTIONS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
               </select>
               <input aria-label="Kolor" type="color" value={customForm.color} onChange={(e) => setCustomForm((prev) => ({ ...prev, color: e.target.value }))} />
-              <input aria-label="Modyfikator inicjatywy" type="number" placeholder="Initiative mod" value={customForm.initiativeModifier} onChange={(e) => setCustomForm((prev) => ({ ...prev, initiativeModifier: e.target.value }))} />
-              <input aria-label="Inicjatywa" type="number" placeholder="Inicjatywa reczna" value={customForm.initiative} onChange={(e) => setCustomForm((prev) => ({ ...prev, initiative: e.target.value }))} />
-              <input aria-label="AC" type="number" placeholder="AC" value={customForm.ac} onChange={(e) => setCustomForm((prev) => ({ ...prev, ac: e.target.value }))} />
+              {isDndMode ? (
+                <>
+                  <input aria-label="Modyfikator inicjatywy" type="number" placeholder="Modyfikator inicjatywy" value={customForm.initiativeModifier} onChange={(e) => setCustomForm((prev) => ({ ...prev, initiativeModifier: e.target.value }))} />
+                  <input aria-label="Inicjatywa" type="number" placeholder="Inicjatywa reczna" value={customForm.initiative} onChange={(e) => setCustomForm((prev) => ({ ...prev, initiative: e.target.value }))} />
+                  <input aria-label="AC" type="number" placeholder="AC" value={customForm.ac} onChange={(e) => setCustomForm((prev) => ({ ...prev, ac: e.target.value }))} />
+                </>
+              ) : (
+                <input aria-label="ZR / DEX" type="number" placeholder="ZR / DEX" value={customForm.dex} onChange={(e) => setCustomForm((prev) => ({ ...prev, dex: e.target.value }))} />
+              )}
               <input aria-label="HP" type="number" placeholder="HP" value={customForm.hp} onChange={(e) => setCustomForm((prev) => ({ ...prev, hp: e.target.value }))} />
               <input aria-label="Max HP" type="number" placeholder="Max HP" value={customForm.maxHp} onChange={(e) => setCustomForm((prev) => ({ ...prev, maxHp: e.target.value }))} />
               <button className="btn btn-primary" type="submit">Dodaj do walki</button>

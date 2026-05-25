@@ -790,6 +790,27 @@ Refactor note (v0.6.6):
 - Added initiative roll (`d20 + initiative modifier`) for all participants.
 - Added manual queue controls (`Sortuj po inicjatywie`, `↑`, `↓`) and improved HP operations (`Obrazenia`, `Leczenie`, `Ustaw HP`).
 
+### Polish Quick Initiative Tracker (v0.8.3)
+
+- `/initiative` remains a fast local tracker (`localStorage`) and does not use campaign/session persistence.
+- Added lightweight system switch:
+  - `D&D 5e` (default),
+  - `Zew Cthulhu 7e` (simple order tracker).
+- Simplified participant table:
+  - merged marker into `Typ / marker`,
+  - removed `Stany` column from main table,
+  - removed visible `D&D Monster` badge in row UI.
+- D&D mode:
+  - columns: `Typ / marker`, `Nazwa`, `Inicjatywa`, `AC`, `HP`, `Akcje`,
+  - initiative roll remains `d20 + initiative modifier`,
+  - sorting remains descending by initiative.
+- CoC mode:
+  - columns: `Typ / marker`, `Nazwa`, `ZR / DEX`, `HP`, `Akcje`,
+  - no initiative roll button,
+  - sorting uses `ZR / DEX` descending.
+- Local state migration:
+  - old tracker snapshots without `systemCode` are treated as `D&D 5e`.
+
 ### Character Sheet PDF Export (deferred)
 
 - Export karty postaci do PDF jest tymczasowo wylaczony z aktualnego MVP.

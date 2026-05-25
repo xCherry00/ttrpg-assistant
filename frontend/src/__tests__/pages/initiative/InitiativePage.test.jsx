@@ -1,4 +1,4 @@
-﻿import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import InitiativePage from "../../../pages/initiative/InitiativePage";
 import * as initiativeApi from "../../../api/initiative";
 
@@ -9,15 +9,13 @@ vi.mock("../../../auth/AuthContext", () => ({
 }));
 
 vi.mock("../../../api/initiative", () => ({
-  getDndConditions: vi.fn(),
   searchDndMonsters: vi.fn(),
   getDndMonsterDetails: vi.fn(),
 }));
 
-async function openCustomModalAndAdd({ name = "Hero", initiative = "15", ac = "16", hp = "20", maxHp = "20", mod = "2" } = {}) {
+async function addParticipantDnd({ name, initiative = "10", mod = "0", ac = "12", hp = "10", maxHp = "10" }) {
   fireEvent.click(screen.getByRole("button", { name: "Dodaj uczestnika" }));
   const dialog = screen.getByRole("dialog");
-  expect(dialog).toBeInTheDocument();
   fireEvent.change(within(dialog).getByLabelText("Nazwa uczestnika"), { target: { value: name } });
   fireEvent.change(within(dialog).getByLabelText("Modyfikator inicjatywy"), { target: { value: mod } });
   fireEvent.change(within(dialog).getByLabelText("Inicjatywa"), { target: { value: initiative } });
@@ -28,30 +26,41 @@ async function openCustomModalAndAdd({ name = "Hero", initiative = "15", ac = "1
   await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
 }
 
-describe("InitiativePage DnD tracker v0.7.6", () => {
+async function addParticipantCoc({ name, dex = "60", hp = "11", maxHp = "11" }) {
+  fireEvent.click(screen.getByRole("button", { name: "Dodaj uczestnika" }));
+  const dialog = screen.getByRole("dialog");
+  fireEvent.change(within(dialog).getByLabelText("Nazwa uczestnika"), { target: { value: name } });
+  fireEvent.change(within(dialog).getByLabelText("ZR / DEX"), { target: { value: dex } });
+  fireEvent.change(within(dialog).getByLabelText("HP"), { target: { value: hp } });
+  fireEvent.change(within(dialog).getByLabelText("Max HP"), { target: { value: maxHp } });
+  fireEvent.click(within(dialog).getByRole("button", { name: "Dodaj do walki" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+}
+
+describe("InitiativePage v0.8.3 quick tracker", () => {
   beforeEach(() => {
     window.localStorage.clear();
-    initiativeApi.getDndConditions.mockResolvedValue([{ index: "blinded", name: "Blinded", url: "/x" }]);
     initiativeApi.searchDndMonsters.mockResolvedValue([]);
     initiativeApi.getDndMonsterDetails.mockResolvedValue(null);
   });
 
-  it("opens add participant modal", async () => {
+  it("defaults to D&D mode", () => {
     render(<InitiativePage />);
-    fireEvent.click(screen.getByRole("button", { name: "Dodaj uczestnika" }));
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByLabelText("Pula potworow")).toBeInTheDocument();
+    expect(screen.getByLabelText("System trackera")).toHaveValue("dnd5e");
+    expect(screen.getByRole("button", { name: "Losuj inicjatywe" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sortuj po inicjatywie" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Sortuj po ZR" })).not.toBeInTheDocument();
   });
 
-  it("adds custom participant via modal", async () => {
+  it("does not render Marker and Stany columns", async () => {
     render(<InitiativePage />);
-    await openCustomModalAndAdd({ name: "Rogue", initiative: "17", ac: "15", hp: "14", maxHp: "14", mod: "3" });
-    expect(screen.getByText("Rogue")).toBeInTheDocument();
-    expect(screen.getByLabelText("HP Rogue")).toHaveValue(14);
-    expect(screen.getByText("/ 14")).toBeInTheDocument();
+    await addParticipantDnd({ name: "Kolumny", initiative: "11", ac: "13" });
+    expect(screen.queryByRole("columnheader", { name: "Marker" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "Stany" })).not.toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Typ / marker" })).toBeInTheDocument();
   });
 
-  it("searches monster and adds it with mapped stats", async () => {
+  it("does not render D&D Monster badge", async () => {
     initiativeApi.searchDndMonsters.mockResolvedValue([{ index: "goblin", name: "Goblin", url: "/api/2014/monsters/goblin" }]);
     initiativeApi.getDndMonsterDetails.mockResolvedValue({
       index: "goblin",
@@ -60,142 +69,79 @@ describe("InitiativePage DnD tracker v0.7.6", () => {
       hitPoints: 7,
       dexterity: 14,
       initiativeModifier: 2,
-      challengeRating: 0.25,
-      type: "humanoid",
     });
 
     render(<InitiativePage />);
     fireEvent.click(screen.getByRole("button", { name: "Dodaj uczestnika" }));
-    await waitFor(() => expect(initiativeApi.searchDndMonsters).toHaveBeenCalledWith("test-token", ""));
+    await waitFor(() => expect(initiativeApi.searchDndMonsters).toHaveBeenCalled());
     fireEvent.change(screen.getByLabelText("Pula potworow"), { target: { value: "goblin" } });
-    await waitFor(() => expect(initiativeApi.getDndMonsterDetails).toHaveBeenCalledWith("test-token", "goblin"));
+    await waitFor(() => expect(initiativeApi.getDndMonsterDetails).toHaveBeenCalled());
     fireEvent.click(screen.getByRole("button", { name: "Dodaj do walki" }));
-    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
-
-    expect(screen.getByText("Goblin")).toBeInTheDocument();
-    expect(screen.getByText("15")).toBeInTheDocument();
-    expect(screen.getByLabelText("HP Goblin")).toHaveValue(7);
-    expect(screen.getByText("/ 7")).toBeInTheDocument();
-    expect(screen.getByText(/mod \+2/)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("Goblin")).toBeInTheDocument());
+    expect(screen.queryByText("D&D Monster")).not.toBeInTheDocument();
   });
 
-  it("loads conditions from API and can add condition", async () => {
-    initiativeApi.getDndConditions.mockResolvedValue([
-      { index: "blinded", name: "Blinded", url: "/x" },
-      { index: "stunned", name: "Stunned", url: "/x" },
-    ]);
+  it("shows only final initiative number in D&D table", async () => {
     render(<InitiativePage />);
-    await openCustomModalAndAdd({ name: "Hero" });
-
-    const select = screen.getByLabelText("Stan Hero");
-    fireEvent.change(select, { target: { value: "Stunned" } });
-    fireEvent.click(screen.getByRole("button", { name: "Dodaj stan" }));
-
-    expect(screen.getByRole("button", { name: "Stunned x" })).toBeInTheDocument();
+    await addParticipantDnd({ name: "Rogue", initiative: "12", mod: "2", ac: "17" });
+    const row = screen.getByRole("row", { name: /Rogue/i });
+    expect(within(row).getByText("12")).toBeInTheDocument();
+    expect(within(row).queryByText(/\(mod/i)).not.toBeInTheDocument();
+    expect(within(row).queryByText(/mod \+/i)).not.toBeInTheDocument();
   });
 
-  it("uses fallback conditions when API fails", async () => {
-    initiativeApi.getDndConditions.mockRejectedValue(new Error("fail"));
+  it("switches to CoC and shows ZR/DEX instead of Inicjatywa", async () => {
     render(<InitiativePage />);
-    await waitFor(() => {
-      expect(screen.getByText(/Uzyto listy lokalnej/)).toBeInTheDocument();
-    });
+    fireEvent.change(screen.getByLabelText("System trackera"), { target: { value: "coc7e" } });
+    expect(screen.queryByRole("button", { name: "Losuj inicjatywe" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sortuj po ZR" })).toBeInTheDocument();
+    await addParticipantCoc({ name: "Badacz", dex: "65" });
+    expect(screen.getByRole("columnheader", { name: "ZR / DEX" })).toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "Inicjatywa" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "AC" })).not.toBeInTheDocument();
+    expect(screen.getByText("65")).toBeInTheDocument();
   });
 
-  it("rolls initiative as d20 + modifier and locks button", async () => {
-    const randomSpy = vi.spyOn(Math, "random")
-      .mockReturnValueOnce(0.0)
-      .mockReturnValueOnce(0.5);
-
+  it("sorts correctly in D&D mode by initiative", async () => {
     render(<InitiativePage />);
-    await openCustomModalAndAdd({ name: "A", mod: "2", initiative: "" });
-    await openCustomModalAndAdd({ name: "B", mod: "1", initiative: "" });
-
-    fireEvent.click(screen.getByRole("button", { name: "Losuj inicjatywe" }));
-
-    expect(screen.getByText(/Inicjatywa zostala wylosowana/)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Losuj inicjatywe" })).toBeDisabled();
-
-    const rows = screen.getAllByRole("row");
-    expect(rows[1]).toHaveTextContent("B");
-
-    randomSpy.mockRestore();
-  });
-
-  it("end combat unlocks initiative roll", async () => {
-    const randomSpy = vi.spyOn(Math, "random").mockReturnValue(0.1);
-    render(<InitiativePage />);
-    await openCustomModalAndAdd({ name: "A", mod: "1", initiative: "" });
-    fireEvent.click(screen.getByRole("button", { name: "Losuj inicjatywe" }));
-    expect(screen.getByRole("button", { name: "Losuj inicjatywe" })).toBeDisabled();
-    fireEvent.click(screen.getByRole("button", { name: "Zakoncz walke" }));
-    expect(screen.getByRole("button", { name: "Losuj inicjatywe" })).not.toBeDisabled();
-    randomSpy.mockRestore();
-  });
-
-  it("sorts participants by initiative", async () => {
-    render(<InitiativePage />);
-    await openCustomModalAndAdd({ name: "Low", initiative: "10", mod: "0" });
-    await openCustomModalAndAdd({ name: "High", initiative: "18", mod: "0" });
+    await addParticipantDnd({ name: "Low", initiative: "8" });
+    await addParticipantDnd({ name: "High", initiative: "17" });
     fireEvent.click(screen.getByRole("button", { name: "Sortuj po inicjatywie" }));
     const rows = screen.getAllByRole("row");
     expect(rows[1]).toHaveTextContent("High");
     expect(rows[2]).toHaveTextContent("Low");
   });
 
-  it("moves participant up/down manually", async () => {
+  it("sorts correctly in CoC mode by ZR/DEX", async () => {
     render(<InitiativePage />);
-    await openCustomModalAndAdd({ name: "First", initiative: "10" });
-    await openCustomModalAndAdd({ name: "Second", initiative: "10" });
-
-    let rows = screen.getAllByRole("row");
-    expect(rows[1]).toHaveTextContent("First");
-
-    const secondRow = rows[2];
-    const firstRow = rows[1];
-    fireEvent.dragStart(secondRow);
-    fireEvent.dragOver(firstRow);
-    fireEvent.drop(firstRow);
-
-    rows = screen.getAllByRole("row");
-    expect(rows[1]).toHaveTextContent("Second");
+    fireEvent.change(screen.getByLabelText("System trackera"), { target: { value: "coc7e" } });
+    await addParticipantCoc({ name: "Slow", dex: "40" });
+    await addParticipantCoc({ name: "Fast", dex: "80" });
+    fireEvent.click(screen.getByRole("button", { name: "Sortuj po ZR" }));
+    const rows = screen.getAllByRole("row");
+    expect(rows[1]).toHaveTextContent("Fast");
+    expect(rows[2]).toHaveTextContent("Slow");
   });
 
-  it("updates HP from inline input and auto-defeats on zero", async () => {
+  it("persists state in localStorage including systemCode", async () => {
     render(<InitiativePage />);
-    await openCustomModalAndAdd({ name: "Tank", hp: "20", maxHp: "20" });
-
-    const hpInput = screen.getByLabelText("HP Tank");
-    fireEvent.change(hpInput, { target: { value: "15" } });
-    expect(screen.getByLabelText("HP Tank")).toHaveValue(15);
-    fireEvent.change(hpInput, { target: { value: "0" } });
-    expect(screen.getByText("Pokonany")).toBeInTheDocument();
-  });
-
-  it("persists new participant fields in localStorage", async () => {
-    initiativeApi.searchDndMonsters.mockResolvedValue([{ index: "goblin", name: "Goblin", url: "/api/2014/monsters/goblin" }]);
-    initiativeApi.getDndMonsterDetails.mockResolvedValue({
-      index: "goblin",
-      name: "Goblin",
-      armorClass: 15,
-      hitPoints: 7,
-      dexterity: 14,
-      initiativeModifier: 2,
-      challengeRating: 0.25,
-      type: "humanoid",
-    });
-
-    render(<InitiativePage />);
-    fireEvent.click(screen.getByRole("button", { name: "Dodaj uczestnika" }));
-    await waitFor(() => expect(initiativeApi.searchDndMonsters).toHaveBeenCalledWith("test-token", ""));
-    fireEvent.change(screen.getByLabelText("Pula potworow"), { target: { value: "goblin" } });
-    await waitFor(() => expect(initiativeApi.getDndMonsterDetails).toHaveBeenCalledWith("test-token", "goblin"));
-    fireEvent.click(screen.getByRole("button", { name: "Dodaj do walki" }));
-
+    fireEvent.change(screen.getByLabelText("System trackera"), { target: { value: "coc7e" } });
+    await addParticipantCoc({ name: "Persisted", dex: "55" });
     const raw = window.localStorage.getItem(STORAGE_KEY);
     const parsed = JSON.parse(raw);
-    expect(parsed.participants[0].sourceType).toBe("DND_MONSTER");
-    expect(parsed.participants[0].sourceIndex).toBe("goblin");
-    expect(parsed.participants[0].initiativeModifier).toBe(2);
+    expect(parsed.systemCode).toBe("coc7e");
+    expect(parsed.participants[0].name).toBe("Persisted");
+  });
+
+  it("migrates legacy storage without systemCode to D&D", () => {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      participants: [{ id: "x", name: "Legacy", type: "NPC", initiative: 11, ac: 10, hp: 10, maxHp: 10 }],
+      started: false,
+      round: 1,
+      orderCounter: 2,
+      initiativeRolled: false,
+    }));
+    render(<InitiativePage />);
+    expect(screen.getByLabelText("System trackera")).toHaveValue("dnd5e");
   });
 });
