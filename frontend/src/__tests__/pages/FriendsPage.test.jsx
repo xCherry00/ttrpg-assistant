@@ -67,6 +67,13 @@ describe("FriendsPage", () => {
     expect(screen.queryByRole("button", { name: "Odkrywaj" })).not.toBeInTheDocument();
   });
 
+  it("shows suggested empty state when backend returns no suggestions", async () => {
+    socialApi.getFriendSuggestions.mockResolvedValue([]);
+    renderPage();
+    fireEvent.click(await screen.findByRole("button", { name: "Proponowane" }));
+    expect(await screen.findByText("Brak propozycji")).toBeInTheDocument();
+  });
+
   it("shows suggestion reason and sends invite", async () => {
     renderPage();
 

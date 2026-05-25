@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { discoverUsers } from "../api/social";
@@ -17,7 +17,7 @@ import {
 const FILTERS = [
   { id: "all", label: "Wszystkie" },
   { id: "unread", label: "Nieprzeczytane" },
-  { id: "requests", label: "Prośby" },
+  { id: "requests", label: "Prosby" },
 ];
 
 function formatTime(value) {
@@ -27,8 +27,8 @@ function formatTime(value) {
 }
 
 function statusLabel(status) {
-  if (status === "incoming_request") return "Prośba o kontakt";
-  if (status === "outgoing_request") return "Oczekuje na akceptację";
+  if (status === "incoming_request") return "Prosba o kontakt";
+  if (status === "outgoing_request") return "Oczekuje na akceptacje";
   return "Aktywna rozmowa";
 }
 
@@ -75,7 +75,7 @@ export default function MessagesPage() {
         setActiveConversationId(rows[0].id);
       }
     } catch (err) {
-      setError(err?.message || "Nie udało się pobrać listy rozmów.");
+      setError(err?.message || "Nie udalo sie pobrac listy rozmow.");
     } finally {
       setLoadingConversations(false);
     }
@@ -96,7 +96,7 @@ export default function MessagesPage() {
       }
       setHasOlder((rows || []).length >= 40);
     } catch (err) {
-      setError(err?.message || "Nie udało się pobrać wiadomości.");
+      setError(err?.message || "Nie udalo sie pobrac wiadomosci.");
     } finally {
       if (!appendOlder) {
         setLoadingMessages(false);
@@ -133,7 +133,7 @@ export default function MessagesPage() {
         const results = await discoverUsers(token, peopleQuery);
         setPeople(results || []);
       } catch (err) {
-        setError(err?.message || "Nie udało się wyszukać graczy.");
+        setError(err?.message || "Nie udalo sie wyszukac graczy.");
       } finally {
         setLoadingPeople(false);
       }
@@ -158,7 +158,7 @@ export default function MessagesPage() {
       setFiles([]);
       await Promise.all([loadMessages(activeConversationId), loadConversations(filter)]);
     } catch (err) {
-      setError(err?.message || "Nie udało się wysłać wiadomości.");
+      setError(err?.message || "Nie udalo sie wyslac wiadomosci.");
     } finally {
       setSending(false);
     }
@@ -175,7 +175,7 @@ export default function MessagesPage() {
       await loadConversations("all");
       setActiveConversationId(row.id);
     } catch (err) {
-      setError(err?.message || "Nie udało się rozpocząć rozmowy.");
+      setError(err?.message || "Nie udalo sie rozpoczac rozmowy.");
     } finally {
       setBusyAction("");
     }
@@ -189,7 +189,7 @@ export default function MessagesPage() {
       await acceptConversationRequest(token, activeConversationId);
       await Promise.all([loadConversations(filter), loadMessages(activeConversationId)]);
     } catch (err) {
-      setError(err?.message || "Nie udało się zaakceptować prośby.");
+      setError(err?.message || "Nie udalo sie zaakceptowac prosby.");
     } finally {
       setBusyAction("");
     }
@@ -204,7 +204,7 @@ export default function MessagesPage() {
       await loadConversations(filter);
       setMessages([]);
     } catch (err) {
-      setError(err?.message || "Nie udało się odrzucić prośby.");
+      setError(err?.message || "Nie udalo sie odrzucic prosby.");
     } finally {
       setBusyAction("");
     }
@@ -222,7 +222,7 @@ export default function MessagesPage() {
       anchor.remove();
       URL.revokeObjectURL(url);
     } catch (err) {
-      setError(err?.message || "Nie udało się pobrać załącznika.");
+      setError(err?.message || "Nie udalo sie pobrac zalacznika.");
     }
   }
 
@@ -236,190 +236,193 @@ export default function MessagesPage() {
         </div>
       </div>
       <div className="messagesPage">
-      <section className="messagesSidebar panel-soft">
-        <header className="messagesSidebar__header">
-          <h2>Wiadomości</h2>
-          <span>{conversations.length}</span>
-        </header>
+        <section className="messagesSidebar panel-soft">
+          <header className="messagesSidebar__header">
+            <h2>Wiadomosci</h2>
+            <span>{conversations.length}</span>
+          </header>
 
-        <div className="messagesSidebar__filters">
-          {FILTERS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={`messagesFilter${filter === item.id ? " is-active" : ""}`}
-              onClick={() => setFilter(item.id)}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="messagesSidebar__discover">
-          <label htmlFor="messages-discover">Nowa rozmowa</label>
-          <input
-            id="messages-discover"
-            value={peopleQuery}
-            onChange={(event) => setPeopleQuery(event.target.value)}
-            placeholder="Wpisz nick lub #tag"
-          />
-          {loadingPeople && <div className="messagesHint">Szukam użytkowników...</div>}
-          {!loadingPeople && peopleQuery.trim() && people.length === 0 && <div className="messagesHint">Brak wyników.</div>}
-          {!loadingPeople && people.length > 0 && (
-            <div className="messagesDiscoverList">
-              {people.slice(0, 5).map((user) => (
-                <button
-                  key={user.id}
-                  type="button"
-                  className="messagesDiscoverItem"
-                  onClick={() => handleStartConversation(user.id)}
-                  disabled={busyAction === `start-${user.id}`}
-                >
-                  <span>{user.displayName}</span>
-                  <small>{user.username}#{String(user.tagCode).padStart(4, "0")}</small>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="messagesConversationList">
-          {loadingConversations && <div className="messagesHint">Ładowanie rozmów...</div>}
-          {!loadingConversations && conversations.length === 0 && (
-            <div className="messagesHint">
-              Brak rozmów w tym widoku. Wyszukaj użytkownika powyżej, żeby rozpocząć konwersację.
-            </div>
-          )}
-          {!loadingConversations &&
-            conversations.map((conversation) => (
+          <div className="messagesSidebar__filters">
+            {FILTERS.map((item) => (
               <button
-                key={conversation.id}
+                key={item.id}
                 type="button"
-                className={`messagesConversationItem${activeConversationId === conversation.id ? " is-active" : ""}`}
-                onClick={() => setActiveConversationId(conversation.id)}
+                className={`messagesFilter${filter === item.id ? " is-active" : ""}`}
+                onClick={() => setFilter(item.id)}
               >
-                <span className="messagesConversationItem__avatar">
-                  {(conversation?.peer?.displayName || conversation.title || "R").slice(0, 1).toUpperCase()}
-                </span>
-                <span className="messagesConversationItem__meta">
-                  <span className="messagesConversationItem__top">
-                    <strong>{conversation?.peer?.displayName || conversation.title || "Rozmowa"}</strong>
-                    <small>{formatTime(conversation.lastMessageAt)}</small>
-                  </span>
-                  <span className="messagesConversationItem__bottom">
-                    <span>{conversation.lastMessagePreview || statusLabel(conversation.status)}</span>
-                    {conversation.unreadCount > 0 && <span className="messagesUnreadBadge">{conversation.unreadCount}</span>}
-                  </span>
-                </span>
+                {item.label}
               </button>
             ))}
-        </div>
-      </section>
+          </div>
 
-      <section className="messagesMain panel-soft">
-        {!activeConversation && <div className="messagesPlaceholder">Wybierz rozmowę z listy, aby rozpocząć czat.</div>}
-        {activeConversation && (
-          <>
-            <header className="messagesMain__header">
-              <div>
-                <h3>{activeConversation?.peer?.displayName || activeConversation.title}</h3>
-                <p>{statusLabel(activeConversation.status)}</p>
-              </div>
-              {activeConversation.status === "incoming_request" && (
-                <div className="messagesMain__requestActions">
-                  <button type="button" className="btn btn-primary" disabled={busyAction === "accept"} onClick={handleAcceptRequest}>
-                    Akceptuj
+          <div className="messagesSidebar__discover">
+            <label htmlFor="messages-discover">Nowa rozmowa</label>
+            <input
+              id="messages-discover"
+              value={peopleQuery}
+              onChange={(event) => setPeopleQuery(event.target.value)}
+              placeholder="Wpisz nick lub #tag"
+            />
+            {loadingPeople && <div className="messagesHint">Szukam uzytkownikow...</div>}
+            {!loadingPeople && peopleQuery.trim() && people.length === 0 && <div className="messagesHint">Brak wynikow.</div>}
+            {!loadingPeople && people.length > 0 && (
+              <div className="messagesDiscoverList">
+                {people.slice(0, 5).map((user) => (
+                  <button
+                    key={user.id}
+                    type="button"
+                    className="messagesDiscoverItem"
+                    onClick={() => handleStartConversation(user.id)}
+                    disabled={busyAction === `start-${user.id}`}
+                  >
+                    <span>{user.displayName}</span>
+                    <small>{user.username}#{String(user.tagCode).padStart(4, "0")}</small>
                   </button>
-                  <button type="button" className="btn btn-ghost" disabled={busyAction === "reject"} onClick={handleRejectRequest}>
-                    Odrzuć
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="messagesConversationList">
+            {loadingConversations && <div className="messagesHint">Ladowanie rozmow...</div>}
+            {!loadingConversations && conversations.length === 0 && (
+              <div className="messagesHint">
+                Brak rozmow w tym widoku. Wyszukaj uzytkownika powyzej, zeby rozpoczac konwersacje.
+              </div>
+            )}
+            {!loadingConversations &&
+              conversations.map((conversation) => (
+                <button
+                  key={conversation.id}
+                  type="button"
+                  className={`messagesConversationItem${activeConversationId === conversation.id ? " is-active" : ""}`}
+                  onClick={() => setActiveConversationId(conversation.id)}
+                >
+                  <span className="messagesConversationItem__avatar">
+                    {(conversation?.peer?.displayName || conversation.title || "R").slice(0, 1).toUpperCase()}
+                  </span>
+                  <span className="messagesConversationItem__meta">
+                    <span className="messagesConversationItem__top">
+                      <strong>{conversation?.peer?.displayName || conversation.title || "Rozmowa"}</strong>
+                      <small>{formatTime(conversation.lastMessageAt)}</small>
+                    </span>
+                    <span className="messagesConversationItem__bottom">
+                      <span>{conversation.lastMessagePreview || statusLabel(conversation.status)}</span>
+                      {conversation.unreadCount > 0 && <span className="messagesUnreadBadge">{conversation.unreadCount}</span>}
+                    </span>
+                  </span>
+                </button>
+              ))}
+          </div>
+        </section>
+
+        <section className="messagesMain panel-soft">
+          {!activeConversation && <div className="messagesPlaceholder">Wybierz rozmowe z listy, aby rozpoczac czat.</div>}
+          {activeConversation && (
+            <>
+              <header className="messagesMain__header">
+                <div>
+                  <h3>{activeConversation?.peer?.displayName || activeConversation.title}</h3>
+                  <p>{statusLabel(activeConversation.status)}</p>
+                </div>
+                {activeConversation.status === "incoming_request" && (
+                  <div className="messagesMain__requestActions">
+                    <button type="button" className="btn btn-primary" disabled={busyAction === "accept"} onClick={handleAcceptRequest}>
+                      Akceptuj
+                    </button>
+                    <button type="button" className="btn btn-ghost" disabled={busyAction === "reject"} onClick={handleRejectRequest}>
+                      Odrzuc
+                    </button>
+                  </div>
+                )}
+              </header>
+
+              <div className="messagesThread">
+                {hasOlder && (
+                  <button
+                    type="button"
+                    className="messagesOlderBtn"
+                    onClick={() => loadMessages(activeConversation.id, { beforeId: messages[0]?.id, appendOlder: true })}
+                  >
+                    Pokaz starsze wiadomosci
+                  </button>
+                )}
+                {loadingMessages && <div className="messagesHint">Ladowanie wiadomosci...</div>}
+                {!loadingMessages && messages.length === 0 && <div className="messagesHint">Brak wiadomosci w tej rozmowie. Napisz pierwsza wiadomosc ponizej.</div>}
+
+                {messages.map((message) => (
+                  <article key={message.id} className={`messageBubble${message.own ? " is-own" : ""}`}>
+                    <div className="messageBubble__meta">
+                      <strong>{message.own ? "Ty" : message.senderDisplayName}</strong>
+                      <span>{formatTime(message.createdAt)}</span>
+                    </div>
+                    {message.content && <p>{message.content}</p>}
+                    {message.attachments?.length > 0 && (
+                      <div className="messageAttachments">
+                        {message.attachments.map((attachment) => (
+                          <button key={attachment.id} type="button" className="messageAttachment" onClick={() => handleDownloadAttachment(attachment)}>
+                            <span>{attachment.originalName}</span>
+                            <small>{Math.max(1, Math.round(attachment.sizeBytes / 1024))} KB</small>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </article>
+                ))}
+              </div>
+
+              <div className="messagesComposer">
+                <textarea
+                  value={draft}
+                  onChange={(event) => setDraft(event.target.value)}
+                  placeholder={
+                    activeConversation.status === "incoming_request"
+                      ? "Najpierw zaakceptuj prosbe o kontakt."
+                      : "Napisz wiadomosc..."
+                  }
+                  disabled={activeConversation.status === "incoming_request" || sending}
+                />
+                <div className="messagesComposer__row">
+                  <label className="messagesFileInput">
+                    <input
+                      type="file"
+                      multiple
+                      onChange={(event) => setFiles(Array.from(event.target.files || []))}
+                      disabled={activeConversation.status === "incoming_request" || sending}
+                    />
+                    <span>Dodaj pliki</span>
+                  </label>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    disabled={sending || activeConversation.status === "incoming_request" || (!draft.trim() && files.length === 0)}
+                    onClick={handleSend}
+                  >
+                    Wyslij
                   </button>
                 </div>
-              )}
-            </header>
-
-            <div className="messagesThread">
-              {hasOlder && (
-                <button
-                  type="button"
-                  className="messagesOlderBtn"
-                  onClick={() => loadMessages(activeConversation.id, { beforeId: messages[0]?.id, appendOlder: true })}
-                >
-                  Pokaż starsze wiadomości
-                </button>
-              )}
-              {loadingMessages && <div className="messagesHint">Ładowanie wiadomości...</div>}
-              {!loadingMessages && messages.length === 0 && <div className="messagesHint">Brak wiadomości w tej rozmowie. Napisz pierwszą wiadomość poniżej.</div>}
-
-              {messages.map((message) => (
-                <article key={message.id} className={`messageBubble${message.own ? " is-own" : ""}`}>
-                  <div className="messageBubble__meta">
-                    <strong>{message.own ? "Ty" : message.senderDisplayName}</strong>
-                    <span>{formatTime(message.createdAt)}</span>
-                  </div>
-                  {message.content && <p>{message.content}</p>}
-                  {message.attachments?.length > 0 && (
-                    <div className="messageAttachments">
-                      {message.attachments.map((attachment) => (
-                        <button key={attachment.id} type="button" className="messageAttachment" onClick={() => handleDownloadAttachment(attachment)}>
-                          <span>{attachment.originalName}</span>
-                          <small>{Math.max(1, Math.round(attachment.sizeBytes / 1024))} KB</small>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </article>
-              ))}
-            </div>
-
-            <div className="messagesComposer">
-              <textarea
-                value={draft}
-                onChange={(event) => setDraft(event.target.value)}
-                placeholder={
-                  activeConversation.status === "incoming_request"
-                    ? "Najpierw zaakceptuj prośbę o kontakt."
-                    : "Napisz wiadomość..."
-                }
-                disabled={activeConversation.status === "incoming_request" || sending}
-              />
-              <div className="messagesComposer__row">
-                <label className="messagesFileInput">
-                  <input
-                    type="file"
-                    multiple
-                    onChange={(event) => setFiles(Array.from(event.target.files || []))}
-                    disabled={activeConversation.status === "incoming_request" || sending}
-                  />
-                  <span>Dodaj pliki</span>
-                </label>
-                <button type="button" className="btn btn-primary" disabled={sending || activeConversation.status === "incoming_request"} onClick={handleSend}>
-                  Wyślij
-                </button>
+                {files.length > 0 && <div className="messagesFilesPreview">{files.map((file) => file.name).join(", ")}</div>}
               </div>
-              {files.length > 0 && <div className="messagesFilesPreview">{files.map((file) => file.name).join(", ")}</div>}
-            </div>
-          </>
-        )}
-      </section>
+            </>
+          )}
+        </section>
 
-      <aside className="messagesDetails panel-soft">
-        {!activeConversation && <div className="messagesHint">Szczegóły rozmowy pojawią się po wyborze kontaktu.</div>}
         {activeConversation?.peer && (
-          <div className="messagesDetails__content">
-            <div className="messagesDetails__avatar">{activeConversation.peer.displayName.slice(0, 1).toUpperCase()}</div>
-            <h3>{activeConversation.peer.displayName}</h3>
-            <p>{activeConversation.peer.username}#{String(activeConversation.peer.tagCode).padStart(4, "0")}</p>
-            <span>{activeConversation.peer.activityLabel}</span>
-            <Link className="btn btn-ghost" to={`/users/${activeConversation.peer.handle}`}>
-              Otwórz profil
-            </Link>
-          </div>
+          <aside className="messagesDetails panel-soft">
+            <div className="messagesDetails__content">
+              <div className="messagesDetails__avatar">{activeConversation.peer.displayName.slice(0, 1).toUpperCase()}</div>
+              <h3>{activeConversation.peer.displayName}</h3>
+              <p>{activeConversation.peer.username}#{String(activeConversation.peer.tagCode).padStart(4, "0")}</p>
+              <span>{activeConversation.peer.activityLabel}</span>
+              <Link className="btn btn-ghost" to={`/users/${activeConversation.peer.handle}`}>
+                Otworz profil
+              </Link>
+            </div>
+          </aside>
         )}
-      </aside>
 
         {error && <div className="messagesGlobalError">{error}</div>}
       </div>
     </div>
   );
 }
-

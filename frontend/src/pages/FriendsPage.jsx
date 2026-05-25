@@ -17,7 +17,7 @@ import {
 const TABS = [
   { id: "friends", label: "Znajomi" },
   { id: "requests", label: "Zaproszenia" },
-  { id: "discover", label: "Proponowane" },
+  { id: "suggested", label: "Proponowane" },
   { id: "blocked", label: "Blokady" },
 ];
 
@@ -117,10 +117,7 @@ export default function FriendsPage() {
     };
   }, [search, token]);
 
-  const visibleDiscover = useMemo(() => {
-    if (search.trim()) return searchResults;
-    return suggestions;
-  }, [suggestions, search, searchResults]);
+  const visibleDiscover = useMemo(() => suggestions, [suggestions]);
 
   async function runAction(key, handler) {
     setBusyKey(key);
@@ -128,7 +125,7 @@ export default function FriendsPage() {
     try {
       await handler();
       await loadOverview();
-      if (tab === "discover" || search.trim()) {
+      if (search.trim()) {
         const results = await discoverUsers(token, search);
         setSearchResults(Array.isArray(results) ? results : []);
       }
@@ -166,7 +163,7 @@ export default function FriendsPage() {
         </div>
 
         <div className="friendsSearch">
-          <label className="friendsSearch__label">Szukaj uzytkownikow po nicku lub tagu</label>
+          <label className="friendsSearch__label">Szukaj uzytkownikow</label>
           <input
             className="friendsSearch__input"
             value={search}
@@ -175,6 +172,37 @@ export default function FriendsPage() {
           />
         </div>
       </section>
+
+      {!!search.trim() && (
+        <section className="friendsList">
+          <h2>Wyniki wyszukiwania</h2>
+          {searching && <div className="friendsState">Szukam uzytkownikow...</div>}
+          {!searching && searchResults.length === 0 && <div className="friendsState">Brak pasujacych uzytkownikow.</div>}
+          {!searching && searchResults.map((user) => (
+            <UserCard
+              key={`search-${user.id}`}
+              user={user}
+              actions={[
+                user.relationship === "NONE" ? (
+                  <button
+                    key="invite"
+                    type="button"
+                    className="socialBtn"
+                    disabled={busyKey === `invite-search-${user.id}`}
+                    onClick={() => runAction(`invite-search-${user.id}`, () => sendFriendRequest(token, user.id))}
+                  >
+                    Dodaj znajomego
+                  </button>
+                ) : (
+                  <span key="state" className="socialBadge">
+                    {user.relationship === "FRIENDS" ? "Znajomy" : user.relationship === "OUTGOING_REQUEST" ? "Zaproszenie wyslane" : user.relationship === "INCOMING_REQUEST" ? "Czeka na akceptacje" : "Relacja niedostepna"}
+                  </span>
+                ),
+              ]}
+            />
+          ))}
+        </section>
+      )}
 
       <section className="friendsTabs">
         {TABS.map((item) => (
@@ -281,18 +309,20 @@ export default function FriendsPage() {
         </section>
       )}
 
-      {!loading && tab === "discover" && (
+      {!loading && tab === "suggested" && (
         <section className="friendsList">
           <h2>Proponowane</h2>
-          {searching && <div className="friendsState">Szukam uzytkownikow...</div>}
-          {!searching && visibleDiscover.length === 0 && (
-            <div className="friendsState">{search.trim() ? "Brak pasujacych uzytkownikow." : "Brak propozycji. Dolacz do kampanii lub rozbuduj siec znajomych."}</div>
+          {visibleDiscover.length === 0 && (
+            <div className="friendsState">
+              <p>Brak propozycji</p>
+              <p>Sugestie pojawia sie, gdy bedziesz wspoldzielic kampanie z innymi uzytkownikami.</p>
+            </div>
           )}
-          {!searching && visibleDiscover.map((user) => (
+          {visibleDiscover.map((user) => (
             <UserCard
               key={user.id}
               user={user}
-              showSuggestionReason={!search.trim()}
+              showSuggestionReason
               actions={[
                 user.relationship === "NONE" ? (
                   <button

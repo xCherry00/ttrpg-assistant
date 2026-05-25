@@ -918,3 +918,10 @@ Refactor note (v0.6.6):
 - Widok CoC uzywa ujednoliconych sekcji: `Cechy`, `Statystyki pochodne`, `Umiejetnosci`, `Walka`, `Ekwipunek`, `Historia postaci`, `Notatki`.
 - Import/export JSON i print-friendly flow pozostaja aktywne; backendowy eksport PDF pozostaje poza MVP.
 
+### v0.7.11 - Clean social pages UX
+- Social MVP pozostaje prosty: `Znajomi`, `Zaproszenia`, `Proponowane`, `Blokady` oraz wiadomosci 1:1.
+- Zakladka `Proponowane` pokazuje tylko realne sugestie z backendu wraz z powodem (`Wspolna kampania`, `Znajomy znajomego`, `Proponowany gracz`).
+- Wyszukiwanie uzytkownikow jest osobne i nie miesza sie z lista sugerowanych.
+- `Messages` utrzymuje layout: lista rozmow + glowny chat; panel szczegolow jest widoczny tylko dla realnie wybranego kontaktu.
+- Dodane czytelne empty states dla braku rozmow, braku wynikow, braku wiadomosci i rozmow oczekujacych na akceptacje.
+
