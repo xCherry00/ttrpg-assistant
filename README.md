@@ -21,7 +21,7 @@ Każdy użytkownik ma konto — dane są izolowane, nie widzisz cudzych kampanii
 - **Inicjatywa** — tracker kolejności w walce
 - **Słownik** — pojęcia TTRPG z opisami
 - **Social** — znajomi, publiczne profile, blokowanie użytkowników
-- **Wiadomości** — bezpośrednie wiadomości między użytkownikami
+- **Wiadomości** — prosty moduł rozmów 1:1 między użytkownikami
 
 ### Jak to działa (architektura)
 
@@ -221,7 +221,7 @@ Every user has an account — data is isolated, you only see your own campaigns 
 - **Initiative** — combat order tracker
 - **Glossary** — TTRPG terms and descriptions
 - **Social** — friends, public profiles, blocking users
-- **Messages** — direct messages between users
+- **Messages** — simple 1:1 conversation module between users
 
 ### How it works (architecture)
 
@@ -916,6 +916,28 @@ Refactor note (v0.6.6):
   - historia rzutow,
   - po `FINISHED` CTA `Dodaj notatki po sesji`.
 - Initiative preview pozostaje poza MVP i nie jest renderowane w LiveSession.
+
+### v0.8.5 - Rework campaign panel for GM and player
+- `CampaignDetailPage` rozpoznaje role po danych kampanii i membership (`owner/mg/self`), a nastepnie renderuje:
+  - `MG Dashboard` (zarzadzanie),
+  - `Player Dashboard` (uproszczony).
+- Widok gracza zostal uproszczony do trzech glownych sekcji:
+  - `Nadchodzaca sesja`,
+  - `Gracze` (postacie kampanii + uczestnicy),
+  - `Moje notatki`.
+- Widok MG ma sekcje:
+  - `Nadchodzaca sesja` z akcjami lifecycle i planowaniem nowej sesji,
+  - `Gracze` i `Postacie kampanii`,
+  - `Notatki kampanii`,
+  - `Ustawienia kampanii`.
+- W `CampaignCharactersPanel`:
+  - karty postaci pokazuja portret, gracza, klase, poziom, rase i system,
+  - gracz dostaje CTA tylko do swojej karty (`Otworz moja karte` -> `/characters`),
+  - MG pozostaje w trybie zarzadczym (przypinanie/odpinanie postaci).
+- W `CampaignPlayerNotesPanel`:
+  - gracz widzi wylacznie swoje notatki,
+  - MG nie widzi cudzych prywatnych notatek, jesli backend ich nie zwraca (neutralny komunikat).
+- Ograniczono duplikacje informacji o sesjach przez skupienie akcji sesyjnych w panelu `Nadchodzaca sesja`.
 
 ### v0.7.9 - Add character JSON import and export
 - Dodano eksport postaci do JSON:

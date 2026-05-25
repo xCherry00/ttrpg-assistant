@@ -48,8 +48,9 @@ describe("MessagesPage", () => {
   it("renders empty conversations state and selected-conversation placeholder", async () => {
     messagesApi.getConversations.mockResolvedValue([]);
     renderPage();
-    expect(await screen.findByText(/Brak rozmow w tym widoku/i)).toBeInTheDocument();
-    expect(screen.getByText(/Wybierz rozmowe z listy/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Brak rozmow\./i)).toBeInTheDocument();
+    expect(screen.getByText(/^Wybierz rozmowe\.$/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Prosby/i })).not.toBeInTheDocument();
     expect(screen.queryByText(/Szczegoly rozmowy/i)).not.toBeInTheDocument();
   });
 

@@ -83,8 +83,8 @@ describe("CampaignDetailPage dashboard by role", () => {
 
     await waitFor(() => {
       expect(screen.getByText("MG Dashboard")).toBeInTheDocument();
-      expect(screen.getByRole("heading", { name: "Sesje kampanii" })).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "Utworz sesje" })).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Nadchodzaca sesja" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Zaplanuj sesje" })).toBeInTheDocument();
       expect(screen.getByText("Kod zaproszenia")).toBeInTheDocument();
     });
   });
@@ -101,9 +101,9 @@ describe("CampaignDetailPage dashboard by role", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Player Dashboard")).toBeInTheDocument();
-      expect(screen.getByRole("heading", { name: "Moja postac" })).toBeInTheDocument();
-      expect(screen.getByRole("heading", { name: "Uczestnicy" })).toBeInTheDocument();
-      expect(screen.queryByRole("button", { name: "Utworz sesje" })).not.toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Postacie kampanii" })).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Gracze" })).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Zaplanuj sesje" })).not.toBeInTheDocument();
     });
   });
 
@@ -118,8 +118,10 @@ describe("CampaignDetailPage dashboard by role", () => {
     });
   });
 
-  it("shows session notes action for finished sessions", async () => {
+  it("player can open own character card entry from campaign characters section", async () => {
     campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "A", owner: false, status: "active", systemCode: "dnd5e" });
+    campaignsApi.listCampaignMembers.mockResolvedValue([{ id: 22, self: true, owner: false, mg: false, displayName: "P1", username: "p1" }]);
+    campaignsApi.getCampaignCharacters.mockResolvedValue([{ characterId: 9, characterName: "Rogue", systemCode: "dnd5e", userId: 22 }]);
     campaignsApi.listCampaignSessions.mockResolvedValue([
       { id: 7, title: "Fin", status: "FINISHED", description: "done", finishedAt: "2026-05-20T12:00:00Z" },
     ]);
@@ -127,7 +129,7 @@ describe("CampaignDetailPage dashboard by role", () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Moje notatki" })).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "Otworz moja karte" })).toBeInTheDocument();
     });
   });
 });

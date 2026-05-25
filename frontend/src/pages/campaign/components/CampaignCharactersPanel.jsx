@@ -1,8 +1,13 @@
+import { Link } from "react-router-dom";
+
 export default function CampaignCharactersPanel({
   campaignCharacters,
   myCharacters,
+  members = [],
   campaignSystemCode,
   canManage,
+  isOwner = false,
+  myUserId = null,
   busy,
   onAssign,
   onDetach,
@@ -11,6 +16,8 @@ export default function CampaignCharactersPanel({
   const compatibleCharacters = myCharacters.filter(
     (character) => (character.systemCode || "").trim().toLowerCase() === normalizedCampaignSystem
   );
+
+  const membersById = new Map(members.map((member) => [Number(member.id ?? member.userId), member]));
 
   return (
     <section className="campaignDetailsCard panel-soft">
@@ -50,16 +57,20 @@ export default function CampaignCharactersPanel({
           {campaignCharacters.map((character) => (
             <article key={character.characterId} className="campaignMaterialCard">
               <div className="campaignMaterialCard__top">
-                <strong>{character.characterName}</strong>
+                <strong>{character.characterName || "Postac"}</strong>
                 <span className="campaignMemberBadge">{character.systemCode || "-"}</span>
               </div>
-              <p>
-                Rasa/klasa/tlo: {character.race || "-"} / {character.className || "-"} / {character.background || "-"}
-              </p>
               <div className="campaignMaterialMeta">
-                <span>Wlasciciel: {character.ownerDisplayName || character.ownerUsername || "-"}</span>
+                <span>Rasa: {character.raceName || "-"}</span>
+                <span>Klasa: {character.className || "-"}</span>
+                <span>Poziom: {character.level ?? "-"}</span>
+              </div>
+              {character.portraitUrl ? <img src={character.portraitUrl} alt={`Portret postaci ${character.characterName || ""}`} style={{ width: 64, height: 64, borderRadius: 12, objectFit: "cover" }} /> : null}
+              <div className="campaignMaterialMeta">
+                <span>Gracz: {membersById.get(Number(character.userId))?.displayName || membersById.get(Number(character.userId))?.username || "-"}</span>
                 <span>Przypisano: {character.assignedAt ? new Date(character.assignedAt).toLocaleString("pl-PL") : "-"}</span>
               </div>
+              {!isOwner && Number(character.userId) === Number(myUserId) ? <Link className="campaignDetailsGhostBtn" to="/characters">Otworz moja karte</Link> : null}
               {canManage && (
                 <button className="campaignDetailsGhostBtn" type="button" disabled={busy} onClick={() => onDetach(character.characterId)}>
                   Odepnij

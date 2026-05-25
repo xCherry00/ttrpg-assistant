@@ -1,12 +1,16 @@
 import { useState } from "react";
 
-export default function CampaignPlayerNotesPanel({ notes, campaign, busy, onCreate, onUpdate, onDelete }) {
+export default function CampaignPlayerNotesPanel({ notes, campaign, busy, isOwner = false, myUserId = null, onCreate, onUpdate, onDelete }) {
   const [editingId, setEditingId] = useState(null);
-  const canSeeAuthor = Boolean(campaign?.owner);
-  const empty = !notes || notes.length === 0;
+  const canSeeAuthor = Boolean(isOwner);
+  const visibleNotes = (Array.isArray(notes) ? notes : []).filter((note) => (
+    isOwner || Number(note.userId) === Number(myUserId)
+  ));
+  const empty = visibleNotes.length === 0;
+  const hasOnlyOwnNotesForOwner = isOwner && visibleNotes.length > 0 && visibleNotes.every((note) => Number(note.userId) === Number(myUserId));
   return (
     <section className="campaignDetailsCard panel-soft">
-      <h2 className="campaignDetailsCardTitle">Notatki graczy</h2>
+      <h2 className="campaignDetailsCardTitle">{isOwner ? "Notatki kampanii" : "Moje notatki"}</h2>
 
       <form
         className="campaignFormCard"
@@ -25,11 +29,15 @@ export default function CampaignPlayerNotesPanel({ notes, campaign, busy, onCrea
         <button className="campaignDetailsPrimaryBtn" type="submit" disabled={busy}>Dodaj notatke</button>
       </form>
 
+      {isOwner && hasOnlyOwnNotesForOwner ? (
+        <div className="campaignDetailsEmpty">Notatki innych graczy sa prywatne lub niedostepne w tym widoku.</div>
+      ) : null}
+
       {empty ? (
         <div className="campaignDetailsEmpty">Brak notatek.</div>
       ) : (
         <div className="campaignMaterialList">
-          {notes.map((note) => {
+          {visibleNotes.map((note) => {
             const isEditing = editingId === note.id;
             return (
               <article key={note.id} className="campaignMaterialCard">

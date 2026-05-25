@@ -34,6 +34,7 @@ export default function UpcomingSessionPanel({
   busy,
   onStart,
   onFinish,
+  onCreate,
 }) {
   const { token } = useAuth();
   const session = isOwner ? pickSessionForOwner(sessions) : pickSessionForPlayer(sessions);
@@ -164,6 +165,27 @@ export default function UpcomingSessionPanel({
             {attendanceError && <div className="campaignDetailsError">{attendanceError}</div>}
           </div>
         </>
+      )}
+      {isOwner && (
+        <form
+          className="campaignFormCard"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const formData = new FormData(event.currentTarget);
+            const title = String(formData.get("title") || "").trim();
+            const description = String(formData.get("description") || "").trim();
+            const scheduledFor = String(formData.get("scheduledFor") || "");
+            if (!title) return;
+            onCreate?.({ title, description, scheduledFor: scheduledFor ? new Date(scheduledFor).toISOString() : null });
+            event.currentTarget.reset();
+          }}
+        >
+          <strong>Dodaj / zaplanuj sesje</strong>
+          <label className="campaignField"><span>Tytul</span><input name="title" required /></label>
+          <label className="campaignField"><span>Opis</span><input name="description" /></label>
+          <label className="campaignField"><span>Termin</span><input name="scheduledFor" type="datetime-local" /></label>
+          <button className="campaignDetailsPrimaryBtn" type="submit" disabled={busy}>Zaplanuj sesje</button>
+        </form>
       )}
     </section>
   );

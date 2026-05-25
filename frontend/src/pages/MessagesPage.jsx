@@ -17,7 +17,6 @@ import {
 const FILTERS = [
   { id: "all", label: "Wszystkie" },
   { id: "unread", label: "Nieprzeczytane" },
-  { id: "requests", label: "Prosby" },
 ];
 
 function formatTime(value) {
@@ -232,7 +231,7 @@ export default function MessagesPage() {
         <div>
           <span className="pageEyebrow">spolecznosc</span>
           <h1 className="pageTitle">Wiadomosci</h1>
-          <p className="pageSubtitle">Rozmowy 1:1, zaproszenia i wysylanie zalacznikow.</p>
+          <p className="pageSubtitle">Proste rozmowy 1:1 i wysylanie zalacznikow.</p>
         </div>
       </div>
       <div className="messagesPage">
@@ -264,7 +263,7 @@ export default function MessagesPage() {
               placeholder="Wpisz nick lub #tag"
             />
             {loadingPeople && <div className="messagesHint">Szukam uzytkownikow...</div>}
-            {!loadingPeople && peopleQuery.trim() && people.length === 0 && <div className="messagesHint">Brak wynikow.</div>}
+            {!loadingPeople && peopleQuery.trim() && people.length === 0 && <div className="messagesHint">Brak wynikow wyszukiwania.</div>}
             {!loadingPeople && people.length > 0 && (
               <div className="messagesDiscoverList">
                 {people.slice(0, 5).map((user) => (
@@ -287,7 +286,7 @@ export default function MessagesPage() {
             {loadingConversations && <div className="messagesHint">Ladowanie rozmow...</div>}
             {!loadingConversations && conversations.length === 0 && (
               <div className="messagesHint">
-                Brak rozmow w tym widoku. Wyszukaj uzytkownika powyzej, zeby rozpoczac konwersacje.
+                Brak rozmow. Zacznij nowa rozmowe powyzej.
               </div>
             )}
             {!loadingConversations &&
@@ -317,7 +316,7 @@ export default function MessagesPage() {
         </section>
 
         <section className="messagesMain panel-soft">
-          {!activeConversation && <div className="messagesPlaceholder">Wybierz rozmowe z listy, aby rozpoczac czat.</div>}
+          {!activeConversation && <div className="messagesPlaceholder">Wybierz rozmowe.</div>}
           {activeConversation && (
             <>
               <header className="messagesMain__header">
@@ -348,7 +347,7 @@ export default function MessagesPage() {
                   </button>
                 )}
                 {loadingMessages && <div className="messagesHint">Ladowanie wiadomosci...</div>}
-                {!loadingMessages && messages.length === 0 && <div className="messagesHint">Brak wiadomosci w tej rozmowie. Napisz pierwsza wiadomosc ponizej.</div>}
+                {!loadingMessages && messages.length === 0 && <div className="messagesHint">Brak wiadomosci w tej rozmowie.</div>}
 
                 {messages.map((message) => (
                   <article key={message.id} className={`messageBubble${message.own ? " is-own" : ""}`}>

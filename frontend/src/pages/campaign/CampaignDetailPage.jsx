@@ -20,18 +20,12 @@ import {
   updateCampaign,
   updateCampaignPlayerNote,
 } from "../../api/campaigns";
-import {
-  deleteMySessionNote,
-  getMySessionNote,
-  saveMySessionNote,
-} from "../../api/sessionNotes";
 import "../../styles/campaign-details.css";
 import CampaignCharactersPanel from "./components/CampaignCharactersPanel";
 import CampaignMaterialsPanel from "./components/CampaignMaterialsPanel";
 import CampaignOverviewPanel from "./components/CampaignOverviewPanel";
 import CampaignPlayerNotesPanel from "./components/CampaignPlayerNotesPanel";
 import CampaignPlayersPanel from "./components/CampaignPlayersPanel";
-import CampaignSessionsPanel from "./components/CampaignSessionsPanel";
 import UpcomingSessionPanel from "./components/UpcomingSessionPanel";
 
 export default function CampaignDetailPage() {
@@ -169,34 +163,14 @@ export default function CampaignDetailPage() {
     });
   }
 
-  async function handleGetMySessionNote(sessionId) {
-    try {
-      return await getMySessionNote(token, campaignId, sessionId);
-    } catch (err) {
-      if (err?.status === 404) return null;
-      throw err;
-    }
-  }
-
-  async function handleSaveMySessionNote(sessionId, payload) {
-    return saveMySessionNote(token, campaignId, sessionId, payload);
-  }
-
-  async function handleDeleteMySessionNote(sessionId) {
-    return deleteMySessionNote(token, campaignId, sessionId);
-  }
-
-  const isOwner = Boolean(campaign?.owner);
   const myMember = members.find((member) => member?.self) || null;
-  const myCharacter = campaignCharacters.find((character) => {
-    if (!myMember) return false;
-    return Number(character.userId) === Number(myMember.id);
-  }) || null;
-  const playerFinishedSessions = sessions
-    .filter((session) => String(session.status).toUpperCase() === "FINISHED")
-    .slice()
-    .sort((a, b) => new Date(b.finishedAt || b.updatedAt || 0).getTime() - new Date(a.finishedAt || a.updatedAt || 0).getTime())
-    .slice(0, 5);
+  const isOwner = Boolean(
+    campaign?.owner
+    || myMember?.owner
+    || myMember?.mg
+    || String(myMember?.role || "").toUpperCase() === "GM"
+  );
+  const myUserId = Number(myMember?.id ?? myMember?.userId ?? 0) || null;
   const inviteCode = campaign?.joinCode || campaign?.inviteCode || "";
   const showMaterialsPanel = materials.length > 0;
 
@@ -246,6 +220,7 @@ export default function CampaignDetailPage() {
                   sessions={sessions}
                   isOwner={isOwner}
                   busy={busy}
+                  onCreate={handleCreateSession}
                   onStart={handleStartSession}
                   onFinish={handleFinishSession}
                 />
@@ -268,25 +243,14 @@ export default function CampaignDetailPage() {
               </div>
 
               <div className="campaignDashboardRow">
-                <CampaignSessionsPanel
-                  campaignId={campaignId}
-                  sessions={sessions}
-                  title="Sesje kampanii"
-                  isOwner={isOwner}
-                  busy={busy}
-                  onCreate={handleCreateSession}
-                  onStart={handleStartSession}
-                  onFinish={handleFinishSession}
-                  onGetMySessionNote={handleGetMySessionNote}
-                  onSaveMySessionNote={handleSaveMySessionNote}
-                  onDeleteMySessionNote={handleDeleteMySessionNote}
-                />
-
                 <CampaignCharactersPanel
                   campaignCharacters={campaignCharacters}
                   myCharacters={myCharacters}
+                  members={members}
                   campaignSystemCode={campaign.systemCode}
                   canManage={isOwner}
+                  isOwner={isOwner}
+                  myUserId={myUserId}
                   busy={busy}
                   onAssign={handleAssignCharacter}
                   onDetach={handleDetachCharacter}
@@ -308,6 +272,8 @@ export default function CampaignDetailPage() {
                 <CampaignPlayerNotesPanel
                   notes={playerNotes}
                   campaign={campaign}
+                  isOwner={isOwner}
+                  myUserId={myUserId}
                   busy={busy}
                   onCreate={handleCreatePlayerNote}
                   onUpdate={handleUpdatePlayerNote}
@@ -323,52 +289,36 @@ export default function CampaignDetailPage() {
                   sessions={sessions}
                   isOwner={isOwner}
                   busy={busy}
-                  onStart={handleStartSession}
-                  onFinish={handleFinishSession}
-                />
-                <section className="campaignDetailsCard panel-soft">
-                  <h2 className="campaignDetailsCardTitle">Moja postac</h2>
-                  {myCharacter ? (
-                    <>
-                      <div className="campaignMaterialCard__top">
-                        <strong>{myCharacter.characterName || "Postac"}</strong>
-                        <span className="campaignMemberBadge">{myCharacter.systemCode || "-"}</span>
-                      </div>
-                      <p>
-                        Rasa/klasa/tlo: {myCharacter.raceName || "-"} / {myCharacter.className || "-"} / {myCharacter.backgroundName || "-"}
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <div className="campaignDetailsEmpty">Brak przypisanej postaci do tej kampanii.</div>
-                      <Link className="campaignDetailsGhostBtn" to="/characters">Przejdz do postaci</Link>
-                    </>
-                  )}
-                </section>
-                <CampaignPlayersPanel members={members} title="Uczestnicy" />
-              </div>
-
-              <div className="campaignDashboardRow">
-                <CampaignSessionsPanel
-                  campaignId={campaignId}
-                  sessions={playerFinishedSessions}
-                  title="Ostatnie zakonczone sesje"
-                  isOwner={false}
-                  busy={busy}
                   onCreate={handleCreateSession}
                   onStart={handleStartSession}
                   onFinish={handleFinishSession}
-                  onGetMySessionNote={handleGetMySessionNote}
-                  onSaveMySessionNote={handleSaveMySessionNote}
-                  onDeleteMySessionNote={handleDeleteMySessionNote}
                 />
-                <section className="campaignDetailsCard panel-soft">
-                  <h2 className="campaignDetailsCardTitle">Informacje o kampanii</h2>
-                  <div className="campaignDetailsInfoRow"><span>Tytul</span><strong>{campaign.title || "-"}</strong></div>
-                  <div className="campaignDetailsInfoRow"><span>System</span><strong>{campaign.systemCode || "-"}</strong></div>
-                  <div className="campaignDetailsInfoRow"><span>Status</span><strong>{campaign.status || "-"}</strong></div>
-                  <p className="campaignDetailsHelpText">{campaign.description || "Brak opisu kampanii."}</p>
-                </section>
+                <CampaignCharactersPanel
+                  campaignCharacters={campaignCharacters}
+                  myCharacters={myCharacters}
+                  members={members}
+                  campaignSystemCode={campaign.systemCode}
+                  canManage={false}
+                  isOwner={false}
+                  myUserId={myUserId}
+                  busy={busy}
+                  onAssign={handleAssignCharacter}
+                  onDetach={handleDetachCharacter}
+                />
+                <CampaignPlayersPanel members={members} title="Gracze" />
+              </div>
+
+              <div className="campaignDashboardRow campaignDashboardRow--bottom">
+                <CampaignPlayerNotesPanel
+                  notes={playerNotes}
+                  campaign={campaign}
+                  isOwner={false}
+                  myUserId={myUserId}
+                  busy={busy}
+                  onCreate={handleCreatePlayerNote}
+                  onUpdate={handleUpdatePlayerNote}
+                  onDelete={handleDeletePlayerNote}
+                />
               </div>
             </div>
           )}
