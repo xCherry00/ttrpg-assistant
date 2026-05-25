@@ -20,7 +20,7 @@
 .settingsHero {
   min-height: 64px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
   gap: 24px;
 }
@@ -109,7 +109,7 @@
 
 .settingsStudio {
   display: grid;
-  grid-template-columns: 286px minmax(420px, 1fr) 320px;
+  grid-template-columns: 286px minmax(0, 1fr);
   gap: 22px;
   align-items: start;
 }
@@ -151,7 +151,7 @@
   width: 100%;
   min-height: 42px;
   display: grid;
-  grid-template-columns: 22px 1fr auto;
+  grid-template-columns: 22px 1fr;
   align-items: center;
   gap: 10px;
   border: 1px solid transparent;
@@ -185,16 +185,6 @@
 .settingsIndexIcon {
   width: 22px;
   height: 22px;
-}
-
-.settingsIndex strong {
-  min-width: 28px;
-  border-radius: 999px;
-  background: rgba(127, 145, 180, 0.13);
-  color: rgba(226, 235, 250, 0.72);
-  text-align: center;
-  padding: 2px 7px;
-  font-size: 12px;
 }
 
 .settingsStack {
@@ -423,6 +413,10 @@
   font-size: 18px;
 }
 
+.settingsChatPreview p {
+  margin: 0;
+}
+
 .chatColorGrid {
   display: grid;
   grid-template-columns: repeat(8, minmax(34px, 1fr));
@@ -617,16 +611,6 @@
   .settingsStudio {
     grid-template-columns: 240px minmax(0, 1fr);
   }
-
-  .settingsRail {
-    position: static;
-    grid-column: 1 / -1;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .settingsUpgrade {
-    min-height: 100%;
-  }
 }
 
 @media (max-width: 900px) {
@@ -646,9 +630,6 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .settingsRail {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 640px) {

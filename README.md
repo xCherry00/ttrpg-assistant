@@ -948,3 +948,10 @@ Refactor note (v0.6.6):
 - Dashboard nie renderuje juz panelu `Ostatnio wygenerowane`; prawa kolumna zawiera: `Dostepnosc graczy`, `Systemy RPG`, `Twoja rola`.
 - Logika danych pozostaje bez zmian: dashboard nadal opiera sie na realnych danych kampanii/postaci/sesji/attendance bez mockow i placeholderow.
 
+### v0.8.1 - Clean settings page structure
+- `/settings` zostalo uproszczone do ukladu dwukolumnowego: `menu kategorii` + `tresc ustawien`.
+- Usunieto prawy rail i panele pomocnicze (profil, szybki dostep, status, panel MG).
+- Usunieto gorne taby i dodatkowe elementy nawigacji, ktore nie wnosily realnej logiki ustawien.
+- Sekcje ustawien sa skupione na realnych funkcjach: `Konto`, `Bezpieczenstwo`, `Wyglad`, `Chat sesji`, `Dane lokalne`, `Strefa ryzyka`.
+- Ustawienie koloru nicku pozostaje w `Chat sesji`, a `Wyglad` zawiera tylko wybor motywu aplikacji.
+

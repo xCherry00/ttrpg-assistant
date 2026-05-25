@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import {
@@ -17,20 +17,12 @@ const INITIATIVE_SYSTEM_KEY = "ttrpg_initiative_system_v1";
 const CHAT_NICK_PRESETS = ["#b26cff", "#7bdff2", "#ff8fab", "#80ed99", "#f4a261", "#a0c4ff", "#f5d76e", "#ff6b6b"];
 
 const NAV_SECTIONS = [
-  { id: "account", label: "Konto", count: 2, icon: "user" },
-  { id: "security", label: "Bezpieczeństwo", count: 3, icon: "lock" },
-  { id: "appearance", label: "Wygląd", count: 2, icon: "palette" },
-  { id: "chat", label: "Chat sesji", count: 8, icon: "message" },
-  { id: "local", label: "Dane lokalne", count: 1, icon: "database" },
-  { id: "danger", label: "Strefa ryzyka", count: 1, icon: "trash" },
-];
-
-const QUICK_LINKS = [
-  { id: "account", label: "Zmień email", icon: "mail" },
-  { id: "security", label: "Nowe hasło", icon: "lock" },
-  { id: "appearance", label: "Motyw aplikacji", icon: "moon" },
-  { id: "chat", label: "Kolor nicku", icon: "sparkles" },
-  { id: "local", label: "Cache inicjatywy", icon: "database" },
+  { id: "account", label: "Konto", icon: "user" },
+  { id: "security", label: "Bezpieczenstwo", icon: "lock" },
+  { id: "appearance", label: "Wyglad", icon: "palette" },
+  { id: "chat", label: "Chat sesji", icon: "message" },
+  { id: "local", label: "Dane lokalne", icon: "database" },
+  { id: "danger", label: "Strefa ryzyka", icon: "trash" },
 ];
 
 function applyTheme(theme) {
@@ -52,12 +44,6 @@ function Icon({ name, size = 18 }) {
   };
 
   const paths = {
-    search: (
-      <>
-        <circle cx="11" cy="11" r="8" />
-        <path d="m21 21-4.3-4.3" />
-      </>
-    ),
     user: (
       <>
         <circle cx="12" cy="8" r="4" />
@@ -125,22 +111,9 @@ function Icon({ name, size = 18 }) {
     sparkles: (
       <>
         <path d="m12 3 1.7 4.3L18 9l-4.3 1.7L12 15l-1.7-4.3L6 9l4.3-1.7Z" />
-        <path d="m19 14 .9 2.1L22 17l-2.1.9L19 20l-.9-2.1L16 17l2.1-.9Z" />
-        <path d="m5 14 .8 1.7L7.5 16.5l-1.7.8L5 19l-.8-1.7-1.7-.8 1.7-.8Z" />
       </>
     ),
-    check: (
-      <>
-        <path d="M20 6 9 17l-5-5" />
-      </>
-    ),
-    crown: (
-      <>
-        <path d="m3 8 4 3 5-7 5 7 4-3-2 10H5Z" />
-        <path d="M5 21h14" />
-      </>
-    ),
-    arrow: <path d="m9 18 6-6-6-6" />,
+    check: <path d="M20 6 9 17l-5-5" />,
   };
 
   return <svg {...common}>{paths[name] || paths.user}</svg>;
@@ -182,7 +155,6 @@ export default function SettingsPage() {
   const [emailPassword, setEmailPassword] = useState("");
   const [deletePassword, setDeletePassword] = useState("");
   const [chatNickColor, setChatNickColor] = useState("");
-  const [settingsQuery, setSettingsQuery] = useState("");
   const [activeSection, setActiveSection] = useState("account");
   const [theme, setTheme] = useState(() => localStorage.getItem(THEME_STORAGE_KEY) || "dark");
 
@@ -201,28 +173,18 @@ export default function SettingsPage() {
         setNewEmail(me.email || "");
         setChatNickColor(me.chatNickColor || "");
       } catch {
-        if (!cancelled) setEmailError("Nie udało się pobrać danych konta.");
+        if (!cancelled) setEmailError("Nie udalo sie pobrac danych konta.");
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
-    loadProfile();
+    void loadProfile();
     return () => {
       cancelled = true;
     };
   }, [token]);
 
-  const visibleSections = useMemo(() => {
-    const query = settingsQuery.trim().toLowerCase();
-    if (!query) return new Set(NAV_SECTIONS.map((section) => section.id));
-    return new Set(
-      NAV_SECTIONS.filter((section) => `${section.label} ${section.id}`.toLowerCase().includes(query)).map(
-        (section) => section.id,
-      ),
-    );
-  }, [settingsQuery]);
-
-  const profileName = email ? email.split("@")[0] : "Mistrz gry";
+  const profileName = email ? email.split("@")[0] : "test";
   const displayColor = chatNickColor || "#dbe7fa";
 
   async function handleChangeEmail(e) {
@@ -234,11 +196,11 @@ export default function SettingsPage() {
       return;
     }
     if (!emailPassword) {
-      setEmailError("Podaj obecne hasło.");
+      setEmailError("Podaj obecne haslo.");
       return;
     }
     if (newEmail.trim().toLowerCase() === email.toLowerCase()) {
-      setEmailError("Nowy email musi być inny niż obecny.");
+      setEmailError("Nowy email musi byc inny niz obecny.");
       return;
     }
     try {
@@ -246,10 +208,10 @@ export default function SettingsPage() {
       setEmail(updated.email || "");
       setNewEmail(updated.email || "");
       setEmailPassword("");
-      setEmailSuccess("Email został zaktualizowany.");
+      setEmailSuccess("Email zostal zaktualizowany.");
       window.dispatchEvent(new Event("ttrpg-profile-updated"));
     } catch (err) {
-      setEmailError(err.message || "Nie udało się zmienić emaila.");
+      setEmailError(err.message || "Nie udalo sie zmienic emaila.");
     }
   }
 
@@ -258,15 +220,15 @@ export default function SettingsPage() {
     setPasswordError("");
     setPasswordSuccess("");
     if (!currentPassword) {
-      setPasswordError("Podaj obecne hasło.");
+      setPasswordError("Podaj obecne haslo.");
       return;
     }
     if (newPassword.length < 6) {
-      setPasswordError("Nowe hasło musi mieć co najmniej 6 znaków.");
+      setPasswordError("Nowe haslo musi miec co najmniej 6 znakow.");
       return;
     }
     if (newPassword !== confirmPassword) {
-      setPasswordError("Nowe hasła nie są takie same.");
+      setPasswordError("Nowe hasla nie sa takie same.");
       return;
     }
     try {
@@ -274,9 +236,9 @@ export default function SettingsPage() {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      setPasswordSuccess("Hasło zostało zmienione.");
+      setPasswordSuccess("Haslo zostalo zmienione.");
     } catch (err) {
-      setPasswordError(err.message || "Nie udało się zmienić hasła.");
+      setPasswordError(err.message || "Nie udalo sie zmienic hasla.");
     }
   }
 
@@ -293,23 +255,27 @@ export default function SettingsPage() {
         }),
       );
     } catch (err) {
-      setChatColorError(err.message || "Nie udało się zapisać koloru.");
+      setChatColorError(err.message || "Nie udalo sie zapisac koloru.");
     }
   }
 
   function clearInitiativeCache() {
+    const confirmed = window.confirm(
+      "Czy na pewno chcesz wyczyscic dane lokalne? Ta akcja nie usuwa konta, kampanii ani postaci.",
+    );
+    if (!confirmed) return;
     sessionStorage.removeItem(INITIATIVE_CACHE_KEY);
     sessionStorage.removeItem(INITIATIVE_SYSTEM_KEY);
-    setMiscSuccess("Cache inicjatywy wyczyszczony.");
+    setMiscSuccess("Cache aplikacji wyczyszczony.");
   }
 
   async function handleDeleteAccount() {
     setDeleteError("");
     if (!deletePassword) {
-      setDeleteError("Podaj hasło, aby usunąć konto.");
+      setDeleteError("Podaj haslo, aby usunac konto.");
       return;
     }
-    const confirmed = window.confirm("Czy na pewno chcesz usunąć konto? Tej operacji nie da się cofnąć.");
+    const confirmed = window.confirm("Czy na pewno chcesz usunac konto? Tej operacji nie da sie cofnac.");
     if (!confirmed) return;
     try {
       await deleteAccount(token, deletePassword);
@@ -317,7 +283,7 @@ export default function SettingsPage() {
       logout();
       navigate("/register", { replace: true });
     } catch (err) {
-      setDeleteError(err.message || "Nie udało się usunąć konta.");
+      setDeleteError(err.message || "Nie udalo sie usunac konta.");
     }
   }
 
@@ -326,40 +292,14 @@ export default function SettingsPage() {
     document.getElementById(`settings-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  function sectionVisible(id) {
-    return visibleSections.has(id);
-  }
-
   return (
     <div className="page settingsPage">
       <header className="settingsHero">
         <div>
           <h1>Ustawienia</h1>
-          <p>Zarządzaj kontem, bezpieczeństwem i preferencjami swojej przestrzeni TTRPG.</p>
-        </div>
-        <div className="settingsSearch" role="search">
-          <Icon name="search" size={17} />
-          <input
-            type="search"
-            value={settingsQuery}
-            onChange={(e) => setSettingsQuery(e.target.value)}
-            placeholder="Szukaj w ustawieniach..."
-            aria-label="Szukaj w ustawieniach"
-          />
-          <kbd>Ctrl K</kbd>
+          <p>Zarzadzaj kontem, bezpieczenstwem i wygladem aplikacji.</p>
         </div>
       </header>
-
-      <div className="settingsTabs" aria-label="Kategorie ustawień">
-        <button type="button" className="is-active">
-          <Icon name="user" />
-          Konto i preferencje
-        </button>
-        <button type="button">
-          <Icon name="lock" />
-          Prywatność
-        </button>
-      </div>
 
       <div className="settingsStudio">
         <aside className="settingsIndex settingsGlass">
@@ -376,21 +316,13 @@ export default function SettingsPage() {
                   <Icon name={section.icon} size={15} />
                 </span>
                 <span>{section.label}</span>
-                <strong>{section.count}</strong>
               </button>
             ))}
           </nav>
         </aside>
 
         <main className="settingsStack" aria-live="polite">
-          {!visibleSections.size && (
-            <div className="settingsEmpty settingsGlass">
-              <strong>Brak pasujących ustawień</strong>
-              <span>Spróbuj krótszej frazy albo wybierz kategorię z listy.</span>
-            </div>
-          )}
-
-          {sectionVisible("account") && (
+          {activeSection === "account" && (
             <section id="settings-account" className="settingsPanel settingsPanel--featured">
               <div className="settingsPanelHead">
                 <span className="settingsPanelIcon">
@@ -398,10 +330,10 @@ export default function SettingsPage() {
                 </span>
                 <div>
                   <h2>Konto</h2>
-                  <p>Adres email używany do logowania i odzyskiwania dostępu.</p>
+                  <p>Adres email uzywany do logowania i odzyskiwania dostepu.</p>
                 </div>
               </div>
-              {loading && <div className="settingsInfo">Ładowanie danych konta...</div>}
+              {loading && <div className="settingsInfo">Ladowanie danych konta...</div>}
               <Message type="error">{emailError}</Message>
               <Message type="success">{emailSuccess}</Message>
               <form className="settingsFormGrid" onSubmit={handleChangeEmail}>
@@ -417,7 +349,7 @@ export default function SettingsPage() {
                     autoComplete="email"
                   />
                 </Field>
-                <Field label="Obecne hasło">
+                <Field label="Obecne haslo">
                   <input
                     className="settingsInput"
                     type="password"
@@ -429,28 +361,28 @@ export default function SettingsPage() {
                 <div className="settingsFormAction">
                   <button className="settingsBtn settingsBtnPrimary" type="submit">
                     <Icon name="check" />
-                    Zmień email
+                    Zmien email
                   </button>
                 </div>
               </form>
             </section>
           )}
 
-          {sectionVisible("security") && (
+          {activeSection === "security" && (
             <section id="settings-security" className="settingsPanel">
               <div className="settingsPanelHead">
                 <span className="settingsPanelIcon">
                   <Icon name="lock" />
                 </span>
                 <div>
-                  <h2>Bezpieczeństwo</h2>
-                  <p>Zmieniaj hasło i pilnuj dostępu do swojej biblioteki kampanii.</p>
+                  <h2>Bezpieczenstwo</h2>
+                  <p>Zmieniaj haslo i pilnuj dostepu do swojej biblioteki kampanii.</p>
                 </div>
               </div>
               <Message type="error">{passwordError}</Message>
               <Message type="success">{passwordSuccess}</Message>
               <form className="settingsFormGrid" onSubmit={handleChangePassword}>
-                <Field label="Obecne hasło">
+                <Field label="Obecne haslo">
                   <input
                     className="settingsInput"
                     type="password"
@@ -459,7 +391,7 @@ export default function SettingsPage() {
                     autoComplete="current-password"
                   />
                 </Field>
-                <Field label="Nowe hasło">
+                <Field label="Nowe haslo">
                   <input
                     className="settingsInput"
                     type="password"
@@ -468,7 +400,7 @@ export default function SettingsPage() {
                     autoComplete="new-password"
                   />
                 </Field>
-                <Field label="Powtórz nowe hasło">
+                <Field label="Powtorz nowe haslo">
                   <input
                     className="settingsInput"
                     type="password"
@@ -480,22 +412,22 @@ export default function SettingsPage() {
                 <div className="settingsFormAction">
                   <button className="settingsBtn settingsBtnPrimary" type="submit">
                     <Icon name="check" />
-                    Zmień hasło
+                    Zmien haslo
                   </button>
                 </div>
               </form>
             </section>
           )}
 
-          {sectionVisible("appearance") && (
+          {activeSection === "appearance" && (
             <section id="settings-appearance" className="settingsPanel">
               <div className="settingsPanelHead">
                 <span className="settingsPanelIcon">
                   <Icon name="palette" />
                 </span>
                 <div>
-                  <h2>Wygląd</h2>
-                  <p>Dopasuj motyw interfejsu do pracy przy stole albo podczas przygotowań.</p>
+                  <h2>Wyglad</h2>
+                  <p>Wybierz motyw aplikacji.</p>
                 </div>
               </div>
               <div className="settingsChoiceGrid">
@@ -506,7 +438,6 @@ export default function SettingsPage() {
                 >
                   <Icon name="moon" />
                   <strong>Ciemny</strong>
-                  <span>Nocna konsola MG</span>
                 </button>
                 <button
                   type="button"
@@ -515,13 +446,12 @@ export default function SettingsPage() {
                 >
                   <Icon name="sun" />
                   <strong>Jasny</strong>
-                  <span>Czytelny tryb notatek</span>
                 </button>
               </div>
             </section>
           )}
 
-          {sectionVisible("chat") && (
+          {activeSection === "chat" && (
             <section id="settings-chat" className="settingsPanel">
               <div className="settingsPanelHead">
                 <span className="settingsPanelIcon">
@@ -529,14 +459,16 @@ export default function SettingsPage() {
                 </span>
                 <div>
                   <h2>Chat sesji</h2>
-                  <p>Kolor nicku pomaga odróżnić wiadomości podczas gry.</p>
+                  <p>Ustaw kolor nicku dla wiadomosci na czacie sesji.</p>
                 </div>
               </div>
               <Message type="error">{chatColorError}</Message>
               <Message type="success">{chatColorSuccess}</Message>
               <div className="settingsChatPreview">
-                <span>Podgląd</span>
-                <strong style={{ color: displayColor }}>{profileName}</strong>
+                <span>Podglad</span>
+                <p>
+                  <strong style={{ color: displayColor }}>{profileName}</strong>: Przykladowa wiadomosc na czacie sesji.
+                </p>
               </div>
               <div className="chatColorGrid">
                 {CHAT_NICK_PRESETS.map((preset) => (
@@ -545,10 +477,7 @@ export default function SettingsPage() {
                     type="button"
                     className={`chatColorSwatch${chatNickColor === preset ? " is-active" : ""}`}
                     style={{ "--swatch": preset }}
-                    onClick={() => {
-                      setChatNickColor(preset);
-                      handleChatColorSave(preset);
-                    }}
+                    onClick={() => setChatNickColor(preset)}
                     aria-label={`Ustaw kolor ${preset}`}
                     title={preset}
                   />
@@ -569,7 +498,7 @@ export default function SettingsPage() {
             </section>
           )}
 
-          {sectionVisible("local") && (
+          {activeSection === "local" && (
             <section id="settings-local" className="settingsPanel">
               <div className="settingsPanelHead">
                 <span className="settingsPanelIcon">
@@ -577,18 +506,18 @@ export default function SettingsPage() {
                 </span>
                 <div>
                   <h2>Dane lokalne</h2>
-                  <p>Wyczyść zapisane lokalnie dane pomocnicze bez zmiany konta.</p>
+                  <p>Ta akcja usuwa dane zapisane lokalnie w przegladarce, np. cache narzedzi. Nie usuwa konta, kampanii ani postaci.</p>
                 </div>
               </div>
               <Message type="success">{miscSuccess}</Message>
               <button type="button" className="settingsBtn settingsBtnGhost settingsBtnInline" onClick={clearInitiativeCache}>
                 <Icon name="trash" />
-                Wyczyść cache inicjatywy
+                Wyczysc cache aplikacji
               </button>
             </section>
           )}
 
-          {sectionVisible("danger") && (
+          {activeSection === "danger" && (
             <section id="settings-danger" className="settingsPanel settingsPanel--danger">
               <div className="settingsPanelHead">
                 <span className="settingsPanelIcon">
@@ -596,7 +525,7 @@ export default function SettingsPage() {
                 </span>
                 <div>
                   <h2>Strefa ryzyka</h2>
-                  <p>Usunięcie konta jest trwałe i nie da się go cofnąć.</p>
+                  <p>Usuniecie konta jest trwale i nie da sie go cofnac.</p>
                 </div>
               </div>
               <Message type="error">{deleteError}</Message>
@@ -606,79 +535,16 @@ export default function SettingsPage() {
                   type="password"
                   value={deletePassword}
                   onChange={(e) => setDeletePassword(e.target.value)}
-                  placeholder="Podaj hasło..."
+                  placeholder="Podaj haslo..."
                   autoComplete="current-password"
                 />
                 <button type="button" className="settingsBtn settingsBtnDanger" onClick={handleDeleteAccount}>
-                  Usuń konto
+                  Usun konto
                 </button>
               </div>
             </section>
           )}
         </main>
-
-        <aside className="settingsRail">
-          <section className="settingsGlass settingsProfileCard">
-            <div className="settingsAvatar">{profileName.slice(0, 2).toUpperCase()}</div>
-            <div>
-              <h2>{profileName}</h2>
-              <p>{email || "Profil użytkownika"}</p>
-            </div>
-          </section>
-
-          <section className="settingsGlass settingsQuick">
-            <h2>Szybki dostęp</h2>
-            {QUICK_LINKS.map((link) => (
-              <button key={link.id} type="button" onClick={() => jumpToSection(link.id)}>
-                <span className="settingsQuickIcon">
-                  <Icon name={link.icon} size={15} />
-                </span>
-                {link.label}
-              </button>
-            ))}
-          </section>
-
-          <section className="settingsGlass settingsRecent">
-            <h2>Status</h2>
-            <div>
-              <span className="settingsRecentIcon settingsRecentIcon--ok">
-                <Icon name="check" size={14} />
-              </span>
-              <p>
-                Profil
-                <small>{loading ? "Synchronizacja..." : "Dane wczytane"}</small>
-              </p>
-            </div>
-            <div>
-              <span className="settingsRecentIcon">
-                <Icon name="palette" size={14} />
-              </span>
-              <p>
-                Motyw
-                <small>{theme === "dark" ? "Ciemny" : "Jasny"}</small>
-              </p>
-            </div>
-            <div>
-              <span className="settingsRecentIcon">
-                <Icon name="sparkles" size={14} />
-              </span>
-              <p>
-                Kolor nicku
-                <small>{chatNickColor || "Domyślny"}</small>
-              </p>
-            </div>
-          </section>
-
-          <section className="settingsUpgrade">
-            <Icon name="crown" size={22} />
-            <h2>Panel MG</h2>
-            <p>Twoje ustawienia wpływają na kampanie, sesje i wiadomości w całej aplikacji.</p>
-            <button type="button" onClick={() => jumpToSection("appearance")}>
-              Personalizuj
-              <Icon name="arrow" size={15} />
-            </button>
-          </section>
-        </aside>
       </div>
     </div>
   );
