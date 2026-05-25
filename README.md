@@ -925,3 +925,26 @@ Refactor note (v0.6.6):
 - `Messages` utrzymuje layout: lista rozmow + glowny chat; panel szczegolow jest widoczny tylko dla realnie wybranego kontaktu.
 - Dodane czytelne empty states dla braku rozmow, braku wynikow, braku wiadomosci i rozmow oczekujacych na akceptacje.
 
+### v0.8.0 - Rework dashboard widgets and session overview
+- Dashboard ma jeden glowny panel sesji:
+  - priorytet `IN_PROGRESS` jako `Aktywna sesja`,
+  - fallback do najblizszej `PLANNED` jako `Najblizsza sesja`,
+  - empty state gdy brak sesji aktywnej i planowanej.
+- Dla sesji `PLANNED` dashboard pokazuje countdown (`dni`, `godziny`, `minuty`), a dla `IN_PROGRESS` status `Sesja trwa`.
+- KPI zostaly zastapione rozwijanymi kafelkami opartymi o realne dane:
+  - `Kampanie` (listCampaigns),
+  - `Postacie` (listCharacters),
+  - `Nadchodzace sesje` (`PLANNED` z listCampaignSessions),
+  - `Ostatnie sesje` (`FINISHED` z listCampaignSessions).
+- Dodano panele:
+  - `Systemy RPG` (agregacja `systemCode` dla kampanii i postaci),
+  - `Dostepnosc graczy` (attendance najblizszej sesji `PLANNED`),
+  - `Twoja rola` (kampanie jako MG/gracz).
+- Dashboard nie renderuje mockow ani placeholderowych rekordow; brak danych oznacza realny empty state, a nie sztuczne demo wpisy.
+- Usunieto osobny duzy panel `Nadchodzace sesje` oraz placeholderowy panel backlogu notatek z tego widoku.
+
+### v0.8.0.1 - Improve dashboard layout scale and remove recent generated panel
+- Glowny panel sesji (`Aktywna sesja` / `Najblizsza sesja`) ma nizsza, bardziej panoramiczna proporcje i bardziej zwarty uklad tresci.
+- Dashboard nie renderuje juz panelu `Ostatnio wygenerowane`; prawa kolumna zawiera: `Dostepnosc graczy`, `Systemy RPG`, `Twoja rola`.
+- Logika danych pozostaje bez zmian: dashboard nadal opiera sie na realnych danych kampanii/postaci/sesji/attendance bez mockow i placeholderow.
+

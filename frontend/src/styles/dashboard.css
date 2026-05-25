@@ -49,7 +49,7 @@
 
 .dashboardSaas {
   width: 100%;
-  max-width: 1600px;
+  max-width: 1360px;
   color: var(--dash-text);
 }
 
@@ -375,7 +375,7 @@
 
 .dashboardFeatureGrid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: minmax(0, 1fr);
   gap: 24px;
   margin-bottom: 24px;
 }
@@ -390,11 +390,11 @@
 }
 
 .dashboardHero {
-  min-height: 356px;
+  min-height: 286px;
+  max-height: 320px;
   position: relative;
   overflow: hidden;
-  display: grid;
-  grid-template-columns: minmax(320px, 0.48fr) minmax(0, 0.52fr);
+  display: block;
   border-color: rgba(124, 58, 237, 0.38);
 }
 
@@ -415,11 +415,13 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 42px 38px;
+  gap: 6px;
+  padding: 24px 30px;
+  max-width: 560px;
 }
 
 .dashboardHero__copy > span {
-  margin-bottom: 16px;
+  margin-bottom: 6px;
   color: rgba(244, 240, 255, 0.76);
   font-size: 0.76rem;
   font-weight: 800;
@@ -429,23 +431,23 @@
 .dashboardHero h2 {
   margin: 0;
   max-width: 520px;
-  font-size: clamp(2rem, 4vw, 3rem);
-  line-height: 1;
+  font-size: clamp(1.55rem, 2.7vw, 2.3rem);
+  line-height: 1.1;
 }
 
 .dashboardHero p {
   max-width: 520px;
-  margin: 22px 0 0;
+  margin: 0;
   color: var(--dash-muted);
-  font-size: 1rem;
-  line-height: 1.75;
+  font-size: 0.92rem;
+  line-height: 1.35;
 }
 
 .dashboardHero__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
-  margin-top: 30px;
+  gap: 10px;
+  margin-top: 14px;
 }
 
 .dashboardHero__primary,
@@ -585,12 +587,13 @@
 
 .dashboardLowerGrid {
   display: grid;
-  grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.9fr) minmax(300px, 0.92fr);
+  grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
   gap: 16px;
+  align-items: start;
 }
 
 .dashboardPanel {
-  min-height: 304px;
+  min-height: 0;
   padding: 16px;
 }
 
@@ -832,7 +835,8 @@
   }
 
   .dashboardHero {
-    min-height: 460px;
+    min-height: 320px;
+    max-height: none;
     grid-template-columns: 1fr;
   }
 
