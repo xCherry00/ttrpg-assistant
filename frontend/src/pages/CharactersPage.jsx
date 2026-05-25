@@ -185,6 +185,11 @@ export default function CharactersPage() {
     importInputRef.current?.click();
   }
 
+  function handlePrint() {
+    if (!selectedId) return;
+    window.print();
+  }
+
   async function handleImportFile(event) {
     const file = event.target.files?.[0];
     event.target.value = "";
@@ -247,6 +252,7 @@ export default function CharactersPage() {
             onCreate={openCreateFlow}
             onExport={handleExportJson}
             onImport={handleImportClick}
+            onPrint={handlePrint}
           />
           <input
             ref={importInputRef}

@@ -3,7 +3,7 @@ function normalize(items) {
   return items.map((item) => {
     if (item && typeof item === "object") {
       return {
-        title: item.name || item.title || "Feature",
+        title: item.name || item.title || "Cecha",
         text: item.description || item.text || "",
       };
     }
@@ -15,8 +15,8 @@ export default function FeaturesTraitsPanel({ featuresTraits }) {
   const rows = normalize(featuresTraits);
   return (
     <section className="sheetSection">
-      <h3>Features & Traits</h3>
-      {rows.length === 0 && <div className="sheetEmpty">Brak cech i traitow.</div>}
+      <h3>Cechy i zdolnosci</h3>
+      {rows.length === 0 && <div className="sheetEmpty">Brak cech i zdolnosci.</div>}
       {rows.length > 0 && (
         <div className="sheetStack">
           {rows.map((row, index) => (

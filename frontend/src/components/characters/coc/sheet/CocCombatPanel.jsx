@@ -2,15 +2,15 @@ export default function CocCombatPanel({ combat }) {
   const weapons = Array.isArray(combat?.weapons) ? combat.weapons : [];
   return (
     <section className="sheetSection">
-      <h3>Combat</h3>
+      <h3>Walka</h3>
       <div className="sheetGrid">
-        <label className="sheetField"><span>Dodge</span><input value={combat?.dodge ?? "-"} readOnly /></label>
+        <label className="sheetField"><span>Unik</span><input value={combat?.dodge ?? "-"} readOnly /></label>
       </div>
       {weapons.length === 0 && <div className="sheetEmpty">Brak danych o broni.</div>}
       {weapons.length > 0 && (
         <table className="sheetTable">
           <thead>
-            <tr><th>Weapon</th><th>Skill</th><th>Damage</th></tr>
+            <tr><th>Bron</th><th>Umiejetnosc</th><th>Obrazenia</th></tr>
           </thead>
           <tbody>
             {weapons.map((weapon, index) => (

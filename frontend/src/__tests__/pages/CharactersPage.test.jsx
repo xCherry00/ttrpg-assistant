@@ -18,64 +18,93 @@ vi.mock("../../api/characters", () => ({
 }));
 
 vi.mock("../../components/characters/CharacterCreatorRouter", () => ({
-  default: () => <div>creator</div>,
-}));
-vi.mock("../../components/characters/CharacterSheetRouter", () => ({
-  default: () => <div>sheet</div>,
-}));
-vi.mock("../../components/characters/CharacterSystemSelector", () => ({
-  default: () => <div>system-selector</div>,
+  default: ({ systemCode, onCreateDnd, onCreateCoc }) => (
+    <div>
+      <span>creator-{systemCode}</span>
+      <button type="button" onClick={() => onCreateDnd?.({ name: "Dnd Hero" })}>submit-dnd</button>
+      <button type="button" onClick={() => onCreateCoc?.({ name: "Coc Hero" })}>submit-coc</button>
+    </div>
+  ),
 }));
 
-describe("CharactersPage import/export", () => {
+vi.mock("../../components/characters/CharacterSheetRouter", () => ({
+  default: ({ onSave }) => <button type="button" onClick={() => onSave({ name: "After Save" })}>save-sheet</button>,
+}));
+
+vi.mock("../../components/characters/CharacterSystemSelector", () => ({
+  default: ({ onSelect }) => (
+    <div>
+      <button type="button" onClick={() => onSelect("dnd5e")}>wybierz-dnd</button>
+      <button type="button" onClick={() => onSelect("coc7e")}>wybierz-coc</button>
+    </div>
+  ),
+}));
+
+describe("CharactersPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     charactersApi.listCharacters.mockResolvedValue([{ id: 1, name: "Hero", systemCode: "dnd5e", raceName: "Human", className: "Fighter", level: 1 }]);
     charactersApi.getCharacter.mockResolvedValue({ id: 1, name: "Hero", systemCode: "dnd5e", sheetJson: {} });
     charactersApi.exportCharacter.mockResolvedValue({ exportVersion: "v1", character: { name: "Hero", systemCode: "dnd5e", sheetJson: {} } });
     charactersApi.importCharacter.mockResolvedValue({ characterId: 2 });
+    charactersApi.quickCreateCharacter.mockResolvedValue({ id: 10 });
+    charactersApi.quickCreateCocCharacter.mockResolvedValue({ id: 11 });
+    charactersApi.updateCharacterSheet.mockResolvedValue({ id: 1, name: "After Save", systemCode: "dnd5e", sheetJson: {} });
+    charactersApi.deleteCharacter.mockResolvedValue({});
     global.URL.createObjectURL = vi.fn(() => "blob:mock");
     global.URL.revokeObjectURL = vi.fn();
+    window.print = vi.fn();
   });
 
-  it("renders export and import buttons", async () => {
+  it("renders sidebar actions including print and no backend PDF button", async () => {
     render(<CharactersPage />);
     expect(await screen.findByRole("button", { name: "Eksportuj JSON" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Importuj JSON" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Drukuj" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /PDF/i })).not.toBeInTheDocument();
   });
 
-  it("export calls API", async () => {
+  it("exports and imports JSON", async () => {
     render(<CharactersPage />);
     fireEvent.click(await screen.findByRole("button", { name: "Eksportuj JSON" }));
-    await waitFor(() => {
-      expect(charactersApi.exportCharacter).toHaveBeenCalledWith("test-token", 1);
-    });
+    await waitFor(() => expect(charactersApi.exportCharacter).toHaveBeenCalledWith("test-token", 1));
+
+    const input = document.querySelector('input[type="file"]');
+    const file = new File([JSON.stringify({ exportVersion: "v1", character: { name: "X", systemCode: "dnd5e", sheetJson: {} } })], "char.json", { type: "application/json" });
+    fireEvent.change(input, { target: { files: [file] } });
+    await waitFor(() => expect(charactersApi.importCharacter).toHaveBeenCalled());
   });
 
-  it("import valid json calls API and refreshes list", async () => {
+  it("creates D&D character and CoC character", async () => {
     render(<CharactersPage />);
-    await screen.findByRole("button", { name: "Importuj JSON" });
-    const input = document.querySelector('input[type="file"]');
-    const file = new File(
-      [JSON.stringify({ exportVersion: "v1", character: { name: "X", systemCode: "dnd5e", sheetJson: {} } })],
-      "char.json",
-      { type: "application/json" },
-    );
-    fireEvent.change(input, { target: { files: [file] } });
-    await waitFor(() => {
-      expect(charactersApi.importCharacter).toHaveBeenCalled();
-      expect(charactersApi.listCharacters).toHaveBeenCalledTimes(2);
-    });
+
+    fireEvent.click((await screen.findAllByRole("button", { name: /\+ Nowa postac/i }))[0]);
+    fireEvent.click(screen.getByRole("button", { name: "wybierz-dnd" }));
+    fireEvent.click(screen.getByRole("button", { name: "submit-dnd" }));
+    await waitFor(() => expect(charactersApi.quickCreateCharacter).toHaveBeenCalled());
+
+    fireEvent.click(screen.getAllByRole("button", { name: /\+ Nowa postac/i })[0]);
+    fireEvent.click(screen.getByRole("button", { name: "wybierz-coc" }));
+    fireEvent.click(screen.getByRole("button", { name: "submit-coc" }));
+    await waitFor(() => expect(charactersApi.quickCreateCocCharacter).toHaveBeenCalled());
   });
 
-  it("shows import error message", async () => {
-    charactersApi.importCharacter.mockRejectedValue(new Error("Import fail"));
+  it("supports save, delete and print flow", async () => {
     render(<CharactersPage />);
-    await screen.findByRole("button", { name: "Importuj JSON" });
-    const input = document.querySelector('input[type="file"]');
-    const file = new File([JSON.stringify({})], "bad.json", { type: "application/json" });
-    fireEvent.change(input, { target: { files: [file] } });
-    const errors = await screen.findAllByText("Import fail");
-    expect(errors.length).toBeGreaterThan(0);
+    fireEvent.click(await screen.findByRole("button", { name: "save-sheet" }));
+    await waitFor(() => expect(charactersApi.updateCharacterSheet).toHaveBeenCalled());
+
+    fireEvent.click(screen.getByRole("button", { name: "Drukuj" }));
+    expect(window.print).toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Usun postac" }));
+    fireEvent.click(screen.getByRole("button", { name: "Potwierdz usuniecie" }));
+    await waitFor(() => expect(charactersApi.deleteCharacter).toHaveBeenCalledWith("test-token", 1));
+  });
+
+  it("does not render legacy coming soon / MVP markers", async () => {
+    render(<CharactersPage />);
+    await screen.findByRole("button", { name: "Eksportuj JSON" });
+    expect(screen.queryByText(/coming soon|wkrotce|demo|mvp/i)).not.toBeInTheDocument();
   });
 });

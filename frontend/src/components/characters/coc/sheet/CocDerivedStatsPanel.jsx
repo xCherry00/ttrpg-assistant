@@ -3,14 +3,14 @@ export default function CocDerivedStatsPanel({ derived }) {
     ["HP", derived?.hp],
     ["MP", derived?.mp],
     ["SAN", derived?.san],
-    ["Luck", derived?.luck],
-    ["Damage Bonus", derived?.damageBonus],
+    ["Szczescie", derived?.luck],
+    ["Premia do obrazen", derived?.damageBonus],
     ["Build", derived?.build],
     ["Move", derived?.move],
   ];
   return (
     <section className="sheetSection">
-      <h3>Derived Stats</h3>
+      <h3>Statystyki pochodne</h3>
       <div className="sheetStatsGrid">
         {entries.map(([label, value]) => (
           <div key={label} className="sheetStatTile">

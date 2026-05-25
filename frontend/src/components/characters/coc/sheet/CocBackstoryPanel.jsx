@@ -2,8 +2,8 @@ export default function CocBackstoryPanel({ backstory }) {
   const entries = backstory && typeof backstory === "object" ? Object.entries(backstory) : [];
   return (
     <section className="sheetSection">
-      <h3>Backstory</h3>
-      {entries.length === 0 && <div className="sheetEmpty">Brak backstory.</div>}
+      <h3>Historia postaci</h3>
+      {entries.length === 0 && <div className="sheetEmpty">Brak historii postaci.</div>}
       {entries.length > 0 && (
         <div className="sheetStack">
           {entries.map(([key, value]) => (

@@ -14,7 +14,7 @@ export default function AbilityScoresPanel({ abilityScores }) {
   const entries = normalizeAbilityEntries(abilityScores);
   return (
     <section className="sheetSection">
-      <h3>Ability Scores</h3>
+      <h3>Atrybuty</h3>
       <div className="sheetAbilityGrid">
         {entries.map(([key, value]) => (
           <div key={key} className="sheetAbilityTile">

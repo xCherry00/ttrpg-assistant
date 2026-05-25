@@ -19,11 +19,11 @@ export default function CharacterHeader({
         </div>
         <div className="sheetIdentityGrid">
           <label className="sheetField">
-            <span>Name</span>
+            <span>Nazwa</span>
             <input value={name} onChange={(e) => onNameChange(e.target.value)} />
           </label>
           <label className="sheetField">
-            <span>Portrait</span>
+            <span>Portret</span>
             <input value={portraitUrl} onChange={(e) => onPortraitUrlChange(e.target.value)} placeholder="URL lub data:image/..." />
           </label>
           <div className="sheetField" style={{ gridColumn: "1 / -1" }}>
@@ -36,19 +36,19 @@ export default function CharacterHeader({
             />
           </div>
           <label className="sheetField">
-            <span>Race</span>
+            <span>Rasa</span>
             <input value={identity?.race || detail?.raceName || "-"} readOnly />
           </label>
           <label className="sheetField">
-            <span>Class</span>
+            <span>Klasa</span>
             <input value={identity?.className || detail?.className || "-"} readOnly />
           </label>
           <label className="sheetField">
-            <span>Background</span>
+            <span>Pochodzenie</span>
             <input value={identity?.background || detail?.backgroundName || "-"} readOnly />
           </label>
           <label className="sheetField">
-            <span>Level</span>
+            <span>Poziom</span>
             <input value={detail?.level ?? 1} readOnly />
           </label>
         </div>

@@ -10,17 +10,17 @@ export default function CombatPanel({
   onTempHpChange,
 }) {
   const stats = [
-    { label: "Max HP", value: statValue(combat?.maxHp) },
+    { label: "Maks. HP", value: statValue(combat?.maxHp) },
     { label: "AC", value: statValue(combat?.armorClass) },
-    { label: "Speed", value: statValue(combat?.speed) },
-    { label: "Initiative", value: statValue(combat?.initiative) },
-    { label: "Prof Bonus", value: statValue(combat?.proficiencyBonus, 2) },
+    { label: "Predkosc", value: statValue(combat?.speed) },
+    { label: "Inicjatywa", value: statValue(combat?.initiative) },
+    { label: "Premia bieglosci", value: statValue(combat?.proficiencyBonus, 2) },
     { label: "Hit Dice", value: combat?.hitDice || "-" },
   ];
 
   return (
     <section className="sheetSection">
-      <h3>Combat</h3>
+      <h3>Walka</h3>
       <div className="sheetStatsGrid">
         {stats.map((stat) => (
           <div key={stat.label} className="sheetStatTile">
@@ -31,11 +31,11 @@ export default function CombatPanel({
       </div>
       <div className="sheetGrid">
         <label className="sheetField">
-          <span>Current HP</span>
+          <span>Aktualne HP</span>
           <input type="number" min="0" value={currentHp} onChange={(e) => onCurrentHpChange(Number(e.target.value || 0))} />
         </label>
         <label className="sheetField">
-          <span>Temp HP</span>
+          <span>Tymczasowe HP</span>
           <input type="number" min="0" value={tempHp} onChange={(e) => onTempHpChange(Number(e.target.value || 0))} />
         </label>
       </div>

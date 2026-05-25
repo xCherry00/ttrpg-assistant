@@ -910,3 +910,11 @@ Refactor note (v0.6.6):
 - Frontend dodaje akcje `Eksportuj JSON` i `Importuj JSON` w module postaci.
 - Import z zewnetrznych serwisow (np. D&D Beyond) pozostaje poza MVP.
 
+### v0.7.10 - Polish character management flow
+- `/characters` ma dopracowany flow MVP dla D&D 5e i CoC 7e bez placeholderow `coming soon`.
+- Sidebar postaci zawiera spojne akcje: `Nowa postac`, `Importuj JSON`, `Eksportuj JSON`, `Drukuj`.
+- Po usunieciu postaci lista odswieza sie i usuniety rekord nie zostaje zaznaczony.
+- Widok D&D uzywa ujednoliconych sekcji: `Atrybuty`, `Walka`, `Rzuty obronne`, `Umiejetnosci`, `Cechy i zdolnosci`, `Zaklecia`, `Ekwipunek`, `Notatki`.
+- Widok CoC uzywa ujednoliconych sekcji: `Cechy`, `Statystyki pochodne`, `Umiejetnosci`, `Walka`, `Ekwipunek`, `Historia postaci`, `Notatki`.
+- Import/export JSON i print-friendly flow pozostaja aktywne; backendowy eksport PDF pozostaje poza MVP.
+

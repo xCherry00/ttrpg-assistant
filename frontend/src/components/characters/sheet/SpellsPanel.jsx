@@ -13,7 +13,7 @@ export default function SpellsPanel({ spells }) {
   if (!Array.isArray(spells)) return null;
   return (
     <section className="sheetSection">
-      <h3>Spells</h3>
+      <h3>Zaklecia</h3>
       {rows.length === 0 && <div className="sheetEmpty">Brak zaklec na tym poziomie.</div>}
       {rows.length > 0 && (
         <ul className="sheetSimpleList">

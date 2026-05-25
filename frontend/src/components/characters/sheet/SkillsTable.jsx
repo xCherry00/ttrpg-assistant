@@ -3,7 +3,7 @@ function normalizeSkills(skills) {
   return skills.map((entry) => {
     if (entry && typeof entry === "object") {
       return {
-        name: entry.name || entry.skill || "Unknown",
+        name: entry.name || entry.skill || "Nieznana",
         value: entry.value ?? entry.modifier ?? "-",
       };
     }
@@ -15,12 +15,12 @@ export default function SkillsTable({ skills }) {
   const rows = normalizeSkills(skills);
   return (
     <section className="sheetSection">
-      <h3>Skills</h3>
-      {rows.length === 0 && <div className="sheetEmpty">Brak danych skills.</div>}
+      <h3>Umiejetnosci</h3>
+      {rows.length === 0 && <div className="sheetEmpty">Brak danych umiejetnosci.</div>}
       {rows.length > 0 && (
         <table className="sheetTable">
           <thead>
-            <tr><th>Skill</th><th>Value</th></tr>
+            <tr><th>Umiejetnosc</th><th>Wartosc</th></tr>
           </thead>
           <tbody>
             {rows.map((row, index) => (

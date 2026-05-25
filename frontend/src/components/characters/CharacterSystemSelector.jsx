@@ -3,15 +3,8 @@ export const CHARACTER_SYSTEMS = [
     code: "dnd5e",
     name: "D&D 5e",
     status: "ready",
-    description: "Quick creator poziomu 1 z karta startowa.",
+    description: "Szybki kreator postaci poziomu 1 z karta startowa.",
     enabled: true,
-  },
-  {
-    code: "generic",
-    name: "Uniwersalny TTRPG",
-    status: "coming_soon",
-    description: "Tryb uniwersalny bedzie dostepny w kolejnym etapie.",
-    enabled: false,
   },
   {
     code: "coc7e",
@@ -19,13 +12,6 @@ export const CHARACTER_SYSTEMS = [
     status: "ready",
     description: "Szybki kreator badacza z podstawowymi statystykami CoC7e.",
     enabled: true,
-  },
-  {
-    code: "morkborg",
-    name: "Mork Borg",
-    status: "coming_soon",
-    description: "Mroczny, szybki kreator bedzie dodany pozniej.",
-    enabled: false,
   },
 ];
 
@@ -35,9 +21,10 @@ function statusLabel(status) {
 }
 
 export default function CharacterSystemSelector({ systems = CHARACTER_SYSTEMS, onSelect }) {
+  const visibleSystems = systems.filter((system) => system.enabled);
   return (
     <div className="charactersSystemSelector">
-      {systems.map((system) => (
+      {visibleSystems.map((system) => (
         <button
           key={system.code}
           type="button"

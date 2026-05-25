@@ -13,12 +13,14 @@ describe("CharacterSidebar", () => {
         onCreate={vi.fn()}
         onExport={vi.fn()}
         onImport={vi.fn()}
+        onPrint={vi.fn()}
       />,
     );
 
     const button = screen.getByRole("button", { name: /Lyra/i });
     fireEvent.click(button);
     expect(onSelect).toHaveBeenCalledWith(7);
+    expect(screen.getByRole("button", { name: "Drukuj" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Pobierz PDF/i })).not.toBeInTheDocument();
   });
 });

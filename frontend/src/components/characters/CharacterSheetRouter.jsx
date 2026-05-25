@@ -9,5 +9,5 @@ export default function CharacterSheetRouter({ detail, onSave, saving }) {
   if (systemCode === "coc7e") {
     return <CocCharacterSheetView detail={detail} onSave={onSave} saving={saving} />;
   }
-  return <div className="charactersEmpty">Podglad karty dla tego systemu pojawi sie wkrotce.</div>;
+  return <div className="charactersEmpty">Brak obslugi podgladu karty dla systemu: {detail?.systemCode || "nieznany"}.</div>;
 }

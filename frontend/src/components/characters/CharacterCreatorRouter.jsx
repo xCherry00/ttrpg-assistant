@@ -14,5 +14,5 @@ export default function CharacterCreatorRouter({
   if (systemCode === "coc7e") {
     return <CocCharacterCreator onCreate={onCreateCoc} creating={creating} onBack={onBack} />;
   }
-  return <div className="charactersEmpty">Ten kreator pojawi sie wkrotce.</div>;
+  return <div className="charactersEmpty">Brak obslugi kreatora dla wybranego systemu.</div>;
 }

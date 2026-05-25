@@ -2,12 +2,12 @@ export default function CocSkillsTable({ skills }) {
   const rows = Array.isArray(skills) ? skills : [];
   return (
     <section className="sheetSection">
-      <h3>Skills</h3>
-      {rows.length === 0 && <div className="sheetEmpty">Brak skills.</div>}
+      <h3>Umiejetnosci</h3>
+      {rows.length === 0 && <div className="sheetEmpty">Brak umiejetnosci.</div>}
       {rows.length > 0 && (
         <table className="sheetTable">
           <thead>
-            <tr><th>Skill</th><th>Value</th><th>Half</th><th>Fifth</th></tr>
+            <tr><th>Umiejetnosc</th><th>Wartosc</th><th>1/2</th><th>1/5</th></tr>
           </thead>
           <tbody>
             {rows.map((row, index) => (
