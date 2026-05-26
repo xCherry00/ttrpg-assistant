@@ -65,7 +65,7 @@ describe("CampaignPlayerNotesPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: "Zapisz" }));
     expect(onUpdate).toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole("button", { name: "Usun" }));
+    fireEvent.click(screen.getByRole("button", { name: "Usuń" }));
     expect(onDelete).toHaveBeenCalledWith(1);
   });
 

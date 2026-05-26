@@ -2,7 +2,7 @@ export const BASIC_RULES = [
   {
     systemCode: "general-rpg",
     rulesApiCode: "general",
-    name: "Ogolne zasady RPG",
+    name: "Ogólne zasady RPG",
     legalStatus: "local-summary",
     legalNote: "Skrot ogolnych zasad gry fabularnej dla poczatkujacych.",
     sourcePolicy: "summary",

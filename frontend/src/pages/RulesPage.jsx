@@ -6,12 +6,12 @@ import "../styles/rules.css";
 const SECTION_DEFS = [
   { key: "overview", label: "Czym jest ten system?", generalLabel: "Czym sa gry RPG?" },
   { key: "core-test", label: "Podstawowa mechanika testow", generalLabel: "Testy, decyzje i konsekwencje" },
-  { key: "character-creation", label: "Tworzenie postaci w skrocie", generalLabel: "Rola gracza i postac gracza" },
-  { key: "combat", label: "Walka w skrocie", generalLabel: "Rola Mistrza Gry" },
+  { key: "character-creation", label: "Tworzenie postaci w skrócie", generalLabel: "Rola gracza i postać gracza" },
+  { key: "combat", label: "Walka w skrócie", generalLabel: "Rola Mistrza Gry" },
   { key: "health", label: "Zdrowie i obrazenia", generalLabel: "Jak wyglada typowa sesja?" },
-  { key: "progression", label: "Rozwoj postaci", generalLabel: "Odgrywanie postaci i wspolna historia" },
+  { key: "progression", label: "Rozwój postaci", generalLabel: "Odgrywanie postaci i wspólna historia" },
   { key: "game-flow", label: "Minimalny flow gry", generalLabel: "Kampanie, sceny i dluzsza gra" },
-  { key: "dice-rolls", label: "Rzuty koscmi", generalLabel: "Kosci i rozne systemy RPG" },
+  { key: "dice-rolls", label: "Rzuty kośćmi", generalLabel: "Kości i różne systemy RPG" },
 ];
 
 export default function RulesPage() {
@@ -119,7 +119,7 @@ export default function RulesPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    {String(resource.type).includes("pdf") ? "Pobierz / otworz PDF" : "Otworz zrodlo"}
+                    {String(resource.type).includes("pdf") ? "Pobierz / otwórz PDF" : "Otwórz zrodlo"}
                   </a>
                 </div>
               </article>

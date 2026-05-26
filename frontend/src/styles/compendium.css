@@ -1,5 +1,5 @@
 .compendiumPage {
-  --comp-accent: #9b5cff;
+  --comp-accent: var(--r-primary);
   --comp-border: rgba(161, 173, 204, 0.15);
   --comp-muted: rgba(226, 232, 255, 0.66);
   display: grid;
@@ -145,7 +145,7 @@
 }
 
 .compendiumPanelHeader a {
-  color: #b994ff;
+  color: var(--r-primary);
   font-weight: 900;
 }
 
@@ -205,7 +205,7 @@
 }
 
 .compendiumDetailTitle span {
-  color: #b994ff;
+  color: var(--r-primary);
   font-size: 12px;
   font-weight: 900;
   letter-spacing: 0.08em;
@@ -278,4 +278,102 @@
   .compendiumCategories {
     position: static;
   }
+}
+
+/* Modern design adapter: compendium uses the same SaaS surfaces as the rest of the app. */
+.compendiumPage {
+  --comp-accent: var(--r-primary);
+  --comp-border: var(--r-line);
+  --comp-muted: var(--r-ink-soft);
+  color: var(--r-ink);
+}
+
+.compendiumToolbar,
+.compendiumCategories,
+.compendiumTablePanel,
+.compendiumDetailPanel {
+  border: 1px solid var(--r-line);
+  border-radius: 8px;
+  color: var(--r-ink);
+  background: var(--r-surface);
+  box-shadow: var(--r-shadow-soft);
+  backdrop-filter: blur(10px);
+}
+
+.compendiumToolbar {
+  border-radius: 8px;
+}
+
+.compendiumToolbar span,
+.compendiumCategories span,
+.compendiumPanelHeader p,
+.compendiumTable td:not(:first-child),
+.compendiumDetailRows strong,
+.compendiumEmpty {
+  color: var(--r-ink-soft);
+}
+
+.compendiumToolbar select,
+.compendiumToolbar input {
+  border-color: var(--r-line);
+  border-radius: 8px;
+  color: var(--r-ink);
+  background: #ffffff;
+}
+
+.compendiumCategories button {
+  border-color: var(--r-line);
+  border-radius: 8px;
+  color: var(--r-ink);
+  background: #ffffff;
+}
+
+.compendiumCategories button:hover,
+.compendiumCategories button.is-active {
+  border-color: var(--r-line-strong);
+  background: var(--r-primary-soft);
+}
+
+.compendiumPanelHeader h2,
+.compendiumDetailTitle h2,
+.compendiumTable td:first-child,
+.compendiumDetailRows span {
+  color: var(--r-ink);
+}
+
+.compendiumPanelHeader a,
+.compendiumDetailTitle span {
+  color: var(--r-primary);
+}
+
+.compendiumTableWrap,
+.compendiumDetailRows div {
+  border-color: var(--r-line);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.compendiumTable th,
+.compendiumTable td {
+  border-bottom-color: var(--r-line);
+}
+
+.compendiumTable th {
+  color: var(--r-ink-soft);
+  background: var(--r-panel);
+}
+
+.compendiumTable tr:hover,
+.compendiumTable tr.is-active {
+  background: var(--r-primary-soft);
+}
+
+.compendiumDetailTitle {
+  border-bottom-color: var(--r-line);
+}
+
+.compendiumError {
+  border-color: rgba(200, 92, 74, 0.28);
+  color: var(--r-coral);
+  background: var(--r-coral-soft);
 }

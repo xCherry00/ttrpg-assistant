@@ -145,7 +145,7 @@ describe("CampaignDetailPage dashboard by role", () => {
     fireEvent.click(screen.getByRole("tab", { name: /Postacie/i }));
 
     await waitFor(() => {
-      expect(screen.getByRole("link", { name: "Otworz moja karte" })).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "Otwórz moją kartę" })).toBeInTheDocument();
     });
   });
 

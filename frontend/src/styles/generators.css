@@ -5,7 +5,7 @@
   --gen-border: rgba(161, 173, 204, 0.16);
   --gen-muted: rgba(226, 232, 255, 0.66);
   --gen-text: #f8f6ff;
-  --gen-purple: #9b5cff;
+  --gen-primary: var(--r-primary);
   --gen-red: #ff5d63;
   --gen-teal: #36d7e8;
   --gen-blue: #58a6ff;
@@ -23,9 +23,9 @@
   gap: 0;
   padding: 0;
   background:
-    radial-gradient(circle at 18% 0%, rgba(124, 58, 237, 0.16), transparent 34%),
+    radial-gradient(circle at 18% 0%, rgba(31, 118, 95, 0.16), transparent 34%),
     radial-gradient(circle at 88% 12%, rgba(14, 165, 233, 0.08), transparent 32%),
-    linear-gradient(135deg, #070a12 0%, #0b1020 46%, #111827 100%);
+    linear-gradient(135deg, #070a12 0%, #0b1020 46%, var(--r-nav) 100%);
   color: #e5e7eb;
 }
 
@@ -49,8 +49,8 @@
   width: 56px;
   height: 56px;
   border-radius: 14px;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.92), rgba(49, 18, 104, 0.92));
-  box-shadow: 0 18px 42px rgba(88, 28, 135, 0.34);
+  background: linear-gradient(135deg, rgba(31, 118, 95, 0.92), rgba(21, 88, 68, 0.92));
+  box-shadow: 0 18px 42px rgba(22, 33, 29, 0.34);
 }
 
 .generatorsCatalogBrand .generatorsHeroIcon svg {
@@ -136,15 +136,15 @@
 }
 
 .generatorsFavoritesButton:hover {
-  border-color: rgba(168, 85, 247, 0.38);
-  background: rgba(124, 58, 237, 0.12);
+  border-color: rgba(31, 118, 95, 0.38);
+  background: rgba(31, 118, 95, 0.12);
   transform: translateY(-1px);
 }
 
 .generatorsFavoritesButton.is-active {
-  border-color: rgba(168, 85, 247, 0.52);
+  border-color: rgba(31, 118, 95, 0.52);
   color: #f8fafc;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.38), rgba(88, 28, 135, 0.28));
+  background: linear-gradient(135deg, rgba(31, 118, 95, 0.38), rgba(22, 33, 29, 0.28));
 }
 
 .generatorsCatalogLayout {
@@ -254,7 +254,7 @@
 }
 
 .generatorsFilterItem strong {
-  color: rgba(216, 180, 254, 0.95);
+  color: rgba(31, 118, 95, 0.95);
   font-size: 12px;
 }
 
@@ -264,10 +264,10 @@
 }
 
 .generatorsFilterItem.is-active {
-  border-color: rgba(168, 85, 247, 0.45);
+  border-color: rgba(31, 118, 95, 0.45);
   color: #ffffff;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.85), rgba(88, 28, 135, 0.75));
-  box-shadow: 0 12px 28px rgba(88, 28, 135, 0.24);
+  background: linear-gradient(135deg, rgba(31, 118, 95, 0.85), rgba(22, 33, 29, 0.75));
+  box-shadow: 0 12px 28px rgba(22, 33, 29, 0.24);
 }
 
 .generatorsFilterItem.is-active svg,
@@ -289,11 +289,11 @@
 }
 
 .generatorsFilterSelect::after {
-  content: "⌄";
+  content: "âŚ„";
   position: absolute;
   top: 50%;
   right: 14px;
-  color: rgba(216, 180, 254, 0.9);
+  color: rgba(31, 118, 95, 0.9);
   pointer-events: none;
   transform: translateY(-52%);
 }
@@ -304,14 +304,14 @@
   appearance: none;
   border-radius: 13px;
   background:
-    linear-gradient(135deg, rgba(124, 58, 237, 0.18), rgba(8, 13, 25, 0.72)),
+    linear-gradient(135deg, rgba(31, 118, 95, 0.18), rgba(8, 13, 25, 0.72)),
     rgba(8, 13, 25, 0.72);
-  box-shadow: inset 0 0 0 1px rgba(124, 58, 237, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(31, 118, 95, 0.08);
   cursor: pointer;
 }
 
 .generatorsFilterSelect select:focus {
-  outline: 2px solid rgba(168, 85, 247, 0.28);
+  outline: 2px solid rgba(31, 118, 95, 0.28);
   outline-offset: 2px;
 }
 
@@ -352,8 +352,8 @@
 }
 
 .generatorCard {
-  --card-accent: #8b5cf6;
-  --card-media-a: rgba(124, 58, 237, 0.42);
+  --card-accent: var(--r-primary);
+  --card-media-a: rgba(31, 118, 95, 0.42);
   --card-media-b: rgba(30, 41, 59, 0.92);
   position: relative;
   min-height: 270px;
@@ -424,9 +424,9 @@
   --card-media-a: rgba(16, 185, 129, 0.36);
 }
 
-.generatorCard--violet {
-  --card-accent: #8b5cf6;
-  --card-media-a: rgba(139, 92, 246, 0.38);
+.generatorCard--sage {
+  --card-accent: var(--r-primary);
+  --card-media-a: rgba(31, 118, 95, 0.38);
 }
 
 .generatorCard--indigo {
@@ -493,9 +493,9 @@
 }
 
 .generatorCardFavorite:hover {
-  border-color: rgba(216, 180, 254, 0.65);
+  border-color: rgba(31, 118, 95, 0.65);
   color: #ffffff;
-  background: rgba(124, 58, 237, 0.32);
+  background: rgba(31, 118, 95, 0.32);
   transform: scale(1.06);
 }
 
@@ -567,8 +567,8 @@
 }
 
 .generatorBadge--fantasy {
-  color: #d8b4fe;
-  background: rgba(124, 58, 237, 0.28);
+  color: var(--r-primary);
+  background: rgba(31, 118, 95, 0.28);
 }
 
 .generatorBadge--horror {
@@ -587,8 +587,8 @@
 }
 
 .generatorBadge--universal {
-  color: #ddd6fe;
-  background: rgba(124, 58, 237, 0.22);
+  color: var(--r-primary);
+  background: rgba(31, 118, 95, 0.22);
 }
 
 .generatorBadge--variant {
@@ -617,8 +617,8 @@
 }
 
 .generatorsLoadMore:hover {
-  border-color: rgba(168, 85, 247, 0.38);
-  background: rgba(124, 58, 237, 0.12);
+  border-color: rgba(31, 118, 95, 0.38);
+  background: rgba(31, 118, 95, 0.12);
 }
 
 .generatorsDashboard::before {
@@ -627,7 +627,7 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 25% 8%, rgba(139, 92, 246, 0.17), transparent 32%),
+    radial-gradient(circle at 25% 8%, rgba(31, 118, 95, 0.17), transparent 32%),
     radial-gradient(circle at 72% 16%, rgba(20, 184, 166, 0.1), transparent 30%),
     radial-gradient(circle at 50% 92%, rgba(232, 181, 88, 0.08), transparent 34%);
   z-index: -1;
@@ -786,7 +786,7 @@
 }
 
 .generatorTile {
-  --tile-accent: var(--gen-purple);
+  --tile-accent: var(--gen-primary);
   --tile-accent-soft: rgba(155, 92, 255, 0.16);
   position: relative;
   min-height: 252px;
@@ -866,9 +866,9 @@
   --tile-accent-soft: rgba(16, 185, 129, 0.15);
 }
 
-.generatorTile--violet {
-  --tile-accent: #8b5cf6;
-  --tile-accent-soft: rgba(139, 92, 246, 0.16);
+.generatorTile--sage {
+  --tile-accent: var(--r-primary);
+  --tile-accent-soft: rgba(31, 118, 95, 0.16);
 }
 
 .generatorTile--indigo {
@@ -1012,7 +1012,7 @@
 }
 
 .generatorWorkbench {
-  --workbench-accent: var(--gen-purple);
+  --workbench-accent: var(--gen-primary);
   border-radius: 16px;
   padding: 20px;
 }
@@ -1383,7 +1383,7 @@
 
 .generatorRailHeader button {
   border: 0;
-  color: #b994ff;
+  color: var(--r-primary);
   background: transparent;
   padding: 0;
   font-size: 13px;
@@ -1523,7 +1523,7 @@
 }
 
 .generatorWindowPage {
-  --window-accent: var(--gen-purple);
+  --window-accent: var(--gen-primary);
   gap: 0;
 }
 
@@ -1564,8 +1564,8 @@
   --window-accent: #10b981;
 }
 
-.generatorWindowPage--violet {
-  --window-accent: #8b5cf6;
+.generatorWindowPage--sage {
+  --window-accent: var(--r-primary);
 }
 
 .generatorWindowPage--indigo {
@@ -1591,7 +1591,7 @@
   gap: 0;
   padding: 0;
   background:
-    radial-gradient(circle at 14% 8%, rgba(124, 58, 237, 0.22), transparent 32%),
+    radial-gradient(circle at 14% 8%, rgba(31, 118, 95, 0.22), transparent 32%),
     radial-gradient(circle at 78% 0%, rgba(14, 165, 233, 0.12), transparent 30%),
     linear-gradient(135deg, #050811 0%, #09111f 48%, #0d1726 100%);
   color: #f8fafc;
@@ -1601,7 +1601,7 @@
 .weatherResultPanel {
   border: 1px solid rgba(148, 163, 184, 0.16);
   background:
-    radial-gradient(circle at 8% 0%, rgba(124, 58, 237, 0.14), transparent 28%),
+    radial-gradient(circle at 8% 0%, rgba(31, 118, 95, 0.14), transparent 28%),
     linear-gradient(180deg, rgba(15, 23, 42, 0.82), rgba(7, 12, 22, 0.88));
   border-radius: 16px;
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.06);
@@ -1636,8 +1636,8 @@
   place-items: center;
   border-radius: 16px;
   color: #dbeafe;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.9), rgba(37, 99, 235, 0.48));
-  box-shadow: 0 0 34px rgba(124, 58, 237, 0.34);
+  background: linear-gradient(135deg, rgba(31, 118, 95, 0.9), rgba(37, 99, 235, 0.48));
+  box-shadow: 0 0 34px rgba(31, 118, 95, 0.34);
 }
 
 .weatherHeaderIcon svg {
@@ -1740,9 +1740,9 @@
 
 .weatherControl select:hover,
 .weatherControl select:focus {
-  border-color: rgba(168, 85, 247, 0.42);
+  border-color: rgba(31, 118, 95, 0.42);
   outline: 0;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+  box-shadow: 0 0 0 3px rgba(31, 118, 95, 0.12);
 }
 
 .weatherToggleRow {
@@ -1764,7 +1764,7 @@
   width: 54px;
   height: 28px;
   position: relative;
-  border: 1px solid rgba(168, 85, 247, 0.24);
+  border: 1px solid rgba(31, 118, 95, 0.24);
   border-radius: 999px;
   background: rgba(15, 23, 42, 0.76);
 }
@@ -1782,7 +1782,7 @@
 }
 
 .weatherToggleRow input:checked + i {
-  background: linear-gradient(135deg, #7c3aed, #2563eb);
+  background: linear-gradient(135deg, var(--r-primary), #2563eb);
 }
 
 .weatherToggleRow input:checked + i::after {
@@ -1804,10 +1804,10 @@
 }
 
 .weatherPrimaryAction {
-  border: 1px solid rgba(192, 132, 252, 0.52);
+  border: 1px solid rgba(31, 118, 95, 0.52);
   color: #ffffff;
-  background: linear-gradient(135deg, #7c3aed, #4c1d95);
-  box-shadow: 0 18px 44px rgba(124, 58, 237, 0.28);
+  background: linear-gradient(135deg, var(--r-primary), var(--r-primary-2));
+  box-shadow: 0 18px 44px rgba(31, 118, 95, 0.28);
 }
 
 .weatherPrimaryAction svg {
@@ -1898,8 +1898,8 @@
 }
 
 .weatherChips span:nth-child(2) {
-  color: #f0abfc;
-  background: rgba(124, 58, 237, 0.18);
+  color: var(--r-primary);
+  background: rgba(31, 118, 95, 0.18);
 }
 
 .weatherChips span:nth-child(3) {
@@ -2000,7 +2000,7 @@
 .weatherEmptyState svg {
   width: 52px;
   height: 52px;
-  color: #a78bfa;
+  color: var(--r-primary);
 }
 
 .weatherEmptyState strong {
@@ -2921,6 +2921,262 @@
   }
 
   .generatorsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Modern design adapter: generator-specific treatment on top of the global foundation. */
+.generatorsDashboard,
+.generatorsCatalogPage {
+  --gen-bg: transparent;
+  --gen-panel: var(--r-surface);
+  --gen-panel-strong: var(--r-surface-solid);
+  --gen-border: var(--r-line);
+  --gen-muted: var(--r-ink-soft);
+  --gen-text: var(--r-ink);
+  --gen-primary: var(--r-primary);
+  --gen-red: var(--r-coral);
+  --gen-teal: var(--r-primary);
+  --gen-blue: var(--r-indigo);
+  --gen-gold: var(--r-gold);
+  --gen-green: #20835f;
+  background: transparent;
+  color: var(--r-ink);
+}
+
+.generatorsDashboard::before {
+  display: none;
+}
+
+.generatorsCatalogLayout {
+  grid-template-columns: 248px minmax(0, 1fr);
+  gap: 16px;
+}
+
+.generatorsSidebar,
+.generatorsContent,
+.generatorCard,
+.generatorSettingsPanel,
+.generatorOutputPanel,
+.weatherSettingsCard,
+.weatherResultPanel {
+  border: 1px solid var(--r-line);
+  border-radius: 8px;
+  color: var(--r-ink);
+  background: var(--r-surface);
+  box-shadow: var(--r-shadow-soft);
+  backdrop-filter: blur(10px);
+}
+
+.generatorsContent {
+  min-height: 560px;
+  padding: 18px;
+}
+
+.generatorsSearch,
+.generatorsSort select,
+.generatorsFilterSelect select {
+  border: 1px solid var(--r-line);
+  border-radius: 8px;
+  color: var(--r-ink);
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.generatorsFavoritesButton,
+.generatorsLoadMore,
+.generatorBackButton,
+.weatherBackButton,
+.generatorResultActions button {
+  border: 1px solid var(--r-line);
+  border-radius: 8px;
+  color: var(--r-ink);
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.generatorWindowGenerate,
+.weatherPrimaryAction {
+  border-color: transparent;
+  border-radius: 8px;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--r-primary), var(--r-primary-2));
+  box-shadow: 0 10px 22px rgba(31, 118, 95, 0.18);
+}
+
+.generatorCard {
+  --card-accent: var(--r-primary);
+  --card-media-a: rgba(31, 118, 95, 0.22);
+  --card-media-b: rgba(83, 111, 174, 0.18);
+  min-height: 236px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.generatorCard:hover,
+.generatorCard.is-active {
+  border-color: var(--r-line-strong);
+  box-shadow: var(--r-shadow);
+}
+
+.generatorCardBody {
+  min-height: 236px;
+  grid-template-rows: 92px auto;
+}
+
+.generatorCardMedia {
+  min-height: 92px;
+  background:
+    linear-gradient(135deg, var(--card-media-a), var(--card-media-b)),
+    linear-gradient(90deg, rgba(31, 39, 34, 0.08) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(31, 39, 34, 0.08) 1px, transparent 1px);
+  background-size: auto, 24px 24px, 24px 24px;
+}
+
+.generatorCardIcon,
+.generatorsHeroIcon,
+.generatorPortrait,
+.weatherHeaderIcon {
+  border-radius: 8px;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--r-primary), var(--r-indigo));
+  box-shadow: none;
+}
+
+.generatorCard--red,
+.generatorCard--crimson,
+.generatorCard--orange,
+.generatorCard--pink {
+  --card-accent: var(--r-coral);
+  --card-media-a: rgba(200, 92, 74, 0.22);
+}
+
+.generatorCard--blue,
+.generatorCard--cyan,
+.generatorCard--indigo {
+  --card-accent: var(--r-indigo);
+  --card-media-a: rgba(83, 111, 174, 0.22);
+}
+
+.generatorCard--gold,
+.generatorCard--yellow,
+.generatorCard--amber {
+  --card-accent: var(--r-gold);
+  --card-media-a: rgba(184, 135, 52, 0.22);
+}
+
+.generatorCard--green,
+.generatorCard--emerald,
+.generatorCard--teal,
+.generatorCard--sage,
+.generatorCard--sage {
+  --card-accent: var(--r-primary);
+  --card-media-a: rgba(31, 118, 95, 0.22);
+}
+
+.generatorTile,
+.generatorTile--sage,
+.generatorTile--sage,
+.generatorWindowPage,
+.generatorWindowPage--sage,
+.generatorWindowPage--sage {
+  --tile-accent: var(--r-primary);
+  --tile-accent-soft: var(--r-primary-soft);
+  --window-accent: var(--r-primary);
+  --workbench-accent: var(--r-primary);
+}
+
+.generatorTile--red,
+.generatorTile--crimson,
+.generatorWindowPage--red,
+.generatorWindowPage--crimson {
+  --tile-accent: var(--r-coral);
+  --tile-accent-soft: var(--r-coral-soft);
+  --window-accent: var(--r-coral);
+}
+
+.generatorTile--blue,
+.generatorTile--cyan,
+.generatorTile--indigo,
+.generatorWindowPage--blue,
+.generatorWindowPage--cyan,
+.generatorWindowPage--indigo {
+  --tile-accent: var(--r-indigo);
+  --tile-accent-soft: var(--r-indigo-soft);
+  --window-accent: var(--r-indigo);
+}
+
+.generatorTileGenerate,
+.generatorLoadExample {
+  background: linear-gradient(135deg, var(--r-primary), var(--r-primary-2));
+}
+
+.generatorCardTitle,
+.generatorResultIdentity h2,
+.weatherHeroCopy h2 {
+  color: var(--r-ink);
+  font-family: var(--font-display);
+  letter-spacing: 0;
+}
+
+.generatorCardDescription,
+.generatorWindowSections p,
+.weatherResultCard p {
+  color: var(--r-ink-soft);
+}
+
+.generatorBadge {
+  border-radius: 999px;
+  color: var(--r-ink-soft);
+  background: #eef4ef;
+  letter-spacing: 0;
+}
+
+.generatorCardFavorite {
+  border: 1px solid rgba(255, 255, 255, 0.64);
+  color: #ffffff;
+  background: rgba(22, 33, 29, 0.48);
+}
+
+.generatorCardFavorite.is-favorite {
+  color: #ffffff;
+  background: var(--r-coral);
+}
+
+.generatorWindowShell {
+  gap: 16px;
+}
+
+.generatorSettingsPanel,
+.generatorOutputPanel,
+.weatherSettingsCard,
+.weatherResultPanel {
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.generatorPanelNumber,
+.generatorWindowSections h3,
+.weatherPanelHeading {
+  color: var(--r-primary-2);
+  letter-spacing: 0;
+}
+
+.generatorWindowFields .generatorInput,
+.generatorWindowFields .generatorCheckField,
+.weatherControl,
+.weatherHeroCard,
+.generatorWindowSections article,
+.generatorWindowEmpty,
+.weatherResultCard,
+.weatherEmptyState {
+  border-color: var(--r-line);
+  color: var(--r-ink);
+  background: #ffffff;
+  border-radius: 8px;
+}
+
+@media (max-width: 860px) {
+  .generatorsCatalogLayout {
     grid-template-columns: 1fr;
   }
 }

@@ -9,7 +9,7 @@ const TABS = [
 
 export default function AccountTabNav() {
   return (
-    <nav className="accountTabNav" aria-label="Konto — nawigacja">
+    <nav className="accountTabNav" aria-label="Konto â€” nawigacja">
       {TABS.map((t) => (
         <NavLink
           key={t.path}

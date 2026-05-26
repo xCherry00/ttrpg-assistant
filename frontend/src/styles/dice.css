@@ -1,16 +1,16 @@
-/* ── Dice page tokens ── */
+/* â”€â”€ Dice page tokens â”€â”€ */
 .dicePage {
   --dice-surface: rgba(13, 20, 36, 0.86);
   --dice-surface-strong: rgba(8, 13, 25, 0.96);
   --dice-surface-soft: rgba(18, 27, 48, 0.74);
-  --dice-bg: radial-gradient(circle at 16% 0%, rgba(124, 58, 237, 0.18) 0%, transparent 42%),
+  --dice-bg: radial-gradient(circle at 16% 0%, rgba(31, 118, 95, 0.18) 0%, transparent 42%),
     radial-gradient(circle at 90% 10%, rgba(14, 165, 233, 0.08) 0%, transparent 32%);
   --dice-card: linear-gradient(180deg, rgba(17, 24, 43, 0.94), rgba(9, 15, 29, 0.94));
-  --dice-line: rgba(168, 85, 247, 0.32);
+  --dice-line: rgba(31, 118, 95, 0.32);
   --dice-line-soft: rgba(161, 173, 204, 0.14);
   --dice-text: #f8f6ff;
   --dice-muted: rgba(226, 232, 255, 0.68);
-  --dice-accent: #9b5cff;
+  --dice-accent: var(--r-primary);
   --dice-accent-2: #36d7e8;
   --dice-success: #64d987;
   --dice-fail: #ff5d63;
@@ -23,7 +23,7 @@
   grid-template-rows: auto minmax(0, 1fr);
 }
 
-/* ── Page header ── */
+/* â”€â”€ Page header â”€â”€ */
 .dicePageHeader {
   position: sticky;
   top: 0;
@@ -34,7 +34,7 @@
   gap: 18px;
   border-bottom: 1px solid rgba(161, 173, 204, 0.1);
   background:
-    radial-gradient(circle at 18% 0%, rgba(124, 58, 237, 0.18), transparent 34%),
+    radial-gradient(circle at 18% 0%, rgba(31, 118, 95, 0.18), transparent 34%),
     linear-gradient(90deg, rgba(8, 13, 25, 0.96), rgba(11, 18, 32, 0.96));
   backdrop-filter: blur(14px);
 }
@@ -45,7 +45,7 @@
 }
 
 .dicePage .pageEyebrow {
-  color: rgba(216, 180, 254, 0.88);
+  color: rgba(31, 118, 95, 0.88);
 }
 
 .dicePage .pageSubtitle {
@@ -61,7 +61,7 @@
   align-self: flex-end;
 }
 
-/* ── Tabs ── */
+/* â”€â”€ Tabs â”€â”€ */
 .diceTabs {
   display: flex;
   gap: 6px;
@@ -88,7 +88,7 @@
 
 .diceTab.is-active {
   color: #ffffff;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.72), rgba(49, 18, 104, 0.72));
+  background: linear-gradient(135deg, rgba(31, 118, 95, 0.72), rgba(21, 88, 68, 0.72));
 }
 
 .diceManageBtn {
@@ -112,7 +112,7 @@
   background: var(--primary-dim);
 }
 
-/* ── Card base ── */
+/* â”€â”€ Card base â”€â”€ */
 .diceCard {
   border-radius: 14px;
   border: 1px solid var(--dice-line-soft);
@@ -135,7 +135,7 @@
 
 .diceCard > * { position: relative; z-index: 1; }
 
-/* ── Workbench ── */
+/* â”€â”€ Workbench â”€â”€ */
 .diceWorkbench {
   display: grid;
   grid-template-columns: minmax(420px, 1.45fr) minmax(320px, 0.85fr);
@@ -153,7 +153,7 @@
   min-height: 100%;
 }
 
-/* ── Arena (left) ── */
+/* â”€â”€ Arena (left) â”€â”€ */
 .diceArena { padding: 18px; }
 
 .diceArenaTop {
@@ -190,7 +190,7 @@
   white-space: nowrap;
 }
 
-.diceGhostBtn:hover { border-color: var(--dice-line); color: #ffffff; background: rgba(124, 58, 237, 0.13); }
+.diceGhostBtn:hover { border-color: var(--dice-line); color: #ffffff; background: rgba(31, 118, 95, 0.13); }
 
 .diceArenaModTag {
   margin-top: 10px;
@@ -199,22 +199,22 @@
   gap: 6px;
   padding: 4px 12px;
   border-radius: 99px;
-  border: 1px solid rgba(168, 85, 247, 0.32);
-  background: rgba(124, 58, 237, 0.14);
+  border: 1px solid rgba(31, 118, 95, 0.32);
+  background: rgba(31, 118, 95, 0.14);
   font-size: 0.85rem;
   color: rgba(244, 247, 255, 0.78);
 }
 
 .diceArenaModTag strong { color: #67e8f9; }
 
-/* ── Dice visual zone ── */
+/* â”€â”€ Dice visual zone â”€â”€ */
 .diceVisualZone {
   margin-top: 14px;
   min-height: 168px;
   border: 1px solid var(--dice-line-soft);
   border-radius: 12px;
   background:
-    radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.14), transparent 44%),
+    radial-gradient(circle at 50% 0%, rgba(31, 118, 95, 0.14), transparent 44%),
     rgba(5, 9, 19, 0.66);
   display: flex;
   align-items: center;
@@ -258,7 +258,7 @@
   font-weight: 800;
   color: #ffffff;
   fill: #d8baff;
-  letter-spacing: -0.5px;
+  letter-spacing: 0;
 }
 
 .diceArenaDieType {
@@ -312,7 +312,7 @@
   stroke-width: 2;
 }
 
-/* ── Result ── */
+/* â”€â”€ Result â”€â”€ */
 .diceFinalWrap {
   margin-top: 16px;
   display: flex;
@@ -348,7 +348,7 @@
 .diceFinalHint.is-critical { color: var(--dice-gold); }
 .diceFinalHint.is-fail { color: var(--dice-fail); }
 
-/* ── Main actions ── */
+/* â”€â”€ Main actions â”€â”€ */
 .diceMainActions {
   margin-top: 16px;
   display: grid;
@@ -368,14 +368,14 @@
   font-size: 0.95rem;
   font-weight: 900;
   color: #ffffff;
-  background: linear-gradient(135deg, #7c3aed, #6d28d9 54%, #0891b2);
-  box-shadow: 0 12px 26px rgba(124, 58, 237, 0.3);
+  background: linear-gradient(135deg, var(--r-primary), var(--r-primary-2) 54%, #0891b2);
+  box-shadow: 0 12px 26px rgba(31, 118, 95, 0.3);
   transition: transform 0.15s, box-shadow 0.15s;
 }
 
 .dicePrimaryBtn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 16px 32px rgba(124, 58, 237, 0.38);
+  box-shadow: 0 16px 32px rgba(31, 118, 95, 0.38);
 }
 
 .diceSecondaryBtn {
@@ -392,10 +392,10 @@
   transition: border-color 0.15s;
 }
 
-.diceSecondaryBtn:hover { border-color: #a78bfa; background: rgba(124, 58, 237, 0.13); }
+.diceSecondaryBtn:hover { border-color: var(--r-primary); background: rgba(31, 118, 95, 0.13); }
 
 
-/* ── Config panel (middle) ── */
+/* â”€â”€ Config panel (middle) â”€â”€ */
 .diceConfig { padding: 18px; }
 
 .diceColumnHeader {
@@ -511,8 +511,8 @@
 
 .diceInput:focus, .diceSelect:focus, .diceTextarea:focus {
   outline: none;
-  border-color: rgba(168, 85, 247, 0.55);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.14);
+  border-color: rgba(31, 118, 95, 0.55);
+  box-shadow: 0 0 0 3px rgba(31, 118, 95, 0.14);
 }
 
 .diceTextarea {
@@ -554,7 +554,7 @@
   cursor: pointer;
 }
 
-/* ── History panel (right) ── */
+/* â”€â”€ History panel (right) â”€â”€ */
 .diceHistoryCard {
   padding: 18px;
   display: flex;
@@ -646,7 +646,7 @@
 .diceHistoryBadge.is-fail { color: var(--dice-fail); background: rgba(255,92,122,0.12); }
 
 
-/* ── Bottom grid ── */
+/* â”€â”€ Bottom grid â”€â”€ */
 .diceNarrativeResult {
   display: grid;
   gap: 12px;
@@ -831,7 +831,7 @@
   margin: 0;
 }
 
-/* ── Stats card ── */
+/* â”€â”€ Stats card â”€â”€ */
 .diceStatsCard, .diceChartCard { padding: 18px; }
 
 .diceStatsHeader {
@@ -915,7 +915,7 @@
 
 .diceSuccessPct { font-size: 0.8rem; color: var(--dice-muted); white-space: nowrap; }
 
-/* ── Chart card ── */
+/* â”€â”€ Chart card â”€â”€ */
 .diceBarChart {
   min-height: 140px;
   display: flex;
@@ -968,7 +968,7 @@
   line-height: 1;
 }
 
-/* ── Responsive ── */
+/* â”€â”€ Responsive â”€â”€ */
 @media (max-width: 1240px) {
   .diceWorkbench { grid-template-columns: 1fr 1fr; }
   .diceHistoryCard { grid-column: 1 / -1; }
@@ -1011,4 +1011,19 @@
   .diceSecondaryBtn {
     width: 100%;
   }
+}
+
+/* Modern design adapter: dice tools use the shared SaaS accent palette. */
+.dicePrimaryBtn {
+  background: linear-gradient(135deg, var(--r-primary), var(--r-primary-2));
+  box-shadow: 0 10px 22px rgba(31, 118, 95, 0.18);
+}
+
+.diceSecondaryBtn:hover {
+  border-color: var(--r-line-strong);
+  background: var(--r-primary-soft);
+}
+
+.diceBarFill {
+  background: linear-gradient(180deg, var(--r-primary), var(--r-indigo));
 }

@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getDndBackgrounds, getDndClasses, getDndRaces } from "../api/characters";
 import { useAuth } from "../auth/AuthContext";
 
@@ -28,8 +28,8 @@ function svgPortrait(label, from, to) {
 
 const PORTRAIT_PRESETS = [
   { id: "warrior", label: "Wojownik", value: svgPortrait("Wojownik", "#7c2d12", "#d97706") },
-  { id: "mage", label: "Mag", value: svgPortrait("Mag", "#1d4ed8", "#7c3aed") },
-  { id: "rogue", label: "Lotrzyk", value: svgPortrait("Lotrzyk", "#111827", "#64748b") },
+  { id: "mage", label: "Mag", value: svgPortrait("Mag", "#536fae", "#1f765f") },
+  { id: "rogue", label: "Lotrzyk", value: svgPortrait("Lotrzyk", "#16211d", "#64748b") },
   { id: "cleric", label: "Kaplan", value: svgPortrait("Kaplan", "#92400e", "#facc15") },
 ];
 

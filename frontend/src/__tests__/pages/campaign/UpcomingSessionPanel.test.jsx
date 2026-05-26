@@ -42,7 +42,7 @@ describe("UpcomingSessionPanel attendance", () => {
           isOwner
           sessions={[
             { id: 6, title: "Pozniejsza", status: "PLANNED", scheduledFor: "2026-06-20T18:00:00Z" },
-            { id: 5, title: "Najblizsza", status: "PLANNED", scheduledFor: "2026-06-10T18:00:00Z" },
+            { id: 5, title: "Najbliższa", status: "PLANNED", scheduledFor: "2026-06-10T18:00:00Z" },
             { id: 4, title: "Archiwalna", status: "FINISHED", scheduledFor: "2026-06-01T18:00:00Z" },
           ]}
         />
@@ -50,7 +50,7 @@ describe("UpcomingSessionPanel attendance", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("Najblizsza")).toBeInTheDocument();
+      expect(screen.getByText("Najbliższa")).toBeInTheDocument();
       expect(screen.queryByText("Pozniejsza")).not.toBeInTheDocument();
     });
   });
@@ -86,7 +86,7 @@ describe("UpcomingSessionPanel attendance", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText("Ladowanie frekwencji...")).toBeInTheDocument();
+    expect(await screen.findByText("Ładowanie frekwencji...")).toBeInTheDocument();
   });
 
   it("shows attendance error state when fetch fails", async () => {
@@ -155,7 +155,7 @@ describe("UpcomingSessionPanel attendance", () => {
         <UpcomingSessionPanel campaignId={10} sessions={[{ id: 5, title: "S", status: "PLANNED" }]} isOwner={false} />
       </MemoryRouter>,
     );
-    expect(screen.queryByRole("link", { name: "Dolacz do aktywnej sesji" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Dołącz do aktywnej sesji" })).not.toBeInTheDocument();
   });
 
   it("shows enter-live and finish for owner when in progress", async () => {
@@ -172,7 +172,7 @@ describe("UpcomingSessionPanel attendance", () => {
         <UpcomingSessionPanel campaignId={10} sessions={[{ id: 5, title: "S", status: "IN_PROGRESS" }]} isOwner onFinish={onFinish} />
       </MemoryRouter>,
     );
-    expect(await screen.findByRole("link", { name: "Dolacz do aktywnej sesji" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Zakoncz sesje" })).toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: "Dołącz do aktywnej sesji" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Zakończ sesje" })).toBeInTheDocument();
   });
 });

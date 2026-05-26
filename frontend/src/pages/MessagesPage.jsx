@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { discoverUsers } from "../api/social";
@@ -74,7 +74,7 @@ export default function MessagesPage() {
         setActiveConversationId(rows[0].id);
       }
     } catch (err) {
-      setError(err?.message || "Nie udalo sie pobrac listy rozmow.");
+      setError(err?.message || "Nie udało się pobrac listy rozmów.");
     } finally {
       setLoadingConversations(false);
     }
@@ -95,7 +95,7 @@ export default function MessagesPage() {
       }
       setHasOlder((rows || []).length >= 40);
     } catch (err) {
-      setError(err?.message || "Nie udalo sie pobrac wiadomosci.");
+      setError(err?.message || "Nie udało się pobrac wiadomości.");
     } finally {
       if (!appendOlder) {
         setLoadingMessages(false);
@@ -132,7 +132,7 @@ export default function MessagesPage() {
         const results = await discoverUsers(token, peopleQuery);
         setPeople(results || []);
       } catch (err) {
-        setError(err?.message || "Nie udalo sie wyszukac graczy.");
+        setError(err?.message || "Nie udało się wyszukac graczy.");
       } finally {
         setLoadingPeople(false);
       }
@@ -157,7 +157,7 @@ export default function MessagesPage() {
       setFiles([]);
       await Promise.all([loadMessages(activeConversationId), loadConversations(filter)]);
     } catch (err) {
-      setError(err?.message || "Nie udalo sie wyslac wiadomosci.");
+      setError(err?.message || "Nie udało się wyslac wiadomości.");
     } finally {
       setSending(false);
     }
@@ -174,7 +174,7 @@ export default function MessagesPage() {
       await loadConversations("all");
       setActiveConversationId(row.id);
     } catch (err) {
-      setError(err?.message || "Nie udalo sie rozpoczac rozmowy.");
+      setError(err?.message || "Nie udało się rozpocząć rozmowy.");
     } finally {
       setBusyAction("");
     }
@@ -188,7 +188,7 @@ export default function MessagesPage() {
       await acceptConversationRequest(token, activeConversationId);
       await Promise.all([loadConversations(filter), loadMessages(activeConversationId)]);
     } catch (err) {
-      setError(err?.message || "Nie udalo sie zaakceptowac prosby.");
+      setError(err?.message || "Nie udało się zaakceptowac prosby.");
     } finally {
       setBusyAction("");
     }
@@ -203,7 +203,7 @@ export default function MessagesPage() {
       await loadConversations(filter);
       setMessages([]);
     } catch (err) {
-      setError(err?.message || "Nie udalo sie odrzucic prosby.");
+      setError(err?.message || "Nie udało się odrzucic prosby.");
     } finally {
       setBusyAction("");
     }
@@ -221,7 +221,7 @@ export default function MessagesPage() {
       anchor.remove();
       URL.revokeObjectURL(url);
     } catch (err) {
-      setError(err?.message || "Nie udalo sie pobrac zalacznika.");
+      setError(err?.message || "Nie udało się pobrac zalacznika.");
     }
   }
 
@@ -230,14 +230,14 @@ export default function MessagesPage() {
       <div className="pageHeader">
         <div>
           <span className="pageEyebrow">spolecznosc</span>
-          <h1 className="pageTitle">Wiadomosci</h1>
-          <p className="pageSubtitle">Proste rozmowy 1:1 i wysylanie zalacznikow.</p>
+          <h1 className="pageTitle">Wiadomości</h1>
+          <p className="pageSubtitle">Proste rozmowy 1:1 i wysyłanie załączników.</p>
         </div>
       </div>
       <div className="messagesPage">
         <section className="messagesSidebar panel-soft">
           <header className="messagesSidebar__header">
-            <h2>Wiadomosci</h2>
+            <h2>Wiadomości</h2>
             <span>{conversations.length}</span>
           </header>
 
@@ -283,10 +283,10 @@ export default function MessagesPage() {
           </div>
 
           <div className="messagesConversationList">
-            {loadingConversations && <div className="messagesHint">Ladowanie rozmow...</div>}
+            {loadingConversations && <div className="messagesHint">Ładowanie rozmów...</div>}
             {!loadingConversations && conversations.length === 0 && (
               <div className="messagesHint">
-                Brak rozmow. Zacznij nowa rozmowe powyzej.
+                Brak rozmów. Zacznij nową rozmowę powyżej.
               </div>
             )}
             {!loadingConversations &&
@@ -316,7 +316,7 @@ export default function MessagesPage() {
         </section>
 
         <section className="messagesMain panel-soft">
-          {!activeConversation && <div className="messagesPlaceholder">Wybierz rozmowe.</div>}
+          {!activeConversation && <div className="messagesPlaceholder">Wybierz rozmowę.</div>}
           {activeConversation && (
             <>
               <header className="messagesMain__header">
@@ -343,11 +343,11 @@ export default function MessagesPage() {
                     className="messagesOlderBtn"
                     onClick={() => loadMessages(activeConversation.id, { beforeId: messages[0]?.id, appendOlder: true })}
                   >
-                    Pokaz starsze wiadomosci
+                    Pokaz starsze wiadomości
                   </button>
                 )}
-                {loadingMessages && <div className="messagesHint">Ladowanie wiadomosci...</div>}
-                {!loadingMessages && messages.length === 0 && <div className="messagesHint">Brak wiadomosci w tej rozmowie.</div>}
+                {loadingMessages && <div className="messagesHint">Ładowanie wiadomości...</div>}
+                {!loadingMessages && messages.length === 0 && <div className="messagesHint">Brak wiadomości w tej rozmówie.</div>}
 
                 {messages.map((message) => (
                   <article key={message.id} className={`messageBubble${message.own ? " is-own" : ""}`}>
@@ -397,7 +397,7 @@ export default function MessagesPage() {
                     disabled={sending || activeConversation.status === "incoming_request" || (!draft.trim() && files.length === 0)}
                     onClick={handleSend}
                   >
-                    Wyslij
+                    Wyślij
                   </button>
                 </div>
                 {files.length > 0 && <div className="messagesFilesPreview">{files.map((file) => file.name).join(", ")}</div>}
@@ -414,7 +414,7 @@ export default function MessagesPage() {
               <p>{activeConversation.peer.username}#{String(activeConversation.peer.tagCode).padStart(4, "0")}</p>
               <span>{activeConversation.peer.activityLabel}</span>
               <Link className="btn btn-ghost" to={`/users/${activeConversation.peer.handle}`}>
-                Otworz profil
+                Otwórz profil
               </Link>
             </div>
           </aside>

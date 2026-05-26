@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function CampaignPlayerNotesPanel({ notes, campaign, busy, isOwner = false, myUserId = null, onCreate, onUpdate, onDelete }) {
+export default function CampaignPlayerNotesPanel({ notes, busy, isOwner = false, myUserId = null, onCreate, onUpdate, onDelete }) {
   const [editingId, setEditingId] = useState(null);
   const canSeeAuthor = Boolean(isOwner);
   const visibleNotes = (Array.isArray(notes) ? notes : []).filter((note) => (
@@ -30,7 +30,7 @@ export default function CampaignPlayerNotesPanel({ notes, campaign, busy, isOwne
       </form>
 
       {isOwner && hasOnlyOwnNotesForOwner ? (
-        <div className="campaignDetailsEmpty">Notatki innych graczy sa prywatne lub niedostepne w tym widoku.</div>
+        <div className="campaignDetailsEmpty">Notatki innych graczy są prywatne lub niedostępne w tym widoku.</div>
       ) : null}
 
       {empty ? (
@@ -71,7 +71,7 @@ export default function CampaignPlayerNotesPanel({ notes, campaign, busy, isOwne
                     {canSeeAuthor && <p>Autor: {note.displayName || note.username}</p>}
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                       <button className="campaignDetailsGhostBtn" type="button" disabled={busy} onClick={() => setEditingId(note.id)}>Edytuj</button>
-                      <button className="campaignDetailsDangerBtn" type="button" disabled={busy} onClick={() => onDelete(note.id)}>Usun</button>
+                      <button className="campaignDetailsDangerBtn" type="button" disabled={busy} onClick={() => onDelete(note.id)}>Usuń</button>
                     </div>
                   </>
                 )}

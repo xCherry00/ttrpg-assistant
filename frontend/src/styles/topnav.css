@@ -16,7 +16,7 @@
   box-shadow: 0 1px 0 rgba(232, 181, 88, 0.06), 0 8px 32px rgba(0,0,0,0.3);
 }
 
-/* ─── BRAND ─────────────────────────────────────── */
+/* â”€â”€â”€ BRAND â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .topNav__left { min-width: 0; }
 
@@ -46,7 +46,7 @@
 }
 
 .topNav__logo::before {
-  content: "✦";
+  content: "âś¦";
   font-size: 18px;
   background: linear-gradient(135deg, var(--primary), #f5d080);
   -webkit-background-clip: text;
@@ -84,7 +84,7 @@
   background-clip: text;
 }
 
-/* ─── CENTER NAV ────────────────────────────────── */
+/* â”€â”€â”€ CENTER NAV â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .topNav__center {
   display: flex;
@@ -117,7 +117,7 @@
   border-color: var(--border-accent);
 }
 
-/* ─── PANEL (tools dropdown) ────────────────────── */
+/* â”€â”€â”€ PANEL (tools dropdown) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .topNav__panel { position: relative; min-width: max-content; }
 .topNav__panelGroup { display: flex; gap: 8px; }
@@ -205,14 +205,14 @@
 }
 .topNav__panelDropdownIcon svg { width: 16px; height: 16px; }
 
-/* ─── RIGHT (avatar) ────────────────────────────── */
+/* â”€â”€â”€ RIGHT (avatar) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .topNav__right { position: relative; }
 
 .topNav__avatarBtn {
   min-height: 52px;
   min-width: 164px;
-  border: 1px solid var(--app-glass-border);
+  border: 1px solid var(--app-menu-border);
   background: rgba(10, 15, 28, 0.78);
   backdrop-filter: blur(12px);
   color: #f4f0ff;
@@ -226,9 +226,9 @@
   transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
 }
 .topNav__avatarBtn:hover {
-  border-color: rgba(124, 58, 237, 0.45);
+  border-color: rgba(31, 118, 95, 0.45);
   background: rgba(15, 23, 42, 0.9);
-  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow: 0 10px 30px rgba(31, 118, 95, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .topNav__avatarMeta {
@@ -269,7 +269,7 @@
   place-items: center;
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.03)),
-    radial-gradient(circle at 50% 22%, rgba(124, 58, 237, 0.4), transparent 62%);
+    radial-gradient(circle at 50% 22%, rgba(31, 118, 95, 0.4), transparent 62%);
   border: 1px solid rgba(255, 255, 255, 0.14);
   font-size: 0.94rem;
   font-weight: 800;
@@ -298,7 +298,7 @@
   height: 16px;
 }
 
-/* ─── USER MENU ─────────────────────────────────── */
+/* â”€â”€â”€ USER MENU â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .topNav__menu {
   position: absolute;
@@ -306,12 +306,12 @@
   right: 0;
   width: 248px;
   border-radius: 16px;
-  border: 1px solid rgba(124, 58, 237, 0.36);
-  background: var(--app-glass-strong);
-  box-shadow: var(--app-glass-shadow);
+  border: 1px solid rgba(31, 118, 95, 0.36);
+  background: var(--app-menu-surface);
+  box-shadow: var(--app-menu-shadow);
   backdrop-filter: blur(14px) saturate(1.16);
   overflow: hidden;
-  animation: glassDropdownIn 0.18s var(--ease) both;
+  animation: menuDropdownIn 0.18s var(--ease) both;
 }
 
 .topNav__menu::before {
@@ -321,8 +321,8 @@
   right: 52px;
   width: 12px;
   height: 12px;
-  border-top: 1px solid rgba(124, 58, 237, 0.36);
-  border-left: 1px solid rgba(124, 58, 237, 0.36);
+  border-top: 1px solid rgba(31, 118, 95, 0.36);
+  border-left: 1px solid rgba(31, 118, 95, 0.36);
   background: rgba(10, 15, 28, 0.94);
   transform: rotate(45deg);
 }
@@ -335,7 +335,7 @@
   align-items: center;
   padding: 18px 18px 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  background: linear-gradient(180deg, rgba(124, 58, 237, 0.08), transparent);
+  background: linear-gradient(180deg, rgba(31, 118, 95, 0.08), transparent);
   text-align: left;
 }
 
@@ -345,7 +345,7 @@
   height: 54px;
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.13);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 12px 28px rgba(124, 58, 237, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 12px 28px rgba(31, 118, 95, 0.14);
 }
 
 .topNav__menuAvatar {
@@ -354,7 +354,7 @@
   color: #ffffff;
   background:
     radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.22), transparent 34%),
-    linear-gradient(145deg, rgba(124, 58, 237, 0.5), rgba(15, 23, 42, 0.96));
+    linear-gradient(145deg, rgba(31, 118, 95, 0.5), rgba(15, 23, 42, 0.96));
   font-size: 1.45rem;
   font-weight: 900;
 }
@@ -381,9 +381,9 @@
   text-transform: uppercase;
   padding: 3px 8px;
   border-radius: 999px;
-  border: 1px solid rgba(124, 58, 237, 0.3);
-  background: rgba(124, 58, 237, 0.14);
-  color: #ddd6fe;
+  border: 1px solid rgba(31, 118, 95, 0.3);
+  background: rgba(31, 118, 95, 0.14);
+  color: var(--r-primary);
 }
 
 .topNav__menuRoleList {
@@ -436,12 +436,12 @@
 }
 
 .topNav__menuItem:hover {
-  background: rgba(124, 58, 237, 0.1);
+  background: rgba(31, 118, 95, 0.1);
   color: #f8fafc;
 }
 
 .topNav__menuItem:active {
-  background: rgba(124, 58, 237, 0.16);
+  background: rgba(31, 118, 95, 0.16);
 }
 
 .topNav__menuItem.is-danger { color: #f87171; }
@@ -468,7 +468,7 @@
   text-align: center;
 }
 
-/* ─── LIGHT THEME ───────────────────────────────── */
+/* â”€â”€â”€ LIGHT THEME â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 :root[data-theme="light"] .topNav {
   background: linear-gradient(180deg, rgba(248,242,232,0.97), rgba(242,234,220,0.94));
@@ -483,8 +483,8 @@
 }
 :root[data-theme="light"] .topNav__panelDropdown,
 :root[data-theme="light"] .topNav__menu {
-  background: var(--app-glass-strong);
-  border-color: rgba(124, 58, 237, 0.36);
+  background: var(--app-menu-surface);
+  border-color: rgba(31, 118, 95, 0.36);
 }
 :root[data-theme="light"] .topNav__avatarBtn {
   background: rgba(10, 15, 28, 0.78);
@@ -494,7 +494,7 @@
   border-color: rgba(80,58,20,0.16);
 }
 
-/* ─── RESPONSIVE ────────────────────────────────── */
+/* â”€â”€â”€ RESPONSIVE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 @media (max-width: 900px) {
   .topNav {

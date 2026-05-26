@@ -61,7 +61,7 @@ const CARD_META = {
     title: "NPC",
     tag: "Setting",
     description: "Jeden generator postaci z wyborem settingu, roli, sekretu i haczyka.",
-    tone: "purple",
+    tone: "green",
     icon: "hood",
     order: 10,
   },
@@ -109,7 +109,7 @@ const CARD_META = {
     title: "Pułapka",
     tag: "Pułapki i zagrożenia",
     description: "Pułapki, hazardy, zagadki i niebezpieczeństwa czekające na bohaterów.",
-    tone: "purple",
+    tone: "green",
     icon: "gear",
     order: 70,
   },
@@ -141,7 +141,7 @@ const CARD_META = {
     title: "Wskazówka",
     tag: "Setting",
     description: "Dowód albo ślad do sceny: opis, znaczenie i zwodniczy detal.",
-    tone: "purple",
+    tone: "green",
     icon: "scroll",
     order: 87,
   },
@@ -189,7 +189,7 @@ const CARD_META = {
     title: "Koncept lochu",
     tag: "Loch",
     description: "Historia miejsca, obecny stan, glowne zagrozenie i sekret.",
-    tone: "purple",
+    tone: "green",
     icon: "gear",
     order: 140,
   },
@@ -197,7 +197,7 @@ const CARD_META = {
     title: "Pomieszczenie lochu",
     tag: "Pokoj",
     description: "Pojedyncza scena eksploracji z zawartoscia i zagrozeniem.",
-    tone: "purple",
+    tone: "green",
     icon: "gear",
     order: 150,
   },
@@ -229,7 +229,7 @@ const CARD_META = {
     title: "Swiat fantasy",
     tag: "Worldbuilding",
     description: "Swiat fantasy z magia, geografia, konfliktem, krolestwem i sekretem.",
-    tone: "purple",
+    tone: "green",
     icon: "planet",
     order: 240,
   },
@@ -295,13 +295,13 @@ const DEFAULT_META = {
   title: "Generator",
   tag: "Seed-first",
   description: "Generator oparty o backendowe pule i parametry.",
-  tone: "purple",
+  tone: "green",
   icon: "spark",
   order: 200,
 };
 
 const TYPE_THEME = {
-  npc: { tone: "purple", icon: "hood" },
+  npc: { tone: "green", icon: "hood" },
   location: { tone: "teal", icon: "castle" },
   settlement: { tone: "teal", icon: "castle" },
   world: { tone: "cyan", icon: "planet" },
@@ -309,7 +309,7 @@ const TYPE_THEME = {
   encounter: { tone: "red", icon: "swords" },
   item: { tone: "gold", icon: "chest" },
   creature: { tone: "crimson", icon: "swords" },
-  clue: { tone: "violet", icon: "eye" },
+  clue: { tone: "sage", icon: "eye" },
   resource: { tone: "amber", icon: "chest" },
   event: { tone: "indigo", icon: "spark" },
   mood: { tone: "pink", icon: "eye" },
@@ -1419,7 +1419,7 @@ export default function GeneratorsPage() {
     }
 
     return (
-      <div className={`page generatorsPage generatorsDashboard generatorWindowPage generatorWindowPage--${activeDefinition?.tone || "purple"}`}>
+      <div className={`page generatorsPage generatorsDashboard generatorWindowPage generatorWindowPage--${activeDefinition?.tone || "green"}`}>
         <header className="pageHeader generatorWindowHero">
           <div className="generatorWindowTitle">
             <div className="generatorsHeroIcon" aria-hidden="true">

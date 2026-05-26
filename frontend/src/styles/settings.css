@@ -1,11 +1,11 @@
 .settingsPage {
-  --settings-accent: #b26cff;
-  --settings-accent-2: #7c3ff2;
+  --settings-accent: var(--r-primary);
+  --settings-accent-2: var(--r-primary-2);
   --settings-hot: #ff5c8a;
   --settings-warn: #ff7a45;
   --settings-ok: #20d39b;
   --settings-line: rgba(166, 191, 230, 0.13);
-  --settings-line-strong: rgba(178, 108, 255, 0.34);
+  --settings-line-strong: rgba(31, 118, 95, 0.34);
   --settings-card: rgba(9, 17, 30, 0.84);
   --settings-card-2: rgba(14, 24, 40, 0.9);
   --settings-text-soft: rgba(229, 237, 250, 0.7);
@@ -102,8 +102,8 @@
 }
 
 .settingsTabs button.is-active {
-  border-color: rgba(178, 108, 255, 0.3);
-  background: linear-gradient(135deg, rgba(178, 108, 255, 0.22), rgba(84, 45, 150, 0.18));
+  border-color: rgba(31, 118, 95, 0.3);
+  background: linear-gradient(135deg, rgba(31, 118, 95, 0.22), rgba(83, 111, 174, 0.18));
   color: #eacfff;
 }
 
@@ -166,8 +166,8 @@
 
 .settingsIndex button:hover,
 .settingsIndex button.is-active {
-  background: rgba(178, 108, 255, 0.12);
-  border-color: rgba(178, 108, 255, 0.2);
+  background: rgba(31, 118, 95, 0.12);
+  border-color: rgba(31, 118, 95, 0.2);
   color: #eacfff;
 }
 
@@ -178,7 +178,7 @@
   display: inline-grid;
   place-items: center;
   border-radius: 8px;
-  background: rgba(178, 108, 255, 0.16);
+  background: rgba(31, 118, 95, 0.16);
   color: #d794ff;
 }
 
@@ -199,7 +199,7 @@
 }
 
 .settingsPanel--featured {
-  border-color: rgba(178, 108, 255, 0.2);
+  border-color: rgba(31, 118, 95, 0.2);
 }
 
 .settingsPanel--danger {
@@ -268,7 +268,7 @@
 
 .settingsInput:focus {
   border-color: var(--settings-line-strong);
-  box-shadow: 0 0 0 3px rgba(178, 108, 255, 0.16);
+  box-shadow: 0 0 0 3px rgba(31, 118, 95, 0.16);
 }
 
 .settingsInput:disabled {
@@ -312,7 +312,7 @@
 
 .settingsBtnGhost:hover {
   border-color: var(--settings-line-strong);
-  background: rgba(178, 108, 255, 0.12);
+  background: rgba(31, 118, 95, 0.12);
 }
 
 .settingsBtnInline {
@@ -365,7 +365,7 @@
   gap: 7px;
   border-radius: 8px;
   border: 1px solid var(--settings-line);
-  background: rgba(7, 15, 27, 0.74);
+  background: rgba(255, 255, 255, 0.74);
   color: var(--settings-text-soft);
   padding: 14px;
   cursor: pointer;
@@ -386,8 +386,8 @@
 }
 
 .settingsThemeCard.is-active {
-  border-color: rgba(178, 108, 255, 0.42);
-  background: linear-gradient(135deg, rgba(178, 108, 255, 0.18), rgba(7, 15, 27, 0.74));
+  border-color: rgba(31, 118, 95, 0.42);
+  background: linear-gradient(135deg, rgba(31, 118, 95, 0.18), rgba(255, 255, 255, 0.74));
 }
 
 .settingsChatPreview {
@@ -436,7 +436,7 @@
 .chatColorSwatch:hover,
 .chatColorSwatch.is-active {
   border-color: rgba(255, 255, 255, 0.82);
-  box-shadow: 0 0 0 4px rgba(178, 108, 255, 0.2);
+  box-shadow: 0 0 0 4px rgba(31, 118, 95, 0.2);
 }
 
 .chatColorCustomRow,
@@ -473,7 +473,7 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  border: 2px solid rgba(178, 108, 255, 0.42);
+  border: 2px solid rgba(31, 118, 95, 0.42);
   background:
     radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.28), transparent 28%),
     linear-gradient(145deg, #2c1a52, #a33170);
@@ -516,7 +516,7 @@
 }
 
 .settingsQuick button:hover {
-  background: rgba(178, 108, 255, 0.1);
+  background: rgba(31, 118, 95, 0.1);
   color: #fff;
 }
 
@@ -559,7 +559,7 @@
 }
 
 .settingsUpgrade {
-  border: 1px solid rgba(178, 108, 255, 0.28);
+  border: 1px solid rgba(31, 118, 95, 0.28);
   border-radius: 8px;
   background:
     radial-gradient(circle at 8% 0%, rgba(255, 92, 138, 0.18), transparent 32%),
@@ -590,7 +590,7 @@
   gap: 8px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 8px;
-  background: linear-gradient(135deg, #7c3ff2, #b26cff);
+  background: linear-gradient(135deg, var(--r-primary-2), var(--r-primary));
   color: #fff;
   cursor: pointer;
   font-weight: 900;
@@ -671,5 +671,104 @@
 
   .settingsSearch kbd {
     display: none;
+  }
+}
+
+/* v0.9 visual unification: settings/account */
+.settingsPage,
+.settingsStudio {
+  color: var(--r-ink);
+}
+
+.settingsHero,
+.settingsIndex,
+.settingsPanel,
+.settingsCard,
+.settingsSection,
+.settingsEmpty,
+.settingsUpgrade,
+.settingsRecent > div,
+.settingsQuick button {
+  border: 1px solid var(--r-line) !important;
+  border-radius: 8px !important;
+  background: var(--r-surface) !important;
+  color: var(--r-ink) !important;
+  box-shadow: var(--r-shadow-soft) !important;
+}
+
+.settingsHero h1,
+.settingsPanel h2,
+.settingsPanel h3,
+.settingsIndex strong {
+  color: var(--r-ink) !important;
+  font-family: var(--font-display) !important;
+  letter-spacing: 0 !important;
+}
+
+.settingsHero p,
+.settingsPanel p,
+.settingsRecent small,
+.settingsEmpty span,
+.settingsUpgrade p {
+  color: var(--r-ink-soft) !important;
+}
+
+.settingsTabs,
+.settingsIndex nav button,
+.settingsQuick button,
+.settingsBtn,
+.settingsFormAction,
+.settingsUpgrade button {
+  border-radius: 8px !important;
+}
+
+.settingsIndex nav button,
+.settingsQuick button,
+.settingsTabs button {
+  border: 1px solid var(--r-line) !important;
+  background: #ffffff !important;
+  color: var(--r-ink) !important;
+}
+
+.settingsIndex nav button:hover,
+.settingsIndex nav button.is-active,
+.settingsTabs button.is-active,
+.settingsQuick button:hover {
+  border-color: var(--r-line-strong) !important;
+  background: var(--r-primary-soft) !important;
+  color: var(--r-primary-2) !important;
+}
+
+.settingsBtn,
+.settingsFormAction,
+.settingsUpgrade button {
+  border-color: transparent !important;
+  background: linear-gradient(135deg, var(--r-primary), var(--r-primary-2)) !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 22px rgba(31, 118, 95, 0.16) !important;
+}
+
+.settingsDangerRow,
+.settingsDangerBox {
+  border-color: rgba(200, 92, 74, 0.3) !important;
+  background: var(--r-coral-soft) !important;
+}
+
+.settingsPage input,
+.settingsPage select,
+.settingsPage textarea {
+  border-color: var(--r-line) !important;
+  background: #ffffff !important;
+  color: var(--r-ink) !important;
+  border-radius: 8px !important;
+}
+
+.settingsStudio {
+  grid-template-columns: minmax(230px, 280px) minmax(0, 1fr) !important;
+}
+
+@media (max-width: 900px) {
+  .settingsStudio {
+    grid-template-columns: 1fr !important;
   }
 }

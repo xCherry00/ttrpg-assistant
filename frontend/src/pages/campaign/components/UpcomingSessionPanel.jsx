@@ -65,7 +65,7 @@ export default function UpcomingSessionPanel({
         const self = data?.responses?.find((item) => item.self);
         setNote(self?.note || "");
       } catch (err) {
-        setAttendanceError(err?.message || "Nie udalo sie pobrac frekwencji.");
+        setAttendanceError(err?.message || "Nie udało się pobrac frekwencji.");
       } finally {
         setAttendanceLoading(false);
       }
@@ -81,7 +81,7 @@ export default function UpcomingSessionPanel({
       const data = await updateMySessionAttendance(token, campaignId, sessionId, { status, note });
       setAttendance(data);
     } catch (err) {
-      setAttendanceError(err?.message || "Nie udalo sie zapisac odpowiedzi.");
+      setAttendanceError(err?.message || "Nie udało się zapisać odpowiedzi.");
     } finally {
       setSavingStatus("");
     }
@@ -116,12 +116,12 @@ export default function UpcomingSessionPanel({
             )}
             {session.status === "PLANNED" && !isOwner && (
               <button className="campaignDetailsGhostBtn" type="button" disabled>
-                Sesja jeszcze sie nie rozpoczela
+                Sesja jeszcze się nie rozpoczęła
               </button>
             )}
             {session.status === "IN_PROGRESS" && (
               <Link className="campaignDetailsPrimaryBtn" to={`/campaigns/${campaignId}/sessions/${session.id}/live`}>
-                Dolacz do aktywnej sesji
+                Dołącz do aktywnej sesji
               </Link>
             )}
             {session.status === "IN_PROGRESS" && isOwner && (
@@ -131,7 +131,7 @@ export default function UpcomingSessionPanel({
                 disabled={busy}
                 onClick={() => onFinish?.(session.id)}
               >
-                Zakoncz sesje
+                Zakończ sesje
               </button>
             )}
           </div>
@@ -139,7 +139,7 @@ export default function UpcomingSessionPanel({
           <div>
             <strong>Frekwencja</strong>
             {attendanceLoading ? (
-              <p>Ladowanie frekwencji...</p>
+              <p>Ładowanie frekwencji...</p>
             ) : !attendance ? (
               <p>Brak sesji do glosowania.</p>
             ) : (

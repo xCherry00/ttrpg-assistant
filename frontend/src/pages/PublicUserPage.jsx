@@ -16,7 +16,7 @@ function relationLabel(relation) {
     case "FRIENDS":
       return "Znajomi";
     case "INCOMING_REQUEST":
-      return "Zaproszenie od uzytkownika";
+      return "Zaproszenie od użytkownika";
     case "OUTGOING_REQUEST":
       return "Wyslane zaproszenie";
     case "BLOCKED_BY_ME":
@@ -93,7 +93,7 @@ export default function PublicUserPage() {
         <Link to="/friends" className="publicV2Back">Wroc do znajomych</Link>
       </header>
 
-      {loading && <div className="friendsState">Ladowanie profilu...</div>}
+      {loading && <div className="friendsState">Ładowanie profilu...</div>}
       {error && <div className="friendsState friendsState--error">{error}</div>}
 
       {!loading && user && (
@@ -198,7 +198,7 @@ export default function PublicUserPage() {
                   <p>Liczba wspolnych kampanii pomaga szybko zobaczyc, czy gracie juz razem.</p>
                 </article>
                 <article>
-                  <strong>Bezpieczenstwo</strong>
+                  <strong>Bezpieczeństwo</strong>
                   <p>W razie potrzeby mozesz zablokowac kontakt bez opuszczania tego widoku.</p>
                 </article>
               </div>

@@ -1,5 +1,5 @@
 .campaignsSaas {
-  --campaign-bg: #0b0f1a;
+  --campaign-bg: var(--r-bg);
   --campaign-card: rgba(20, 25, 41, 0.84);
   --campaign-side-card: rgba(10, 15, 27, 0.58);
   --campaign-border: rgba(255, 255, 255, 0.08);
@@ -7,7 +7,7 @@
   --campaign-text: #f4f0ff;
   --campaign-muted: rgba(225, 226, 238, 0.64);
   --campaign-faint: rgba(225, 226, 238, 0.42);
-  --campaign-purple: #7c3aed;
+  --campaign-primary: var(--r-primary);
   --campaign-green: #22c55e;
   --campaign-orange: #f59e0b;
   --campaign-red: #ef4444;
@@ -49,8 +49,8 @@
   display: grid;
   place-items: center;
   border-radius: 10px;
-  color: #a78bfa;
-  background: rgba(124, 58, 237, 0.16);
+  color: var(--r-primary);
+  background: rgba(31, 118, 95, 0.16);
 }
 
 .campaignsHeader h1,
@@ -193,7 +193,7 @@
   border-radius: 50%;
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.03)),
-    radial-gradient(circle at 50% 22%, rgba(124, 58, 237, 0.4), transparent 62%);
+    radial-gradient(circle at 50% 22%, rgba(31, 118, 95, 0.4), transparent 62%);
   border: 1px solid rgba(255, 255, 255, 0.14);
   font-weight: 800;
 }
@@ -235,8 +235,8 @@
 
 .campaignListTabs button.is-active {
   color: var(--campaign-text);
-  background: linear-gradient(180deg, rgba(124, 58, 237, 0.2), rgba(124, 58, 237, 0.08));
-  box-shadow: 0 16px 42px rgba(124, 58, 237, 0.12);
+  background: linear-gradient(180deg, rgba(31, 118, 95, 0.2), rgba(31, 118, 95, 0.08));
+  box-shadow: 0 16px 42px rgba(31, 118, 95, 0.12);
 }
 
 .campaignListTabs button.is-active::after {
@@ -258,7 +258,7 @@
   grid-template-columns: 20px 1fr;
   align-items: center;
   gap: 12px;
-  border: 1px solid rgba(124, 58, 237, 0.32);
+  border: 1px solid rgba(31, 118, 95, 0.32);
   border-radius: 9px;
   padding: 0 14px;
   background: rgba(7, 11, 21, 0.62);
@@ -302,10 +302,10 @@
 }
 
 .campaignFilterPills button.is-active {
-  border-color: rgba(167, 139, 250, 0.42);
-  background: rgba(124, 58, 237, 0.24);
+  border-color: rgba(31, 118, 95, 0.42);
+  background: rgba(31, 118, 95, 0.24);
   color: var(--campaign-text);
-  box-shadow: 0 0 22px rgba(124, 58, 237, 0.18);
+  box-shadow: 0 0 22px rgba(31, 118, 95, 0.18);
 }
 
 .campaignSort select {
@@ -334,9 +334,9 @@
 }
 
 .campaignJoinCodeButton:hover:not(:disabled) {
-  border-color: rgba(167, 139, 250, 0.38);
-  background: rgba(124, 58, 237, 0.12);
-  box-shadow: 0 0 24px rgba(124, 58, 237, 0.1);
+  border-color: rgba(31, 118, 95, 0.38);
+  background: rgba(31, 118, 95, 0.12);
+  box-shadow: 0 0 24px rgba(31, 118, 95, 0.1);
 }
 
 .campaignJoinCodeButton:disabled {
@@ -410,8 +410,8 @@
 .campaignCard:hover,
 .campaignCard:focus-visible {
   transform: translateY(-4px);
-  border-color: rgba(167, 139, 250, 0.38);
-  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.34), 0 0 26px rgba(124, 58, 237, 0.12);
+  border-color: rgba(31, 118, 95, 0.38);
+  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.34), 0 0 26px rgba(31, 118, 95, 0.12);
 }
 
 .campaignCard__visual {
@@ -463,7 +463,7 @@
 .campaignRoleBadge.is-gm,
 .campaignStatusBadge.is-nowe,
 .campaignStatusBadge.is-popularna {
-  background: rgba(124, 58, 237, 0.62);
+  background: rgba(31, 118, 95, 0.62);
 }
 
 .campaignRoleBadge.is-player,
@@ -496,10 +496,10 @@
 
 .campaignBookmark:hover,
 .campaignBookmark.is-saved {
-  border-color: rgba(167, 139, 250, 0.46);
-  background: rgba(124, 58, 237, 0.22);
-  color: #ddd6fe;
-  box-shadow: 0 10px 24px rgba(124, 58, 237, 0.18);
+  border-color: rgba(31, 118, 95, 0.46);
+  background: rgba(31, 118, 95, 0.22);
+  color: var(--r-primary);
+  box-shadow: 0 10px 24px rgba(31, 118, 95, 0.18);
 }
 
 .campaignBookmark.is-saved svg {
@@ -561,7 +561,7 @@
   margin-left: -6px;
   border: 2px solid rgba(9, 13, 24, 0.9);
   border-radius: 50%;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.18), rgba(124, 58, 237, 0.38));
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.18), rgba(31, 118, 95, 0.38));
   color: var(--campaign-text);
   font-size: 0.72rem;
   font-style: normal;
@@ -588,7 +588,7 @@
 .campaignAvatar:focus-visible,
 .campaignAvatars em:hover {
   transform: scale(1.08);
-  border-color: rgba(167, 139, 250, 0.5);
+  border-color: rgba(31, 118, 95, 0.5);
 }
 
 .campaignAvatarProfile {
@@ -599,7 +599,7 @@
   min-height: 122px;
   display: block;
   overflow: hidden;
-  border: 1px solid rgba(124, 58, 237, 0.34);
+  border: 1px solid rgba(31, 118, 95, 0.34);
   border-radius: 14px;
   background: rgba(10, 15, 28, 0.94);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.52);
@@ -620,7 +620,7 @@
   height: 46px;
   display: block;
   background:
-    radial-gradient(circle at 22% 0%, rgba(167, 139, 250, 0.38), transparent 46%),
+    radial-gradient(circle at 22% 0%, rgba(31, 118, 95, 0.38), transparent 46%),
     linear-gradient(135deg, rgba(30, 41, 59, 0.96), rgba(76, 29, 149, 0.72));
 }
 
@@ -642,7 +642,7 @@
   border-radius: 50%;
   background:
     radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.22), transparent 34%),
-    linear-gradient(145deg, rgba(124, 58, 237, 0.58), rgba(15, 23, 42, 0.94));
+    linear-gradient(145deg, rgba(31, 118, 95, 0.58), rgba(15, 23, 42, 0.94));
   color: #fff;
   font-size: 1rem;
   font-weight: 900;
@@ -680,11 +680,11 @@
   max-width: 100%;
   height: auto;
   margin: 4px 0 0;
-  border: 1px solid rgba(124, 58, 237, 0.3);
+  border: 1px solid rgba(31, 118, 95, 0.3);
   border-radius: 999px;
   padding: 3px 8px;
-  background: rgba(124, 58, 237, 0.14);
-  color: #ddd6fe;
+  background: rgba(31, 118, 95, 0.14);
+  color: var(--r-primary);
   font-size: 0.62rem;
   line-height: 1;
 }
@@ -741,7 +741,7 @@
   position: absolute;
   right: 20px;
   bottom: 48px;
-  color: #c4b5fd;
+  color: var(--r-primary);
   font-size: 0.8rem;
   opacity: 0;
   transform: translateY(4px);
@@ -756,18 +756,18 @@
 .campaignJoinButton {
   min-height: 38px;
   justify-self: end;
-  border: 1px solid rgba(167, 139, 250, 0.45);
+  border: 1px solid rgba(31, 118, 95, 0.45);
   border-radius: 7px;
   padding: 0 22px;
-  background: rgba(124, 58, 237, 0.16);
+  background: rgba(31, 118, 95, 0.16);
   color: var(--campaign-text);
   font-weight: 800;
 }
 
 .campaignJoinButton:hover:not(:disabled) {
-  border-color: rgba(196, 181, 253, 0.62);
-  background: rgba(124, 58, 237, 0.24);
-  box-shadow: 0 0 22px rgba(124, 58, 237, 0.14);
+  border-color: rgba(31, 118, 95, 0.62);
+  background: rgba(31, 118, 95, 0.24);
+  box-shadow: 0 0 22px rgba(31, 118, 95, 0.14);
 }
 
 .campaignJoinButton:disabled {
@@ -782,9 +782,9 @@
   justify-items: center;
   gap: 16px;
   border-style: dashed;
-  border-color: rgba(167, 139, 250, 0.36);
+  border-color: rgba(31, 118, 95, 0.36);
   background:
-    radial-gradient(circle at 50% 28%, rgba(124, 58, 237, 0.16), transparent 46%),
+    radial-gradient(circle at 50% 28%, rgba(31, 118, 95, 0.16), transparent 46%),
     rgba(9, 13, 24, 0.62);
   color: var(--campaign-text);
   text-align: center;
@@ -795,11 +795,11 @@
 .campaignCreateTile:hover,
 .campaignCreateTile:focus-visible {
   transform: translateY(-4px);
-  border-color: rgba(168, 85, 247, 0.62);
+  border-color: rgba(31, 118, 95, 0.62);
   background:
-    radial-gradient(circle at 50% 28%, rgba(124, 58, 237, 0.2), transparent 48%),
+    radial-gradient(circle at 50% 28%, rgba(31, 118, 95, 0.2), transparent 48%),
     rgba(11, 16, 29, 0.72);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.26), 0 0 34px rgba(124, 58, 237, 0.12);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.26), 0 0 34px rgba(31, 118, 95, 0.12);
 }
 
 .campaignCreateTile span {
@@ -834,11 +834,11 @@
   place-items: center;
   justify-items: center;
   gap: 12px;
-  border: 1px dashed rgba(167, 139, 250, 0.26);
+  border: 1px dashed rgba(31, 118, 95, 0.26);
   border-radius: 16px;
   padding: 32px;
   background:
-    radial-gradient(circle at 50% 18%, rgba(124, 58, 237, 0.14), transparent 44%),
+    radial-gradient(circle at 50% 18%, rgba(31, 118, 95, 0.14), transparent 44%),
     linear-gradient(160deg, rgba(16, 21, 35, 0.58), rgba(9, 13, 24, 0.78));
   color: var(--campaign-muted);
   text-align: center;
@@ -849,10 +849,10 @@
   height: 58px;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(167, 139, 250, 0.34);
+  border: 1px solid rgba(31, 118, 95, 0.34);
   border-radius: 16px;
   color: #a855f7;
-  background: rgba(124, 58, 237, 0.12);
+  background: rgba(31, 118, 95, 0.12);
 }
 
 .campaignPublicEmpty svg {
@@ -917,11 +917,11 @@
   place-items: center;
   justify-items: center;
   gap: 10px;
-  border: 1px dashed rgba(167, 139, 250, 0.22);
+  border: 1px dashed rgba(31, 118, 95, 0.22);
   border-radius: 14px;
   padding: 22px;
   background:
-    radial-gradient(circle at 50% 12%, rgba(124, 58, 237, 0.12), transparent 48%),
+    radial-gradient(circle at 50% 12%, rgba(31, 118, 95, 0.12), transparent 48%),
     rgba(255, 255, 255, 0.018);
   color: var(--campaign-muted);
   text-align: center;
@@ -932,10 +932,10 @@
   height: 44px;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(167, 139, 250, 0.3);
+  border: 1px solid rgba(31, 118, 95, 0.3);
   border-radius: 12px;
   color: #a855f7;
-  background: rgba(124, 58, 237, 0.12);
+  background: rgba(31, 118, 95, 0.12);
 }
 
 .campaignInviteEmpty strong {
@@ -976,7 +976,7 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: linear-gradient(145deg, rgba(245, 158, 11, 0.24), rgba(124, 58, 237, 0.24));
+  background: linear-gradient(145deg, rgba(245, 158, 11, 0.24), rgba(31, 118, 95, 0.24));
   font-weight: 900;
 }
 
@@ -1009,7 +1009,7 @@
 }
 
 .campaignInvite button:first-of-type {
-  border-color: rgba(167, 139, 250, 0.5);
+  border-color: rgba(31, 118, 95, 0.5);
   color: #a855f7;
 }
 
@@ -1060,7 +1060,7 @@
 }
 
 .campaignAdvancedFilters input[type="range"] {
-  accent-color: var(--campaign-purple);
+  accent-color: var(--campaign-primary);
 }
 
 .campaignAdvancedFilters small {
@@ -1118,10 +1118,10 @@
 
 .campaignCtaCard button {
   min-height: 42px;
-  border: 1px solid rgba(167, 139, 250, 0.42);
+  border: 1px solid rgba(31, 118, 95, 0.42);
   border-radius: 8px;
   padding: 0 18px;
-  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  background: linear-gradient(135deg, var(--r-primary), var(--r-primary-2));
   color: var(--campaign-text);
   font-weight: 900;
 }
@@ -1236,8 +1236,8 @@
 
 .campaignModal__actions button[type="submit"],
 .campaignModal__actions button:last-child {
-  border-color: rgba(167, 139, 250, 0.42);
-  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  border-color: rgba(31, 118, 95, 0.42);
+  background: linear-gradient(135deg, var(--r-primary), var(--r-primary-2));
 }
 
 @media (max-width: 1500px) {
@@ -1295,5 +1295,169 @@
   .campaignCard footer {
     align-items: flex-start;
     flex-direction: column;
+  }
+}
+/* Modern design adapter: campaign-specific treatment on top of the global foundation. */
+.campaignsSaas {
+  display: grid;
+  gap: 18px;
+}
+
+.campaignListTabs {
+  width: fit-content;
+  border: 1px solid var(--r-line);
+  border-radius: 8px;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.campaignListTabs button,
+.campaignFilterPills button {
+  border-radius: 6px;
+  color: var(--r-ink-soft);
+  background: transparent;
+}
+
+.campaignListTabs button.is-active,
+.campaignFilterPills button.is-active {
+  color: #ffffff;
+  background: var(--r-primary);
+  box-shadow: none;
+}
+
+.campaignToolbar,
+.campaignNotice,
+.campaignLoading,
+.campaignError {
+  border: 1px solid var(--r-line);
+  border-radius: 8px;
+  color: var(--r-ink);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.campaignToolbar {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) auto auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+}
+
+.campaignSearch,
+.campaignSort select {
+  border: 1px solid var(--r-line);
+  border-radius: 8px;
+  color: var(--r-ink);
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.campaignGrid {
+  gap: 16px;
+}
+
+.campaignSideCard,
+.campaignCard,
+.campaignCreateTile,
+.campaignPublicEmpty {
+  border: 1px solid var(--r-line);
+  border-radius: 8px;
+  color: var(--r-ink);
+  background: var(--r-surface);
+  box-shadow: var(--r-shadow-soft);
+  backdrop-filter: blur(10px);
+}
+
+.campaignCard {
+  overflow: hidden;
+  min-height: 0;
+  background: #ffffff;
+}
+
+.campaignCard:hover {
+  border-color: var(--r-line-strong);
+  box-shadow: var(--r-shadow);
+}
+
+.campaignCard__visual {
+  min-height: 132px;
+  background:
+    linear-gradient(135deg, rgba(31, 118, 95, 0.72), rgba(83, 111, 174, 0.44)),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.16) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+  background-size: auto, 28px 28px, 28px 28px;
+}
+
+.campaignCard__body,
+.campaignSideCard {
+  background: #ffffff;
+}
+
+.campaignCard__body h2,
+.campaignSideCard h2 {
+  color: var(--r-ink);
+  font-family: var(--font-display);
+  letter-spacing: 0;
+}
+
+.campaignCard__body p,
+.campaignCard__body footer {
+  color: var(--r-ink-soft);
+}
+
+.campaignJoinButton,
+.campaignCreateTile span,
+.campaignModal__actions button[type="submit"],
+.campaignCtaCard button {
+  border-color: transparent;
+  border-radius: 8px;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--r-primary), var(--r-primary-2));
+  box-shadow: 0 10px 22px rgba(31, 118, 95, 0.18);
+}
+
+.campaignJoinCodeButton,
+.campaignDetailsGhostBtn,
+.campaignModal__actions button {
+  border: 1px solid var(--r-line);
+  border-radius: 8px;
+  color: var(--r-ink);
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.campaignRoleBadge,
+.campaignStatusBadge {
+  border-radius: 999px;
+  color: var(--r-primary-2);
+  background: var(--r-primary-soft);
+  letter-spacing: 0;
+}
+
+.campaignBookmark {
+  border: 1px solid rgba(255, 255, 255, 0.64);
+  color: #ffffff;
+  background: rgba(22, 33, 29, 0.48);
+}
+
+.campaignBookmark.is-saved {
+  color: #ffffff;
+  background: var(--r-coral);
+}
+
+.campaignTags span,
+.campaignAvatar,
+.campaignStats div,
+.campaignInviteEmpty,
+.campaignLegend li {
+  border-color: var(--r-line);
+  color: var(--r-ink);
+  background: var(--r-panel);
+  border-radius: 8px;
+}
+
+@media (max-width: 860px) {
+  .campaignToolbar {
+    grid-template-columns: 1fr;
   }
 }

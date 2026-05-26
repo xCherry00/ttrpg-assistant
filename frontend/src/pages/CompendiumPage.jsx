@@ -8,7 +8,7 @@ import {
 } from "../api/compendium";
 
 const DEFAULT_CATEGORIES = [
-  { code: "monsters", label: "Potwory", description: "CR, XP, statystyki i akcje potworow SRD." },
+  { code: "monsters", label: "Potwory", description: "CR, XP, statystyki i akcje potworów SRD." },
   { code: "spells", label: "Zaklecia", description: "Poziom, szkola, komponenty i opis zaklec SRD." },
   { code: "magic-items", label: "Magiczne przedmioty", description: "Magiczne przedmioty dostepne w SRD." },
   { code: "equipment", label: "Ekwipunek", description: "Bronie, pancerze, sprzet i koszt." },
@@ -185,7 +185,7 @@ export default function CompendiumPage() {
       setDetail(data || item);
     } catch (e) {
       setDetail(item);
-      setError(e?.message || "Nie udalo sie pobrac szczegolow.");
+      setError(e?.message || "Nie udalo sie pobrac szczegółów.");
     } finally {
       setDetailLoading(false);
     }
@@ -237,7 +237,7 @@ export default function CompendiumPage() {
 
           {error && <div className="compendiumError">{error}</div>}
           {loading ? (
-            <div className="compendiumEmpty">Ladowanie danych...</div>
+            <div className="compendiumEmpty">Ładowanie danych...</div>
           ) : (
             <div className="compendiumTableWrap">
               <table className="compendiumTable">
@@ -269,7 +269,7 @@ export default function CompendiumPage() {
 
         <aside className="compendiumDetailPanel">
           {detailLoading ? (
-            <div className="compendiumEmpty">Ladowanie szczegolow...</div>
+            <div className="compendiumEmpty">Ładowanie szczegółów...</div>
           ) : detail ? (
             <>
               <div className="compendiumDetailTitle">

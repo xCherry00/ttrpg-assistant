@@ -2,7 +2,7 @@
   min-height: 100vh;
   color: var(--text);
   background:
-    radial-gradient(circle at 12% 0%, rgba(124, 58, 237, 0.18), transparent 34%),
+    radial-gradient(circle at 12% 0%, rgba(31, 118, 95, 0.18), transparent 34%),
     radial-gradient(circle at 86% 8%, rgba(232, 181, 88, 0.1), transparent 30%),
     var(--app-bg);
   padding: 42px 24px 56px;
@@ -65,7 +65,7 @@
 
 .legalPanel,
 .legalSourceCard {
-  border: 1px solid var(--app-glass-border);
+  border: 1px solid var(--app-menu-border);
   border-radius: 18px;
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025)),
@@ -159,7 +159,7 @@
   height: 8px;
   border-radius: 50%;
   background: var(--primary);
-  box-shadow: 0 0 18px rgba(124, 58, 237, 0.7);
+  box-shadow: 0 0 18px rgba(31, 118, 95, 0.7);
 }
 
 .legalPanel--split {

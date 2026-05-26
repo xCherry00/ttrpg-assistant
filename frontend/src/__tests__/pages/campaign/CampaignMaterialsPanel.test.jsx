@@ -4,7 +4,7 @@ import CampaignMaterialsPanel from "../../../pages/campaign/components/CampaignM
 describe("CampaignMaterialsPanel", () => {
   it("shows unavailable state when materials are not available", () => {
     render(<CampaignMaterialsPanel materials={[]} materialsAvailable={false} />);
-    expect(screen.getByText("Materialy kampanii sa chwilowo niedostepne.")).toBeInTheDocument();
+    expect(screen.getByText("Materiały kampanii są chwilowo niedostępne.")).toBeInTheDocument();
   });
 
   it("shows empty state when there are no materials", () => {

@@ -14,12 +14,12 @@ import "../styles/settings.css";
 const THEME_STORAGE_KEY = "ttrpg_theme";
 const INITIATIVE_CACHE_KEY = "ttrpg_initiative_rows_v2";
 const INITIATIVE_SYSTEM_KEY = "ttrpg_initiative_system_v1";
-const CHAT_NICK_PRESETS = ["#b26cff", "#7bdff2", "#ff8fab", "#80ed99", "#f4a261", "#a0c4ff", "#f5d76e", "#ff6b6b"];
+const CHAT_NICK_PRESETS = ["#1f765f", "#536fae", "#c85c4a", "#20835f", "#b88734", "#64c3b3", "#718078", "#b42318"];
 
 const NAV_SECTIONS = [
   { id: "account", label: "Konto", icon: "user" },
-  { id: "security", label: "Bezpieczenstwo", icon: "lock" },
-  { id: "appearance", label: "Wyglad", icon: "palette" },
+  { id: "security", label: "Bezpieczeństwo", icon: "lock" },
+  { id: "appearance", label: "Wygląd", icon: "palette" },
   { id: "chat", label: "Chat sesji", icon: "message" },
   { id: "local", label: "Dane lokalne", icon: "database" },
   { id: "danger", label: "Strefa ryzyka", icon: "trash" },
@@ -173,7 +173,7 @@ export default function SettingsPage() {
         setNewEmail(me.email || "");
         setChatNickColor(me.chatNickColor || "");
       } catch {
-        if (!cancelled) setEmailError("Nie udalo sie pobrac danych konta.");
+        if (!cancelled) setEmailError("Nie udało się pobrac danych konta.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -211,7 +211,7 @@ export default function SettingsPage() {
       setEmailSuccess("Email zostal zaktualizowany.");
       window.dispatchEvent(new Event("ttrpg-profile-updated"));
     } catch (err) {
-      setEmailError(err.message || "Nie udalo sie zmienic emaila.");
+      setEmailError(err.message || "Nie udało się zmienic emaila.");
     }
   }
 
@@ -224,7 +224,7 @@ export default function SettingsPage() {
       return;
     }
     if (newPassword.length < 6) {
-      setPasswordError("Nowe haslo musi miec co najmniej 6 znakow.");
+      setPasswordError("Nowe haslo musi mieć co najmniej 6 znakow.");
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -238,7 +238,7 @@ export default function SettingsPage() {
       setConfirmPassword("");
       setPasswordSuccess("Haslo zostalo zmienione.");
     } catch (err) {
-      setPasswordError(err.message || "Nie udalo sie zmienic hasla.");
+      setPasswordError(err.message || "Nie udało się zmienic hasla.");
     }
   }
 
@@ -255,13 +255,13 @@ export default function SettingsPage() {
         }),
       );
     } catch (err) {
-      setChatColorError(err.message || "Nie udalo sie zapisac koloru.");
+      setChatColorError(err.message || "Nie udało się zapisać koloru.");
     }
   }
 
   function clearInitiativeCache() {
     const confirmed = window.confirm(
-      "Czy na pewno chcesz wyczyscic dane lokalne? Ta akcja nie usuwa konta, kampanii ani postaci.",
+      "Czy na pewno chcesz wyczyścić dane lokalne? Ta akcja nie usuwa konta, kampanii ani postaci.",
     );
     if (!confirmed) return;
     sessionStorage.removeItem(INITIATIVE_CACHE_KEY);
@@ -283,7 +283,7 @@ export default function SettingsPage() {
       logout();
       navigate("/register", { replace: true });
     } catch (err) {
-      setDeleteError(err.message || "Nie udalo sie usunac konta.");
+      setDeleteError(err.message || "Nie udało się usunac konta.");
     }
   }
 
@@ -297,6 +297,13 @@ export default function SettingsPage() {
 
   return (
     <div className="page settingsPage">
+      <div className="pageHeader">
+        <div>
+          <span className="pageEyebrow">konto</span>
+          <h1 className="pageTitle">Ustawienia</h1>
+          <p className="pageSubtitle">Zarządzaj kontem, bezpieczeństwem i wyglądem aplikacji.</p>
+        </div>
+      </div>
       <div className="settingsStudio">
         <aside className="settingsIndex settingsGlass">
           <h2>Kategorie</h2>
@@ -328,7 +335,7 @@ export default function SettingsPage() {
                   <p>Adres email uzywany do logowania i odzyskiwania dostepu.</p>
                 </div>
               </div>
-              {loading && <div className="settingsInfo">Ladowanie danych konta...</div>}
+              {loading && <div className="settingsInfo">Ładowanie danych konta...</div>}
               <Message type="error">{emailError}</Message>
               <Message type="success">{emailSuccess}</Message>
               <form className="settingsFormGrid" onSubmit={handleChangeEmail}>
@@ -368,7 +375,7 @@ export default function SettingsPage() {
                   <Icon name="lock" />
                 </span>
                 <div>
-                  <h2>Bezpieczenstwo</h2>
+                  <h2>Bezpieczeństwo</h2>
                   <p>Zmieniaj haslo i pilnuj dostepu do swojej biblioteki kampanii.</p>
                 </div>
               </div>
@@ -417,7 +424,7 @@ export default function SettingsPage() {
                   <Icon name="palette" />
                 </span>
                 <div>
-                  <h2>Wyglad</h2>
+                  <h2>Wygląd</h2>
                   <p>Wybierz motyw aplikacji.</p>
                 </div>
               </div>
@@ -448,7 +455,7 @@ export default function SettingsPage() {
                 </span>
                 <div>
                   <h2>Chat sesji</h2>
-                  <p>Ustaw kolor nicku dla wiadomosci na czacie sesji.</p>
+                  <p>Ustaw kolor nicku dla wiadomości na czacie sesji.</p>
                 </div>
               </div>
               <Message type="error">{chatColorError}</Message>
@@ -493,13 +500,13 @@ export default function SettingsPage() {
                 </span>
                 <div>
                   <h2>Dane lokalne</h2>
-                  <p>Ta akcja usuwa dane zapisane lokalnie w przegladarce, np. cache narzedzi. Nie usuwa konta, kampanii ani postaci.</p>
+                  <p>Ta akcja usuwa dane zapisane lokalnie w przeglądarce, np. cache narzędzi. Nie usuwa konta, kampanii ani postaci.</p>
                 </div>
               </div>
               <Message type="success">{miscSuccess}</Message>
               <button type="button" className="settingsBtn settingsBtnGhost settingsBtnInline" onClick={clearInitiativeCache}>
                 <Icon name="trash" />
-                Wyczysc cache aplikacji
+                Wyczyść cache aplikacji
               </button>
           </section>
 
@@ -510,7 +517,7 @@ export default function SettingsPage() {
                 </span>
                 <div>
                   <h2>Strefa ryzyka</h2>
-                  <p>Usuniecie konta jest trwale i nie da sie go cofnac.</p>
+                  <p>Usuńiecie konta jest trwałe i nie da się go cofnąć.</p>
                 </div>
               </div>
               <Message type="error">{deleteError}</Message>
@@ -524,7 +531,7 @@ export default function SettingsPage() {
                   autoComplete="current-password"
                 />
                 <button type="button" className="settingsBtn settingsBtnDanger" onClick={handleDeleteAccount}>
-                  Usun konto
+                  Usuń konto
                 </button>
               </div>
           </section>

@@ -26,7 +26,7 @@ export default function CharacterSidebar({
           <h2>Postacie</h2>
           <p>{items.length} zapisanych</p>
         </div>
-        <button type="button" className="charactersPrimaryBtn" onClick={onCreate}>+ Nowa postac</button>
+        <button type="button" className="charactersPrimaryBtn" onClick={onCreate}>+ Nowa postać</button>
       </div>
       <div style={{ display: "flex", gap: 8 }}>
         <button type="button" className="charactersGhostBtn" onClick={onImport}>Importuj JSON</button>
@@ -42,7 +42,7 @@ export default function CharacterSidebar({
       </label>
 
       <div className="charactersList">
-        {loading && <div className="charactersState">Ladowanie listy postaci...</div>}
+        {loading && <div className="charactersState">Ładowanie listy postaci...</div>}
         {!loading && items.length === 0 && <div className="charactersEmptyRow">Nie masz jeszcze zadnej postaci.</div>}
         {filtered.length === 0 && <div className="charactersEmptyRow">Brak wynikow.</div>}
         {!loading && filtered.map((item) => (

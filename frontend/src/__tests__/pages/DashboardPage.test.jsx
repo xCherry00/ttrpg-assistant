@@ -1,4 +1,4 @@
-﻿import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import DashboardPage from "../../pages/DashboardPage";
 import * as meApi from "../../api/me";
@@ -66,14 +66,14 @@ describe("DashboardPage v0.8.0.1", () => {
     campaignsApi.listCampaigns.mockResolvedValue([{ id: 1, title: "Kampania A", owner: false, systemCode: "dnd5e" }]);
     campaignsApi.listCampaignSessions.mockResolvedValue([
       { id: 11, title: "Sesja Pozniej", status: "PLANNED", scheduledFor: "2030-06-20T18:00:00Z" },
-      { id: 12, title: "Sesja Najblizsza", status: "PLANNED", scheduledFor: "2030-06-19T18:00:00Z" },
+      { id: 12, title: "Sesja Najbliższa", status: "PLANNED", scheduledFor: "2030-06-19T18:00:00Z" },
     ]);
     charactersApi.listCharacters.mockResolvedValue([]);
 
     renderPage();
 
-    expect(await screen.findByText("Sesja Najblizsza")).toBeInTheDocument();
-    expect(screen.getByText(/Najblizsza sesja/i)).toBeInTheDocument();
+    expect(await screen.findByText("Sesja Najbliższa")).toBeInTheDocument();
+    expect(screen.getByText(/Najbliższa sesja/i)).toBeInTheDocument();
     expect(screen.queryByText(/Pozostalo:/i)).not.toBeInTheDocument();
   });
 
@@ -94,7 +94,7 @@ describe("DashboardPage v0.8.0.1", () => {
     campaignsApi.listCampaigns.mockResolvedValue([{ id: 1, title: "Kampania A", owner: true, systemCode: "dnd5e" }]);
     campaignsApi.listCampaignSessions.mockResolvedValue([
       { id: 21, title: "Planowana", status: "PLANNED", scheduledFor: "2030-06-19T18:00:00Z" },
-      { id: 22, title: "Zakonczona", status: "FINISHED", scheduledFor: "2029-06-19T18:00:00Z" },
+      { id: 22, title: "Zakończona", status: "FINISHED", scheduledFor: "2029-06-19T18:00:00Z" },
     ]);
     charactersApi.listCharacters.mockResolvedValue([{ id: 100, name: "Aria", systemCode: "dnd5e" }]);
 
@@ -102,14 +102,12 @@ describe("DashboardPage v0.8.0.1", () => {
 
     expect(await screen.findByRole("heading", { name: "Kampanie" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Postacie" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Nadchodzace sesje" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Nadchodzące sesje" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Ostatnie sesje" })).toBeInTheDocument();
 
-    expect(screen.queryByText("Nadchodzące sesje")).not.toBeInTheDocument();
-
     const campaignsPanel = screen.getByRole("heading", { name: "Kampanie" }).closest("article");
-    fireEvent.click(within(campaignsPanel).getByRole("button", { name: "Zwin" }));
-    fireEvent.click(within(campaignsPanel).getByRole("button", { name: "Rozwin" }));
+    fireEvent.click(within(campaignsPanel).getByRole("button", { name: "Zwiń" }));
+    fireEvent.click(within(campaignsPanel).getByRole("button", { name: "Rozwiń" }));
     expect((await screen.findAllByText(/Kampania A/i)).length).toBeGreaterThan(0);
   });
 
@@ -124,10 +122,10 @@ describe("DashboardPage v0.8.0.1", () => {
 
     renderPage();
 
-    const upcomingPanel = screen.getByRole("heading", { name: "Nadchodzace sesje" }).closest("article");
+    const upcomingPanel = screen.getByRole("heading", { name: "Nadchodzące sesje" }).closest("article");
     const recentPanel = screen.getByRole("heading", { name: "Ostatnie sesje" }).closest("article");
-    fireEvent.click(within(upcomingPanel).getByRole("button", { name: "Rozwin" }));
-    fireEvent.click(within(recentPanel).getByRole("button", { name: "Rozwin" }));
+    fireEvent.click(within(upcomingPanel).getByRole("button", { name: "Rozwiń" }));
+    fireEvent.click(within(recentPanel).getByRole("button", { name: "Rozwiń" }));
 
     await waitFor(() => {
       expect(within(upcomingPanel).getByText("P1")).toBeInTheDocument();
@@ -147,7 +145,7 @@ describe("DashboardPage v0.8.0.1", () => {
     renderPage();
 
     const charactersPanel = screen.getByRole("heading", { name: "Postacie" }).closest("article");
-    fireEvent.click(within(charactersPanel).getByRole("button", { name: "Rozwin" }));
+    fireEvent.click(within(charactersPanel).getByRole("button", { name: "Rozwiń" }));
     expect(await screen.findByText("Mira")).toBeInTheDocument();
     expect(within(charactersPanel).getByText("COC7E")).toBeInTheDocument();
     expect(screen.queryByText(/Przykladowa kampania|Testowa sesja|Placeholder character/i)).not.toBeInTheDocument();
@@ -170,14 +168,14 @@ describe("DashboardPage v0.8.0.1", () => {
     const systemsPanel = screen.getByRole("heading", { name: "Systemy RPG" }).closest("article");
     const systems = within(systemsPanel);
     expect(systems.getByRole("tab", { name: "Kampanie" })).toHaveAttribute("aria-selected", "true");
-    expect(systems.getByRole("img", { name: /Wykres systemow RPG dla kampanii/i })).toBeInTheDocument();
+    expect(systems.getByRole("img", { name: /Wykres systemów RPG dla kampanii/i })).toBeInTheDocument();
     expect(systems.getByText("DND5E: 1")).toBeInTheDocument();
     expect(systems.getByText("COC7E: 1")).toBeInTheDocument();
 
     fireEvent.click(systems.getByRole("tab", { name: "Postacie" }));
 
     expect(systems.getByRole("tab", { name: "Postacie" })).toHaveAttribute("aria-selected", "true");
-    expect(systems.getByRole("img", { name: /Wykres systemow RPG dla postaci/i })).toBeInTheDocument();
+    expect(systems.getByRole("img", { name: /Wykres systemów RPG dla postaci/i })).toBeInTheDocument();
     expect(systems.getByText("DND5E: 2")).toBeInTheDocument();
   });
 
@@ -195,7 +193,7 @@ describe("DashboardPage v0.8.0.1", () => {
     expect(await screen.findByRole("heading", { name: "Twoja rola" })).toBeInTheDocument();
     expect(screen.getByText("Jako MG: 1")).toBeInTheDocument();
     expect(screen.getByText("Jako gracz: 2")).toBeInTheDocument();
-    expect(screen.getByText("Lacznie: 3")).toBeInTheDocument();
+    expect(screen.getByText("Łącznie: 3")).toBeInTheDocument();
   });
 
   it("does not render recently generated panel", async () => {
@@ -216,10 +214,10 @@ describe("DashboardPage v0.8.0.1", () => {
 
     renderPage();
 
-    expect(await screen.findByRole("heading", { name: "Dostepnosc graczy" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Dostępność graczy" })).toBeInTheDocument();
     expect(
-      screen.queryByText(/Dostepni:/i) ||
-      screen.queryByText(/Brak danych o dostepnosci dla najblizszej sesji./i),
+      screen.queryByText(/Dostępni:/i) ||
+      screen.queryByText(/Brak danych o dostępności dla najbliższej sesji./i),
     ).toBeTruthy();
     expect(screen.queryByText(/4\/6|67%|fake/i)).not.toBeInTheDocument();
   });

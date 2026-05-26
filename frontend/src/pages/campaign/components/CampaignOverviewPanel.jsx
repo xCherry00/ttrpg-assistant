@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ImageUpload from "../../../components/common/ImageUpload";
 
 export default function CampaignOverviewPanel({ campaign, isOwner, busy, onUpdate, onDelete }) {
@@ -48,6 +48,9 @@ export default function CampaignOverviewPanel({ campaign, isOwner, busy, onUpdat
       <div className="campaignDetailsInfoRow"><span>Nazwa</span><strong>{campaign?.title || "-"}</strong></div>
       <div className="campaignDetailsInfoRow"><span>Status</span><strong>{campaign?.status || "-"}</strong></div>
       <div className="campaignDetailsInfoRow"><span>System</span><strong>{campaign?.systemCode || "-"}</strong></div>
+      {campaign?.inviteCode || campaign?.joinCode ? (
+        <div className="campaignDetailsInfoRow"><span>Kod zaproszenia</span><strong>{campaign.inviteCode || campaign.joinCode}</strong></div>
+      ) : null}
       <div className="campaignDetailsInfoRow"><span>Limit graczy</span><strong>{campaign?.playerLimit || 5}</strong></div>
       <p className="campaignDetailsHelpText">{campaign?.description || "Brak opisu kampanii."}</p>
 
@@ -93,7 +96,7 @@ export default function CampaignOverviewPanel({ campaign, isOwner, busy, onUpdat
           </label>
           <div style={{ display: "flex", gap: 8 }}>
             <button className="campaignDetailsPrimaryBtn" type="submit" disabled={busy || !dirty}>Zapisz</button>
-            <button className="campaignDetailsDangerBtn" type="button" disabled={busy} onClick={onDelete}>Usun (soft-delete)</button>
+            <button className="campaignDetailsDangerBtn" type="button" disabled={busy} onClick={onDelete}>Usuń (soft-delete)</button>
           </div>
         </form>
       )}

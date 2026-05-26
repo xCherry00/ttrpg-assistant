@@ -155,7 +155,7 @@ export default function AccountMenu() {
         aria-haspopup="menu"
       >
         {avatarSrc ? (
-          <img src={avatarSrc} alt="Avatar uzytkownika" className="topNav__avatarImg" />
+          <img src={avatarSrc} alt="Avatar użytkownika" className="topNav__avatarImg" />
         ) : (
           <span className="topNav__avatar">{avatarLabel}</span>
         )}
@@ -174,7 +174,7 @@ export default function AccountMenu() {
         <div className="topNav__menu" role="menu">
           <div className="topNav__menuHeader">
             {avatarSrc ? (
-              <img src={avatarSrc} alt="Avatar uzytkownika" className="topNav__menuAvatarImg" />
+              <img src={avatarSrc} alt="Avatar użytkownika" className="topNav__menuAvatarImg" />
             ) : (
               <div className="topNav__menuAvatar">{avatarLabel}</div>
             )}
@@ -209,7 +209,7 @@ export default function AccountMenu() {
           </div>
 
           {(loadingUser || userError) && (
-            <div className="topNav__menuStatus">{loadingUser ? "Ladowanie danych..." : userError}</div>
+            <div className="topNav__menuStatus">{loadingUser ? "Ładowanie danych..." : userError}</div>
           )}
         </div>
       )}

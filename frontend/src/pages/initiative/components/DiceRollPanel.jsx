@@ -26,12 +26,12 @@ export default function DiceRollPanel({
       </section>
 
       <section className="initTableWrap initTableWrap--wide">
-        <div className="initMeta">Historia rzutow {selectedEncounterId ? "(filtrowana po encounterze)" : "(kampania)"}</div>
+        <div className="initMeta">Historia rzutów {selectedEncounterId ? "(filtrowana po encounterze)" : "(kampania)"}</div>
         {diceLoading ? (
-          <div>Ladowanie rzutow...</div>
+          <div>Ładowanie rzutów...</div>
         ) : diceRolls.length === 0 ? (
           <div className="empty">
-            <div className="emptyTitle">Brak rzutow</div>
+            <div className="emptyTitle">Brak rzutów</div>
             <div className="emptyText">Wykonaj pierwszy rzut, aby zapisac go w historii.</div>
           </div>
         ) : (

@@ -1,4 +1,4 @@
-﻿import { render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import CampaignOverviewPanel from "../../../pages/campaign/components/CampaignOverviewPanel";
 
 vi.mock("../../../auth/AuthContext", () => ({

@@ -90,12 +90,12 @@ describe("CharactersPage", () => {
   it("creates D&D character and CoC character", async () => {
     renderPage("/characters");
 
-    fireEvent.click((await screen.findAllByRole("button", { name: /\+ Nowa postac/i }))[0]);
+    fireEvent.click((await screen.findAllByRole("button", { name: /\+ Nowa postać/i }))[0]);
     fireEvent.click(screen.getByRole("button", { name: "wybierz-dnd" }));
     fireEvent.click(screen.getByRole("button", { name: "submit-dnd" }));
     await waitFor(() => expect(charactersApi.quickCreateCharacter).toHaveBeenCalled());
 
-    fireEvent.click((await screen.findAllByRole("button", { name: /\+ Nowa postac/i }))[0]);
+    fireEvent.click((await screen.findAllByRole("button", { name: /\+ Nowa postać/i }))[0]);
     fireEvent.click(await screen.findByRole("button", { name: "wybierz-coc" }));
     fireEvent.click(screen.getByRole("button", { name: "submit-coc" }));
     await waitFor(() => expect(charactersApi.quickCreateCocCharacter).toHaveBeenCalled());
@@ -109,7 +109,7 @@ describe("CharactersPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Drukuj" }));
     expect(window.print).toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole("button", { name: "Usun postac" }));
+    fireEvent.click(screen.getByRole("button", { name: "Usuń postać" }));
     fireEvent.click(screen.getByRole("button", { name: "Potwierdz usuniecie" }));
     await waitFor(() => expect(charactersApi.deleteCharacter).toHaveBeenCalledWith("test-token", 1));
   });
@@ -123,7 +123,7 @@ describe("CharactersPage", () => {
   it("read-only preview hides editing actions", async () => {
     renderPage("/characters/1?mode=preview");
     await screen.findByText(/tryb tylko do odczytu/i);
-    expect(screen.queryByRole("button", { name: "Usun postac" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Usuń postać" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Zapisz zmiany" })).not.toBeInTheDocument();
   });
 });

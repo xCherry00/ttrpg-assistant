@@ -56,7 +56,7 @@ export default function CharactersPage() {
         return prev ?? null;
       });
     } catch (err) {
-      const message = err?.message || "Nie udalo sie pobrac postaci.";
+      const message = err?.message || "Nie udało się pobrac postaci.";
       setError(message);
       showNotice("error", message);
     } finally {
@@ -87,7 +87,7 @@ export default function CharactersPage() {
     getCharacter(token, selectedId)
       .then(setDetail)
       .catch((e) => {
-        const message = e?.message || "Nie udalo sie pobrac karty.";
+        const message = e?.message || "Nie udało się pobrac karty.";
         setError(message);
         showNotice("error", message);
       })
@@ -103,9 +103,9 @@ export default function CharactersPage() {
       setSelectedCreationSystem(null);
       await loadList({ preserveSelection: true });
       navigate(`/characters/${created.id}`);
-      showNotice("success", "Postac utworzona.");
+      showNotice("success", "Postać utwórzona.");
     } catch (err) {
-      const message = err?.message || "Nie udalo sie utworzyc postaci.";
+      const message = err?.message || "Nie udało się utwórzyc postaci.";
       setError(message);
       showNotice("error", message);
     } finally {
@@ -122,9 +122,9 @@ export default function CharactersPage() {
       setSelectedCreationSystem(null);
       await loadList({ preserveSelection: true });
       navigate(`/characters/${created.id}`);
-      showNotice("success", "Badacz utworzony.");
+      showNotice("success", "Badacz utwórzony.");
     } catch (err) {
-      const message = err?.message || "Nie udalo sie utworzyc badacza.";
+      const message = err?.message || "Nie udało się utwórzyc badacza.";
       setError(message);
       showNotice("error", message);
     } finally {
@@ -142,7 +142,7 @@ export default function CharactersPage() {
       await loadList({ preserveSelection: true });
       showNotice("success", "Zmiany zapisane.");
     } catch (err) {
-      const message = err?.message || "Nie udalo sie zapisac zmian.";
+      const message = err?.message || "Nie udało się zapisac zmian.";
       setError(message);
       showNotice("error", message);
     } finally {
@@ -161,9 +161,9 @@ export default function CharactersPage() {
       await loadList({ preserveSelection: true });
       navigate("/characters");
       setConfirmDeleteOpen(false);
-      showNotice("success", "Postac usunieta.");
+      showNotice("success", "Postać usunieta.");
     } catch (err) {
-      const message = err?.message || "Nie udalo sie usunac postaci.";
+      const message = err?.message || "Nie udało się usunac postaci.";
       setError(message);
       showNotice("error", message);
     } finally {
@@ -190,9 +190,9 @@ export default function CharactersPage() {
       anchor.click();
       document.body.removeChild(anchor);
       window.URL.revokeObjectURL(url);
-      showNotice("success", "Wyeksportowano postac do JSON.");
+      showNotice("success", "Wyeksportowano postać do JSON.");
     } catch (err) {
-      const message = err?.message || "Nie udalo sie wyeksportowac postaci.";
+      const message = err?.message || "Nie udało się wyeksportowac postaci.";
       setError(message);
       showNotice("error", message);
     }
@@ -219,9 +219,9 @@ export default function CharactersPage() {
       if (imported?.characterId) {
         navigate(`/characters/${imported.characterId}`);
       }
-      showNotice("success", "Postac zaimportowana.");
+      showNotice("success", "Postać zaimportowana.");
     } catch (err) {
-      const message = err?.message || "Nie udalo sie zaimportowac postaci.";
+      const message = err?.message || "Nie udało się zaimportowac postaci.";
       setError(message);
       showNotice("error", message);
     }
@@ -258,14 +258,14 @@ export default function CharactersPage() {
         <div>
           <span className="pageEyebrow">bohaterowie</span>
           <h1 className="pageTitle">Postacie</h1>
-          <p className="pageSubtitle">Wybierz postac z listy albo utworz nowa, aby przejsc do widoku karty.</p>
+          <p className="pageSubtitle">Wybierz postać z listy albo utwórz nową, aby przejść do widoku karty.</p>
         </div>
-        <button type="button" className="charactersPrimaryBtn" onClick={openCreateFlow}>+ Nowa postac</button>
+        <button type="button" className="charactersPrimaryBtn" onClick={openCreateFlow}>+ Nowa postać</button>
       </div>
 
       {notice && <div className={`charactersNotice${notice.type === "error" ? " is-error" : ""}`}>{notice.text}</div>}
       {error && <div className="charactersError">{error}</div>}
-      {loading && <div className="charactersState">Ladowanie...</div>}
+      {loading && <div className="charactersState">Ładowanie...</div>}
 
       {!loading && (
         <div className="charactersLayout">
@@ -291,8 +291,8 @@ export default function CharactersPage() {
                 <div className="charactersCreateHead">
                     <div>
                       <div className="charactersEyebrow">{selectedCreationSystem ? "Szybki kreator" : "Wybierz system"}</div>
-                    <h2>{selectedCreationSystem === "dnd5e" ? "Nowa postac D&D 5e" : selectedCreationSystem === "coc7e" ? "Nowy badacz CoC 7e" : "Nowa postac"}</h2>
-                    <p>{selectedCreationSystem ? "Wypelnij podstawowe dane i utworz startowa karte." : "Najpierw wybierz system gry. Potem pokazemy odpowiedni szybki kreator."}</p>
+                    <h2>{selectedCreationSystem === "dnd5e" ? "Nowa postać D&D 5e" : selectedCreationSystem === "coc7e" ? "Nowy badacz CoC 7e" : "Nowa postać"}</h2>
+                    <p>{selectedCreationSystem ? "Wypelnij podstawowe dane i utwórz startowa kartę." : "Najpierw wybierz system gry. Potem pokazemy odpowiedni szybki kreator."}</p>
                   </div>
                   <button type="button" className="charactersGhostBtn" onClick={closeCreateFlow}>Zamknij</button>
                 </div>
@@ -312,24 +312,24 @@ export default function CharactersPage() {
               </div>
             )}
 
-            {!creatorOpen && items.length === 0 && <div className="charactersEmpty">Nie masz jeszcze postaci. Uzyj przycisku + Nowa postac.</div>}
-            {!creatorOpen && items.length > 0 && !selectedId && <div className="charactersEmpty">Wybierz postac z listy, aby otworzyc karte.</div>}
-            {!creatorOpen && detailLoading && <div className="charactersState">Ladowanie karty...</div>}
+            {!creatorOpen && items.length === 0 && <div className="charactersEmpty">Nie masz jeszcze postaci. Uzyj przycisku + Nowa postać.</div>}
+            {!creatorOpen && items.length > 0 && !selectedId && <div className="charactersEmpty">Wybierz postać z listy, aby otworzyć kartę.</div>}
+            {!creatorOpen && detailLoading && <div className="charactersState">Ładowanie karty...</div>}
 
             {!creatorOpen && detail && !detailLoading && (
               <>
                 <div className="charactersActionBar">
-                  <button type="button" className="charactersGhostBtn" onClick={handleBackToList}>Wroc do listy</button>
+                  <button type="button" className="charactersGhostBtn" onClick={handleBackToList}>Wróć do listy</button>
                   {!readOnlyPreview && <button type="button" className="charactersGhostBtn" onClick={handleExportJson}>Eksportuj JSON</button>}
                   <button type="button" className="charactersGhostBtn" onClick={handlePrint}>Drukuj</button>
-                  {!readOnlyPreview && <button type="button" className="charactersDangerBtn" disabled={deleting} onClick={() => setConfirmDeleteOpen(true)}>Usun postac</button>}
+                  {!readOnlyPreview && <button type="button" className="charactersDangerBtn" disabled={deleting} onClick={() => setConfirmDeleteOpen(true)}>Usuń postać</button>}
                   {readOnlyPreview && <span className="charactersReadonlyBadge">Podglad MG - tryb tylko do odczytu</span>}
                 </div>
                 {saving && <div className="charactersState">Zapisywanie zmian...</div>}
                 <CharacterSheetRouter detail={detail} onSave={onSave} saving={saving} readOnly={readOnlyPreview} />
                 {!readOnlyPreview && confirmDeleteOpen && (
                   <div className="charactersConfirmBox">
-                    <p>Czy na pewno chcesz usunac postac: <strong>{detail.name}</strong>?</p>
+                    <p>Czy na pewno chcesz usunac postać: <strong>{detail.name}</strong>?</p>
                     <div className="charactersActionsFooter">
                       <button type="button" className="charactersGhostBtn" disabled={deleting} onClick={() => setConfirmDeleteOpen(false)}>Anuluj</button>
                       <button type="button" className="charactersDangerBtn" disabled={deleting} onClick={onDelete}>{deleting ? "Usuwanie..." : "Potwierdz usuniecie"}</button>

@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { createCampaign, joinCampaign, listCampaigns, listPublicCampaigns, toggleCampaignFavorite } from "../api/campaigns";
@@ -158,7 +158,7 @@ export default function CampaignsPage() {
       limit: safeCount(campaign.playerLimit, 5),
       tags: [campaign.systemCode || "RPG", "Publiczna", "Wolne miejsca"],
       statusBadge: index % 3 === 0 ? "NOWE" : "AKTYWNA",
-      tone: ["violet", "blue", "amber", "green"][index % 4],
+      tone: ["sage", "blue", "amber", "green"][index % 4],
     }));
 
     if (publicFilter === "open") list = list.filter((campaign) => safeCount(campaign.players ?? campaign.playerCount) < safeCount(campaign.limit ?? campaign.playerLimit, 5));
@@ -463,7 +463,7 @@ function MyCampaignGrid({ campaigns, navigate, openCreate, onToggleFavorite }) {
         const members = Array.isArray(campaign.members) ? campaign.members : [];
         const role = campaignRole(campaign);
         return (
-          <article key={campaign.id} className={`campaignCard campaignCard--${["violet", "blue", "amber", "green", "slate"][index % 5]}`} onClick={() => navigate(`/campaigns/${campaign.id}`)} role="button" tabIndex={0}>
+          <article key={campaign.id} className={`campaignCard campaignCard--${["sage", "blue", "amber", "green", "slate"][index % 5]}`} onClick={() => navigate(`/campaigns/${campaign.id}`)} role="button" tabIndex={0}>
             <div className="campaignCard__visual" style={campaign.coverImageUrl ? { backgroundImage: `url(${campaign.coverImageUrl})` } : undefined}>
               <span className={`campaignRoleBadge ${role === "MG" ? "is-gm" : "is-player"}`}>{role}</span>
               <button
@@ -518,7 +518,7 @@ function PublicCampaignGrid({ campaigns, onJoin, joinLoading, onToggleFavorite }
         const isFull = players >= limit;
         const members = Array.isArray(campaign.members) ? campaign.members : [];
         return (
-          <article key={campaign.id} className={`campaignCard campaignCard--public campaignCard--${campaign.tone || ["violet", "blue", "amber", "green"][index % 4]}`}>
+          <article key={campaign.id} className={`campaignCard campaignCard--public campaignCard--${campaign.tone || ["sage", "blue", "amber", "green"][index % 4]}`}>
             <div className="campaignCard__visual" style={campaign.coverImageUrl ? { backgroundImage: `url(${campaign.coverImageUrl})` } : undefined}>
               <span className={`campaignStatusBadge is-${String(campaign.statusBadge || "AKTYWNA").toLowerCase()}`}>{campaign.statusBadge || "AKTYWNA"}</span>
               <button

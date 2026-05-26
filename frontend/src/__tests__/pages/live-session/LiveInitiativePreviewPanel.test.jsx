@@ -23,7 +23,7 @@ function renderPanel(props = {}) {
 describe("LiveInitiativePreviewPanel", () => {
   it("PLANNED shows locked state", () => {
     renderPanel({ sessionStatus: "PLANNED" });
-    expect(screen.getByText(/bedzie dostepny po rozpoczeciu sesji/i)).toBeInTheDocument();
+    expect(screen.getByText(/będzie dostępny po rozpoczęciu sesji/i)).toBeInTheDocument();
   });
 
   it("shows empty state when there is no active encounter", () => {
@@ -87,7 +87,7 @@ describe("LiveInitiativePreviewPanel", () => {
 
   it("FINISHED shows read-only ended state", () => {
     renderPanel({ sessionStatus: "FINISHED" });
-    expect(screen.getByText(/Sesja zakonczona/i)).toBeInTheDocument();
+    expect(screen.getByText(/Sesja zakończona/i)).toBeInTheDocument();
   });
 
   it("owner can change active encounter from selector", () => {

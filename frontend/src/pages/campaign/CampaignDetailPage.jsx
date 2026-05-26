@@ -69,7 +69,7 @@ export default function CampaignDetailPage() {
       setMaterials(Array.isArray(materialsData) ? materialsData : []);
       setPlayerNotes(Array.isArray(playerNotesData) ? playerNotesData : []);
     } catch (err) {
-      setError(err?.message || "Nie udalo sie pobrac workspace kampanii.");
+      setError(err?.message || "Nie uda�o si� pobrac workspace kampanii.");
     } finally {
       setLoading(false);
     }
@@ -102,7 +102,7 @@ export default function CampaignDetailPage() {
   }
 
   function handleDeleteCampaign() {
-    if (!window.confirm("Usunac kampanie (soft-delete)?")) return;
+    if (!window.confirm("Usu�ac kampanie (soft-delete)?")) return;
     return runAction(async () => {
       await deleteCampaign(token, campaignId);
       navigate("/campaigns");
@@ -112,21 +112,21 @@ export default function CampaignDetailPage() {
   function handleAssignCharacter(characterId) {
     return runAction(async () => {
       await assignCharacterToCampaign(token, campaignId, characterId);
-      setNotice("Przypisano postac.");
+      setNotice("Przypisano posta�.");
     });
   }
 
   function handleDetachCharacter(characterId) {
     return runAction(async () => {
       await detachCharacterFromCampaign(token, campaignId, characterId);
-      setNotice("Odpieto postac.");
+      setNotice("Odpieto posta�.");
     });
   }
 
   function handleCreateSession(payload) {
     return runAction(async () => {
       await createCampaignSession(token, campaignId, payload);
-      setNotice("Utworzono sesje.");
+      setNotice("Utwórzono sesje.");
     });
   }
 
@@ -140,7 +140,7 @@ export default function CampaignDetailPage() {
   function handleFinishSession(sessionId) {
     return runAction(async () => {
       await finishCampaignSession(token, campaignId, sessionId);
-      setNotice("Sesja zakonczona.");
+      setNotice("Sesja zako�czona.");
     });
   }
 
@@ -161,7 +161,7 @@ export default function CampaignDetailPage() {
   function handleDeletePlayerNote(noteId) {
     return runAction(async () => {
       await deleteCampaignPlayerNote(token, campaignId, noteId);
-      setNotice("Usunieto notatke.");
+      setNotice("Usu�ieto notatke.");
     });
   }
 
@@ -180,7 +180,7 @@ export default function CampaignDetailPage() {
       { key: "session", label: "Sesja" },
       { key: "characters", label: "Postacie" },
       { key: "players", label: "Gracze" },
-      ...(showMaterialsPanel ? [{ key: "materials", label: "Materialy" }] : []),
+      ...(showMaterialsPanel ? [{ key: "materials", label: "Materiały" }] : []),
       { key: "notes", label: "Notatki" },
       { key: "settings", label: "Ustawienia" },
     ]
@@ -188,7 +188,7 @@ export default function CampaignDetailPage() {
       { key: "session", label: "Sesja" },
       { key: "characters", label: "Postacie" },
       { key: "players", label: "Gracze" },
-      ...(showMaterialsPanel ? [{ key: "materials", label: "Materialy" }] : []),
+      ...(showMaterialsPanel ? [{ key: "materials", label: "Materiały" }] : []),
       { key: "notes", label: "Notatki" },
     ];
 
@@ -196,7 +196,7 @@ export default function CampaignDetailPage() {
     <div className="page campaignDetailsPage">
       <Link className="campaignDetailsGhostBtn" to="/campaigns">Powrot do kampanii</Link>
 
-      {loading && <div className="campaignDetailsState">Ladowanie workspace kampanii...</div>}
+      {loading && <div className="campaignDetailsState">�adowanie workspace kampanii...</div>}
       {error && <div className="campaignDetailsError">{error}</div>}
       {notice && <div className="campaignDetailsNotice">{notice}</div>}
 

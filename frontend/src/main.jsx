@@ -9,6 +9,7 @@ import "./styles/globals.css";
 import "./styles/ui.css";
 import "./styles/topnav.css";
 import "./styles/sidebar.css";
+import "./styles/redesign.css";
 import "./styles/glossary.css";
 import "./styles/dice.css";
 import "./styles/auth.css";
@@ -26,7 +27,7 @@ import "./styles/messages.css";
 
 import App from "./App";
 
-const storedTheme = localStorage.getItem("ttrpg_theme") || "dark";
+const storedTheme = localStorage.getItem("ttrpg_theme") || "light";
 document.documentElement.setAttribute("data-theme", storedTheme);
 
 ReactDOM.createRoot(document.getElementById("root")).render(

@@ -1,9 +1,9 @@
-﻿export default function CampaignMaterialsPanel({ materials, materialsAvailable = true }) {
+export default function CampaignMaterialsPanel({ materials, materialsAvailable = true }) {
   return (
     <section className="campaignDetailsCard panel-soft">
-      <h2 className="campaignDetailsCardTitle">Materialy kampanii</h2>
+      <h2 className="campaignDetailsCardTitle">Materiały kampanii</h2>
       {!materialsAvailable ? (
-        <div className="campaignDetailsEmpty">Materialy kampanii sa chwilowo niedostepne.</div>
+        <div className="campaignDetailsEmpty">Materiały kampanii są chwilowo niedostępne.</div>
       ) : materials.length === 0 ? (
         <div className="campaignDetailsEmpty">Brak materialow.</div>
       ) : (

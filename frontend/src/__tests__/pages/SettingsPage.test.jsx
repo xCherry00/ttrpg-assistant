@@ -41,8 +41,8 @@ function renderPage() {
 describe("SettingsPage v0.8.1", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    settingsApi.getMyProfile.mockResolvedValue({ email: "tester@example.com", chatNickColor: "#b26cff" });
-    settingsApi.updateChatNickColor.mockResolvedValue({ chatNickColor: "#b26cff" });
+    settingsApi.getMyProfile.mockResolvedValue({ email: "tester@example.com", chatNickColor: "#1f765f" });
+    settingsApi.updateChatNickColor.mockResolvedValue({ chatNickColor: "#1f765f" });
     settingsApi.deleteAccount.mockResolvedValue({ ok: true });
     vi.spyOn(window, "confirm").mockReturnValue(true);
   });
@@ -51,12 +51,12 @@ describe("SettingsPage v0.8.1", () => {
     renderPage();
 
     expect(await screen.findByRole("heading", { name: "Ustawienia" })).toBeInTheDocument();
-    expect(screen.getByText("Zarzadzaj kontem, bezpieczenstwem i wygladem aplikacji.")).toBeInTheDocument();
+    expect(screen.getByText("Zarządzaj kontem, bezpieczeństwem i wyglądem aplikacji.")).toBeInTheDocument();
 
     const categoriesPanel = screen.getByRole("heading", { name: "Kategorie" }).closest("aside");
     expect(within(categoriesPanel).getByRole("button", { name: /Konto/i })).toBeInTheDocument();
-    expect(within(categoriesPanel).getByRole("button", { name: /Bezpieczenstwo/i })).toBeInTheDocument();
-    expect(within(categoriesPanel).getByRole("button", { name: /Wyglad/i })).toBeInTheDocument();
+    expect(within(categoriesPanel).getByRole("button", { name: /Bezpieczeństwo/i })).toBeInTheDocument();
+    expect(within(categoriesPanel).getByRole("button", { name: /Wygląd/i })).toBeInTheDocument();
     expect(within(categoriesPanel).getByRole("button", { name: /Chat sesji/i })).toBeInTheDocument();
     expect(within(categoriesPanel).getByRole("button", { name: /Dane lokalne/i })).toBeInTheDocument();
     expect(within(categoriesPanel).getByRole("button", { name: /Strefa ryzyka/i })).toBeInTheDocument();
@@ -69,7 +69,7 @@ describe("SettingsPage v0.8.1", () => {
     expect(screen.queryByText(/Szybki dostep/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/^Status$/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Panel MG/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Profil uzytkownika/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Profil użytkownika/i)).not.toBeInTheDocument();
   });
 
   it("shows expected sections and keeps nickname color in chat section", async () => {
@@ -77,11 +77,11 @@ describe("SettingsPage v0.8.1", () => {
     await screen.findByRole("heading", { name: "Konto" });
 
     const categoriesPanel = screen.getByRole("heading", { name: "Kategorie" }).closest("aside");
-    fireEvent.click(within(categoriesPanel).getByRole("button", { name: /Bezpieczenstwo/i }));
-    expect(await screen.findByRole("heading", { name: "Bezpieczenstwo" })).toBeInTheDocument();
+    fireEvent.click(within(categoriesPanel).getByRole("button", { name: /Bezpieczeństwo/i }));
+    expect(await screen.findByRole("heading", { name: "Bezpieczeństwo" })).toBeInTheDocument();
 
-    fireEvent.click(within(categoriesPanel).getByRole("button", { name: /Wyglad/i }));
-    expect(await screen.findByRole("heading", { name: "Wyglad" })).toBeInTheDocument();
+    fireEvent.click(within(categoriesPanel).getByRole("button", { name: /Wygląd/i }));
+    expect(await screen.findByRole("heading", { name: "Wygląd" })).toBeInTheDocument();
     expect(screen.getByText("Ciemny")).toBeInTheDocument();
     expect(screen.getByText("Jasny")).toBeInTheDocument();
 
@@ -96,7 +96,7 @@ describe("SettingsPage v0.8.1", () => {
 
     fireEvent.click(within(categoriesPanel).getByRole("button", { name: /Strefa ryzyka/i }));
     expect(await screen.findByRole("heading", { name: "Strefa ryzyka" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Usun konto/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Usuń konto/i })).toBeInTheDocument();
   });
 
   it("requires confirmation for local data clear and account delete", async () => {
@@ -105,13 +105,13 @@ describe("SettingsPage v0.8.1", () => {
 
     const categoriesPanel = screen.getByRole("heading", { name: "Kategorie" }).closest("aside");
     fireEvent.click(within(categoriesPanel).getByRole("button", { name: /Dane lokalne/i }));
-    fireEvent.click(await screen.findByRole("button", { name: /Wyczysc cache aplikacji/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Wyczyść cache aplikacji/i }));
 
     expect(window.confirm).toHaveBeenCalled();
 
     fireEvent.click(within(categoriesPanel).getByRole("button", { name: /Strefa ryzyka/i }));
     fireEvent.change(await screen.findByPlaceholderText(/Podaj haslo/i), { target: { value: "secret123" } });
-    fireEvent.click(screen.getByRole("button", { name: /Usun konto/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Usuń konto/i }));
 
     await waitFor(() => {
       expect(settingsApi.deleteAccount).toHaveBeenCalledWith("test-token", "secret123");

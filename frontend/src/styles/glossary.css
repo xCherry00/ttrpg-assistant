@@ -1,8 +1,8 @@
 /* =========================================================
-   GLOSSARY — SPLIT VIEW
+   GLOSSARY â€” SPLIT VIEW
    ========================================================= */
 
-/* ─── COUNT BADGE ────────────────────────────────── */
+/* â”€â”€â”€ COUNT BADGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .glossaryCount {
   display: flex;
@@ -31,7 +31,7 @@
   color: var(--text-2);
 }
 
-/* ─── LAYOUT ─────────────────────────────────────── */
+/* â”€â”€â”€ LAYOUT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .glossarySplit {
   display: grid;
@@ -50,7 +50,7 @@
   }
 }
 
-/* ─── LEFT PANEL ─────────────────────────────────── */
+/* â”€â”€â”€ LEFT PANEL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .glossaryLeft {
   border-radius: var(--radius-xl);
@@ -135,7 +135,7 @@
 /* Empty */
 .glossaryEmpty { padding: 20px; text-align: center; }
 
-/* ─── LETTER GROUPS ──────────────────────────────── */
+/* â”€â”€â”€ LETTER GROUPS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .glossaryGroup { margin-bottom: 6px; }
 
@@ -149,7 +149,7 @@
   opacity: 0.8;
 }
 
-/* ─── ITEMS ──────────────────────────────────────── */
+/* â”€â”€â”€ ITEMS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .glossaryItem {
   width: 100%;
@@ -200,7 +200,7 @@
   font-weight: 500;
 }
 
-/* ─── RIGHT PANEL ────────────────────────────────── */
+/* â”€â”€â”€ RIGHT PANEL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .glossaryRight {
   border-radius: var(--radius-xl);
@@ -285,7 +285,7 @@
   font-weight: 600;
 }
 
-/* ─── LIGHT THEME ────────────────────────────────── */
+/* â”€â”€â”€ LIGHT THEME â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 :root[data-theme="light"] .glossaryLeft,
 :root[data-theme="light"] .glossaryRight {
@@ -313,4 +313,47 @@
 
 :root[data-theme="light"] .glossaryList::-webkit-scrollbar-thumb {
   background: rgba(88,69,33,0.18);
+}
+
+/* v0.9 visual unification: glossary reference */
+.glossaryPage {
+  color: var(--r-ink);
+}
+
+.glossarySearch,
+.glossaryList,
+.glossaryDetail,
+.glossaryCard,
+.glossaryEmpty {
+  border: 1px solid var(--r-line) !important;
+  border-radius: 8px !important;
+  background: var(--r-surface) !important;
+  color: var(--r-ink) !important;
+  box-shadow: var(--r-shadow-soft) !important;
+}
+
+.glossarySearch input,
+.glossarySearch select {
+  border-color: var(--r-line) !important;
+  background: #ffffff !important;
+  color: var(--r-ink) !important;
+  border-radius: 8px !important;
+}
+
+.glossaryCard:hover,
+.glossaryCard.is-active {
+  border-color: var(--r-line-strong) !important;
+  background: var(--r-primary-soft) !important;
+}
+
+.glossaryDetail h2,
+.glossaryCard strong {
+  color: var(--r-ink) !important;
+  font-family: var(--font-display) !important;
+}
+
+.glossaryDetail p,
+.glossaryCard span,
+.glossaryEmpty {
+  color: var(--r-ink-soft) !important;
 }

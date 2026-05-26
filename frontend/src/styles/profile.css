@@ -1,4 +1,4 @@
-﻿.profileV2Page {
+.profileV2Page {
   display: grid;
   gap: 14px;
 }
@@ -552,4 +552,108 @@
   .profileIdentityMeta strong {
     text-align: left;
   }
+}
+
+/* v0.9 visual unification: profile/social */
+.profilePage,
+.friendsPage,
+.publicUserPage,
+.messagesPage {
+  color: var(--r-ink);
+}
+
+.profileHero,
+.profilePanel,
+.profileCard,
+.profileActivityItem,
+.friendsPanel,
+.friendsCard,
+.friendsUserCard,
+.publicUserHero,
+.publicUserPanel,
+.messagesShell,
+.messagesSidebar,
+.messagesConversation,
+.messagesDetails,
+.messagesCard {
+  border: 1px solid var(--r-line) !important;
+  border-radius: 8px !important;
+  background: var(--r-surface) !important;
+  color: var(--r-ink) !important;
+  box-shadow: var(--r-shadow-soft) !important;
+  backdrop-filter: none !important;
+}
+
+.profileHero h1,
+.profilePanel h2,
+.profilePanel h3,
+.friendsPanel h2,
+.friendsPanel h3,
+.publicUserHero h1,
+.messagesSidebar h2,
+.messagesConversation h2,
+.messagesDetails h2 {
+  color: var(--r-ink) !important;
+  font-family: var(--font-display) !important;
+  letter-spacing: 0 !important;
+}
+
+.profileHero p,
+.profilePanel p,
+.profileActivityItem small,
+.friendsPanel p,
+.friendsUserCard span,
+.publicUserHero p,
+.messagesHint,
+.messagesPreview,
+.messagesMeta {
+  color: var(--r-ink-soft) !important;
+}
+
+.profilePage input,
+.profilePage select,
+.profilePage textarea,
+.friendsPage input,
+.friendsPage select,
+.friendsPage textarea,
+.messagesPage input,
+.messagesPage select,
+.messagesPage textarea {
+  border-color: var(--r-line) !important;
+  background: #ffffff !important;
+  color: var(--r-ink) !important;
+  border-radius: 8px !important;
+}
+
+.profilePage button,
+.friendsPage button,
+.publicUserPage button,
+.messagesPage button {
+  border-radius: 8px;
+}
+
+.profilePrimaryBtn,
+.friendsPrimaryBtn,
+.messagesPrimaryBtn,
+.messagesSendBtn {
+  border-color: transparent !important;
+  background: linear-gradient(135deg, var(--r-primary), var(--r-primary-2)) !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 22px rgba(31, 118, 95, 0.16) !important;
+}
+
+.profileGhostBtn,
+.friendsGhostBtn,
+.messagesGhostBtn {
+  border: 1px solid var(--r-line) !important;
+  background: #ffffff !important;
+  color: var(--r-ink) !important;
+  box-shadow: none !important;
+}
+
+.messagesConversationItem:hover,
+.messagesConversationItem.is-active,
+.friendsUserCard:hover {
+  border-color: var(--r-line-strong) !important;
+  background: var(--r-primary-soft) !important;
 }

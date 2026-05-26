@@ -218,7 +218,7 @@ export default function FriendsPage() {
       </section>
 
       {error && <div className="friendsState friendsState--error">{error}</div>}
-      {loading && <div className="friendsState">Ladowanie sekcji znajomych...</div>}
+      {loading && <div className="friendsState">Ładowanie sekcji znajomych...</div>}
 
       {!loading && tab === "friends" && (
         <section className="friendsList">
@@ -315,7 +315,7 @@ export default function FriendsPage() {
           {visibleDiscover.length === 0 && (
             <div className="friendsState">
               <p>Brak propozycji</p>
-              <p>Sugestie pojawia sie, gdy bedziesz wspoldzielic kampanie z innymi uzytkownikami.</p>
+              <p>Sugestie pojawią się, gdy bedziesz współdzielić kampanie z innymi użytkownikami.</p>
             </div>
           )}
           {visibleDiscover.map((user) => (

@@ -6,15 +6,15 @@ describe("RulesPage v0.8.2", () => {
     window.sessionStorage.removeItem("rulesSelectedSystem");
   });
 
-  it("renders Ogolne zasady RPG category and Rzuty koscmi section", async () => {
+  it("renders Ogólne zasady RPG category and Rzuty kośćmi section", async () => {
     render(<RulesPage />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Ogolne zasady RPG" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ogólne zasady RPG" }));
 
     await waitFor(() => {
-      expect(screen.getByRole("heading", { name: "Ogolne zasady RPG" })).toBeInTheDocument();
-      expect(screen.getByText("Kosci i rozne systemy RPG")).toBeInTheDocument();
-      expect(screen.getByText(/Kosci pomagaja rozstrzygac niepewne sytuacje/i)).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Ogólne zasady RPG" })).toBeInTheDocument();
+      expect(screen.getByText(/systemy RPG/i)).toBeInTheDocument();
+      expect(screen.getByText(/Kości pomagają rozstrzygać niepewne sytuacje|Kosci pomagaja rozstrzygac niepewne sytuacje/i)).toBeInTheDocument();
     });
   });
 

@@ -28,12 +28,12 @@ describe("CampaignSessionsPanel", () => {
     expect(screen.getByText("S1")).toBeInTheDocument();
     expect(screen.getByText("PLANNED")).toBeInTheDocument();
     expect(screen.getByText("IN_PROGRESS")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Dolacz do aktywnej sesji" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Dołącz do aktywnej sesji" })).toHaveAttribute(
       "href",
       "/campaigns/10/sessions/3/live",
     );
     expect(screen.getByRole("button", { name: /Sesja jeszcze nie rozpoczeta/i })).toBeDisabled();
-    expect(screen.getByText("Sesja zakonczona (archiwalna).")).toBeInTheDocument();
+    expect(screen.getByText("Sesja zakończona (archiwalna).")).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "Moje notatki" })).toHaveLength(1);
   });
 
@@ -66,7 +66,7 @@ describe("CampaignSessionsPanel", () => {
       expect(onSaveMySessionNote).toHaveBeenCalledWith(4, { title: "T", content: "C" });
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Usun notatke" }));
+    fireEvent.click(screen.getByRole("button", { name: "Usuń notatke" }));
     await waitFor(() => {
       expect(onDeleteMySessionNote).toHaveBeenCalledWith(4);
     });

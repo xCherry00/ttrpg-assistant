@@ -26,7 +26,7 @@ export default function CampaignEncounterPanel({
         <div className="initSystemBlock">
           <span className="initControlLabel">Kampania</span>
           {campaignLoading ? (
-            <div>Ladowanie kampanii...</div>
+            <div>Ładowanie kampanii...</div>
           ) : (
             <select className="cellSelect" value={selectedCampaignId} onChange={(event) => onCampaignChange(event.target.value)}>
               {campaigns.map((item) => (
@@ -47,7 +47,7 @@ export default function CampaignEncounterPanel({
             <input className="cellInput" value={encounterForm.systemCode} onChange={(e) => onEncounterFormChange({ ...encounterForm, systemCode: e.target.value })} />
           </label>
           <button className="btn btn-primary" disabled={!selectedCampaignId || createEncounterBusy} type="submit">
-            {createEncounterBusy ? "Tworzenie..." : "Utworz encounter"}
+            {createEncounterBusy ? "Tworzenie..." : "Utwórz encounter"}
           </button>
         </form>
       </section>
@@ -56,7 +56,7 @@ export default function CampaignEncounterPanel({
         <div className="initSystemBlock">
           <span className="initControlLabel">Encounter</span>
           {encounterLoading ? (
-            <div>Ladowanie encounterow...</div>
+            <div>Ładowanie encounterów...</div>
           ) : (
             <select className="cellSelect" value={selectedEncounterId} onChange={(event) => onEncounterChange(event.target.value)}>
               <option value="">- wybierz encounter -</option>
@@ -72,22 +72,22 @@ export default function CampaignEncounterPanel({
 
         <div className="initToolbar">
           <button className="btn" onClick={() => onTurnAction("previous-turn")} disabled={!selectedEncounterId || !!actionBusy} type="button">{"<-"} Poprzednia</button>
-          <button className="btn" onClick={() => onTurnAction("next-turn")} disabled={!selectedEncounterId || !!actionBusy} type="button">Nastepna {"->"}</button>
-          <button className="btn" onClick={() => onEncounterAction("finish-encounter")} disabled={!selectedEncounterId || !!actionBusy} type="button">Zakoncz</button>
-          <button className="btn" onClick={() => onEncounterAction("delete-encounter")} disabled={!selectedEncounterId || !!actionBusy} type="button">Usun</button>
+          <button className="btn" onClick={() => onTurnAction("next-turn")} disabled={!selectedEncounterId || !!actionBusy} type="button">Następna {"->"}</button>
+          <button className="btn" onClick={() => onEncounterAction("finish-encounter")} disabled={!selectedEncounterId || !!actionBusy} type="button">Zakończ</button>
+          <button className="btn" onClick={() => onEncounterAction("delete-encounter")} disabled={!selectedEncounterId || !!actionBusy} type="button">Usuń</button>
         </div>
       </section>
 
       {selectedCampaign && !selectedEncounterId && !encounterLoading && (
         <div className="empty">
-          <div className="emptyTitle">Brak encounterow</div>
-          <div className="emptyText">Utworz pierwszy encounter dla kampanii: {selectedCampaign.title}.</div>
+          <div className="emptyTitle">Brak encounterów</div>
+          <div className="emptyText">Utwórz pierwszy encounter dla kampanii: {selectedCampaign.title}.</div>
         </div>
       )}
 
       {activeEncounter && (
         <div className="initMeta">
-          Encounter: {activeEncounter.name} • status: {activeEncounter.status} • runda: {activeEncounter.roundNumber} • aktywni: {activeParticipantsCount}
+          Encounter: {activeEncounter.name} â€˘ status: {activeEncounter.status} â€˘ runda: {activeEncounter.roundNumber} â€˘ aktywni: {activeParticipantsCount}
         </div>
       )}
     </>

@@ -1,1 +1,1 @@
-﻿export { default } from "./campaign/CampaignDetailPage";
+export { default } from "./campaign/CampaignDetailPage";

@@ -20,7 +20,7 @@ describe("CharacterSidebar", () => {
     const button = screen.getByRole("button", { name: /Lyra/i });
     fireEvent.click(button);
     expect(onSelect).toHaveBeenCalledWith(7);
-    expect(screen.getByRole("button", { name: "Drukuj" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Pobierz PDF/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "+ Nowa postać" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Importuj JSON" })).toBeInTheDocument();
   });
 });

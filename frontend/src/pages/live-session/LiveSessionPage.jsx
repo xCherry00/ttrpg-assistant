@@ -136,7 +136,7 @@ export default function LiveSessionPage() {
         });
         setRequestedRolls(Array.isArray(requestedRollsData) ? requestedRollsData : []);
       } catch (err) {
-        setError(err?.message || "Nie udalo sie zaladowac live session.");
+        setError(err?.message || "Nie udało się załadować sesji live.");
       } finally {
         setLoading(false);
       }
@@ -171,7 +171,7 @@ export default function LiveSessionPage() {
       await reloadSessionData();
       setNotice("Sesja rozpoczeta.");
     } catch (err) {
-      setError(err?.message || "Nie udalo sie rozpoczac sesji.");
+      setError(err?.message || "Nie udało się rozpocząć sesji.");
     } finally {
       setSessionActionBusy(false);
     }
@@ -184,9 +184,9 @@ export default function LiveSessionPage() {
     try {
       await finishCampaignSession(token, campaignId, sessionId);
       await reloadSessionData();
-      setNotice("Sesja zakonczona.");
+      setNotice("Sesja zakończona.");
     } catch (err) {
-      setError(err?.message || "Nie udalo sie zakonczyc sesji.");
+      setError(err?.message || "Nie udało się zakończyć sesji.");
     } finally {
       setSessionActionBusy(false);
     }
@@ -216,7 +216,7 @@ export default function LiveSessionPage() {
     };
 
     if (targetMode === "CHARACTER" && payload.targetCharacterIds.length === 0) {
-      setError("Wybierz co najmniej jedna postac.");
+      setError("Wybierz co najmniej jedną postać.");
       return;
     }
     if (targetMode === "USER" && payload.targetUserIds.length === 0) {
@@ -230,14 +230,14 @@ export default function LiveSessionPage() {
     try {
       await createRequestedRoll(token, campaignId, sessionId, payload);
       await reloadSessionData();
-      setNotice("Rzut zostal wyslany do graczy.");
+      setNotice("Rzut został wysłany do graczy.");
       setShowQuickRollPanel(false);
       setTargetMode("ALL");
       setSelectedCharacterIds([]);
       setSelectedUserIds([]);
       event.currentTarget.reset();
     } catch (err) {
-      setError(err?.message || "Nie udalo sie utworzyc requested roll.");
+      setError(err?.message || "Nie udało się utwórzyc requested roll.");
     } finally {
       setRequestedActionBusy(false);
     }
@@ -252,7 +252,7 @@ export default function LiveSessionPage() {
       await reloadSessionData();
       setNotice("Requested roll wykonany.");
     } catch (err) {
-      setError(err?.message || "Nie udalo sie wykonac requested roll.");
+      setError(err?.message || "Nie udało się wykonać requested roll.");
     } finally {
       setRequestedActionBusy(false);
     }
@@ -267,7 +267,7 @@ export default function LiveSessionPage() {
       await reloadSessionData();
       setNotice("Requested roll anulowany.");
     } catch (err) {
-      setError(err?.message || "Nie udalo sie anulowac requested roll.");
+      setError(err?.message || "Nie udało się anulować requested roll.");
     } finally {
       setRequestedActionBusy(false);
     }
@@ -282,11 +282,11 @@ export default function LiveSessionPage() {
           <p className="pageSubtitle">
             Sesja: {session?.title || `#${sessionId}`} ({sessionStatusLabel(session?.status)})
           </p>
-          {isPlanned && <p className="campaignDetailsEmpty">Sesja jest zaplanowana i jeszcze sie nie rozpoczela.</p>}
-          {isFinished && <p className="campaignDetailsEmpty">Sesja zakonczona. Widok tylko do odczytu.</p>}
+          {isPlanned && <p className="campaignDetailsEmpty">Sesja jest zaplanowana i jeszcze się nie rozpoczęła.</p>}
+          {isFinished && <p className="campaignDetailsEmpty">Sesja zakończona. Widok tylko do odczytu.</p>}
         </div>
         <div>
-          <Link className="campaignDetailsGhostBtn" to={`/campaigns/${campaignId}`}>Wroc do kampanii</Link>
+          <Link className="campaignDetailsGhostBtn" to={`/campaigns/${campaignId}`}>Wróć do kampanii</Link>
           {isPlanned && isGmView && (
             <button className="campaignDetailsPrimaryBtn" type="button" onClick={handleStartSession} disabled={sessionActionBusy}>
               Rozpocznij sesje
@@ -294,13 +294,13 @@ export default function LiveSessionPage() {
           )}
           {isInProgress && isGmView && (
             <button className="campaignDetailsDangerBtn" type="button" onClick={handleFinishSession} disabled={sessionActionBusy}>
-              Zakoncz sesje
+              Zakończ sesje
             </button>
           )}
         </div>
       </div>
 
-      {loading && <div className="liveSessionState">Ladowanie live session...</div>}
+      {loading && <div className="liveSessionState">Ładowanie sesji live...</div>}
       {error && <div className="campaignDetailsError">{error}</div>}
       {notice && <div className="campaignDetailsNotice">{notice}</div>}
 
@@ -332,7 +332,7 @@ export default function LiveSessionPage() {
                     });
                     setNotice("Scena zapisana.");
                   } catch (err) {
-                    setError(err?.message || "Nie udalo sie zapisac sceny.");
+                    setError(err?.message || "Nie udało się zapisać sceny.");
                   } finally {
                     setSavingScene(false);
                   }
@@ -413,7 +413,7 @@ export default function LiveSessionPage() {
             </section>
           ) : (
             <section className="campaignDetailsCard panel-soft liveSessionPartyPanel">
-              <h2 className="campaignDetailsCardTitle">Moja postac</h2>
+              <h2 className="campaignDetailsCardTitle">Moja postać</h2>
               {myCharacters.length === 0 ? (
                 <div className="campaignDetailsEmpty">Nie masz przypisanej postaci w tej kampanii.</div>
               ) : (
@@ -421,12 +421,12 @@ export default function LiveSessionPage() {
                   {myCharacters.map((character) => (
                     <article key={character.characterId} className="campaignMaterialCard liveSessionCharacterCard">
                       {character.portraitUrl ? (
-                        <img src={character.portraitUrl} alt={character.characterName || "Postac"} className="liveSessionCharacterAvatar" />
+                        <img src={character.portraitUrl} alt={character.characterName || "Postać"} className="liveSessionCharacterAvatar" />
                       ) : (
                         <div className="liveSessionCharacterAvatarPlaceholder">Brak avatara</div>
                       )}
                       <div className="campaignMaterialMeta">
-                        <strong>{character.characterName || "Postac"}</strong>
+                        <strong>{character.characterName || "Postać"}</strong>
                         <span>Poziom: {character.level ?? "-"}</span>
                         <span>System: {character.systemCode || "-"}</span>
                       </div>
@@ -439,8 +439,8 @@ export default function LiveSessionPage() {
 
           <section className="campaignDetailsCard panel-soft liveSessionRequestsPanel">
             <h2 className="campaignDetailsCardTitle">{isGmView ? "Requested Rolls" : "Moje rzuty"}</h2>
-            {isPlanned && <p className="liveSessionPlaceholder">Rzuty beda dostepne po rozpoczeciu sesji przez MG.</p>}
-            {isFinished && <p className="liveSessionPlaceholder">Sesja zakonczona. Lista rzutow pozostaje tylko do odczytu.</p>}
+            {isPlanned && <p className="liveSessionPlaceholder">Rzuty będą dostępne po rozpoczęciu sesji przez MG.</p>}
+            {isFinished && <p className="liveSessionPlaceholder">Sesja zakończona. Lista rzutów pozostaje tylko do odczytu.</p>}
 
             {isInProgress && isGmView && (
               <>
@@ -455,9 +455,9 @@ export default function LiveSessionPage() {
                 {showQuickRollPanel && (
                   <form className="campaignFormCard liveSessionQuickRollPanel" onSubmit={handleCreateRequestedRoll}>
                     <label className="campaignField"><span>Etykieta rzutu</span><input name="rollLabel" maxLength={160} required /></label>
-                    <label className="campaignField"><span>Trudnosc / DC</span><input name="dc" type="number" min="0" /></label>
+                    <label className="campaignField"><span>Trudność / DC</span><input name="dc" type="number" min="0" /></label>
                     <label className="campaignField"><span>Typ rzutu</span><input name="rollType" defaultValue="SKILL" maxLength={40} /></label>
-                    <label className="campaignField"><span>Wyrazenie rzutu</span><input name="rollExpression" defaultValue={campaign?.systemCode === "dnd5e" ? "1d20" : ""} maxLength={120} /></label>
+                    <label className="campaignField"><span>Wyrażenie rzutu</span><input name="rollExpression" defaultValue={campaign?.systemCode === "dnd5e" ? "1d20" : ""} maxLength={120} /></label>
                     <label className="campaignField">
                       <span>Do kogo?</span>
                       <select value={targetMode} onChange={(event) => setTargetMode(event.target.value)}>
@@ -476,7 +476,7 @@ export default function LiveSessionPage() {
                               checked={selectedCharacterIds.includes(Number(character.characterId))}
                               onChange={() => toggleSelected(setSelectedCharacterIds, Number(character.characterId))}
                             />
-                            <span>{character.characterName || `Postac #${character.characterId}`}</span>
+                            <span>{character.characterName || `Postać #${character.characterId}`}</span>
                           </label>
                         ))}
                       </div>
@@ -513,7 +513,7 @@ export default function LiveSessionPage() {
                     ) : null}
 
                     <button className="campaignDetailsPrimaryBtn" type="submit" disabled={requestedActionBusy}>
-                      Wyslij do graczy
+                      Wyślij do graczy
                     </button>
                   </form>
                 )}
@@ -528,7 +528,7 @@ export default function LiveSessionPage() {
                     <span className="campaignMemberBadge">{roll.status}</span>
                   </div>
                   {isGmView ? <p>Cel: {roll.characterName || roll.targetName || "-"}</p> : null}
-                  {roll.dcVisible && roll.dc != null && <p>Trudnosc: {roll.dc}</p>}
+                  {roll.dcVisible && roll.dc != null && <p>Trudność: {roll.dc}</p>}
                   {roll.resultTotal != null && <p>Wynik: {roll.resultTotal}{roll.success != null ? ` (${roll.success ? "SUCCESS" : "FAIL"})` : ""}</p>}
 
                   {isInProgress && !isGmView && roll.status === "PENDING" && (
@@ -544,16 +544,16 @@ export default function LiveSessionPage() {
           </section>
 
           <section className="campaignDetailsCard panel-soft liveSessionHistoryPanel">
-            <h2 className="campaignDetailsCardTitle">Historia rzutow</h2>
+            <h2 className="campaignDetailsCardTitle">Historia rzutów</h2>
             {recentRolls.length === 0 ? (
-              <p className="liveSessionPlaceholder">Brak rzutow sesji albo podglad historii jest niedostepny.</p>
+              <p className="liveSessionPlaceholder">Brak rzutów sesji albo podgląd historii jest niedostępny.</p>
             ) : (
               <div className="campaignMaterialList">
                 {recentRolls.map((roll) => (
                   <article key={roll.id || `${roll.createdAt}-${roll.rollExpression}`} className="campaignMaterialCard">
                     <strong>{roll.rollLabel || roll.rollType || "Rzut"}</strong>
-                    <p>Rzucal: {roll.rolledByUsername || `User #${roll.rolledByUserId ?? "-"}`}</p>
-                    <p>Postac: {roll.characterName || roll.characterId || "-"}</p>
+                    <p>Rzucał: {roll.rolledByUsername || `User #${roll.rolledByUserId ?? "-"}`}</p>
+                    <p>Postać: {roll.characterName || roll.characterId || "-"}</p>
                     <p>Wynik: {roll.total ?? "?"}</p>
                     <p>Data: {formatDateTime(roll.createdAt)}</p>
                   </article>
@@ -563,12 +563,12 @@ export default function LiveSessionPage() {
           </section>
 
           <section className="campaignDetailsCard panel-soft liveSessionStatsPanel">
-            <h2 className="campaignDetailsCardTitle">Statystyki rzutow</h2>
+            <h2 className="campaignDetailsCardTitle">Statystyki rzutów</h2>
             <div className="liveSessionStatsGrid">
-              <p>Liczba rzutow: <strong>{rollStats.count}</strong></p>
-              <p>Sredni wynik: <strong>{rollStats.average ?? "-"}</strong></p>
-              <p>Najwyzszy wynik: <strong>{rollStats.highest ?? "-"}</strong></p>
-              <p>Najnizszy wynik: <strong>{rollStats.lowest ?? "-"}</strong></p>
+              <p>Liczba rzutów: <strong>{rollStats.count}</strong></p>
+              <p>Średni wynik: <strong>{rollStats.average ?? "-"}</strong></p>
+              <p>Najwyższy wynik: <strong>{rollStats.highest ?? "-"}</strong></p>
+              <p>Najniższy wynik: <strong>{rollStats.lowest ?? "-"}</strong></p>
             </div>
             {rollStats.perPlayer.length === 0 ? (
               <p className="liveSessionPlaceholder">Brak danych per gracz.</p>
@@ -590,7 +590,7 @@ export default function LiveSessionPage() {
           {!isGmView && isFinished && (
             <section className="campaignDetailsCard panel-soft">
               <h2 className="campaignDetailsCardTitle">Po sesji</h2>
-              <p className="liveSessionPlaceholder">Sesja zostala zakonczona. Mozesz dodac notatki po sesji.</p>
+              <p className="liveSessionPlaceholder">Sesja została zakończona. Możesz dodać notatki po sesji.</p>
               <Link className="campaignDetailsPrimaryBtn" to={`/campaigns/${campaignId}`}>Dodaj notatki po sesji</Link>
             </section>
           )}

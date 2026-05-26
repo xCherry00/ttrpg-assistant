@@ -15,8 +15,8 @@ function allegianceLabel(type) {
 }
 
 function statusMessage(sessionStatus) {
-  if (sessionStatus === "PLANNED") return "Podglad inicjatywy bedzie dostepny po rozpoczeciu sesji.";
-  if (sessionStatus === "FINISHED") return "Sesja zakonczona. Podglad inicjatywy jest w trybie read-only.";
+  if (sessionStatus === "PLANNED") return "Podglad inicjatywy będzie dostępny po rozpoczęciu sesji.";
+  if (sessionStatus === "FINISHED") return "Sesja zakończona. Podglad inicjatywy jest w trybie read-only.";
   return "";
 }
 
@@ -62,7 +62,7 @@ export default function LiveInitiativePreviewPanel({
         <h2 className="campaignDetailsCardTitle">Initiative Preview</h2>
         {isOwner && (
           <Link className="campaignDetailsGhostBtn" to="/initiative">
-            Otworz szybki tracker MG
+            Otwórz szybki tracker MG
           </Link>
         )}
       </div>
@@ -89,18 +89,18 @@ export default function LiveInitiativePreviewPanel({
       )}
 
       {message && <p className="liveSessionPlaceholder">{message}</p>}
-      {loading && <p className="liveSessionPlaceholder">Ladowanie podgladu inicjatywy...</p>}
+      {loading && <p className="liveSessionPlaceholder">Ładowanie podglądu inicjatywy...</p>}
 
       {!loading && !liveState?.activeEncounterId && (
         <p className="liveSessionPlaceholder">
           Brak aktywnego starcia dla tej sesji.
           {isOwner && encounters.length > 0 ? " Wybierz encounter z listy powyzej." : ""}
-          {isOwner && encounters.length === 0 ? " Globalny /initiative dziala jako szybki lokalny tracker i nie zapisuje encounterow kampanijnych." : ""}
+          {isOwner && encounters.length === 0 ? " Globalny /initiative dziala jako szybki lokalny tracker i nie zapisuje encounterów kampanijnych." : ""}
         </p>
       )}
 
       {!loading && liveState?.activeEncounterId && !encounter && (
-        <p className="liveSessionPlaceholder">Nie udalo sie pobrac danych aktywnego starcia.</p>
+        <p className="liveSessionPlaceholder">Nie udało się pobrac danych aktywnego starcia.</p>
       )}
 
       {!loading && encounter && isOwner && (
@@ -141,7 +141,7 @@ export default function LiveInitiativePreviewPanel({
                   <strong>{participant.name || "Unknown participant"}</strong>
                   <span className="campaignMemberBadge">{allegianceLabel(participant.participantType)}</span>
                 </div>
-                <p>{index === 0 ? "Aktualna tura" : `Nastepny #${index}`}</p>
+                <p>{index === 0 ? "Aktualna tura" : `Następny #${index}`}</p>
                 <p>Typ: {normalizeParticipantType(participant.participantType)}</p>
               </article>
             ))}

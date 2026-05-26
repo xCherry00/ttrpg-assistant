@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { getMe } from "../api/me";
@@ -45,7 +45,7 @@ function formatSessionStatus(status) {
   const normalized = normalizeStatus(status);
   if (normalized === "IN_PROGRESS") return "Trwa";
   if (normalized === "PLANNED") return "Zaplanowana";
-  if (normalized === "FINISHED") return "Zakonczona";
+  if (normalized === "FINISHED") return "Zakończona";
   return normalized || "Nieznany";
 }
 
@@ -76,7 +76,7 @@ function fallbackCharacterSubtitle(character) {
   if (character?.className && character?.raceName) return `${character.raceName} / ${character.className}`;
   if (character?.occupationName) return character.occupationName;
   if (character?.className) return character.className;
-  return "Brak szczegolow";
+  return "Brak szczegółów";
 }
 
 function pickSessionImage(session) {
@@ -133,7 +133,7 @@ function ExpandableTile({ title, count, description, expanded, onToggle, childre
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <span className="dashboardTag">{count}</span>
           <button type="button" className="campaignDetailsGhostBtn" onClick={onToggle}>
-            {expanded ? "Zwin" : "Rozwin"}
+            {expanded ? "Zwiń" : "Rozwiń"}
           </button>
         </div>
       </header>
@@ -149,7 +149,6 @@ export default function DashboardPage() {
   const { token, logout } = useAuth();
   const navigate = useNavigate();
 
-  const [me, setMe] = useState(null);
   const [campaigns, setCampaigns] = useState([]);
   const [characters, setCharacters] = useState([]);
   const [sessions, setSessions] = useState([]);
@@ -177,10 +176,8 @@ export default function DashboardPage() {
       setError("");
 
       try {
-        const meResponse = await getMe(token);
+        await getMe(token);
         if (cancelled) return;
-
-        setMe(meResponse);
 
         const [campaignResult, characterResult] = await Promise.allSettled([
           listCampaigns(token),
@@ -231,7 +228,7 @@ export default function DashboardPage() {
           navigate("/login", { replace: true });
           return;
         }
-        setError(err?.message || "Nie udalo sie odswiezyc danych dashboardu.");
+        setError(err?.message || "Nie udało się odświeżyć danych dashboardu.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -293,7 +290,7 @@ export default function DashboardPage() {
       } catch (err) {
         if (cancelled) return;
         setAttendance(null);
-        setAttendanceError(err?.message || "Brak danych o dostepnosci dla najblizszej sesji.");
+        setAttendanceError(err?.message || "Brak danych o dostępności dla najbliższej sesji.");
       } finally {
         if (!cancelled) setAttendanceLoading(false);
       }
@@ -319,11 +316,11 @@ export default function DashboardPage() {
     const minimumForSession = Math.ceil(Math.max(0, totalMembers) / 2);
     const availabilityPct = totalMembers > 0 ? Math.round((available / totalMembers) * 100) : 0;
 
-    let status = "W trakcie glosowania";
+    let status = "W trakcie głosowania";
     if (available === 0 && unavailable === 0 && maybe === 0) {
       status = "Brak odpowiedzi";
     } else if (available >= minimumForSession && minimumForSession > 0) {
-      status = "Sesja moze sie odbyc";
+      status = "Sesja może się odbyć";
     } else {
       status = "Sesja zagrozona";
     }
@@ -344,20 +341,20 @@ export default function DashboardPage() {
     setExpandedTiles((prev) => ({ ...prev, [key]: !prev[key] }));
   }
 
-  const heroTitle = hero.mode === "active" ? "Aktywna sesja" : hero.mode === "planned" ? "Najblizsza sesja" : "Brak aktywnej lub zaplanowanej sesji";
+  const heroTitle = hero.mode === "active" ? "Aktywna sesja" : hero.mode === "planned" ? "Najbliższa sesja" : "Brak aktywnej lub zaplanowanej sesji";
   const heroSession = hero.session;
   const heroImage = pickSessionImage(heroSession) || heroSession?.campaignCoverImageUrl || "";
   const attendanceChartItems = attendanceSummary ? [
-    { label: "Dostepni", value: attendanceSummary.available, color: "#22c55e" },
-    { label: "Moze", value: attendanceSummary.maybe, color: "#f59e0b" },
-    { label: "Niedostepni", value: attendanceSummary.unavailable, color: "#ef4444" },
+    { label: "Dostępni", value: attendanceSummary.available, color: "#1f765f" },
+    { label: "Może", value: attendanceSummary.maybe, color: "#b88734" },
+    { label: "Niedostępni", value: attendanceSummary.unavailable, color: "#c85c4a" },
     { label: "Bez odpowiedzi", value: attendanceSummary.noResponse, color: "#64748b" },
   ] : [];
   const roleChartItems = [
-    { label: "Jako MG", value: roleStats.asOwner, color: "#8b5cf6" },
-    { label: "Jako gracz", value: roleStats.asMember, color: "#3b82f6" },
+    { label: "Jako MG", value: roleStats.asOwner, color: "#1f765f" },
+    { label: "Jako gracz", value: roleStats.asMember, color: "#536fae" },
   ];
-  const systemChartPalette = ["#60a5fa", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6", "#14b8a6"];
+  const systemChartPalette = ["#536fae", "#1f765f", "#b88734", "#c85c4a", "#64c3b3", "#718078"];
   const activeSystemRows = systemsTab === "campaigns" ? campaignSystems : characterSystems;
   const activeSystemTotal = systemsTab === "campaigns" ? campaigns.length : characters.length;
   const activeSystemChartItems = activeSystemRows.map((item, index) => ({
@@ -380,17 +377,17 @@ export default function DashboardPage() {
                   {hero.mode === "active" ? (
                     <Link className="dashboardHero__primary" to={`/campaigns/${heroSession.campaignId}/sessions/${heroSession.id}/live`}>
                       <DashboardIcon name="play" />
-                      Dolacz do sesji
+                      Dołącz do sesji
                     </Link>
                   ) : (
                     <Link className="dashboardHero__primary" to={`/campaigns/${heroSession.campaignId}`}>
                       <DashboardIcon name="calendar" />
-                      Otworz sesje
+                      Otwórz sesję
                     </Link>
                   )}
                   <Link className="dashboardHero__secondary" to={`/campaigns/${heroSession.campaignId}`}>
                     <DashboardIcon name="users" />
-                    Otworz kampanie
+                    Otwórz kampanię
                   </Link>
                 </div>
               </>
@@ -401,7 +398,7 @@ export default function DashboardPage() {
                 <div className="dashboardHero__actions">
                   <Link className="dashboardHero__secondary" to="/campaigns">
                     <DashboardIcon name="users" />
-                    Przejdz do kampanii
+                    Przejdź do kampanii
                   </Link>
                 </div>
               </>
@@ -434,7 +431,7 @@ export default function DashboardPage() {
                     <strong>{campaign.title || "Kampania"}</strong>
                     <small>{getCampaignRoleLabel(campaign)} • {(campaign.systemCode || "-").toUpperCase()}</small>
                   </span>
-                  <span className="dashboardTag">Otworz</span>
+                  <span className="dashboardTag">Otwórz</span>
                 </Link>
               ))}
             </div>
@@ -454,19 +451,19 @@ export default function DashboardPage() {
               ) : characters.slice(0, TILE_PREVIEW_LIMIT).map((character) => (
                 <Link key={character.id} to="/characters" className="dashboardMaterialItem">
                   <span>
-                    <strong>{character.name || "Postac"}</strong>
+                    <strong>{character.name || "Postać"}</strong>
                     <small>{(character.systemCode || "-").toUpperCase()}</small>
                     <small>{fallbackCharacterSubtitle(character)}</small>
                     <small>{character.campaignTitle || "Brak kampanii"}</small>
                   </span>
-                  <span className="dashboardTag">Otworz</span>
+                  <span className="dashboardTag">Otwórz</span>
                 </Link>
               ))}
             </div>
           </ExpandableTile>
 
           <ExpandableTile
-            title="Nadchodzace sesje"
+            title="Nadchodzące sesje"
             count={plannedSessions.length}
             description="Sesje zaplanowane"
             expanded={expandedTiles.upcoming}
@@ -483,7 +480,7 @@ export default function DashboardPage() {
                     <small>{session.campaignTitle || "Kampania"}</small>
                     <small>{formatDateTime(session.scheduledFor)}</small>
                   </span>
-                  <span className="dashboardTag">Otworz</span>
+                  <span className="dashboardTag">Otwórz</span>
                 </Link>
               ))}
             </div>
@@ -492,14 +489,14 @@ export default function DashboardPage() {
           <ExpandableTile
             title="Ostatnie sesje"
             count={finishedSessions.length}
-            description="Sesje zakonczone"
+            description="Sesje zakończone"
             expanded={expandedTiles.recent}
             onToggle={() => toggleTile("recent")}
             to="/campaigns"
           >
             <div className="dashboardMaterialList">
               {finishedSessions.length === 0 ? (
-                <div className="dashboardMaterialItem"><span><strong>Brak zakonczonych sesji.</strong></span></div>
+                <div className="dashboardMaterialItem"><span><strong>Brak zakończonych sesji.</strong></span></div>
               ) : finishedSessions.slice(0, TILE_PREVIEW_LIMIT).map((session) => (
                 <Link key={session.id} to={`/campaigns/${session.campaignId}`} className="dashboardMaterialItem">
                   <span>
@@ -507,7 +504,7 @@ export default function DashboardPage() {
                     <small>{session.campaignTitle || "Kampania"}</small>
                     <small>{formatDateTime(session.finishedAt || session.scheduledFor)} • {formatSessionStatus(session.status)}</small>
                   </span>
-                  <span className="dashboardTag">Otworz</span>
+                  <span className="dashboardTag">Otwórz</span>
                 </Link>
               ))}
             </div>
@@ -517,21 +514,21 @@ export default function DashboardPage() {
         <div>
           <article className="dashboardPanel">
             <header className="dashboardPanel__head">
-              <h2>Dostepnosc graczy</h2>
+              <h2>Dostępność graczy</h2>
             </header>
-            {attendanceLoading ? <div className="dashboardMaterialItem"><span><strong>Ladowanie dostepnosci...</strong></span></div> : null}
-            {!attendanceLoading && attendanceError ? <div className="dashboardMaterialItem"><span><strong>Brak danych o dostepnosci dla najblizszej sesji.</strong></span></div> : null}
-            {!attendanceLoading && !attendanceError && !attendanceSummary ? <div className="dashboardMaterialItem"><span><strong>Brak danych o dostepnosci dla najblizszej sesji.</strong></span></div> : null}
+            {attendanceLoading ? <div className="dashboardMaterialItem"><span><strong>Ładowanie dostępności...</strong></span></div> : null}
+            {!attendanceLoading && attendanceError ? <div className="dashboardMaterialItem"><span><strong>Brak danych o dostępności dla najbliższej sesji.</strong></span></div> : null}
+            {!attendanceLoading && !attendanceError && !attendanceSummary ? <div className="dashboardMaterialItem"><span><strong>Brak danych o dostępności dla najbliższej sesji.</strong></span></div> : null}
             {!attendanceLoading && !attendanceError && attendanceSummary ? (
               <div className="dashboardChartPanel">
                 <DonutChart
                   items={attendanceChartItems}
                   centerValue={`${attendanceSummary.availabilityPct}%`}
-                  centerLabel="dostepnych"
-                  ariaLabel="Wykres dostepnosci graczy"
+                  centerLabel="dostępnych"
+                  ariaLabel="Wykres dostępności graczy"
                 />
                 <div className="dashboardChartMeta">
-                  <strong>{plannedSessions[0]?.title || "Najblizsza sesja"}</strong>
+                  <strong>{plannedSessions[0]?.title || "Najbliższa sesja"}</strong>
                   <small>{formatDateTime(plannedSessions[0]?.scheduledFor)}</small>
                   <small>Status: {attendanceSummary.status}</small>
                   <Link to={`/campaigns/${plannedSessions[0]?.campaignId || ""}`}>Zobacz odpowiedzi</Link>
@@ -565,14 +562,14 @@ export default function DashboardPage() {
               </button>
             </div>
             {activeSystemRows.length === 0 ? (
-              <div className="dashboardMaterialItem"><span><small>Brak danych systemow.</small></span></div>
+              <div className="dashboardMaterialItem"><span><small>Brak danych systemów.</small></span></div>
             ) : (
               <div className="dashboardChartPanel dashboardChartPanel--stacked">
                 <DonutChart
                   items={activeSystemChartItems}
                   centerValue={activeSystemTotal}
                   centerLabel={activeSystemLabel}
-                  ariaLabel={`Wykres systemow RPG dla ${activeSystemLabel}`}
+                  ariaLabel={`Wykres systemów RPG dla ${activeSystemLabel}`}
                 />
               </div>
             )}
@@ -586,11 +583,11 @@ export default function DashboardPage() {
               <DonutChart
                 items={roleChartItems}
                 centerValue={roleStats.total}
-                centerLabel="lacznie"
+                centerLabel="łącznie"
                 ariaLabel="Wykres roli w kampaniach"
               />
               <div className="dashboardChartMeta">
-                <strong>Lacznie: {roleStats.total}</strong>
+                <strong>Łącznie: {roleStats.total}</strong>
               </div>
             </div>
           </article>
@@ -600,7 +597,7 @@ export default function DashboardPage() {
 
       {(loading || error) && (
         <div className={`dashboardStatusMessage${error ? " is-error" : ""}`}>
-          {error || "Odswiezanie danych dashboardu..."}
+          {error || "Odświeżanie danych dashboardu..."}
         </div>
       )}
     </div>

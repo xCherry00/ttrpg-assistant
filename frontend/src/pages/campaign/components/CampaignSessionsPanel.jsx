@@ -1,4 +1,4 @@
-﻿import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useState } from "react";
 
 function statusLabel(status) {
@@ -38,7 +38,7 @@ export default function CampaignSessionsPanel({
       const note = await onGetMySessionNote?.(session.id);
       setNoteForm({ title: note?.title || "", content: note?.content || "" });
     } catch (err) {
-      setNoteError(err?.message || "Nie udalo sie pobrac notatki.");
+      setNoteError(err?.message || "Nie udało się pobrac notatki.");
     } finally {
       setNoteLoading(false);
     }
@@ -62,7 +62,7 @@ export default function CampaignSessionsPanel({
       });
       setNoteNotice("Zapisano notatke.");
     } catch (err) {
-      setNoteError(err?.message || "Nie udalo sie zapisac notatki.");
+      setNoteError(err?.message || "Nie udało się zapisać notatki.");
     } finally {
       setNoteSaving(false);
     }
@@ -76,9 +76,9 @@ export default function CampaignSessionsPanel({
     try {
       await onDeleteMySessionNote?.(noteModal.session.id);
       setNoteForm({ title: "", content: "" });
-      setNoteNotice("Usunieto notatke.");
+      setNoteNotice("Usuńieto notatke.");
     } catch (err) {
-      setNoteError(err?.message || "Nie udalo sie usunac notatki.");
+      setNoteError(err?.message || "Nie udało się usunac notatki.");
     } finally {
       setNoteSaving(false);
     }
@@ -106,7 +106,7 @@ export default function CampaignSessionsPanel({
             <label className="campaignField"><span>Tytul</span><input name="title" required /></label>
             <label className="campaignField"><span>Opis</span><input name="description" /></label>
             <label className="campaignField"><span>Termin</span><input name="scheduledFor" type="datetime-local" /></label>
-            <button className="campaignDetailsPrimaryBtn" type="submit" disabled={busy}>Utworz sesje</button>
+            <button className="campaignDetailsPrimaryBtn" type="submit" disabled={busy}>Utwórz sesje</button>
           </form>
         )}
 
@@ -128,7 +128,7 @@ export default function CampaignSessionsPanel({
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {session.status === "IN_PROGRESS" && (
                     <Link className="campaignDetailsGhostBtn" to={`/campaigns/${campaignId}/sessions/${session.id}/live`}>
-                      Dolacz do aktywnej sesji
+                      Dołącz do aktywnej sesji
                     </Link>
                   )}
                   {session.status === "PLANNED" && (
@@ -138,7 +138,7 @@ export default function CampaignSessionsPanel({
                   )}
                   {session.status === "FINISHED" && (
                     <>
-                      <span className="campaignDetailsEmpty">Sesja zakonczona (archiwalna).</span>
+                      <span className="campaignDetailsEmpty">Sesja zakończona (archiwalna).</span>
                       <button className="campaignDetailsGhostBtn" type="button" onClick={() => openMyNotes(session)}>
                         Moje notatki
                       </button>
@@ -166,7 +166,7 @@ export default function CampaignSessionsPanel({
                 Zamknij
               </button>
             </header>
-            {noteLoading ? <p>Ladowanie notatki...</p> : null}
+            {noteLoading ? <p>Ładowanie notatki...</p> : null}
             {noteError ? <p className="campaignDetailsError">{noteError}</p> : null}
             {noteNotice ? <p className="campaignDetailsNotice">{noteNotice}</p> : null}
             {!noteLoading && (
@@ -195,7 +195,7 @@ export default function CampaignSessionsPanel({
                 Zamknij
               </button>
               <button className="initiativeBtn initiativeBtn--ghost" type="button" onClick={deleteMyNotes} disabled={noteSaving || noteLoading}>
-                Usun notatke
+                Usuń notatke
               </button>
               <button className="initiativeBtn initiativeBtn--primary" type="button" onClick={saveMyNotes} disabled={noteSaving || noteLoading}>
                 {noteSaving ? "Zapisywanie..." : "Zapisz"}

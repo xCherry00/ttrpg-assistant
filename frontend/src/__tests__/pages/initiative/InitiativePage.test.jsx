@@ -47,7 +47,7 @@ describe("InitiativePage v0.8.3 quick tracker", () => {
   it("defaults to D&D mode", () => {
     render(<InitiativePage />);
     expect(screen.getByLabelText("System trackera")).toHaveValue("dnd5e");
-    expect(screen.getByRole("button", { name: "Losuj inicjatywe" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Losuj inicjatywę" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Sortuj po inicjatywie" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Sortuj po ZR" })).not.toBeInTheDocument();
   });
@@ -74,7 +74,7 @@ describe("InitiativePage v0.8.3 quick tracker", () => {
     render(<InitiativePage />);
     fireEvent.click(screen.getByRole("button", { name: "Dodaj uczestnika" }));
     await waitFor(() => expect(initiativeApi.searchDndMonsters).toHaveBeenCalled());
-    fireEvent.change(screen.getByLabelText("Pula potworow"), { target: { value: "goblin" } });
+    fireEvent.change(screen.getByLabelText("Pula potworów"), { target: { value: "goblin" } });
     await waitFor(() => expect(initiativeApi.getDndMonsterDetails).toHaveBeenCalled());
     fireEvent.click(screen.getByRole("button", { name: "Dodaj do walki" }));
     await waitFor(() => expect(screen.getByText("Goblin")).toBeInTheDocument());
@@ -93,7 +93,7 @@ describe("InitiativePage v0.8.3 quick tracker", () => {
   it("switches to CoC and shows ZR/DEX instead of Inicjatywa", async () => {
     render(<InitiativePage />);
     fireEvent.change(screen.getByLabelText("System trackera"), { target: { value: "coc7e" } });
-    expect(screen.queryByRole("button", { name: "Losuj inicjatywe" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Losuj inicjatywę" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Sortuj po ZR" })).toBeInTheDocument();
     await addParticipantCoc({ name: "Badacz", dex: "65" });
     expect(screen.getByRole("columnheader", { name: "ZR / DEX" })).toBeInTheDocument();

@@ -78,8 +78,8 @@ describe("LiveSessionPage role split", () => {
     renderPage();
 
     fireEvent.click(await screen.findByRole("button", { name: "Zadaj rzut" }));
-    expect(await screen.findByRole("button", { name: "Wyslij do graczy" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Trudnosc / DC")).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Wyślij do graczy" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Trudność / DC")).toBeInTheDocument();
   });
 
   it("MG can choose players without entering IDs", async () => {
@@ -92,7 +92,7 @@ describe("LiveSessionPage role split", () => {
     fireEvent.change(screen.getByLabelText("Do kogo?"), { target: { value: "CHARACTER" } });
     fireEvent.click(screen.getByRole("checkbox"));
     fireEvent.change(screen.getByLabelText("Etykieta rzutu"), { target: { value: "Percepcja" } });
-    fireEvent.click(screen.getByRole("button", { name: "Wyslij do graczy" }));
+    fireEvent.click(screen.getByRole("button", { name: "Wyślij do graczy" }));
 
     await waitFor(() => {
       expect(campaignsApi.createRequestedRoll).toHaveBeenCalledWith(
@@ -135,7 +135,7 @@ describe("LiveSessionPage role split", () => {
     campaignsApi.listCampaignSessions.mockResolvedValue([{ id: 2, title: "Session Two", status: "IN_PROGRESS" }]);
     renderPage();
 
-    expect(await screen.findByRole("button", { name: "Zakoncz sesje" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Zakończ sesje" })).toBeInTheDocument();
   });
 
   it("player does not see start/finish actions", async () => {
@@ -144,7 +144,7 @@ describe("LiveSessionPage role split", () => {
 
     await waitFor(() => {
       expect(screen.queryByRole("button", { name: "Rozpocznij sesje" })).not.toBeInTheDocument();
-      expect(screen.queryByRole("button", { name: "Zakoncz sesje" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Zakończ sesje" })).not.toBeInTheDocument();
     });
   });
 
@@ -172,7 +172,7 @@ describe("LiveSessionPage role split", () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByText("Sesja jest zaplanowana i jeszcze sie nie rozpoczela.")).toBeInTheDocument();
+      expect(screen.getByText("Sesja jest zaplanowana i jeszcze się nie rozpoczęła.")).toBeInTheDocument();
     });
   });
 
@@ -198,9 +198,9 @@ describe("LiveSessionPage role split", () => {
     ]);
     renderPage();
 
-    expect(await screen.findByRole("heading", { name: "Historia rzutow" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Statystyki rzutow" })).toBeInTheDocument();
-    expect(screen.getByText("Liczba rzutow:")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Historia rzutów" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Statystyki rzutów" })).toBeInTheDocument();
+    expect(screen.getByText("Liczba rzutów:")).toBeInTheDocument();
     expect(screen.getByText("3")).toBeInTheDocument();
   });
 

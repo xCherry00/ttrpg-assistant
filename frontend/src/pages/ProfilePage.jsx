@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { getMyProfile, updateDisplayName } from "../api/settings";
@@ -11,7 +11,7 @@ const RECENT_GENERATIONS_KEY = "ttrpg_recent_generations_v1";
 
 const TOOL_META = {
   npc: { name: "Generator NPC", desc: "Wygeneruj postac niezalezna" },
-  monster: { name: "Generator potworow", desc: "Buduj spotkania i bestie" },
+  monster: { name: "Generator potworów", desc: "Buduj spotkania i bestie" },
   loot: { name: "Generator lupu", desc: "Tworz nagrody i skarby" },
   tavern: { name: "Generator karczm", desc: "Projektuj miejsca i sceny" },
   faction: { name: "Generator frakcji", desc: "Rozwijaj swiat i polityke" },
@@ -224,7 +224,7 @@ export default function ProfilePage() {
     const sessionEvents = sessions
       .map((session) => ({
         id: `ses-${session.id}`,
-        title: session?.status === "finished" ? `Zakonczono sesje "${session.title || "Sesja"}"` : `Zaktualizowano sesje "${session.title || "Sesja"}"`,
+        title: session?.status === "finished" ? `Zakończono sesje "${session.title || "Sesja"}"` : `Zaktualizowano sesje "${session.title || "Sesja"}"`,
         subtitle: session?.campaignTitle || "Kampania",
         at: session?.updatedAt || session?.finishedAt || session?.startedAt || session?.createdAt,
       }))
@@ -253,7 +253,7 @@ export default function ProfilePage() {
       { id: "first-session", title: "Pierwsza sesja", desc: "Przeprowadz lub rozegrac pierwsza sesje", unlocked: stats.sessionTotal >= 1 },
       { id: "world-builder", title: "Tworca swiatow", desc: "Utworz 10 wygenerowanych rzeczy", unlocked: stats.generatedTotal >= 10 },
       { id: "chronicle", title: "Kronikarz", desc: "Utworz 50 materialow", unlocked: stats.generatedTotal >= 50 },
-      { id: "dice-master", title: "Mistrz kosci", desc: "Wykonaj 100 rzutow koscmi", unlocked: false },
+      { id: "dice-master", title: "Mistrz kosci", desc: "Wykonaj 100 rzutów koscmi", unlocked: false },
       { id: "collector", title: "Kolekcjoner", desc: "Utworz 100 wygenerowanych rzeczy", unlocked: stats.generatedTotal >= 100 },
     ];
   }, [stats.generatedTotal, stats.sessionTotal]);
@@ -265,7 +265,7 @@ export default function ProfilePage() {
 
     const trimmed = displayNameInput.trim();
     if (trimmed.length < 2) {
-      setNameError("Nazwa uzytkownika musi miec co najmniej 2 znaki.");
+      setNameError("Nazwa użytkownika musi mieć co najmniej 2 znaki.");
       return;
     }
 
@@ -305,7 +305,7 @@ export default function ProfilePage() {
         </label>
       </header>
 
-      {loading && <div className="profileState">Ladowanie profilu...</div>}
+      {loading && <div className="profileState">Ładowanie profilu...</div>}
       {error && <div className="profileState is-error">{error}</div>}
 
       {!loading && !error && (
@@ -353,7 +353,7 @@ export default function ProfilePage() {
               value={avatarSrc}
               onChange={handleAvatarUploaded}
               onRemove={handleRemoveAvatar}
-              previewAlt="Avatar uzytkownika"
+              previewAlt="Avatar użytkownika"
             />
 
             {avatarError && <div className="profileInlineMsg is-error">{avatarError}</div>}

@@ -13,7 +13,7 @@ const SOURCES = [
     owner: "5e-bits community",
     license: "Projekt open-source; dane pochodza z SRD i sa udostepniane przez publiczne API.",
     url: "https://www.dnd5eapi.co/",
-    scope: "Techniczne zrodlo API dla kompendium: listy i szczegoly encji takich jak monsters, spells, equipment, magic-items, conditions i skills.",
+    scope: "Techniczne �r�d�o API dla kompendium: listy i szczeg�y encji takich jak monsters, spells, equipment, magic-items, conditions i skills.",
   },
 ];
 

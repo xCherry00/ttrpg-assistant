@@ -263,3 +263,68 @@
   padding: 12px 14px;
   font-size: 13px;
 }
+
+/* v0.9 visual unification: knowledge pages */
+.rulesPage,
+.glossaryPage {
+  color: var(--r-ink);
+}
+
+.rulesSystemButtons button,
+.rulesSearchInput,
+.rulesExpandAllBtn,
+.rulesQuickRefItem,
+.rulesCard,
+.rulesResourceCard,
+.rulesLegalPanel {
+  border: 1px solid var(--r-line);
+  border-radius: 8px;
+  background: var(--r-surface);
+  color: var(--r-ink);
+  box-shadow: var(--r-shadow-soft);
+}
+
+.rulesSystemButtons button:hover,
+.rulesSystemButtons button.active,
+.rulesSystemButtons button.rulesSystemBtn--active,
+.rulesQuickRefItem:hover {
+  border-color: var(--r-line-strong);
+  background: var(--r-primary-soft);
+  color: var(--r-primary-2);
+}
+
+.rulesCard:hover {
+  background: var(--r-surface-solid);
+}
+
+.rulesCardHeader,
+.rulesCardBody,
+.rulesQuickRefItem small,
+.rulesResourceCard p {
+  color: var(--r-ink-soft);
+}
+
+.rulesCardTitle,
+.rulesQuickRefItem span,
+.rulesSystemTitle {
+  color: var(--r-ink);
+  font-family: var(--font-display);
+}
+
+.rulesSearchInput {
+  background: #ffffff;
+}
+
+@media (max-width: 900px) {
+  .rulesQuickRef {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .rulesSearchRow,
+  .rulesQuickRef {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+}

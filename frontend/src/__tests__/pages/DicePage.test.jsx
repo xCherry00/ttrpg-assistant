@@ -16,6 +16,6 @@ describe("DicePage v0.8.2", () => {
 
     const finalValue = container.querySelector(".diceFinalValue");
     expect(finalValue).toBeTruthy();
-    expect(finalValue.textContent).not.toBe("—");
+    expect(finalValue.textContent).not.toBe("â€”");
   });
 });

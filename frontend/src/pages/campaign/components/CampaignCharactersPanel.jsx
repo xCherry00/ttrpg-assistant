@@ -35,14 +35,14 @@ export default function CampaignCharactersPanel({
           className="campaignToolbar"
         >
           <select className="cellSelect" name="characterId" defaultValue="">
-            <option value="">- wybierz postac -</option>
+            <option value="">- wybierz postać -</option>
             {compatibleCharacters.map((character) => (
               <option key={character.id} value={character.id}>
                 {character.name} ({character.systemCode || "other"})
               </option>
             ))}
           </select>
-          <button className="campaignDetailsPrimaryBtn" type="submit" disabled={busy}>Przypisz postac</button>
+          <button className="campaignDetailsPrimaryBtn" type="submit" disabled={busy}>Przypisz postać</button>
         </form>
       )}
 
@@ -57,7 +57,7 @@ export default function CampaignCharactersPanel({
           {campaignCharacters.map((character) => (
             <article key={character.characterId} className="campaignMaterialCard">
               <div className="campaignMaterialCard__top">
-                <strong>{character.characterName || "Postac"}</strong>
+                <strong>{character.characterName || "Postać"}</strong>
                 <span className="campaignMemberBadge">{character.systemCode || "-"}</span>
               </div>
               <div className="campaignMaterialMeta">
@@ -70,7 +70,7 @@ export default function CampaignCharactersPanel({
                 <span>Gracz: {membersById.get(Number(character.userId))?.displayName || membersById.get(Number(character.userId))?.username || "-"}</span>
                 <span>Przypisano: {character.assignedAt ? new Date(character.assignedAt).toLocaleString("pl-PL") : "-"}</span>
               </div>
-              {!isOwner && Number(character.userId) === Number(myUserId) ? <Link className="campaignDetailsGhostBtn" to={`/characters/${character.characterId}`}>Otworz moja karte</Link> : null}
+              {!isOwner && Number(character.userId) === Number(myUserId) ? <Link className="campaignDetailsGhostBtn" to={`/characters/${character.characterId}`}>Otwórz moją kartę</Link> : null}
               {isOwner ? <Link className="campaignDetailsGhostBtn" to={`/characters/${character.characterId}?mode=preview`}>Podglad karty</Link> : null}
               {canManage && (
                 <button className="campaignDetailsGhostBtn" type="button" disabled={busy} onClick={() => onDetach(character.characterId)}>

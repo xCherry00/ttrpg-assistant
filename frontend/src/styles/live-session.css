@@ -275,3 +275,95 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* v0.9 visual unification: live session workspace */
+.liveSessionPage {
+  gap: 18px;
+  color: var(--r-ink);
+}
+
+.liveSessionGrid {
+  grid-template-columns: minmax(360px, 1.18fr) minmax(280px, 0.82fr) minmax(280px, 0.82fr);
+  gap: 18px;
+}
+
+.liveSessionPage .campaignDetailsCard,
+.liveSessionState,
+.liveSessionTargetList,
+.liveSessionStatsGrid p,
+.liveSessionSceneImagePlaceholder,
+.liveSessionPortraitPlaceholder,
+.liveSessionCharacterAvatarPlaceholder {
+  border: 1px solid var(--r-line);
+  border-radius: 8px;
+  background: var(--r-surface);
+  color: var(--r-ink);
+  box-shadow: var(--r-shadow-soft);
+}
+
+.liveSessionPage .campaignDetailsCard {
+  padding: 16px;
+}
+
+.liveSessionPage .campaignDetailsCard h2,
+.liveSessionPage .campaignDetailsCard h3,
+.liveSessionSceneReadonly h3 {
+  color: var(--r-ink);
+  font-family: var(--font-display);
+  letter-spacing: 0;
+}
+
+.liveSessionPlaceholder,
+.liveInitiativeMeta,
+.liveSessionSceneReadonly p {
+  color: var(--r-ink-soft);
+}
+
+.liveSessionSceneImage,
+.liveSessionCharacterPortrait img,
+.liveSessionCharacterAvatar {
+  border-color: var(--r-line);
+  border-radius: 8px;
+}
+
+.liveSessionTargetList,
+.liveSessionStatsGrid p {
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.liveSessionPage input,
+.liveSessionPage select,
+.liveSessionPage textarea {
+  border-color: var(--r-line);
+  background: #ffffff;
+  color: var(--r-ink);
+  border-radius: 8px;
+}
+
+.liveSessionPage .campaignDetailsPrimaryBtn {
+  background: linear-gradient(135deg, var(--r-primary), var(--r-primary-2));
+  color: #ffffff;
+}
+
+@media (max-width: 1240px) {
+  .liveSessionGrid {
+    grid-template-columns: repeat(2, minmax(280px, 1fr));
+    grid-template-areas:
+      "scene scene"
+      "party requests"
+      "history stats";
+  }
+}
+
+@media (max-width: 760px) {
+  .liveSessionGrid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "scene"
+      "party"
+      "requests"
+      "history"
+      "stats";
+  }
+}

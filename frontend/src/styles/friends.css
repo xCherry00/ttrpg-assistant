@@ -208,7 +208,7 @@
   background: rgba(244, 106, 127, 0.12);
 }
 
-/* ─── ПУБЛИЧНЫЙ ПРОФИЛЬ — centered card ──────────── */
+/* â”€â”€â”€ ĐźĐŁĐ‘Đ›ĐĐ§ĐťĐ«Đ™ ĐźĐ ĐžĐ¤ĐĐ›Đ¬ â€” centered card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .publicProfilePage {
   display: block;
@@ -354,7 +354,7 @@
   flex-wrap: wrap;
 }
 
-/* ─── RESPONSIVE ─────────────────────────────────── */
+/* â”€â”€â”€ RESPONSIVE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 @media (max-width: 980px) {
   .friendsHero,
@@ -679,5 +679,88 @@
 
   .publicV2AchievementsGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* v0.9 visual unification is shared from profile.css selectors for friends/public user. */
+
+
+/* v0.9 visual unification: friends and public profile */
+.friendsPage,
+.publicProfilePage {
+  color: var(--r-ink);
+}
+
+.friendsHero,
+.friendsHero__stat,
+.friendsSearch,
+.socialCard,
+.publicProfileCard,
+.publicProfileHero,
+.publicProfilePanel,
+.friendsState {
+  border: 1px solid var(--r-line) !important;
+  border-radius: 8px !important;
+  background: var(--r-surface) !important;
+  color: var(--r-ink) !important;
+  box-shadow: var(--r-shadow-soft) !important;
+}
+
+.friendsHero h2,
+.friendsHero h3,
+.socialCard__name,
+.publicProfileCard h2,
+.publicProfileHero h1 {
+  color: var(--r-ink) !important;
+  font-family: var(--font-display) !important;
+  letter-spacing: 0 !important;
+}
+
+.friendsHero__stat span,
+.friendsSearch__label,
+.socialCard__meta,
+.publicProfileCard__tag,
+.publicProfileCard__meta,
+.friendsState {
+  color: var(--r-ink-soft) !important;
+}
+
+.friendsSearch__input,
+.friendsPage input,
+.friendsPage select,
+.publicProfilePage input,
+.publicProfilePage select {
+  border-color: var(--r-line) !important;
+  border-radius: 8px !important;
+  background: #ffffff !important;
+  color: var(--r-ink) !important;
+}
+
+.friendsTabs__button,
+.socialBtn {
+  border: 1px solid var(--r-line) !important;
+  border-radius: 8px !important;
+  background: #ffffff !important;
+  color: var(--r-ink) !important;
+}
+
+.friendsTabs__button:hover,
+.friendsTabs__button.is-active,
+.socialCard:hover {
+  border-color: var(--r-line-strong) !important;
+  background: var(--r-primary-soft) !important;
+  color: var(--r-primary-2) !important;
+}
+
+.socialBtn--primary {
+  border-color: transparent !important;
+  background: linear-gradient(135deg, var(--r-primary), var(--r-primary-2)) !important;
+  color: #ffffff !important;
+}
+
+@media (max-width: 900px) {
+  .friendsHero,
+  .friendsHero__stats {
+    grid-template-columns: 1fr !important;
   }
 }

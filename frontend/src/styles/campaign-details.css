@@ -287,7 +287,7 @@
   font-family: var(--font-display);
   font-size: clamp(2rem, 4vw, 3.2rem);
   line-height: 0.96;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
 }
 
 .campaignHeroMeta {
@@ -400,7 +400,7 @@
   margin: 0;
   font-size: 1.1rem;
   font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 
 .campaignDetailsInfoRow {
@@ -2122,6 +2122,162 @@
   .campaignDashboardRow:not(.campaignDashboardRow--top):not(.campaignDashboardRow--bottom):not(.campaignDashboardRow--session):not(.campaignDashboardRow--single),
   .campaignDashboardRow--bottom,
   .campaignDetailsCard .campaignToolbar {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* v0.9 visual unification: campaign workspace */
+.campaignDetailsPage {
+  gap: 18px;
+  color: var(--r-ink);
+}
+
+.cdBackBtn,
+.campaignDetailsGhostBtn,
+.campaignDetailsPrimaryBtn,
+.campaignDetailsDangerBtn,
+.campaignDetailsActionLink,
+.campaignNoteArchiveAction {
+  border-radius: 8px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0 !important;
+}
+
+.cdBackBtn,
+.campaignDetailsGhostBtn,
+.campaignDetailsActionLink {
+  border: 1px solid var(--r-line) !important;
+  background: #ffffff !important;
+  color: var(--r-ink) !important;
+  box-shadow: none !important;
+}
+
+.campaignDetailsPrimaryBtn {
+  border-color: transparent !important;
+  background: linear-gradient(135deg, var(--r-primary), var(--r-primary-2)) !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 22px rgba(31, 118, 95, 0.16) !important;
+}
+
+.campaignDetailsDangerBtn {
+  border-color: rgba(200, 92, 74, 0.3) !important;
+  background: var(--r-coral-soft) !important;
+  color: var(--r-coral) !important;
+}
+
+.cdHero,
+.campaignDetailsCard,
+.campaignMaterialCard,
+.campaignNoteSessionCard,
+.campaignNotificationItem,
+.campaignDetailsPanel,
+.campaignDetailsSection {
+  border: 1px solid var(--r-line) !important;
+  border-radius: 8px !important;
+  background: var(--r-surface) !important;
+  color: var(--r-ink) !important;
+  box-shadow: var(--r-shadow-soft) !important;
+  backdrop-filter: none !important;
+}
+
+.cdHero {
+  min-height: 190px !important;
+  grid-template-columns: minmax(200px, 30%) minmax(0, 1fr) !important;
+  overflow: hidden;
+}
+
+.cdHeroBody {
+  padding: 20px 22px !important;
+}
+
+.cdHeroCover::after {
+  background: linear-gradient(90deg, transparent 55%, rgba(247, 250, 247, 0.82) 100%) !important;
+}
+
+.cdHeroTitle,
+.campaignDetailsCard h2,
+.campaignDetailsCard h3,
+.campaignMaterialCard strong {
+  color: var(--r-ink) !important;
+  font-family: var(--font-display) !important;
+  letter-spacing: 0 !important;
+}
+
+.cdHeroDesc,
+.cdMetaValue,
+.campaignDetailsCard p,
+.campaignMaterialMeta,
+.campaignDetailsEmpty {
+  color: var(--r-ink-soft) !important;
+}
+
+.cdMetaLabel,
+.cdMetaCode,
+.campaignDetailsInfoRow code {
+  color: var(--r-primary) !important;
+}
+
+.cdBadgeSys,
+.cdBadgeGM,
+.cdBadgePlayer,
+.cdBadgeActive,
+.campaignSessionStatus,
+.campaignSessionStatusLarge {
+  border: 1px solid var(--r-line) !important;
+  background: var(--r-panel) !important;
+  color: var(--r-ink-soft) !important;
+  border-radius: 999px !important;
+  backdrop-filter: none !important;
+}
+
+.cdBadgeGM,
+.campaignSessionStatus.is-planned,
+.campaignSessionStatusLarge.is-planned {
+  border-color: rgba(184, 135, 52, 0.3) !important;
+  background: rgba(184, 135, 52, 0.12) !important;
+  color: var(--r-gold) !important;
+}
+
+.cdBadgeActive,
+.campaignSessionStatus.is-active,
+.campaignSessionStatusLarge.is-active {
+  border-color: rgba(31, 118, 95, 0.3) !important;
+  background: var(--r-primary-soft) !important;
+  color: var(--r-primary-2) !important;
+}
+
+.cdTabNav {
+  border-bottom-color: var(--r-line) !important;
+}
+
+.cdTabBtn {
+  color: var(--r-ink-soft) !important;
+}
+
+.cdTabBtn:hover,
+.cdTabBtn.is-active {
+  color: var(--r-primary) !important;
+  background: var(--r-surface-solid) !important;
+  border-color: var(--r-line) !important;
+}
+
+.campaignDetailsCard input,
+.campaignDetailsCard select,
+.campaignDetailsCard textarea,
+.cellInput,
+.cellSelect {
+  border-color: var(--r-line) !important;
+  background: #ffffff !important;
+  color: var(--r-ink) !important;
+  border-radius: 8px !important;
+}
+
+.campaignDetailsEmpty {
+  background: var(--r-panel) !important;
+}
+
+@media (max-width: 780px) {
+  .cdHero {
     grid-template-columns: 1fr !important;
   }
 }

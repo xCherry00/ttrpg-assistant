@@ -1,0 +1,365 @@
+/*
+  Product design foundation.
+  Keep this file for cross-app defaults only: tokens, app shell, typography,
+  shared surfaces, buttons, forms and global menus. Page-specific accents live
+  in their own CSS files loaded after this foundation.
+*/
+
+:root {
+  --r-bg: #eef4ef;
+  --r-bg-2: #f7faf7;
+  --r-ink: #1d2722;
+  --r-ink-soft: #4e6058;
+  --r-muted: #718078;
+  --r-line: #d5dfd8;
+  --r-line-strong: #b9c8bf;
+  --r-surface: rgba(255, 255, 255, 0.86);
+  --r-surface-solid: #ffffff;
+  --r-panel: #f9fbf9;
+  --r-nav: #16211d;
+  --r-nav-2: #1f2d28;
+  --r-primary: #1f765f;
+  --r-primary-2: #155844;
+  --r-primary-soft: rgba(31, 118, 95, 0.12);
+  --r-coral: #c85c4a;
+  --r-coral-soft: rgba(200, 92, 74, 0.12);
+  --r-indigo: #536fae;
+  --r-indigo-soft: rgba(83, 111, 174, 0.13);
+  --r-gold: #b88734;
+  --r-shadow: 0 16px 44px rgba(31, 39, 34, 0.1);
+  --r-shadow-soft: 0 8px 24px rgba(31, 39, 34, 0.08);
+  --radius-xl: 12px;
+  --radius-lg: 10px;
+  --radius-md: 8px;
+  --radius-sm: 6px;
+  --bg: var(--r-bg);
+  --bg-2: var(--r-bg-2);
+  --bg-3: #e6eee8;
+  --bg-surface: var(--r-surface-solid);
+  --card: var(--r-surface);
+  --card-2: var(--r-panel);
+  --card-solid: var(--r-surface-solid);
+  --border: var(--r-line);
+  --border-accent: rgba(31, 118, 95, 0.34);
+  --border-strong: rgba(31, 118, 95, 0.54);
+  --text: var(--r-ink);
+  --text-2: var(--r-ink-soft);
+  --muted: var(--r-muted);
+  --primary: var(--r-primary);
+  --primary-2: var(--r-primary-2);
+  --primary-dim: var(--r-primary-soft);
+  --accent: var(--r-primary);
+  --secondary: var(--r-indigo);
+  --danger: var(--r-coral);
+  --ok: #20835f;
+  --warn: var(--r-gold);
+  --ring: 0 0 0 3px rgba(31, 118, 95, 0.18);
+  --shadow-xl: var(--r-shadow);
+  --shadow-lg: var(--r-shadow);
+  --shadow-md: var(--r-shadow-soft);
+  --shadow-sm: 0 4px 14px rgba(31, 39, 34, 0.07);
+}
+
+body,
+.appLayout,
+.appBody,
+.appMain,
+.appLayout--dashboard,
+.appLayout--dashboard .appBody,
+.appLayout--dashboard .appMain {
+  color: var(--r-ink);
+  background:
+    linear-gradient(90deg, rgba(22, 33, 29, 0.035) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(22, 33, 29, 0.035) 1px, transparent 1px),
+    linear-gradient(135deg, #eef4ef 0%, #f7faf7 46%, #e9f1ec 100%);
+  background-size: 32px 32px, 32px 32px, auto;
+}
+
+body::before {
+  opacity: 0;
+}
+
+button,
+input,
+textarea,
+select {
+  letter-spacing: 0;
+}
+
+.appContent,
+.appLayout--dashboard .appContent {
+  min-height: 100%;
+  padding: 28px 32px 36px;
+  background: transparent;
+}
+
+.page {
+  max-width: 1480px;
+  color: var(--r-ink);
+}
+
+.appPageHeader,
+.pageHeader {
+  min-height: 0;
+  margin: 0 0 20px;
+  padding: 0 240px 16px 0;
+  border-bottom: 1px solid var(--r-line);
+}
+
+.appPageHeader__title,
+.pageTitle {
+  color: var(--r-ink);
+  font-family: var(--font-display);
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.1;
+  text-transform: none;
+}
+
+.appPageHeader__subtitle,
+.pageSubtitle {
+  max-width: 78ch;
+  margin-top: 8px;
+  color: var(--r-ink-soft);
+  font-size: 1rem;
+}
+
+.pageEyebrow {
+  display: none;
+}
+
+.sidebar {
+  width: 264px;
+  flex-basis: 264px;
+  background: var(--r-nav);
+}
+
+.sidebar__inner {
+  border-right: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 42%),
+    linear-gradient(180deg, var(--r-nav), #111a17);
+  box-shadow: 12px 0 34px rgba(22, 33, 29, 0.12);
+}
+
+.sidebar__brand {
+  border-bottom-color: rgba(240, 246, 242, 0.14);
+}
+
+.sidebar__logo,
+.topNav__logo {
+  border-color: rgba(136, 204, 181, 0.45);
+  background:
+    linear-gradient(135deg, rgba(136, 204, 181, 0.28), rgba(83, 111, 174, 0.18)),
+    #20312b;
+  box-shadow: none;
+}
+
+.sidebar__brandCopy strong,
+.topNav__brandText {
+  color: #f4f8f5;
+  font-family: var(--font-display);
+  letter-spacing: 0;
+  -webkit-text-fill-color: currentColor;
+  background: none;
+}
+
+.sidebar__brandCopy span,
+.sidebar__sectionToggle,
+.sidebar__item {
+  color: rgba(235, 244, 239, 0.68);
+}
+
+.sidebar__sectionToggle span {
+  letter-spacing: 0.12em;
+}
+
+.sidebar__sectionToggle:hover,
+.sidebar__section.is-active .sidebar__sectionToggle {
+  border-color: rgba(136, 204, 181, 0.2);
+  color: #f4f8f5;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.sidebar__item {
+  min-height: 42px;
+  border-radius: 8px;
+}
+
+.sidebar__item:hover,
+.sidebar__item.is-active {
+  border-color: rgba(136, 204, 181, 0.28);
+  color: #ffffff;
+  background: linear-gradient(90deg, rgba(31, 118, 95, 0.52), rgba(31, 118, 95, 0.12));
+}
+
+.sidebar__icon {
+  color: #9bd3bd;
+}
+
+.sidebar__logout {
+  border-color: rgba(237, 131, 111, 0.34);
+  color: #ffd8d0;
+  background: rgba(200, 92, 74, 0.13);
+}
+
+.appShellBell,
+.topNav__avatarBtn,
+.appAccountButton {
+  border: 1px solid var(--r-line);
+  color: var(--r-ink);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: var(--r-shadow-soft);
+}
+
+.appShellBell:hover,
+.notificationBell:has(.notificationMenu) .appShellBell,
+.topNav__avatarBtn:hover {
+  border-color: rgba(31, 118, 95, 0.34);
+  background: #ffffff;
+  box-shadow: var(--r-shadow-soft);
+}
+
+.panel,
+.panel-soft,
+.notificationMenu,
+.topNav__menu {
+  border: 1px solid var(--r-line);
+  border-radius: 8px;
+  color: var(--r-ink);
+  background: var(--r-surface);
+  box-shadow: var(--r-shadow-soft);
+  backdrop-filter: blur(10px);
+}
+
+.panel:hover,
+.panel-soft:hover {
+  border-color: var(--r-line-strong);
+  box-shadow: var(--r-shadow);
+}
+
+.btn,
+.btn-primary {
+  border-color: transparent;
+  border-radius: 8px;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--r-primary), var(--r-primary-2));
+  box-shadow: 0 10px 22px rgba(31, 118, 95, 0.18);
+}
+
+.btn-ghost {
+  border: 1px solid var(--r-line);
+  border-radius: 8px;
+  color: var(--r-ink);
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.appMain :where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]), select, textarea) {
+  border: 1px solid var(--r-line);
+  border-radius: 8px;
+  color: var(--r-ink);
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.appMain :where(input, textarea)::placeholder {
+  color: #8a9891;
+}
+
+.appMain :where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]), select, textarea):focus {
+  border-color: rgba(31, 118, 95, 0.54);
+  background: #ffffff;
+  box-shadow: var(--ring);
+}
+
+.notificationMenu,
+.topNav__menu {
+  color: var(--r-ink);
+}
+
+.notificationMenu__head,
+.topNav__menuHeader {
+  border-bottom-color: var(--r-line);
+  background: var(--r-panel);
+}
+
+.notificationMenu__head strong,
+.notificationItem__copy strong,
+.topNav__menuName,
+.topNav__avatarName {
+  color: var(--r-ink);
+}
+
+.notificationItem,
+.notificationItem__action,
+.topNav__menuItem {
+  color: var(--r-ink-soft);
+  background: rgba(255, 255, 255, 0.74);
+  border-color: var(--r-line);
+}
+
+.notificationBell__badge {
+  border-color: #eef4ef;
+  background: var(--r-coral);
+  box-shadow: 0 8px 18px rgba(200, 92, 74, 0.2);
+}
+
+.notificationItem:hover,
+.notificationItem.is-unread {
+  border-color: var(--r-line-strong);
+  background: var(--r-primary-soft);
+}
+
+.notificationItem__dot,
+.notificationItem__dot--social {
+  background: var(--r-primary);
+  box-shadow: 0 0 14px rgba(31, 118, 95, 0.36);
+}
+
+.notificationItem__dot--messages {
+  background: var(--r-indigo);
+  box-shadow: 0 0 14px rgba(83, 111, 174, 0.32);
+}
+
+.notificationItem__avatar,
+.notificationItem__avatar--messages,
+.notificationItem__avatar--campaign {
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--r-primary), var(--r-indigo));
+}
+
+.notificationItem__action.is-accept {
+  border-color: rgba(31, 118, 95, 0.32);
+  color: var(--r-primary);
+  background: var(--r-primary-soft);
+}
+
+@media (max-width: 1080px) {
+  .appContent,
+  .appLayout--dashboard .appContent {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 860px) {
+  .appPageHeader,
+  .pageHeader {
+    padding-right: 72px;
+  }
+
+}
+
+@media (max-width: 560px) {
+  .appContent,
+  .appLayout--dashboard .appContent {
+    padding: 12px;
+  }
+
+  .appPageHeader__title,
+  .pageTitle {
+    font-size: 1.45rem;
+  }
+
+}

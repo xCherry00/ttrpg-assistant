@@ -1,4 +1,4 @@
-﻿.page.page--wide.initiativePage {
+.page.page--wide.initiativePage {
   max-width: 1500px;
 }
 
@@ -188,5 +188,81 @@
 @media (max-width: 980px) {
   .initiativeModalBody {
     grid-template-columns: 1fr;
+  }
+}
+
+/* v0.9 visual unification: initiative tool */
+.initiativePage,
+.initiativeShell {
+  color: var(--r-ink);
+}
+
+.initiativePanel,
+.initiativeCard,
+.initiativeTableWrap,
+.initiativeModal,
+.encounterPanel,
+.participantsPanel,
+.diceRollPanel {
+  border: 1px solid var(--r-line) !important;
+  border-radius: 8px !important;
+  background: var(--r-surface) !important;
+  color: var(--r-ink) !important;
+  box-shadow: var(--r-shadow-soft) !important;
+}
+
+.initiativeTableWrap {
+  overflow-x: auto;
+}
+
+.initiativeTable th,
+.initiativeTable td {
+  border-bottom-color: var(--r-line);
+}
+
+.initiativeTable th {
+  color: var(--r-ink-soft);
+  background: var(--r-panel);
+}
+
+.initiativeTable tr.is-active {
+  background: var(--r-primary-soft);
+}
+
+.initiativeTag,
+.initiativeBadge,
+.initiativeBadgeMuted {
+  border: 1px solid var(--r-line);
+  background: var(--r-panel);
+  color: var(--r-ink-soft);
+}
+
+.initiativeConditionAdd input,
+.initiativeConditionAdd select,
+.initiativeRowActions input,
+.initiativeModalBody input,
+.initiativeModalBody select,
+.initiativeHpInlineInput,
+.cellInput,
+.cellSelect {
+  border-color: var(--r-line) !important;
+  background: #ffffff !important;
+  color: var(--r-ink) !important;
+  border-radius: 8px !important;
+}
+
+.initiativeModalOverlay {
+  background: rgba(22, 33, 29, 0.42);
+}
+
+.initiativeDeleteBtn {
+  border-color: rgba(200, 92, 74, 0.32);
+  background: var(--r-coral-soft);
+  color: var(--r-coral);
+}
+
+@media (max-width: 780px) {
+  .initiativeTable {
+    min-width: 920px;
   }
 }

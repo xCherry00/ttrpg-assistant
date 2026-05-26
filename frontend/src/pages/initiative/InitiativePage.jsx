@@ -4,7 +4,7 @@ import { getDndMonsterDetails, searchDndMonsters } from "../../api/initiative";
 import "../../styles/initiative.css";
 
 const STORAGE_KEY = "ttrpg.quickInitiativeTracker";
-const LOOKUP_ERROR_MESSAGE = "Nie udalo sie pobrac danych z bazy D&D. Mozesz dodac uczestnika recznie.";
+const LOOKUP_ERROR_MESSAGE = "Nie udało się pobrac danych z bazy D&D. Mozesz dodac uczestnika recznie.";
 const SYSTEM_DND = "dnd5e";
 const SYSTEM_COC = "coc7e";
 
@@ -409,14 +409,14 @@ export default function InitiativePage() {
           <button className="btn btn-primary" type="button" onClick={() => setAddModalOpen(true)}>Dodaj uczestnika</button>
           <button className="btn btn-primary" type="button" onClick={startCombat}>Start walki</button>
           {isDndMode ? (
-            <button className="btn" type="button" onClick={rollInitiative} disabled={state.initiativeRolled || state.participants.length === 0}>Losuj inicjatywe</button>
+            <button className="btn" type="button" onClick={rollInitiative} disabled={state.initiativeRolled || state.participants.length === 0}>Losuj inicjatywę</button>
           ) : null}
           <button className="btn" type="button" onClick={sortBySystemAction}>{isDndMode ? "Sortuj po inicjatywie" : "Sortuj po ZR"}</button>
-          <button className="btn" type="button" onClick={() => moveTurn("next")}>Nastepna tura</button>
+          <button className="btn" type="button" onClick={() => moveTurn("next")}>Następna tura</button>
           <button className="btn" type="button" onClick={() => moveTurn("prev")}>Poprzednia tura</button>
           <button className="btn" type="button" onClick={resetTurns}>Reset tur</button>
-          <button className="btn" type="button" onClick={endCombat}>Zakoncz walke</button>
-          <button className="btn" type="button" onClick={clearAll}>Wyczysc wszystko</button>
+          <button className="btn" type="button" onClick={endCombat}>Zakończ walkę</button>
+          <button className="btn" type="button" onClick={clearAll}>Wyczyść wszystko</button>
         </div>
         {notice && <p className="initiativeNotice">{notice}</p>}
       </section>
@@ -426,7 +426,7 @@ export default function InitiativePage() {
       <section className="card">
         <h2>Uczestnicy walki</h2>
         {orderedParticipants.length === 0 ? (
-          <p className="emptyText">Brak uczestnikow. Dodaj pierwsza postac lub przeciwnika.</p>
+          <p className="emptyText">Brak uczestników. Dodaj pierwszą postać lub przeciwnika.</p>
         ) : (
           <div className="initiativeTableWrap">
             <table className="initiativeTable">
@@ -468,7 +468,7 @@ export default function InitiativePage() {
                       </td>
                       <td>
                         <div className="initiativeRowActions">
-                          <button type="button" className="initiativeDeleteBtn" aria-label={`Usun ${participant.name}`} onClick={() => removeParticipant(participant.id)}>x</button>
+                          <button type="button" className="initiativeDeleteBtn" aria-label={`Usuń ${participant.name}`} onClick={() => removeParticipant(participant.id)}>x</button>
                         </div>
                       </td>
                     </tr>
@@ -489,8 +489,8 @@ export default function InitiativePage() {
             </div>
             <form className="initiativeModalBody" onSubmit={handleAddCustomParticipant}>
               {isDndMode ? (
-                <select aria-label="Pula potworow" value={selectedMonsterIndex} onChange={(e) => void handleSelectMonster(e.target.value)}>
-                  <option value="">{monsterLoading ? "Ladowanie potworow..." : "Wybierz potwora (opcjonalnie)"}</option>
+                <select aria-label="Pula potworów" value={selectedMonsterIndex} onChange={(e) => void handleSelectMonster(e.target.value)}>
+                  <option value="">{monsterLoading ? "Ładowanie potworów..." : "Wybierz potwora (opcjonalnie)"}</option>
                   {monsterResults.map((monster) => <option key={monster.index} value={monster.index}>{monster.name}</option>)}
                 </select>
               ) : null}

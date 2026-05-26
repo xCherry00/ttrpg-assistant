@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap");
+
 * {
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
@@ -6,15 +8,15 @@
 
 :root {
   --bottom-bar-h: 72px;
-  --app-bg: #0b0f1a;
-  --app-glow-purple: rgba(124, 58, 237, 0.14);
-  --app-glow-blue: rgba(59, 130, 246, 0.09);
-  --app-accent: #7c3aed;
-  --app-accent-2: #4f46e5;
-  --app-glass: rgba(15, 23, 42, 0.9);
-  --app-glass-strong: rgba(10, 15, 28, 0.92);
-  --app-glass-border: rgba(255, 255, 255, 0.08);
-  --app-glass-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  --app-bg: #101a29;
+  --app-glow-accent: rgba(31, 118, 95, 0.12);
+  --app-glow-blue: rgba(100, 195, 179, 0.11);
+  --app-accent: #1f765f;
+  --app-accent-2: #64c3b3;
+  --app-menu-bg: rgba(24, 38, 56, 0.82);
+  --app-menu-surface: rgba(17, 28, 43, 0.92);
+  --app-menu-border: rgba(210, 225, 247, 0.14);
+  --app-menu-shadow: 0 20px 60px rgba(8, 14, 22, 0.42);
 }
 
 html, body {
@@ -30,7 +32,7 @@ body {
   line-height: 1.55;
   color: var(--text);
   background:
-    radial-gradient(circle at 18% 0%, var(--app-glow-purple), transparent 32%),
+    radial-gradient(circle at 18% 0%, var(--app-glow-accent), transparent 32%),
     radial-gradient(circle at 86% 4%, var(--app-glow-blue), transparent 34%),
     var(--app-bg);
   background-attachment: fixed;
@@ -47,14 +49,14 @@ body::before {
     radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
   background-size: 28px 28px;
   mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 100%);
-  opacity: 0.45;
+  opacity: 0.28;
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--app-bg); }
 ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.24); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(167, 139, 250, 0.38); }
+::-webkit-scrollbar-thumb:hover { background: rgba(31, 118, 95, 0.34); }
 
 a { color: inherit; text-decoration: none; }
 
@@ -71,7 +73,7 @@ select:focus-visible {
 
 ::selection { background: rgba(232, 181, 88, 0.28); }
 
-/* ─── APP SHELL ────────────────────────────────────── */
+/* â”€â”€â”€ APP SHELL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 #root { min-height: 100vh; }
 
@@ -107,9 +109,9 @@ select:focus-visible {
 .appContent {
   position: relative;
   flex: 1 1 auto;
-  padding: 22px 28px 28px;
+  padding: 28px 30px 30px;
   background:
-    radial-gradient(circle at 18% 0%, var(--app-glow-purple), transparent 32%),
+    radial-gradient(circle at 18% 0%, var(--app-glow-accent), transparent 32%),
     radial-gradient(circle at 86% 4%, var(--app-glow-blue), transparent 34%),
     var(--app-bg);
 }
@@ -124,25 +126,28 @@ select:focus-visible {
 }
 
 .appPageHeader {
-  margin: 0 0 20px;
+  margin: 0 0 22px;
   padding-right: 246px;
+  border-bottom: 1px solid rgba(211, 226, 247, 0.12);
+  padding-bottom: 14px;
 }
 
 .appPageHeader__title {
   margin: 0;
   font-family: var(--font-display);
-  color: #f4f0ff;
-  font-size: 2rem;
+  color: #f2f6fb;
+  font-size: clamp(1.72rem, 2.2vw, 2.12rem);
   font-weight: 700;
   letter-spacing: 0;
-  line-height: 1.1;
-  text-transform: uppercase;
+  line-height: 1.06;
+  text-transform: none;
 }
 
 .appPageHeader__subtitle {
-  margin: 8px 0 0;
-  color: rgba(225, 226, 238, 0.72);
-  font-size: 1rem;
+  margin: 10px 0 0;
+  color: rgba(211, 226, 247, 0.74);
+  font-size: 1.02rem;
+  max-width: 74ch;
 }
 
 .page .dashboardHeader,
@@ -193,8 +198,8 @@ select:focus-visible {
 
 .appShellTools {
   position: fixed;
-  top: 22px;
-  right: 44px;
+  top: 24px;
+  right: 40px;
   z-index: 30;
   display: flex;
   align-items: center;
@@ -213,19 +218,19 @@ select:focus-visible {
   height: 42px;
   display: grid;
   place-items: center;
-  border: 1px solid var(--app-glass-border);
+  border: 1px solid rgba(210, 225, 247, 0.2);
   border-radius: 50%;
-  color: #f4f0ff;
-  background: rgba(10, 15, 28, 0.76);
+  color: #f2f6fb;
+  background: rgba(17, 28, 43, 0.84);
   backdrop-filter: blur(12px);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .appShellBell:hover,
 .notificationBell:has(.notificationMenu) .appShellBell {
-  border-color: rgba(124, 58, 237, 0.45);
-  background: rgba(15, 23, 42, 0.9);
-  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 166, 107, 0.55);
+  background: rgba(22, 35, 52, 0.94);
+  box-shadow: 0 10px 30px rgba(255, 166, 107, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .appShellBell svg {
@@ -252,11 +257,11 @@ select:focus-visible {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #0b0f1a;
+  border: 2px solid #eef4ef;
   border-radius: 999px;
   padding: 0 5px;
   color: #ffffff;
-  background: linear-gradient(135deg, #ef4444, #7c3aed);
+  background: linear-gradient(135deg, #ef4444, var(--r-primary));
   font-size: 0.66rem;
   font-weight: 900;
   line-height: 1;
@@ -269,13 +274,13 @@ select:focus-visible {
   right: 0;
   width: min(410px, calc(100vw - 32px));
   overflow: hidden;
-  border: 1px solid rgba(124, 58, 237, 0.34);
+  border: 1px solid rgba(31, 118, 95, 0.34);
   border-radius: 16px;
-  background: var(--app-glass-strong);
-  box-shadow: var(--app-glass-shadow);
+  background: var(--app-menu-surface);
+  box-shadow: var(--app-menu-shadow);
   backdrop-filter: blur(14px) saturate(1.16);
   color: #f4f0ff;
-  animation: glassDropdownIn 0.18s var(--ease) both;
+  animation: menuDropdownIn 0.18s var(--ease) both;
 }
 
 .notificationMenu::before {
@@ -285,8 +290,8 @@ select:focus-visible {
   right: 20px;
   width: 12px;
   height: 12px;
-  border-top: 1px solid rgba(124, 58, 237, 0.34);
-  border-left: 1px solid rgba(124, 58, 237, 0.34);
+  border-top: 1px solid rgba(31, 118, 95, 0.34);
+  border-left: 1px solid rgba(31, 118, 95, 0.34);
   background: rgba(10, 15, 28, 0.94);
   transform: rotate(45deg);
 }
@@ -298,7 +303,7 @@ select:focus-visible {
   gap: 14px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding: 16px 16px 13px;
-  background: linear-gradient(180deg, rgba(124, 58, 237, 0.08), transparent);
+  background: linear-gradient(180deg, rgba(31, 118, 95, 0.08), transparent);
 }
 
 .notificationMenu__head div {
@@ -334,8 +339,8 @@ select:focus-visible {
 }
 
 .notificationMenu__head button:hover {
-  border-color: rgba(124, 58, 237, 0.36);
-  background: rgba(124, 58, 237, 0.1);
+  border-color: rgba(31, 118, 95, 0.36);
+  background: rgba(31, 118, 95, 0.1);
   color: #f4f0ff;
 }
 
@@ -371,8 +376,8 @@ select:focus-visible {
   place-items: center;
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  color: rgba(196, 181, 253, 0.8);
-  background: rgba(124, 58, 237, 0.1);
+  color: rgba(31, 118, 95, 0.8);
+  background: rgba(31, 118, 95, 0.1);
 }
 
 .notificationMenu__stateIcon svg {
@@ -411,8 +416,8 @@ select:focus-visible {
 
 .notificationItem:hover,
 .notificationItem.is-unread {
-  border-color: rgba(124, 58, 237, 0.24);
-  background: rgba(124, 58, 237, 0.07);
+  border-color: rgba(31, 118, 95, 0.24);
+  background: rgba(31, 118, 95, 0.07);
 }
 
 .notificationItem__main {
@@ -434,8 +439,8 @@ select:focus-visible {
   height: 7px;
   margin-top: 0;
   border-radius: 50%;
-  background: #8b5cf6;
-  box-shadow: 0 0 16px rgba(139, 92, 246, 0.6);
+  background: var(--r-primary);
+  box-shadow: 0 0 16px rgba(31, 118, 95, 0.6);
 }
 
 .notificationItem__dot--messages {
@@ -444,8 +449,8 @@ select:focus-visible {
 }
 
 .notificationItem__dot--social {
-  background: #8b5cf6;
-  box-shadow: 0 0 16px rgba(139, 92, 246, 0.55);
+  background: var(--r-primary);
+  box-shadow: 0 0 16px rgba(31, 118, 95, 0.55);
 }
 
 .notificationItem__avatar {
@@ -458,7 +463,7 @@ select:focus-visible {
   color: #f4f0ff;
   background:
     radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.2), transparent 34%),
-    linear-gradient(145deg, rgba(124, 58, 237, 0.42), rgba(15, 23, 42, 0.92));
+    linear-gradient(145deg, rgba(31, 118, 95, 0.42), rgba(15, 23, 42, 0.92));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
   font-size: 0.82rem;
   font-weight: 900;
@@ -467,7 +472,7 @@ select:focus-visible {
 .notificationItem__avatar--messages {
   background:
     radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.18), transparent 34%),
-    linear-gradient(145deg, rgba(79, 70, 229, 0.48), rgba(15, 23, 42, 0.92));
+    linear-gradient(145deg, rgba(83, 111, 174, 0.48), rgba(15, 23, 42, 0.92));
 }
 
 .notificationItem__avatar--campaign {
@@ -528,9 +533,9 @@ select:focus-visible {
 }
 
 .notificationItem__action.is-accept {
-  border-color: rgba(124, 58, 237, 0.42);
-  color: #c4b5fd;
-  background: rgba(124, 58, 237, 0.1);
+  border-color: rgba(31, 118, 95, 0.42);
+  color: var(--r-primary);
+  background: rgba(31, 118, 95, 0.1);
 }
 
 .notificationItem__action.is-accept:hover {
@@ -552,7 +557,7 @@ select:focus-visible {
   font-weight: 800;
 }
 
-/* ─── PAGE SCAFFOLD ──────────────────────────────── */
+/* â”€â”€â”€ PAGE SCAFFOLD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .page {
   width: 100%;
@@ -593,9 +598,9 @@ select:focus-visible {
   display: block;
   border-radius: 10px;
   background:
-    linear-gradient(135deg, rgba(167, 139, 250, 0.18), rgba(124, 58, 237, 0.28)),
-    rgba(124, 58, 237, 0.16);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 14px 34px rgba(124, 58, 237, 0.14);
+    linear-gradient(135deg, rgba(31, 118, 95, 0.18), rgba(31, 118, 95, 0.28)),
+    rgba(31, 118, 95, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 14px 34px rgba(31, 118, 95, 0.14);
 }
 
 .pageHeader > :first-child::after {
@@ -605,9 +610,9 @@ select:focus-visible {
   top: 9px;
   width: 14px;
   height: 12px;
-  border: 1.5px solid #c4b5fd;
+  border: 1.5px solid var(--r-primary);
   border-radius: 3px;
-  box-shadow: inset 0 4px 0 rgba(196, 181, 253, 0.12);
+  box-shadow: inset 0 4px 0 rgba(31, 118, 95, 0.12);
 }
 
 .pageTitle {
@@ -639,7 +644,7 @@ select:focus-visible {
   content: none;
 }
 
-/* ─── SURFACE CARDS ─────────────────────────────── */
+/* â”€â”€â”€ SURFACE CARDS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .panel {
   border-radius: var(--radius-xl);
@@ -668,7 +673,7 @@ select:focus-visible {
   box-shadow: var(--shadow-md);
 }
 
-/* ─── BUTTONS ───────────────────────────────────── */
+/* â”€â”€â”€ BUTTONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 button {
   transition: transform 0.2s var(--ease), box-shadow 0.2s ease, background 0.18s ease, border-color 0.18s ease, opacity 0.18s ease;
@@ -725,7 +730,7 @@ button:active:not(:disabled) { transform: translateY(0px); }
 
 .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-/* ─── INPUTS ────────────────────────────────────── */
+/* â”€â”€â”€ INPUTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .input {
   width: 320px;
@@ -772,7 +777,7 @@ button:active:not(:disabled) { transform: translateY(0px); }
 }
 .inputClear:hover { background: var(--card); }
 
-/* ─── GLOSSARY CONTROLS ─────────────────────────── */
+/* â”€â”€â”€ GLOSSARY CONTROLS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .glossaryControls {
   display: flex;
@@ -781,7 +786,7 @@ button:active:not(:disabled) { transform: translateY(0px); }
   flex-wrap: wrap;
 }
 
-/* ─── EMPTY STATE ───────────────────────────────── */
+/* â”€â”€â”€ EMPTY STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .empty {
   border-radius: var(--radius-lg);
@@ -793,7 +798,7 @@ button:active:not(:disabled) { transform: translateY(0px); }
 .emptyTitle { font-weight: 700; margin-bottom: 6px; font-size: 16px; }
 .emptyText  { color: var(--text-2); line-height: 1.6; font-size: 14px; }
 
-/* ─── PUBLIC SHELL ──────────────────────────────── */
+/* â”€â”€â”€ PUBLIC SHELL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .publicShell {
   min-height: 100vh;
@@ -807,18 +812,18 @@ button:active:not(:disabled) { transform: translateY(0px); }
   padding: 24px 0 40px;
 }
 
-/* ─── SELECT COLORS ─────────────────────────────── */
+/* â”€â”€â”€ SELECT COLORS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 select { color: inherit; }
 select option { color: #000; background: #fff; }
 
-/* ─── ANIMATIONS ────────────────────────────────── */
+/* â”€â”€â”€ ANIMATIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-@keyframes glassDropdownIn {
+@keyframes menuDropdownIn {
   from { opacity: 0; transform: translateY(8px) scale(0.98); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
@@ -842,7 +847,7 @@ select option { color: #000; background: #fff; }
   }
 }
 
-/* ─── RESPONSIVE ────────────────────────────────── */
+/* â”€â”€â”€ RESPONSIVE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 @media (max-width: 720px) {
   .appContent { padding: 12px 12px 28px; }

@@ -418,7 +418,7 @@ export default function DicePage() {
                     {STANDARD_DICE.map((sides) => <option key={sides} value={sides}>k{sides}</option>)}
                   </select>
                 </div>
-                <NumberStepper label="Ilosc rzutow" value={standard.qty} min={1} max={100} onChange={(value) => setStandard((cfg) => ({ ...cfg, qty: value }))} />
+                <NumberStepper label="Ilo�� rzut�w" value={standard.qty} min={1} max={100} onChange={(value) => setStandard((cfg) => ({ ...cfg, qty: value }))} />
                 <NumberStepper label="Modyfikator" value={standard.modifier} min={-9999} max={9999} onChange={(value) => setStandard((cfg) => ({ ...cfg, modifier: value }))} />
                 <div className="diceConfigField">
                   <label className="diceConfigLabel">Typ rzutu</label>

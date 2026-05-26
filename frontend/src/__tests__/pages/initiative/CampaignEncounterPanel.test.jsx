@@ -30,6 +30,6 @@ describe("CampaignEncounterPanel", () => {
     );
     fireEvent.change(screen.getAllByRole("combobox")[0], { target: { value: "2" } });
     expect(onCampaignChange).toHaveBeenCalledWith("2");
-    expect(screen.getByText("Brak encounterow")).toBeInTheDocument();
+    expect(screen.getByText("Brak encounterów")).toBeInTheDocument();
   });
 });

@@ -32,7 +32,7 @@ export default function CocCharacterCreator({ onCreate, creating, onBack }) {
           occupationIndex: prev.occupationIndex || next[0]?.index || "",
         }));
       } catch {
-        if (!cancelled) setError("Nie udalo sie zaladowac zawodow CoC 7e.");
+        if (!cancelled) setError("Nie udalo sie zaladowac zawodów CoC 7e.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -43,7 +43,7 @@ export default function CocCharacterCreator({ onCreate, creating, onBack }) {
 
   return (
     <div className="charactersQuickCreate">
-      {loading && <div className="charactersState">Ladowanie zawodow...</div>}
+      {loading && <div className="charactersState">Ładowanie zawodów...</div>}
       {error && <div className="charactersError">{error}</div>}
       {!loading && (
         <>

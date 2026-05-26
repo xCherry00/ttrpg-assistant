@@ -4,7 +4,7 @@
   flex-direction: column;
 }
 
-/* ─── HERO ──────────────────────────────────────── */
+/* â”€â”€â”€ HERO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .homeHero {
   position: relative;
@@ -75,7 +75,7 @@
 }
 
 .homeBadge::before {
-  content: "✦";
+  content: "âś¦";
   font-size: 10px;
 }
 
@@ -132,7 +132,7 @@
   box-shadow: 0 16px 48px rgba(200,145,48,0.54), var(--primary-glow);
   transform: translateY(-3px);
 }
-.homeBtnPrimary::after { content: "→"; }
+.homeBtnPrimary::after { content: "â†’"; }
 
 .homeBtnGhost {
   display: inline-flex;
@@ -172,7 +172,7 @@
   display: inline-block;
 }
 
-/* ─── FEATURES ──────────────────────────────────── */
+/* â”€â”€â”€ FEATURES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .homeFeatureStrip {
   display: grid;
@@ -241,7 +241,7 @@
   font-size: 14px;
 }
 
-/* ─── FOOTER ────────────────────────────────────── */
+/* â”€â”€â”€ FOOTER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .homeFooter {
   text-align: center;
@@ -251,7 +251,7 @@
   letter-spacing: 0.06em;
 }
 
-/* ─── RESPONSIVE ────────────────────────────────── */
+/* â”€â”€â”€ RESPONSIVE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 @media (max-width: 900px) {
   .homeHero { padding: 60px 20px 48px; }

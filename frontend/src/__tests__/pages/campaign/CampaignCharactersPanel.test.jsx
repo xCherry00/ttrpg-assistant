@@ -1,4 +1,4 @@
-﻿import { render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import CampaignCharactersPanel from "../../../pages/campaign/components/CampaignCharactersPanel";
 
 describe("CampaignCharactersPanel", () => {
@@ -16,7 +16,7 @@ describe("CampaignCharactersPanel", () => {
     );
 
     expect(screen.getByText("Hero")).toBeInTheDocument();
-    expect(screen.getByText(/Wlasciciel:/)).toBeInTheDocument();
+    expect(screen.getByText(/Gracz:/)).toBeInTheDocument();
   });
 
   it("shows only compatible characters in assign select", () => {
