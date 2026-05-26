@@ -70,7 +70,7 @@ function memberRank(member) {
 }
 
 function lastSessionLabel(campaign) {
-  if (!campaign?.lastFinishedSessionAt) return "Brak zakoĹ„czonej sesji";
+  if (!campaign?.lastFinishedSessionAt) return "Brak zakończonej sesji";
   const date = formatDateTime(campaign.lastFinishedSessionAt);
   return campaign.lastFinishedSessionTitle ? `${campaign.lastFinishedSessionTitle}: ${date}` : date;
 }
@@ -122,7 +122,7 @@ export default function CampaignsPage() {
         setCampaigns(Array.isArray(campaignData) ? campaignData : []);
         setJoinablePublicCampaigns(Array.isArray(publicCampaignData) ? publicCampaignData : []);
       } catch (err) {
-        if (!cancelled) setError(err?.message || "Nie udaĹ‚o siÄ™ pobraÄ‡ kampanii.");
+        if (!cancelled) setError(err?.message || "Nie udało się pobrać kampanii.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -185,7 +185,7 @@ export default function CampaignsPage() {
   }, [campaigns]);
 
   const currentSortLabel = tab === "my"
-    ? (mySort === "saved" ? "Sortuj: Zapisane" : "Sortuj: Ostatnia aktywnoĹ›Ä‡")
+    ? (mySort === "saved" ? "Sortuj: Zapisane" : "Sortuj: Ostatnia aktywność")
     : (publicSort === "saved" ? "Sortuj: Zapisane" : "Sortuj: Najnowsze");
 
   function openCreate() {
@@ -206,7 +206,7 @@ export default function CampaignsPage() {
     setCreateError("");
     const title = createForm.title.trim();
     if (title.length < 3) {
-      setCreateError("Nazwa kampanii musi mieÄ‡ minimum 3 znaki.");
+      setCreateError("Nazwa kampanii musi mieć minimum 3 znaki.");
       return;
     }
 
@@ -223,7 +223,7 @@ export default function CampaignsPage() {
       closeCreate();
       setTab("my");
     } catch (err) {
-      setCreateError(err?.message || "Nie udaĹ‚o siÄ™ utworzyÄ‡ kampanii.");
+      setCreateError(err?.message || "Nie udało się utworzyć kampanii.");
     } finally {
       setCreateLoading(false);
     }
@@ -234,7 +234,7 @@ export default function CampaignsPage() {
     setJoinError("");
     const code = normalizeCode(codeOverride || joinCode);
     if (!code) {
-      setJoinError("DoĹ‚Ä…czenie wymaga kodu zaproszenia.");
+      setJoinError("Dołączenie wymaga kodu zaproszenia.");
       return;
     }
 
@@ -243,11 +243,11 @@ export default function CampaignsPage() {
       const response = await joinCampaign(token, code);
       const joined = response?.campaign;
       if (joined) setCampaigns((prev) => [joined, ...prev.filter((campaign) => campaign.id !== joined.id)]);
-      setNotice(response?.message || "DoĹ‚Ä…czono do kampanii.");
+      setNotice(response?.message || "Dołączono do kampanii.");
       setJoinCode("");
       setTab("my");
     } catch (err) {
-      setJoinError(err?.message || "Nie udaĹ‚o siÄ™ doĹ‚Ä…czyÄ‡ do kampanii.");
+      setJoinError(err?.message || "Nie udało się dołączyć do kampanii.");
     } finally {
       setJoinLoading(false);
     }
@@ -261,7 +261,7 @@ export default function CampaignsPage() {
 
     event.preventDefault();
     setJoinError("");
-    setNotice(`WysĹ‚ano proĹ›bÄ™ o doĹ‚Ä…czenie do kampanii "${campaign.title}".`);
+    setNotice(`Wysłano prośbę o dołączenie do kampanii "${campaign.title}".`);
   }
 
   async function handleToggleCampaignFavorite(event, campaign) {
@@ -282,7 +282,7 @@ export default function CampaignsPage() {
       const rollback = (item) => item.id === campaign.id ? { ...item, saved: previousSaved } : item;
       setCampaigns((prev) => prev.map(rollback));
       setJoinablePublicCampaigns((prev) => prev.map(rollback));
-      setNotice(err?.message || "Nie udaĹ‚o siÄ™ zmieniÄ‡ zapisu kampanii.");
+      setNotice(err?.message || "Nie udało się zmienić zapisu kampanii.");
     }
   }
 
@@ -302,7 +302,7 @@ export default function CampaignsPage() {
       <section className="campaignToolbar">
         <label className="campaignSearch">
           <CampaignIcon name="search" />
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={tab === "my" ? "Szukaj kampanii..." : "Szukaj kampanii, Ĺ›wiata, MG..."} />
+          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={tab === "my" ? "Szukaj kampanii..." : "Szukaj kampanii, świata, MG..."} />
         </label>
 
         <div className="campaignFilterPills">
@@ -335,7 +335,7 @@ export default function CampaignsPage() {
               <>
                 <option value="newest">{currentSortLabel}</option>
                 <option value="saved">Sortuj: Zapisane</option>
-                <option value="players">Sortuj: NajwiÄ™cej graczy</option>
+                <option value="players">Sortuj: Najwięcej graczy</option>
                 <option value="name">Sortuj: Nazwa A-Z</option>
               </>
             )}
@@ -352,13 +352,13 @@ export default function CampaignsPage() {
           disabled={joinLoading}
         >
           <CampaignIcon name="link" />
-          DoĹ‚Ä…cz kodem
+          Dołącz kodem
         </button>
       </section>
 
       {notice && <div className="campaignNotice">{notice}</div>}
       {error && <div className="campaignError">{error}</div>}
-      {loading && <div className="campaignLoading">Ĺadowanie kampanii...</div>}
+      {loading && <div className="campaignLoading">Ładowanie kampanii...</div>}
 
       {!loading && !error && (
         <section className="campaignsLayout">
@@ -421,7 +421,7 @@ export default function CampaignsPage() {
               <div className="campaignCreateFields">
                 <label>
                   <span>Nazwa kampanii</span>
-                  <input value={createForm.title} onChange={(event) => setCreateForm((prev) => ({ ...prev, title: event.target.value }))} placeholder="np. Cienie nad DolinÄ… Burz" maxLength={200} autoFocus />
+                  <input value={createForm.title} onChange={(event) => setCreateForm((prev) => ({ ...prev, title: event.target.value }))} placeholder="np. Cienie nad Doliną Burz" maxLength={200} autoFocus />
                 </label>
                 <label>
                   <span>System RPG</span>
@@ -431,12 +431,12 @@ export default function CampaignsPage() {
                 </label>
                 <label>
                   <span>Opis</span>
-                  <textarea value={createForm.description} onChange={(event) => setCreateForm((prev) => ({ ...prev, description: event.target.value }))} rows={5} maxLength={2000} placeholder="KrĂłtki opis klimatu kampanii." />
+                  <textarea value={createForm.description} onChange={(event) => setCreateForm((prev) => ({ ...prev, description: event.target.value }))} rows={5} maxLength={2000} placeholder="Krótki opis klimatu kampanii." />
                 </label>
                 {createError && <div className="campaignError">{createError}</div>}
                 <div className="campaignModal__actions">
                   <button type="button" onClick={closeCreate}>Anuluj</button>
-                  <button type="submit" disabled={createLoading}>{createLoading ? "Tworzenie..." : "UtwĂłrz kampaniÄ™"}</button>
+                  <button type="submit" disabled={createLoading}>{createLoading ? "Tworzenie..." : "Utwórz kampanię"}</button>
                 </div>
               </div>
             </form>
@@ -454,7 +454,7 @@ function MyCampaignGrid({ campaigns, navigate, openCreate, onToggleFavorite }) {
         <div className="campaignPublicEmpty">
           <span><CampaignIcon name="plus" /></span>
           <strong>Nie masz jeszcze kampanii</strong>
-          <small>UtwĂłrz pierwszÄ… kampaniÄ™ albo doĹ‚Ä…cz kodem, gdy MG wyĹ›le Ci zaproszenie.</small>
+          <small>Utwórz pierwszą kampanię albo dołącz kodem, gdy MG wyśle Ci zaproszenie.</small>
         </div>
       )}
 
@@ -469,7 +469,7 @@ function MyCampaignGrid({ campaigns, navigate, openCreate, onToggleFavorite }) {
               <button
                 type="button"
                 className={`campaignBookmark${campaign.saved ? " is-saved" : ""}`}
-                aria-label={campaign.saved ? "UsuĹ„ z zapisanych kampanii" : "Zapisz kampaniÄ™"}
+                aria-label={campaign.saved ? "Usuń z zapisanych kampanii" : "Zapisz kampanię"}
                 aria-pressed={Boolean(campaign.saved)}
                 onClick={(event) => onToggleFavorite(event, campaign)}
               >
@@ -478,13 +478,13 @@ function MyCampaignGrid({ campaigns, navigate, openCreate, onToggleFavorite }) {
             </div>
             <div className="campaignCard__body">
               <h2>{campaign.title}</h2>
-              <p>{campaign.description || "Kampania czeka na opis, notatki i pierwsze spotkanie druĹĽyny."}</p>
+              <p>{campaign.description || "Kampania czeka na opis, notatki i pierwsze spotkanie drużyny."}</p>
               <CampaignMemberAvatars members={members} gmName={campaign.gmName} />
               <footer>
                 <span><CampaignIcon name="user" />{players} graczy</span>
                 <span title={lastSessionLabel(campaign)}><CampaignIcon name="calendar" />Ostatnia sesja: {lastSessionLabel(campaign)}</span>
               </footer>
-              <strong className="campaignOpenHint">OtwĂłrz</strong>
+              <strong className="campaignOpenHint">Otwórz</strong>
             </div>
           </article>
         );
@@ -492,8 +492,8 @@ function MyCampaignGrid({ campaigns, navigate, openCreate, onToggleFavorite }) {
 
       <button type="button" className="campaignCreateTile" onClick={openCreate}>
         <span><CampaignIcon name="plus" /></span>
-        <strong>UtwĂłrz nowÄ… kampaniÄ™</strong>
-        <small>Rozpocznij wĹ‚asnÄ… przygodÄ™ i zaproĹ› graczy do wspĂłlnej rozgrywki.</small>
+        <strong>Utwórz nową kampanię</strong>
+        <small>Rozpocznij własną przygodę i zaproś graczy do wspólnej rozgrywki.</small>
       </button>
     </div>
   );
@@ -505,7 +505,7 @@ function PublicCampaignGrid({ campaigns, onJoin, joinLoading, onToggleFavorite }
       <div className="campaignPublicEmpty">
         <span><CampaignIcon name="globe" /></span>
         <strong>Brak kampanii publicznych z wolnym miejscem</strong>
-        <small>Pokazujemy tutaj tylko publiczne kampanie, do ktĂłrych jeszcze nie naleĹĽysz i ktĂłre nadal majÄ… wolne sloty.</small>
+        <small>Pokazujemy tutaj tylko publiczne kampanie, do których jeszcze nie należysz i które nadal mają wolne sloty.</small>
       </div>
     );
   }
@@ -524,7 +524,7 @@ function PublicCampaignGrid({ campaigns, onJoin, joinLoading, onToggleFavorite }
               <button
                 type="button"
                 className={`campaignBookmark${campaign.saved ? " is-saved" : ""}`}
-                aria-label={campaign.saved ? "UsuĹ„ z zapisanych kampanii" : "Zapisz kampaniÄ™"}
+                aria-label={campaign.saved ? "Usuń z zapisanych kampanii" : "Zapisz kampanię"}
                 aria-pressed={Boolean(campaign.saved)}
                 onClick={(event) => onToggleFavorite(event, campaign)}
               >
@@ -541,10 +541,10 @@ function PublicCampaignGrid({ campaigns, onJoin, joinLoading, onToggleFavorite }
               </div>
               <footer>
                 <span><CampaignIcon name="user" />{players} / {limit} graczy</span>
-                <span className={isFull ? "is-full" : "is-open"}>{isFull ? "PeĹ‚na" : "Wolne miejsca"}</span>
+                <span className={isFull ? "is-full" : "is-open"}>{isFull ? "Pełna" : "Wolne miejsca"}</span>
               </footer>
               <button type="button" className="campaignJoinButton" disabled={isFull || joinLoading} onClick={(event) => onJoin(event, campaign)}>
-                {isFull ? "PeĹ‚na" : "DoĹ‚Ä…cz"}
+                {isFull ? "Pełna" : "Dołącz"}
               </button>
             </div>
           </article>
@@ -577,7 +577,7 @@ function CampaignMemberAvatars({ members, gmName }) {
             <span className="campaignAvatarProfile__body">
               <span className="campaignAvatarProfile__avatar">{memberInitial(member)}</span>
               <span className="campaignAvatarProfile__copy">
-                <strong>{member.displayName || member.username || "UĹĽytkownik"}</strong>
+                <strong>{member.displayName || member.username || "Użytkownik"}</strong>
                 <small>{member.handle || member.username || "bez tagu"}</small>
                 <em>{memberRank(member)}</em>
               </span>
@@ -601,8 +601,8 @@ function MyCampaignPanel({ invites, stats }) {
           {!hasInvites && (
             <div className="campaignInviteEmpty">
               <span><CampaignIcon name="mail" /></span>
-              <strong>Brak zaproszeĹ„</strong>
-              <small>Gdy otrzymasz prawdziwe zaproszenie do kampanii, pojawi siÄ™ w tym miejscu.</small>
+              <strong>Brak zaproszeń</strong>
+              <small>Gdy otrzymasz prawdziwe zaproszenie do kampanii, pojawi się w tym miejscu.</small>
             </div>
           )}
 
@@ -611,7 +611,7 @@ function MyCampaignPanel({ invites, stats }) {
               <span>{invite.avatar}</span>
               <div>
                 <strong>{invite.name}</strong>
-                <small>zaprasza ciÄ™ do kampanii</small>
+                <small>zaprasza cię do kampanii</small>
                 <em>{invite.campaign}</em>
               </div>
               <button type="button"><CampaignIcon name="check" /></button>
@@ -624,10 +624,10 @@ function MyCampaignPanel({ invites, stats }) {
       <section className="campaignSideCard">
         <h2>Statystyki</h2>
         <dl className="campaignStats">
-          <div><dt>ĹÄ…czne kampanie</dt><dd>{stats.total}</dd></div>
+          <div><dt>Łączne kampanie</dt><dd>{stats.total}</dd></div>
           <div><dt>Prowadzone kampanie</dt><dd>{stats.gm}</dd></div>
           <div><dt>Kampanie jako gracz</dt><dd>{stats.player}</dd></div>
-          <div><dt>ĹÄ…czni gracze</dt><dd>{stats.players}</dd></div>
+          <div><dt>Łączni gracze</dt><dd>{stats.players}</dd></div>
           <div><dt>Rozegrane sesje</dt><dd>{stats.sessions}</dd></div>
         </dl>
       </section>
@@ -647,7 +647,7 @@ function PublicCampaignPanel({ playerRange, setPlayerRange, campaignKind, setCam
             setPlayStyle("all");
             setSessionLength("all");
           }}>
-            WyczyĹ›Ä‡
+            Wyczyść
           </button>
         </header>
         <div className="campaignAdvancedFilters">
@@ -689,16 +689,16 @@ function PublicCampaignPanel({ playerRange, setPlayerRange, campaignKind, setCam
       <section className="campaignSideCard">
         <h2>Legenda</h2>
         <ul className="campaignLegend">
-          <li><span className="is-open" />Wolne miejsca<small>Kampania ma dostÄ™pne miejsca dla graczy.</small></li>
-          <li><span className="is-near" />Prawie peĹ‚na<small>ZostaĹ‚o 1 miejsce.</small></li>
-          <li><span className="is-full" />PeĹ‚na<small>Brak wolnych miejsc.</small></li>
+          <li><span className="is-open" />Wolne miejsca<small>Kampania ma dostępne miejsca dla graczy.</small></li>
+          <li><span className="is-near" />Prawie pełna<small>Zostało 1 miejsce.</small></li>
+          <li><span className="is-full" />Pełna<small>Brak wolnych miejsc.</small></li>
         </ul>
       </section>
 
       <section className="campaignSideCard campaignCtaCard">
-        <h2>Nie znalazĹ‚eĹ› nic dla siebie?</h2>
-        <p>UtwĂłrz wĹ‚asnÄ… kampaniÄ™ i zaproĹ› graczy do wspĂłlnej przygody.</p>
-        <button type="button" onClick={openCreate}>UtwĂłrz kampaniÄ™</button>
+        <h2>Nie znalazłeś nic dla siebie?</h2>
+        <p>Utwórz własną kampanię i zaproś graczy do wspólnej przygody.</p>
+        <button type="button" onClick={openCreate}>Utwórz kampanię</button>
       </section>
     </>
   );
