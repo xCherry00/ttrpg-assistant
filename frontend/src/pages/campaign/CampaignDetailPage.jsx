@@ -45,6 +45,8 @@ export default function CampaignDetailPage() {
   const [sessions, setSessions] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [playerNotes, setPlayerNotes] = useState([]);
+  const [activeTab, setActiveTab] = useState("session");
+  const [showInviteCode, setShowInviteCode] = useState(false);
 
   async function loadAll() {
     setLoading(true);
@@ -173,6 +175,22 @@ export default function CampaignDetailPage() {
   const myUserId = Number(myMember?.id ?? myMember?.userId ?? 0) || null;
   const inviteCode = campaign?.joinCode || campaign?.inviteCode || "";
   const showMaterialsPanel = materials.length > 0;
+  const campaignTabs = isOwner
+    ? [
+      { key: "session", label: "Sesja" },
+      { key: "characters", label: "Postacie" },
+      { key: "players", label: "Gracze" },
+      ...(showMaterialsPanel ? [{ key: "materials", label: "Materialy" }] : []),
+      { key: "notes", label: "Notatki" },
+      { key: "settings", label: "Ustawienia" },
+    ]
+    : [
+      { key: "session", label: "Sesja" },
+      { key: "characters", label: "Postacie" },
+      { key: "players", label: "Gracze" },
+      ...(showMaterialsPanel ? [{ key: "materials", label: "Materialy" }] : []),
+      { key: "notes", label: "Notatki" },
+    ];
 
   return (
     <div className="page campaignDetailsPage">
@@ -206,15 +224,30 @@ export default function CampaignDetailPage() {
             ) : null}
             {isOwner ? (
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                <a href="#campaign-overview" className="campaignDetailsPrimaryBtn">Edytuj kampanie</a>
-                {inviteCode ? <span className="campaignMemberBadge">Kod: {inviteCode}</span> : null}
+                <button type="button" className="campaignDetailsPrimaryBtn" onClick={() => setActiveTab("settings")}>Edytuj kampanie</button>
               </div>
             ) : null}
           </section>
 
-          {isOwner ? (
+          <nav className="campaignTabs campaignPanelTabs" role="tablist" aria-label="Panel kampanii">
+            {campaignTabs.map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                role="tab"
+                aria-selected={activeTab === tab.key}
+                aria-label={tab.label}
+                className={`campaignTabBtn${activeTab === tab.key ? " is-active" : ""}`}
+                onClick={() => setActiveTab(tab.key)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+
+          {isOwner && activeTab === "session" ? (
             <div className="campaignWorkspaceGrid">
-              <div className="campaignDashboardRow campaignDashboardRow--top">
+              <div className="campaignDashboardRow campaignDashboardRow--session">
                 <UpcomingSessionPanel
                   campaignId={campaignId}
                   sessions={sessions}
@@ -224,25 +257,13 @@ export default function CampaignDetailPage() {
                   onStart={handleStartSession}
                   onFinish={handleFinishSession}
                 />
-                {inviteCode ? (
-                  <section className="campaignDetailsCard panel-soft">
-                    <h2 className="campaignDetailsCardTitle">Kod zaproszenia</h2>
-                    <p className="campaignDetailsHelpText">Udostepnij kod graczom, aby dolaczyli do kampanii.</p>
-                    <div className="campaignDetailsInfoRow">
-                      <span>Kod</span>
-                      <code>{inviteCode}</code>
-                    </div>
-                  </section>
-                ) : (
-                  <section className="campaignDetailsCard panel-soft">
-                    <h2 className="campaignDetailsCardTitle">Kod zaproszenia</h2>
-                    <div className="campaignDetailsEmpty">Brak aktywnego kodu dolaczenia.</div>
-                  </section>
-                )}
-                <CampaignPlayersPanel members={members} title="Gracze" />
               </div>
+            </div>
+          ) : null}
 
-              <div className="campaignDashboardRow">
+          {isOwner && activeTab === "characters" ? (
+            <div className="campaignWorkspaceGrid">
+              <div className="campaignDashboardRow campaignDashboardRow--single">
                 <CampaignCharactersPanel
                   campaignCharacters={campaignCharacters}
                   myCharacters={myCharacters}
@@ -255,11 +276,54 @@ export default function CampaignDetailPage() {
                   onAssign={handleAssignCharacter}
                   onDetach={handleDetachCharacter}
                 />
-
-                {showMaterialsPanel ? <CampaignMaterialsPanel materials={materials} materialsAvailable /> : null}
               </div>
+            </div>
+          ) : null}
 
-              <div className="campaignDashboardRow campaignDashboardRow--bottom">
+          {isOwner && activeTab === "players" ? (
+            <div className="campaignWorkspaceGrid">
+              <div className="campaignDashboardRow campaignDashboardRow--session">
+                <CampaignPlayersPanel members={members} title="Gracze" />
+                <section className="campaignDetailsCard panel-soft">
+                  <h2 className="campaignDetailsCardTitle">Zaproś gracza</h2>
+                  <p className="campaignDetailsHelpText">
+                    Kod zaproszenia pokazuj tylko wtedy, gdy faktycznie chcesz zaprosić nową osobę do kampanii.
+                  </p>
+                  <div className="campaignDetailsInfoRow">
+                    <span>Limit graczy</span>
+                    <strong>{members.length} / {campaign?.playerLimit || 5}</strong>
+                  </div>
+                  {showInviteCode && inviteCode ? (
+                    <div className="campaignDetailsInfoRow">
+                      <span>Kod zaproszenia</span>
+                      <code>{inviteCode}</code>
+                    </div>
+                  ) : null}
+                  {!showInviteCode ? (
+                    <button type="button" className="campaignDetailsPrimaryBtn" onClick={() => setShowInviteCode(true)}>
+                      Pokaż kod zaproszenia
+                    </button>
+                  ) : (
+                    <button type="button" className="campaignDetailsGhostBtn" onClick={() => setShowInviteCode(false)}>
+                      Ukryj kod zaproszenia
+                    </button>
+                  )}
+                </section>
+              </div>
+            </div>
+          ) : null}
+
+          {isOwner && activeTab === "materials" && showMaterialsPanel ? (
+            <div className="campaignWorkspaceGrid">
+              <div className="campaignDashboardRow campaignDashboardRow--single">
+                <CampaignMaterialsPanel materials={materials} materialsAvailable />
+              </div>
+            </div>
+          ) : null}
+
+          {isOwner && activeTab === "settings" ? (
+            <div className="campaignWorkspaceGrid">
+              <div className="campaignDashboardRow campaignDashboardRow--single">
                 <section id="campaign-overview">
                   <CampaignOverviewPanel
                     campaign={campaign}
@@ -269,6 +333,13 @@ export default function CampaignDetailPage() {
                     onDelete={handleDeleteCampaign}
                   />
                 </section>
+              </div>
+            </div>
+          ) : null}
+
+          {isOwner && activeTab === "notes" ? (
+            <div className="campaignWorkspaceGrid">
+              <div className="campaignDashboardRow campaignDashboardRow--single">
                 <CampaignPlayerNotesPanel
                   notes={playerNotes}
                   campaign={campaign}
@@ -281,9 +352,11 @@ export default function CampaignDetailPage() {
                 />
               </div>
             </div>
-          ) : (
+          ) : null}
+
+          {!isOwner && activeTab === "session" ? (
             <div className="campaignWorkspaceGrid">
-              <div className="campaignDashboardRow campaignDashboardRow--top">
+              <div className="campaignDashboardRow campaignDashboardRow--single">
                 <UpcomingSessionPanel
                   campaignId={campaignId}
                   sessions={sessions}
@@ -293,6 +366,13 @@ export default function CampaignDetailPage() {
                   onStart={handleStartSession}
                   onFinish={handleFinishSession}
                 />
+              </div>
+            </div>
+          ) : null}
+
+          {!isOwner && activeTab === "characters" ? (
+            <div className="campaignWorkspaceGrid">
+              <div className="campaignDashboardRow campaignDashboardRow--single">
                 <CampaignCharactersPanel
                   campaignCharacters={campaignCharacters}
                   myCharacters={myCharacters}
@@ -305,10 +385,29 @@ export default function CampaignDetailPage() {
                   onAssign={handleAssignCharacter}
                   onDetach={handleDetachCharacter}
                 />
+              </div>
+            </div>
+          ) : null}
+
+          {!isOwner && activeTab === "players" ? (
+            <div className="campaignWorkspaceGrid">
+              <div className="campaignDashboardRow campaignDashboardRow--single">
                 <CampaignPlayersPanel members={members} title="Gracze" />
               </div>
+            </div>
+          ) : null}
 
-              <div className="campaignDashboardRow campaignDashboardRow--bottom">
+          {!isOwner && activeTab === "materials" && showMaterialsPanel ? (
+            <div className="campaignWorkspaceGrid">
+              <div className="campaignDashboardRow campaignDashboardRow--single">
+                <CampaignMaterialsPanel materials={materials} materialsAvailable />
+              </div>
+            </div>
+          ) : null}
+
+          {!isOwner && activeTab === "notes" ? (
+            <div className="campaignWorkspaceGrid">
+              <div className="campaignDashboardRow campaignDashboardRow--single">
                 <CampaignPlayerNotesPanel
                   notes={playerNotes}
                   campaign={campaign}
@@ -321,7 +420,7 @@ export default function CampaignDetailPage() {
                 />
               </div>
             </div>
-          )}
+          ) : null}
         </>
       )}
 

@@ -5,8 +5,64 @@
 
 .liveSessionGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 12px;
+  grid-template-columns: minmax(320px, 1.05fr) minmax(320px, 1fr) minmax(320px, 1fr);
+  grid-template-areas:
+    "scene party requests"
+    "scene history stats";
+  gap: 16px;
+  align-items: start;
+}
+
+.liveSessionGrid > * {
+  min-width: 0;
+}
+
+.liveSessionScenePanel {
+  grid-area: scene;
+}
+
+.liveSessionPartyPanel {
+  grid-area: party;
+}
+
+.liveSessionRequestsPanel {
+  grid-area: requests;
+}
+
+.liveSessionHistoryPanel {
+  grid-area: history;
+}
+
+.liveSessionStatsPanel {
+  grid-area: stats;
+}
+
+.liveSessionPage .pageHeader {
+  align-items: start;
+  gap: 16px;
+}
+
+.liveSessionPage .pageHeader > div:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.liveSessionPage .campaignDetailsCard {
+  min-width: 0;
+}
+
+.liveSessionPage .campaignMaterialList {
+  max-height: 460px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.liveSessionScenePanel .campaignMaterialList,
+.liveSessionRequestsPanel .campaignMaterialList {
+  max-height: none;
+  overflow: visible;
 }
 
 .liveSessionState {
@@ -53,7 +109,7 @@
 
 .liveSessionSceneForm {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .liveSessionSceneReadonly {
@@ -71,7 +127,7 @@
 
 .liveSessionSceneImage {
   width: 100%;
-  max-height: 240px;
+  max-height: 360px;
   object-fit: cover;
   border-radius: 10px;
   border: 1px solid var(--line);
@@ -101,6 +157,8 @@
 
 .liveSessionQuickRollPanel {
   margin-top: 10px;
+  max-height: 520px;
+  overflow: auto;
 }
 
 .liveSessionTargetList {
@@ -146,12 +204,16 @@
 
 .liveSessionStatsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 6px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .liveSessionStatsGrid p {
   margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.025);
 }
 
 .liveSessionBars {
@@ -177,4 +239,39 @@
 .liveSessionBarFill {
   height: 100%;
   background: var(--accent);
+}
+
+@media (max-width: 1280px) {
+  .liveSessionGrid {
+    grid-template-columns: minmax(300px, 1fr) minmax(300px, 1fr);
+    grid-template-areas:
+      "scene requests"
+      "party stats"
+      "history history";
+  }
+}
+
+@media (max-width: 760px) {
+  .liveSessionGrid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "scene"
+      "party"
+      "requests"
+      "history"
+      "stats";
+  }
+
+  .liveSessionPage .pageHeader > div:last-child {
+    justify-content: stretch;
+  }
+
+  .liveSessionPage .pageHeader > div:last-child > * {
+    width: 100%;
+  }
+
+  .liveSessionStatsGrid,
+  .liveSessionBarRow {
+    grid-template-columns: 1fr;
+  }
 }

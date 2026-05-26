@@ -41,24 +41,6 @@ function pickHeroSession(sessions) {
   return { mode: "empty", session: null };
 }
 
-function computeCountdownParts(scheduledFor, nowTs) {
-  const targetTs = new Date(scheduledFor).getTime();
-  if (!Number.isFinite(targetTs) || targetTs <= nowTs) return null;
-
-  const diff = targetTs - nowTs;
-  const totalMinutes = Math.floor(diff / 60000);
-  const days = Math.floor(totalMinutes / (24 * 60));
-  const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
-  const minutes = totalMinutes % 60;
-
-  return {
-    days,
-    hours,
-    minutes,
-    text: `Pozostalo: ${String(days).padStart(2, "0")} dni ${String(hours).padStart(2, "0")} godz. ${String(minutes).padStart(2, "0")} min.`,
-  };
-}
-
 function formatSessionStatus(status) {
   const normalized = normalizeStatus(status);
   if (normalized === "IN_PROGRESS") return "Trwa";
@@ -99,6 +81,45 @@ function fallbackCharacterSubtitle(character) {
 
 function pickSessionImage(session) {
   return session?.imageUrl || session?.coverImageUrl || session?.sceneImageUrl || "";
+}
+
+function buildDonutGradient(items) {
+  const total = items.reduce((sum, item) => sum + Math.max(0, Number(item.value || 0)), 0);
+  if (total <= 0) return "conic-gradient(rgba(255,255,255,0.08) 0turn 1turn)";
+
+  let cursor = 0;
+  const segments = items
+    .filter((item) => Number(item.value) > 0)
+    .map((item) => {
+      const start = cursor;
+      cursor += Number(item.value) / total;
+      return `${item.color} ${start}turn ${cursor}turn`;
+    });
+  return `conic-gradient(${segments.join(", ")})`;
+}
+
+function DonutChart({ items, centerValue, centerLabel, ariaLabel }) {
+  return (
+    <div className="dashboardDonutBlock">
+      <div
+        className="dashboardDonut"
+        role="img"
+        aria-label={ariaLabel}
+        style={{ "--dashboard-donut": buildDonutGradient(items) }}
+      >
+        <span>{centerValue}</span>
+        <small>{centerLabel}</small>
+      </div>
+      <div className="dashboardDonutLegend">
+        {items.map((item) => (
+          <div key={item.label} className="dashboardDonutLegend__item">
+            <span className="dashboardDonutLegend__swatch" style={{ background: item.color }} aria-hidden="true" />
+            <span>{item.label}: {item.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function ExpandableTile({ title, count, description, expanded, onToggle, children, to }) {
@@ -146,13 +167,7 @@ export default function DashboardPage() {
     upcoming: false,
     recent: false,
   });
-
-  const [nowTs, setNowTs] = useState(Date.now());
-
-  useEffect(() => {
-    const timer = setInterval(() => setNowTs(Date.now()), 60000);
-    return () => clearInterval(timer);
-  }, []);
+  const [systemsTab, setSystemsTab] = useState("campaigns");
 
   useEffect(() => {
     let cancelled = false;
@@ -249,11 +264,6 @@ export default function DashboardPage() {
     [sessions],
   );
 
-  const heroCountdown = useMemo(() => {
-    if (hero.mode !== "planned" || !hero.session?.scheduledFor) return null;
-    return computeCountdownParts(hero.session.scheduledFor, nowTs);
-  }, [hero, nowTs]);
-
   const roleStats = useMemo(() => countRole(campaigns), [campaigns]);
   const campaignSystems = useMemo(() => countBySystem(campaigns, "systemCode"), [campaigns]);
   const characterSystems = useMemo(() => countBySystem(characters, "systemCode"), [characters]);
@@ -336,8 +346,26 @@ export default function DashboardPage() {
 
   const heroTitle = hero.mode === "active" ? "Aktywna sesja" : hero.mode === "planned" ? "Najblizsza sesja" : "Brak aktywnej lub zaplanowanej sesji";
   const heroSession = hero.session;
-  const heroRole = heroSession?.campaignOwner ? "MG" : "Gracz";
   const heroImage = pickSessionImage(heroSession) || heroSession?.campaignCoverImageUrl || "";
+  const attendanceChartItems = attendanceSummary ? [
+    { label: "Dostepni", value: attendanceSummary.available, color: "#22c55e" },
+    { label: "Moze", value: attendanceSummary.maybe, color: "#f59e0b" },
+    { label: "Niedostepni", value: attendanceSummary.unavailable, color: "#ef4444" },
+    { label: "Bez odpowiedzi", value: attendanceSummary.noResponse, color: "#64748b" },
+  ] : [];
+  const roleChartItems = [
+    { label: "Jako MG", value: roleStats.asOwner, color: "#8b5cf6" },
+    { label: "Jako gracz", value: roleStats.asMember, color: "#3b82f6" },
+  ];
+  const systemChartPalette = ["#60a5fa", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6", "#14b8a6"];
+  const activeSystemRows = systemsTab === "campaigns" ? campaignSystems : characterSystems;
+  const activeSystemTotal = systemsTab === "campaigns" ? campaigns.length : characters.length;
+  const activeSystemChartItems = activeSystemRows.map((item, index) => ({
+    label: item.system,
+    value: item.count,
+    color: systemChartPalette[index % systemChartPalette.length],
+  }));
+  const activeSystemLabel = systemsTab === "campaigns" ? "kampanii" : "postaci";
 
   return (
     <div className="page dashboardSaas">
@@ -348,11 +376,6 @@ export default function DashboardPage() {
             {heroSession ? (
               <>
                 <h2>{heroSession.title || "Sesja"}</h2>
-                <p>Kampania: {heroSession.campaignTitle || "Kampania"}</p>
-                <p>Termin: {formatDateTime(heroSession.scheduledFor)}</p>
-                <p>Status: {formatSessionStatus(heroSession.status)}</p>
-                <p>Twoja rola: {heroRole}</p>
-                {hero.mode === "active" ? <p>Sesja trwa</p> : (heroCountdown ? <p>{heroCountdown.text}</p> : null)}
                 <div className="dashboardHero__actions">
                   {hero.mode === "active" ? (
                     <Link className="dashboardHero__primary" to={`/campaigns/${heroSession.campaignId}/sessions/${heroSession.id}/live`}>
@@ -500,21 +523,19 @@ export default function DashboardPage() {
             {!attendanceLoading && attendanceError ? <div className="dashboardMaterialItem"><span><strong>Brak danych o dostepnosci dla najblizszej sesji.</strong></span></div> : null}
             {!attendanceLoading && !attendanceError && !attendanceSummary ? <div className="dashboardMaterialItem"><span><strong>Brak danych o dostepnosci dla najblizszej sesji.</strong></span></div> : null}
             {!attendanceLoading && !attendanceError && attendanceSummary ? (
-              <div className="dashboardMaterialList">
-                <div className="dashboardMaterialItem">
-                  <span>
-                    <strong>{plannedSessions[0]?.title || "Najblizsza sesja"}</strong>
-                    <small>{formatDateTime(plannedSessions[0]?.scheduledFor)}</small>
-                    <small>Dostepni: {attendanceSummary.available}</small>
-                    <small>Niedostepni: {attendanceSummary.unavailable}</small>
-                    <small>Bez odpowiedzi: {attendanceSummary.noResponse}</small>
-                    <small>Procent dostepnych: {attendanceSummary.availabilityPct}%</small>
-                    <small>Status: {attendanceSummary.status}</small>
-                  </span>
+              <div className="dashboardChartPanel">
+                <DonutChart
+                  items={attendanceChartItems}
+                  centerValue={`${attendanceSummary.availabilityPct}%`}
+                  centerLabel="dostepnych"
+                  ariaLabel="Wykres dostepnosci graczy"
+                />
+                <div className="dashboardChartMeta">
+                  <strong>{plannedSessions[0]?.title || "Najblizsza sesja"}</strong>
+                  <small>{formatDateTime(plannedSessions[0]?.scheduledFor)}</small>
+                  <small>Status: {attendanceSummary.status}</small>
+                  <Link to={`/campaigns/${plannedSessions[0]?.campaignId || ""}`}>Zobacz odpowiedzi</Link>
                 </div>
-                <Link to={`/campaigns/${plannedSessions[0]?.campaignId || ""}`} className="dashboardMaterialItem">
-                  <span><strong>Zobacz odpowiedzi</strong></span>
-                </Link>
               </div>
             ) : null}
           </article>
@@ -523,47 +544,54 @@ export default function DashboardPage() {
             <header className="dashboardPanel__head">
               <h2>Systemy RPG</h2>
             </header>
-            <div className="dashboardMaterialList">
-              <div className="dashboardMaterialItem"><span><strong>Kampanie</strong></span></div>
-              {campaignSystems.length === 0 ? (
-                <div className="dashboardMaterialItem"><span><small>Brak danych systemow.</small></span></div>
-              ) : campaignSystems.map((item) => (
-                <div key={`campaign-${item.system}`} className="dashboardMaterialItem">
-                  <span style={{ width: "100%" }}>
-                    <small>{item.system}</small>
-                    <div style={{ height: 8, background: "rgba(255,255,255,0.08)", borderRadius: 999, overflow: "hidden" }}>
-                      <div style={{ width: `${Math.max(6, Math.round((item.count / campaigns.length) * 100))}%`, height: "100%", background: "#6aa9ff" }} />
-                    </div>
-                    <small>{item.count}</small>
-                  </span>
-                </div>
-              ))}
-
-              <div className="dashboardMaterialItem"><span><strong>Postacie</strong></span></div>
-              {characterSystems.length === 0 ? (
-                <div className="dashboardMaterialItem"><span><small>Brak danych systemow.</small></span></div>
-              ) : characterSystems.map((item) => (
-                <div key={`character-${item.system}`} className="dashboardMaterialItem">
-                  <span style={{ width: "100%" }}>
-                    <small>{item.system}</small>
-                    <div style={{ height: 8, background: "rgba(255,255,255,0.08)", borderRadius: 999, overflow: "hidden" }}>
-                      <div style={{ width: `${Math.max(6, Math.round((item.count / characters.length) * 100))}%`, height: "100%", background: "#72d39b" }} />
-                    </div>
-                    <small>{item.count}</small>
-                  </span>
-                </div>
-              ))}
+            <div className="dashboardTabs" role="tablist" aria-label="Systemy RPG">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={systemsTab === "campaigns"}
+                className={systemsTab === "campaigns" ? "is-active" : ""}
+                onClick={() => setSystemsTab("campaigns")}
+              >
+                Kampanie
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={systemsTab === "characters"}
+                className={systemsTab === "characters" ? "is-active" : ""}
+                onClick={() => setSystemsTab("characters")}
+              >
+                Postacie
+              </button>
             </div>
+            {activeSystemRows.length === 0 ? (
+              <div className="dashboardMaterialItem"><span><small>Brak danych systemow.</small></span></div>
+            ) : (
+              <div className="dashboardChartPanel dashboardChartPanel--stacked">
+                <DonutChart
+                  items={activeSystemChartItems}
+                  centerValue={activeSystemTotal}
+                  centerLabel={activeSystemLabel}
+                  ariaLabel={`Wykres systemow RPG dla ${activeSystemLabel}`}
+                />
+              </div>
+            )}
           </article>
 
           <article className="dashboardPanel">
             <header className="dashboardPanel__head">
               <h2>Twoja rola</h2>
             </header>
-            <div className="dashboardMaterialList">
-              <div className="dashboardMaterialItem"><span><strong>Jako MG: {roleStats.asOwner}</strong></span></div>
-              <div className="dashboardMaterialItem"><span><strong>Jako gracz: {roleStats.asMember}</strong></span></div>
-              <div className="dashboardMaterialItem"><span><strong>Lacznie: {roleStats.total}</strong></span></div>
+            <div className="dashboardChartPanel">
+              <DonutChart
+                items={roleChartItems}
+                centerValue={roleStats.total}
+                centerLabel="lacznie"
+                ariaLabel="Wykres roli w kampaniach"
+              />
+              <div className="dashboardChartMeta">
+                <strong>Lacznie: {roleStats.total}</strong>
+              </div>
             </div>
           </article>
 

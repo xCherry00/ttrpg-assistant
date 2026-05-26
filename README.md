@@ -16,7 +16,7 @@ Każdy użytkownik ma konto — dane są izolowane, nie widzisz cudzych kampanii
 
 - **Kampanie** — tworzysz kampanię, zapraszasz graczy kodem zaproszenia, planujesz sesje, dodajesz materiały, prowadzisz notatki
 - **Postaci** — kreator postaci powiązany z kontem, dane w JSONB (elastyczny schemat)
-- **Generatory** — losowe NPC, łup, lokacje, starcia, frakcje — wyniki seed-based, więc powtarzalne
+- **Generatory** — system-agnostic, bez AI/LLM: NPC, lokacje, haczyki, łup, wskazówki, sklepy, plotki oraz praktyczne generatory `encounter_quick`, `complication_quick`, `document_quick`; wyniki zapisują się w `generator_results` i lokalnej historii UI `ttrpg.generatorHistory`
 - **Kości** — rzucanie kośćmi bezpośrednio w aplikacji
 - **Inicjatywa** — tracker kolejności w walce
 - **Słownik** — pojęcia TTRPG z opisami

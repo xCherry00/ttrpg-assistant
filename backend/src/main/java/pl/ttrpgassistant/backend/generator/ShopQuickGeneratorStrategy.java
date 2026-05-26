@@ -25,25 +25,28 @@ public class ShopQuickGeneratorStrategy implements GeneratorStrategy {
     public GeneratorStructuredResultResponse generate(GeneratorRequest request) {
         Map<String, Object> params = request == null || request.params() == null ? Map.of() : request.params();
         String shopType = stringParam(params, "shopType", "Losowy");
+        String shopMood = stringParam(params, "shopMood", "Losowy");
 
-        List<GeneratorOutputSection> sections = randomChoice(shopType) ? randomShop() : shopFor(shopType);
+        List<GeneratorOutputSection> sections = randomChoice(shopType) ? randomShop(shopMood) : shopFor(shopType, shopMood);
+        String title = sectionContent(sections, "Nazwa", "Sklep / Handel");
+        String subtitle = sectionContent(sections, "Typ i klimat", "Sklep / Handel");
 
         return new GeneratorStructuredResultResponse(
-                null, GENERATOR, VARIANT, "Sklep", "Szybki generator sklepu i handlu", sections, "seed", OffsetDateTime.now()
+                null, GENERATOR, VARIANT, title, subtitle, sections, "seed", OffsetDateTime.now()
         );
     }
 
-    private List<GeneratorOutputSection> randomShop() {
+    private List<GeneratorOutputSection> randomShop(String shopMood) {
         return switch (random.nextInt(5)) {
-            case 0 -> shopFor("Karczma i zajazd");
-            case 1 -> shopFor("Sklep ogolny");
-            case 2 -> shopFor("Kowal");
-            case 3 -> shopFor("Zielarz");
-            default -> shopFor("Magiczne dobra");
+            case 0 -> shopFor("Antykwariat", shopMood);
+            case 1 -> shopFor("Sklep ogolny", shopMood);
+            case 2 -> shopFor("Kowal", shopMood);
+            case 3 -> shopFor("Zielarz", shopMood);
+            default -> shopFor("Kram z osobliwosciami", shopMood);
         };
     }
 
-    private List<GeneratorOutputSection> shopFor(String shopType) {
+    private List<GeneratorOutputSection> shopFor(String shopType, String shopMood) {
         String name = switch (normalize(shopType)) {
             case "karczma i zajazd", "inn & tavern" -> "Pod Trzema Latarniami";
             case "sklep ogolny", "general store" -> "Sklad Pod Roznym Towarem";
@@ -55,18 +58,17 @@ public class ShopQuickGeneratorStrategy implements GeneratorStrategy {
 
         List<GeneratorOutputSection> base = List.of(
                 section("Nazwa", name),
-                section("Typ", shopType),
+                section("Typ i klimat", shopType + " | " + (randomChoice(shopMood) ? pick("Zwyczajny", "Podejrzany", "Ekskluzywny", "Zaniedbany", "Tajemniczy", "Objazdowy", "Nielegalny") : shopMood)),
                 section("Wlasciciel", pick("Mira, byla zwiadowczyni", "Orven, cierpliwy rzemieslnik", "Dalia, kupczyni z pamiecia do twarzy")),
-                section("Oferta dnia", pick("10% taniej na podstawowe racje", "drugi drobiazg pol ceny", "jedna usluga identyfikacji gratis", "ostrzenie broni bez oplaty przy wiekszym zakupie"))
+                section("Oferta dnia", pick("10% taniej na podstawowe racje", "drugi drobiazg pol ceny", "jedna usluga identyfikacji gratis", "ostrzenie broni bez oplaty przy wiekszym zakupie")),
+                section("Specjalny towar", pick("mapa kanalow", "swieca palaca sie niebieskim plomieniem", "zamknieta szkatulka bez klucza", "kompas wskazujacy osobe zamiast polnocy", "pudelko z czarnym piaskiem"))
         );
 
-        if (random.nextBoolean()) {
-            return List.of(
-                    base.get(0), base.get(1), base.get(2), base.get(3),
-                    section("Problem sklepu", pick("dostawa nie dotarla na czas", "konkurencja podbiera stalych klientow", "ktos placi falszywa moneta", "w nocy ginie towar z zaplecza"))
-            );
-        }
-        return base;
+        return List.of(
+                base.get(0), base.get(1), base.get(2), base.get(3),
+                base.get(4),
+                section("Problem sklepu", pick("Wlasciciel jest szantazowany.", "Towar znika noca.", "Sklep ma ukryte zaplecze.", "Towar dnia jest przeklety.", "Na zapleczu ukrywa sie ranny czlowiek."))
+        );
     }
 
     private String pick(String... values) {
@@ -85,6 +87,15 @@ public class ShopQuickGeneratorStrategy implements GeneratorStrategy {
     private boolean randomChoice(String value) {
         String normalized = normalize(value);
         return normalized.equals("losowy") || normalized.equals("losowa") || normalized.equals("random");
+    }
+
+    private String sectionContent(List<GeneratorOutputSection> sections, String title, String fallback) {
+        return sections.stream()
+                .filter(section -> title.equals(section.title()))
+                .map(GeneratorOutputSection::content)
+                .filter(content -> content != null && !content.isBlank())
+                .findFirst()
+                .orElse(fallback);
     }
 
     private String normalize(String value) {

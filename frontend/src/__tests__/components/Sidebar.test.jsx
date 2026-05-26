@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 
@@ -26,5 +26,22 @@ describe("Sidebar navigation cleanup", () => {
 
     expect(gameplayLinks.map((link) => link.textContent)).toEqual(["Kampanie", "Postacie"]);
     expect(within(gameplaySection).queryByRole("link", { name: "Dashboard" })).not.toBeInTheDocument();
+  });
+
+  it("allows gameplay section to collapse on dashboard", () => {
+    render(
+      <MemoryRouter initialEntries={["/dashboard"]}>
+        <Sidebar />
+      </MemoryRouter>,
+    );
+
+    const gameplayToggle = screen.getByRole("button", { name: /Rozgrywka/i });
+    expect(gameplayToggle).toHaveAttribute("aria-expanded", "true");
+
+    fireEvent.click(gameplayToggle);
+
+    expect(gameplayToggle).toHaveAttribute("aria-expanded", "false");
+    const gameplaySection = gameplayToggle.closest("section");
+    expect(within(gameplaySection).queryByRole("link", { name: "Kampanie" })).not.toBeInTheDocument();
   });
 });

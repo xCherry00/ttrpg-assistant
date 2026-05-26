@@ -39,13 +39,22 @@ public class HookGeneralQuickGeneratorStrategy implements GeneratorStrategy {
         Map<String, Object> pool = readPool();
         String setting = setting(params);
         String kind = stringParam(params, "mood", "Losowy");
+        String stakes = stringParam(params, "stakes", "Losowa");
+        String twistLevel = stringParam(params, "twistLevel", "Z twistem");
         Map<String, Object> entry = pickEntry(pool, kind);
 
         List<GeneratorOutputSection> sections = List.of(
+                new GeneratorOutputSection("stats", "Podsumowanie", null, List.of(
+                        item("Setting", setting),
+                        item("Rodzaj", displayKind(kind, entry)),
+                        item("Stawka", randomChoice(stakes) ? pick(List.of("Los osady", "Artefakt", "Znikniecia", "Dlug", "Rytual")) : stakes),
+                        item("Poziom komplikacji", twistLevel)
+                )),
                 section("Problem", problemFor(setting, entry)),
-                section("Dziwny detal", detailFor(setting, entry)),
-                section("Komplikacja", complicationFor(setting)),
-                section("Wskazówka", leadFor(setting, entry))
+                section("Zleceniodawca / zrodlo", pick(List.of("lokalny urzednik ukrywajacy presje frakcji", "swiadek, ktory mowi prawde tylko czesciowo", "rodzina ofiary", "anonimowy list zostawiony w bezpiecznym miejscu"))),
+                section("Komplikacja / twist", twistFor(twistLevel, setting)),
+                section("Pierwszy trop", leadFor(setting, entry)),
+                section("Konsekwencja porazki", consequenceFor(setting))
         );
 
         return new GeneratorStructuredResultResponse(
@@ -100,6 +109,39 @@ public class HookGeneralQuickGeneratorStrategy implements GeneratorStrategy {
             case "sci-fi", "scifi" -> pick(List.of("Zleceniodawca zmienia warunki po starcie misji.", "Druga załoga ma ten sam cel i inne rozkazy.", "AI odmawia wykonania jednego legalnego polecenia.", "Nagroda zależy od skasowania niewygodnych danych.", "Cel misji ma własną wersję kontraktu."));
             case "postapo" -> pick(List.of("Pomoc jednej grupie odbierze zasoby drugiej.", "Najkrótsza droga jest kontrolowana przez ludzi, którzy chcą zapłaty z góry.", "Zapasy istnieją, ale są skażone albo oznaczone cudzym symbolem.", "Ktoś śledzi drużynę od pierwszego postoju.", "Rozwiązanie problemu może zniszczyć kruche porozumienie."));
             default -> pick(List.of("Ktoś z lokalnych wie więcej, ale boi się powiedzieć to publicznie.", "Pierwszy trop prowadzi do osoby, która sama jest ofiarą większego planu.", "Najprostsze rozwiązanie krzywdzi kogoś niewinnego.", "Ktoś oferuje pomoc dokładnie wtedy, gdy robi się zbyt wygodnie."));
+        };
+    }
+
+    private String twistFor(String twistLevel, String setting) {
+        if ("Prosty".equalsIgnoreCase(twistLevel)) {
+            return complicationFor(setting);
+        }
+        return switch (looseKey(twistLevel)) {
+            case "moralnie niejednoznaczny" -> pick(List.of(
+                    "Uratowanie jednej osoby zaszkodzi wielu innym.",
+                    "Zabojca dzialal w obronie kogos slabszego.",
+                    "Artefakt nie powinien zostac odzyskany."
+            ));
+            case "mroczny" -> pick(List.of(
+                    "Rytual juz sie rozpoczal.",
+                    "Zaginiona osoba nie chce zostac znaleziona.",
+                    "Nagroda jest przekleta."
+            ));
+            default -> pick(List.of(
+                    "Zleceniodawca jest winny.",
+                    "Prawdziwy wrog udaje pomocnika.",
+                    "Zlecenie jest testem lojalnosci.",
+                    "Potwor chroni wiekszy sekret."
+            ));
+        };
+    }
+
+    private String consequenceFor(String setting) {
+        return switch (looseKey(setting)) {
+            case "postapo" -> "Spolecznosc straci zasob, bez ktorego kolejna scena bedzie trudniejsza.";
+            case "sci-fi", "scifi" -> "Dane, reputacja albo dostep zostana przejete przez nieprzyjazna strone.";
+            case "horror" -> "Prawda zostanie zaslonieta kolejnym oficjalnym wyjasnieniem.";
+            default -> "Problem rozleje sie na lokalna frakcje, reputacje druzyny albo bezpieczenstwo niewinnych.";
         };
     }
 

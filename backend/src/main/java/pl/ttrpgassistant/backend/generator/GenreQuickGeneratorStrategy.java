@@ -287,9 +287,12 @@ public class GenreQuickGeneratorStrategy implements GeneratorStrategy {
             );
             case "clue" -> List.of(
                     section("Typ", resolveClueType(params) + " | " + category),
+                    section("Wiarygodnosc", clueReliability(params)),
                     section("Opis", clueDescription(category, title)),
                     section("Co sugeruje", clueImplication(category)),
-                    section("Zwodniczy detal", clueFalseLead(category))
+                    section("Prawdziwe znaczenie", clueTruth(category)),
+                    section("Co nie pasuje", clueFalseLead(category)),
+                    section("Kolejny trop", "Sprawdz dokument, swiadka albo miejsce, ktore potwierdza tylko jeden element wskazowki.")
             );
             case "cult_horror" -> List.of(
                     stats(category, tone, system, "Zasieg", stringParam(params, "scope", "Lokalny")),
@@ -738,6 +741,24 @@ public class GenreQuickGeneratorStrategy implements GeneratorStrategy {
             case "postapo" -> "Ślad wygląda na rabunek, ale bardziej pasuje do wymuszonej ewakuacji.";
             case "realistyczny" -> "Najbardziej podejrzana osoba ma powód kłamać, ale nie musi być winna.";
             default -> "Jeśli gracze pójdą za pierwszym wrażeniem, dotrą do osoby niewinnej, ale powiązanej z prawdą.";
+        };
+    }
+
+    private String clueReliability(Map<String, Object> params) {
+        String requested = stringParam(params, "reliability", "Losowa");
+        if (!isRandom(requested)) {
+            return requested;
+        }
+        return pick("Prawdziwa", "Czesciowo prawdziwa", "Zwodnicza", "Falszywa, ale prowadzi do czegos waznego");
+    }
+
+    private String clueTruth(String setting) {
+        return switch (settingKey(setting)) {
+            case "fantasy" -> "Najwazniejszy element wskazuje na osobe albo przysiege, nie na sam przedmiot.";
+            case "sci-fi", "scifi" -> "Metadane zdradzaja ingerencje po fakcie.";
+            case "postapo" -> "Slad pokazuje, kto znal droge przez zabezpieczenia.";
+            case "realistyczny" -> "Dowod potwierdza dostep, czas albo relacje miedzy osobami.";
+            default -> "Wskazowka jest przydatna dopiero po porownaniu z druga relacja.";
         };
     }
 

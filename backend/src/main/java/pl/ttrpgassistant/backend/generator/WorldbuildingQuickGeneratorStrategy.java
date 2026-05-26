@@ -238,7 +238,7 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
     private List<GeneratorOutputSection> advancedDungeon(Map<String, Object> params, String title) {
         String setting = dungeonSetting(params);
         String theme = dungeonTheme(params, setting);
-        int roomCount = intParam(params, "roomCount", 10, 6, 18);
+        int roomCount = intParam(params, "roomCount", 10, 6, 11);
         int floors = intParam(params, "floors", 1, 1, 3);
         DungeonFrame frame = dungeonFrame(setting, theme);
         List<GeneratorOutputSection> sections = new ArrayList<>();

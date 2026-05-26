@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import CampaignDetailPage from "../../../pages/campaign/CampaignDetailPage";
 import * as campaignsApi from "../../../api/campaigns";
@@ -85,8 +85,14 @@ describe("CampaignDetailPage dashboard by role", () => {
       expect(screen.getByText("MG Dashboard")).toBeInTheDocument();
       expect(screen.getByRole("heading", { name: "Nadchodzaca sesja" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Zaplanuj sesje" })).toBeInTheDocument();
-      expect(screen.getByText("Kod zaproszenia")).toBeInTheDocument();
+      expect(screen.queryByText("Kod zaproszenia")).not.toBeInTheDocument();
     });
+
+    fireEvent.click(screen.getByRole("tab", { name: "Gracze" }));
+    expect(await screen.findByRole("heading", { name: "Zaproś gracza" })).toBeInTheDocument();
+    expect(screen.queryByText("ABC123")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Pokaż kod zaproszenia" }));
+    expect(screen.getByText("ABC123")).toBeInTheDocument();
   });
 
   it("player sees player dashboard and no session creation", async () => {
@@ -101,9 +107,16 @@ describe("CampaignDetailPage dashboard by role", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Player Dashboard")).toBeInTheDocument();
-      expect(screen.getByRole("heading", { name: "Postacie kampanii" })).toBeInTheDocument();
-      expect(screen.getByRole("heading", { name: "Gracze" })).toBeInTheDocument();
+      expect(screen.getByRole("tab", { name: /Sesja/i })).toHaveClass("is-active");
       expect(screen.queryByRole("button", { name: "Zaplanuj sesje" })).not.toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("tab", { name: /Postacie/i }));
+    expect(await screen.findByRole("heading", { name: "Postacie kampanii" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("tab", { name: /Gracze/i }));
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Gracze" })).toBeInTheDocument();
     });
   });
 
@@ -128,6 +141,9 @@ describe("CampaignDetailPage dashboard by role", () => {
 
     renderPage();
 
+    await screen.findByText("Player Dashboard");
+    fireEvent.click(screen.getByRole("tab", { name: /Postacie/i }));
+
     await waitFor(() => {
       expect(screen.getByRole("link", { name: "Otworz moja karte" })).toBeInTheDocument();
     });
@@ -138,6 +154,9 @@ describe("CampaignDetailPage dashboard by role", () => {
     campaignsApi.getCampaignCharacters.mockResolvedValue([{ characterId: 9, characterName: "Rogue", systemCode: "dnd5e", userId: 22 }]);
 
     renderPage();
+
+    await screen.findByText("MG Dashboard");
+    fireEvent.click(screen.getByRole("tab", { name: /Postacie/i }));
 
     await waitFor(() => {
       expect(screen.getByRole("link", { name: "Podglad karty" })).toHaveAttribute("href", "/characters/9?mode=preview");

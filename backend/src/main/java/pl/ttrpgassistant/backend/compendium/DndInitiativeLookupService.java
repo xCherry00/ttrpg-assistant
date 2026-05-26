@@ -16,6 +16,7 @@ public class DndInitiativeLookupService {
 
     private static final String SOURCE_NAME = "D&D 5e SRD API";
     private static final String SOURCE_URL = "https://www.dnd5eapi.co/";
+    private static final int MONSTER_LIST_LIMIT = 1000;
 
     private final Dnd5eApiClient apiClient;
 
@@ -25,14 +26,13 @@ public class DndInitiativeLookupService {
 
     public List<DndMonsterSummaryResponse> searchMonsters(String query) {
         try {
-            Map<String, Object> payload = apiClient.get("/monsters");
+            Map<String, Object> payload = apiClient.get("/monsters?limit=" + MONSTER_LIST_LIMIT);
             List<Map<String, Object>> results = asMapList(payload.get("results"));
             String normalizedQuery = normalize(query);
             return results.stream()
                     .filter(item -> normalizedQuery.isBlank()
                             || String.valueOf(item.getOrDefault("name", "")).toLowerCase().contains(normalizedQuery)
                             || String.valueOf(item.getOrDefault("index", "")).toLowerCase().contains(normalizedQuery))
-                    .limit(50)
                     .map(item -> new DndMonsterSummaryResponse(
                             String.valueOf(item.getOrDefault("index", "")),
                             String.valueOf(item.getOrDefault("name", "")),
@@ -145,4 +145,3 @@ public class DndInitiativeLookupService {
         return value == null ? "" : value.trim().toLowerCase();
     }
 }
-

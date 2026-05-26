@@ -18,6 +18,7 @@ import java.util.Map;
 public class CompendiumService {
     private static final String DND5E_API_BASE_HTTPS = "https://www.dnd5eapi.co/api/2014";
     private static final String DND5E_API_BASE_HTTP = "http://www.dnd5eapi.co/api/2014";
+    private static final int LIST_LIMIT = 1000;
     private static final List<Category> DND5E_CATEGORIES = List.of(
             new Category("monsters", "Potwory", "CR, XP, statystyki i akcje potworow SRD.", List.of("name", "challenge_rating", "xp", "type", "size", "alignment")),
             new Category("spells", "Zaklecia", "Poziom, szkola, komponenty, klasy i opis zaklec SRD.", List.of("name", "level", "school", "casting_time", "range", "duration")),
@@ -65,7 +66,7 @@ public class CompendiumService {
     public Map<String, Object> list(String systemCode, String category) {
         requireDnd5e(systemCode);
         Category selected = category(category);
-        Map<String, Object> payload = fetch("/" + selected.code());
+        Map<String, Object> payload = fetch("/" + selected.code() + "?limit=" + LIST_LIMIT);
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("systemCode", "dnd5e");
         result.put("category", selected.code());

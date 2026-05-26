@@ -20,7 +20,7 @@ class DndInitiativeLookupServiceTest {
     @Test
     void searchShouldMapMonsterSummaries() {
         Dnd5eApiClient apiClient = mock(Dnd5eApiClient.class);
-        when(apiClient.get("/monsters")).thenReturn(Map.of(
+        when(apiClient.get("/monsters?limit=1000")).thenReturn(Map.of(
                 "results", List.of(
                         Map.of("index", "goblin", "name", "Goblin", "url", "/api/2014/monsters/goblin"),
                         Map.of("index", "dragon-red", "name", "Red Dragon", "url", "/api/2014/monsters/dragon-red")
@@ -77,7 +77,7 @@ class DndInitiativeLookupServiceTest {
     @Test
     void shouldHandleExternalErrors() {
         Dnd5eApiClient apiClient = mock(Dnd5eApiClient.class);
-        when(apiClient.get("/monsters")).thenThrow(new IllegalStateException("down"));
+        when(apiClient.get("/monsters?limit=1000")).thenThrow(new IllegalStateException("down"));
         when(apiClient.get("/conditions")).thenThrow(new IllegalStateException("down"));
         when(apiClient.get("/monsters/missing")).thenThrow(new IllegalStateException("down"));
 
@@ -89,4 +89,3 @@ class DndInitiativeLookupServiceTest {
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 }
-

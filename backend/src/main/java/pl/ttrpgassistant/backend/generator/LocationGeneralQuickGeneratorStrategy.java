@@ -37,14 +37,17 @@ public class LocationGeneralQuickGeneratorStrategy implements GeneratorStrategy 
         Map<String, Object> pool = readPool();
         String setting = setting(params);
         String type = locationType(params, setting, pool);
+        String purpose = locationPurpose(params);
         String name = nameFor(setting, type, pool);
 
         List<GeneratorOutputSection> sections = List.of(
                 section("Opis", descriptionFor(setting, type, name, pool)),
                 section("Wygląd", appearanceFor(setting, type, name, pool)),
-                section("Atmosfera", atmosphereFor(setting, type, pool)),
-                section("Problem", problemFor(setting, type)),
-                section("Sekret", secretFor(setting, type)),
+                section("Klimat", atmosphereFor(setting, type, pool)),
+                section("Funkcja sceny", purpose),
+                section("Punkt zaczepienia", hookFor(setting, type)),
+                section("Komplikacja", problemFor(setting, type)),
+                section("Detal zmyslowy", sensoryDetail()),
                 section("Haczyk", hookFor(setting, type))
         );
 
@@ -91,6 +94,27 @@ public class LocationGeneralQuickGeneratorStrategy implements GeneratorStrategy 
             }
         }
         return pick(typesFor(setting, pool));
+    }
+
+    private String locationPurpose(Map<String, Object> params) {
+        String requested = stringParam(params, "locationPurpose", "Losowa");
+        if (!randomChoice(requested)) {
+            return requested;
+        }
+        return pick(List.of("Bezpieczne miejsce", "Miejsce sledztwa", "Miejsce walki", "Miejsce rozmowy", "Miejsce zasadzki", "Miejsce handlu", "Miejsce rytualu", "Miejsce finalu"));
+    }
+
+    private String sensoryDetail() {
+        return pick(List.of(
+                "Zapach mokrego drewna.",
+                "Zimny przeciag od podlogi.",
+                "Stlumione szepty za sciana.",
+                "Slady blota prowadza donikad.",
+                "Metaliczny posmak w powietrzu.",
+                "Woda kapie z sufitu mimo suchej pogody.",
+                "Slychac tykanie, choc nie ma zegara.",
+                "Echo wraca z opoznieniem."
+        ));
     }
 
     private List<?> typesFor(String setting, Map<String, Object> pool) {

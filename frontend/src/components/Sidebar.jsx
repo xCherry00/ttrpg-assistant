@@ -38,8 +38,8 @@ export default function Sidebar() {
     { id: "tools", title: "Narzędzia", items: SECTION_TOOLS },
     { id: "library", title: "Biblioteka", items: SECTION_LIBRARY },
   ]), []);
-  const activeSectionId = sections.find((section) => section.items.some((item) => location.pathname.startsWith(item.to)))?.id || "gameplay";
-  const [openSections, setOpenSections] = useState(() => new Set(["gameplay", activeSectionId]));
+  const activeSectionId = sections.find((section) => section.items.some((item) => location.pathname.startsWith(item.to)))?.id;
+  const [openSections, setOpenSections] = useState(() => new Set(["gameplay", activeSectionId].filter(Boolean)));
 
   const toggleSection = (id) => {
     setOpenSections((previous) => {

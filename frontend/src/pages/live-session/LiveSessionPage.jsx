@@ -306,7 +306,7 @@ export default function LiveSessionPage() {
 
       {!loading && !error && (
         <div className="liveSessionGrid">
-          <section className="campaignDetailsCard panel-soft">
+          <section className="campaignDetailsCard panel-soft liveSessionScenePanel">
             <h2 className="campaignDetailsCardTitle">{isGmView ? "Scene Panel" : "Aktualna scena"}</h2>
             {isGmView && !isFinished ? (
               <form
@@ -390,7 +390,7 @@ export default function LiveSessionPage() {
           </section>
 
           {isGmView ? (
-            <section className="campaignDetailsCard panel-soft">
+            <section className="campaignDetailsCard panel-soft liveSessionPartyPanel">
               <h2 className="campaignDetailsCardTitle">Party / Players</h2>
               {campaignCharacters.length === 0 ? (
                 <div className="campaignDetailsEmpty">Brak przypisanych postaci w kampanii.</div>
@@ -412,7 +412,7 @@ export default function LiveSessionPage() {
               )}
             </section>
           ) : (
-            <section className="campaignDetailsCard panel-soft">
+            <section className="campaignDetailsCard panel-soft liveSessionPartyPanel">
               <h2 className="campaignDetailsCardTitle">Moja postac</h2>
               {myCharacters.length === 0 ? (
                 <div className="campaignDetailsEmpty">Nie masz przypisanej postaci w tej kampanii.</div>
@@ -437,7 +437,7 @@ export default function LiveSessionPage() {
             </section>
           )}
 
-          <section className="campaignDetailsCard panel-soft">
+          <section className="campaignDetailsCard panel-soft liveSessionRequestsPanel">
             <h2 className="campaignDetailsCardTitle">{isGmView ? "Requested Rolls" : "Moje rzuty"}</h2>
             {isPlanned && <p className="liveSessionPlaceholder">Rzuty beda dostepne po rozpoczeciu sesji przez MG.</p>}
             {isFinished && <p className="liveSessionPlaceholder">Sesja zakonczona. Lista rzutow pozostaje tylko do odczytu.</p>}
@@ -543,7 +543,7 @@ export default function LiveSessionPage() {
             </div>
           </section>
 
-          <section className="campaignDetailsCard panel-soft">
+          <section className="campaignDetailsCard panel-soft liveSessionHistoryPanel">
             <h2 className="campaignDetailsCardTitle">Historia rzutow</h2>
             {recentRolls.length === 0 ? (
               <p className="liveSessionPlaceholder">Brak rzutow sesji albo podglad historii jest niedostepny.</p>
@@ -562,7 +562,7 @@ export default function LiveSessionPage() {
             )}
           </section>
 
-          <section className="campaignDetailsCard panel-soft">
+          <section className="campaignDetailsCard panel-soft liveSessionStatsPanel">
             <h2 className="campaignDetailsCardTitle">Statystyki rzutow</h2>
             <div className="liveSessionStatsGrid">
               <p>Liczba rzutow: <strong>{rollStats.count}</strong></p>

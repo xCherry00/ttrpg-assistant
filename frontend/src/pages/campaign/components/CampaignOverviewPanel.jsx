@@ -7,6 +7,7 @@ export default function CampaignOverviewPanel({ campaign, isOwner, busy, onUpdat
     description: campaign?.description || "",
     status: campaign?.status || "active",
     coverImageUrl: campaign?.coverImageUrl || "",
+    playerLimit: campaign?.playerLimit || 5,
   });
 
   useEffect(() => {
@@ -15,6 +16,7 @@ export default function CampaignOverviewPanel({ campaign, isOwner, busy, onUpdat
       description: campaign?.description || "",
       status: campaign?.status || "active",
       coverImageUrl: campaign?.coverImageUrl || "",
+      playerLimit: campaign?.playerLimit || 5,
     });
   }, [campaign]);
 
@@ -23,7 +25,8 @@ export default function CampaignOverviewPanel({ campaign, isOwner, busy, onUpdat
       form.title !== (campaign?.title || "") ||
       form.description !== (campaign?.description || "") ||
       form.status !== (campaign?.status || "active") ||
-      form.coverImageUrl !== (campaign?.coverImageUrl || "")
+      form.coverImageUrl !== (campaign?.coverImageUrl || "") ||
+      Number(form.playerLimit) !== Number(campaign?.playerLimit || 5)
     );
   }, [form, campaign]);
 
@@ -35,6 +38,7 @@ export default function CampaignOverviewPanel({ campaign, isOwner, busy, onUpdat
       description: form.description.trim(),
       status: form.status,
       coverImageUrl: form.coverImageUrl || null,
+      playerLimit: Number(form.playerLimit) || 5,
     });
   }
 
@@ -44,7 +48,7 @@ export default function CampaignOverviewPanel({ campaign, isOwner, busy, onUpdat
       <div className="campaignDetailsInfoRow"><span>Nazwa</span><strong>{campaign?.title || "-"}</strong></div>
       <div className="campaignDetailsInfoRow"><span>Status</span><strong>{campaign?.status || "-"}</strong></div>
       <div className="campaignDetailsInfoRow"><span>System</span><strong>{campaign?.systemCode || "-"}</strong></div>
-      <div className="campaignDetailsInfoRow"><span>Join code</span><strong>{isOwner ? (campaign?.inviteCode || "-") : "Dostepny tylko dla MG"}</strong></div>
+      <div className="campaignDetailsInfoRow"><span>Limit graczy</span><strong>{campaign?.playerLimit || 5}</strong></div>
       <p className="campaignDetailsHelpText">{campaign?.description || "Brak opisu kampanii."}</p>
 
       {isOwner && (
@@ -64,6 +68,17 @@ export default function CampaignOverviewPanel({ campaign, isOwner, busy, onUpdat
               <option value="finished">finished</option>
               <option value="archived">archived</option>
             </select>
+          </label>
+          <label className="campaignField">
+            <span>Limit graczy</span>
+            <input
+              type="number"
+              min="1"
+              max="20"
+              value={form.playerLimit}
+              onChange={(e) => setForm((prev) => ({ ...prev, playerLimit: e.target.value }))}
+              required
+            />
           </label>
           <ImageUpload
             label="Okładka kampanii"

@@ -59,10 +59,10 @@ describe("DashboardPage v0.8.0.1", () => {
 
     expect(await screen.findByText("Sesja Trwa")).toBeInTheDocument();
     expect(screen.getByText(/Aktywna sesja/i)).toBeInTheDocument();
-    expect(screen.getByText("Sesja trwa")).toBeInTheDocument();
+    expect(screen.queryByText("Sesja trwa")).not.toBeInTheDocument();
   });
 
-  it("shows nearest planned session when active is missing and renders countdown", async () => {
+  it("shows nearest planned session when active is missing", async () => {
     campaignsApi.listCampaigns.mockResolvedValue([{ id: 1, title: "Kampania A", owner: false, systemCode: "dnd5e" }]);
     campaignsApi.listCampaignSessions.mockResolvedValue([
       { id: 11, title: "Sesja Pozniej", status: "PLANNED", scheduledFor: "2030-06-20T18:00:00Z" },
@@ -74,7 +74,7 @@ describe("DashboardPage v0.8.0.1", () => {
 
     expect(await screen.findByText("Sesja Najblizsza")).toBeInTheDocument();
     expect(screen.getByText(/Najblizsza sesja/i)).toBeInTheDocument();
-    expect(screen.getByText(/Pozostalo:/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Pozostalo:/i)).not.toBeInTheDocument();
   });
 
   it("shows empty state when there is no active or planned session", async () => {
@@ -169,9 +169,16 @@ describe("DashboardPage v0.8.0.1", () => {
     expect(await screen.findByRole("heading", { name: "Systemy RPG" })).toBeInTheDocument();
     const systemsPanel = screen.getByRole("heading", { name: "Systemy RPG" }).closest("article");
     const systems = within(systemsPanel);
-    expect(systems.getByText("Kampanie")).toBeInTheDocument();
-    expect(systems.getByText("Postacie")).toBeInTheDocument();
-    expect(systems.getAllByText("DND5E").length).toBeGreaterThan(0);
+    expect(systems.getByRole("tab", { name: "Kampanie" })).toHaveAttribute("aria-selected", "true");
+    expect(systems.getByRole("img", { name: /Wykres systemow RPG dla kampanii/i })).toBeInTheDocument();
+    expect(systems.getByText("DND5E: 1")).toBeInTheDocument();
+    expect(systems.getByText("COC7E: 1")).toBeInTheDocument();
+
+    fireEvent.click(systems.getByRole("tab", { name: "Postacie" }));
+
+    expect(systems.getByRole("tab", { name: "Postacie" })).toHaveAttribute("aria-selected", "true");
+    expect(systems.getByRole("img", { name: /Wykres systemow RPG dla postaci/i })).toBeInTheDocument();
+    expect(systems.getByText("DND5E: 2")).toBeInTheDocument();
   });
 
   it("renders role panel from real campaigns", async () => {

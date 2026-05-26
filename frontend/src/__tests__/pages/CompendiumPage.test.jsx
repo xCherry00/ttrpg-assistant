@@ -35,6 +35,24 @@ describe("CompendiumPage v0.8.2", () => {
     expect((await screen.findAllByText("Goblin")).length).toBeGreaterThan(0);
   });
 
+  it("renders Potwory and Stany when API returns specialized array payloads", async () => {
+    compendiumApi.getCompendiumList
+      .mockResolvedValueOnce([{ index: "goblin", name: "Goblin", url: "/api/2014/monsters/goblin" }])
+      .mockResolvedValueOnce([{ index: "blinded", name: "Blinded", url: "/api/2014/conditions/blinded" }]);
+    compendiumApi.getCompendiumDetail
+      .mockResolvedValueOnce({ index: "goblin", name: "Goblin", hit_points: 7 })
+      .mockResolvedValueOnce(null);
+
+    render(<CompendiumPage />);
+
+    expect((await screen.findAllByText("Goblin")).length).toBeGreaterThan(0);
+
+    fireEvent.click(screen.getByRole("button", { name: /Stany/i }));
+
+    expect((await screen.findAllByText("Blinded")).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Brak danych dla tej kategorii/i)).not.toBeInTheDocument();
+  });
+
   it("Potwory and Stany categories do not crash and show neutral empty state on missing data", async () => {
     compendiumApi.getCompendiumList.mockRejectedValue({ status: 404, message: "Not found" });
     compendiumApi.getCompendiumDetail.mockResolvedValue(null);

@@ -43,7 +43,7 @@ public class NameGeneralQuickGeneratorStrategy implements GeneratorStrategy {
         Map<String, Object> selected = asMap(cultures.getOrDefault(culture, cultures.values().stream().findFirst().orElse(Map.of())));
         String requestedGender = stringParam(params, "gender", "Losowa");
         String gender = genderKey(requestedGender);
-        String format = stringParam(params, "nameFormat", "Imię + nazwisko");
+        String format = stringParam(params, "nameFormat", "ImiÄ™ + nazwisko");
         int count = intParam(params, "count", 3, 1, 10);
 
         List<Map<String, Object>> names = new ArrayList<>();
@@ -59,12 +59,7 @@ public class NameGeneralQuickGeneratorStrategy implements GeneratorStrategy {
         }
 
         List<GeneratorOutputSection> sections = List.of(
-                new GeneratorOutputSection("stats", "Ustawienia", null, List.of(
-                        item("Kultura", culture),
-                        item("Płeć", randomChoice(requestedGender) ? "Losowa" : requestedGender),
-                        item("Format", format),
-                        item("Liczba wyników", count)
-                )),
+                section("Kultura", culture),
                 new GeneratorOutputSection("table", "Imiona i aliasy", null, names)
         );
 
@@ -140,8 +135,8 @@ public class NameGeneralQuickGeneratorStrategy implements GeneratorStrategy {
 
     private String displayGender(String gender) {
         return switch (gender) {
-            case "male" -> "Męska";
-            case "female" -> "Żeńska";
+            case "male" -> "MÄ™ska";
+            case "female" -> "Ĺ»eĹ„ska";
             case "neutral" -> "Neutralna";
             default -> "Losowa";
         };
@@ -197,8 +192,9 @@ public class NameGeneralQuickGeneratorStrategy implements GeneratorStrategy {
     }
 
     private String looseKey(String value) {
-        String normalized = Normalizer.normalize(value == null ? "" : value.replace('Ł', 'L').replace('ł', 'l'), Normalizer.Form.NFD)
+        String normalized = Normalizer.normalize(value == null ? "" : value.replace("Ĺ", "L").replace("Ĺ‚", "l"), Normalizer.Form.NFD)
                 .replaceAll("\\p{M}", "");
         return normalized.toLowerCase(Locale.ROOT).trim();
     }
 }
+

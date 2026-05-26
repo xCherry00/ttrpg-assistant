@@ -16,20 +16,20 @@ const FALLBACK_CATALOG = [
     description: "Imiona, nazwiska i nazwy z pul seed.",
     source: "seed",
     params: [
-      { key: "culture", label: "Kultura", inputType: "select", options: ["Losowa", "Słowiańska", "Nordycka", "Arabska", "Japońska", "Elficka", "Krasnoludzka", "Orcza", "Fantastyczna"], defaultValue: "Losowa" },
-      { key: "gender", label: "Płeć", inputType: "select", options: ["Losowa", "Męska", "Żeńska", "Neutralna"], defaultValue: "Losowa" },
-      { key: "count", label: "Liczba wyników", inputType: "number", min: 1, max: 10, defaultValue: 3 },
+      { key: "culture", label: "Kultura", inputType: "select", options: ["Losowa", "SĹ‚owiaĹ„ska", "Nordycka", "Arabska", "JapoĹ„ska", "Elficka", "Krasnoludzka", "Orcza", "Fantastyczna"], defaultValue: "Losowa" },
+      { key: "gender", label: "PĹ‚eÄ‡", inputType: "select", options: ["Losowa", "MÄ™ska", "Ĺ»eĹ„ska", "Neutralna"], defaultValue: "Losowa" },
+      { key: "count", label: "Liczba wynikĂłw", inputType: "number", min: 1, max: 10, defaultValue: 3 },
     ],
   },
   {
     type: "npc",
     system: "any",
     label: "NPC",
-    description: "Postać z wyglądem, osobowością, sekretem i motywacją.",
+    description: "PostaÄ‡ z wyglÄ…dem, osobowoĹ›ciÄ…, sekretem i motywacjÄ….",
     source: "seed",
     params: [
-      { key: "race", label: "Rasa", inputType: "select", options: ["Losowa", "Człowiek", "Elf", "Krasnolud", "Niziołek", "Gnom", "Półelf", "Półork", "Tiefling", "Dragonborn"], defaultValue: "Losowa" },
-      { key: "profession", label: "Profesja", inputType: "select", options: ["Losowa", "Strażnik", "Kupiec", "Wiedźma", "Złodziej", "Kapłan", "Szlachcic", "Chłop", "Żołnierz", "Magik"], defaultValue: "Losowa" },
+      { key: "race", label: "Rasa", inputType: "select", options: ["Losowa", "CzĹ‚owiek", "Elf", "Krasnolud", "NizioĹ‚ek", "Gnom", "PĂłĹ‚elf", "PĂłĹ‚ork", "Tiefling", "Dragonborn"], defaultValue: "Losowa" },
+      { key: "profession", label: "Profesja", inputType: "select", options: ["Losowa", "StraĹĽnik", "Kupiec", "WiedĹşma", "ZĹ‚odziej", "KapĹ‚an", "Szlachcic", "ChĹ‚op", "Ĺ»oĹ‚nierz", "Magik"], defaultValue: "Losowa" },
       { key: "role", label: "Rola fabularna", inputType: "select", options: ["Losowa", "Villain", "Quest Giver", "Ally", "Contact", "Neutral", "Rival", "Informant"], defaultValue: "Losowa" },
     ],
   },
@@ -37,19 +37,19 @@ const FALLBACK_CATALOG = [
     type: "loot",
     system: "any",
     label: "Skarb",
-    description: "Monety, kosztowności, magiczne przedmioty i miejsce ukrycia.",
+    description: "Monety, kosztownoĹ›ci, magiczne przedmioty i miejsce ukrycia.",
     source: "seed/algorithm",
     params: [
       { key: "treasureType", label: "Typ skarbu", inputType: "select", options: ["Individual Loot", "Treasure Hoard"], defaultValue: "Treasure Hoard" },
-      { key: "contents", label: "Zawartość", inputType: "select", options: ["Wszystko", "Monety", "Kosztowności", "Magiczne"], defaultValue: "Wszystko" },
+      { key: "contents", label: "ZawartoĹ›Ä‡", inputType: "select", options: ["Wszystko", "Monety", "KosztownoĹ›ci", "Magiczne"], defaultValue: "Wszystko" },
       { key: "theme", label: "Motyw", inputType: "select", options: ["Podziemie", "Szlachta", "Religijny", "Dzicz", "Arkana"], defaultValue: "Podziemie" },
     ],
   },
 ];
 
 const SYSTEM_LABELS = {
-  any: "Ogólny",
-  system_agnostic: "Ogólny",
+  any: "OgĂłlny",
+  system_agnostic: "OgĂłlny",
 };
 
 const FAVORITES_STORAGE_KEY = "ttrpg.generatorFavorites";
@@ -68,7 +68,7 @@ const CARD_META = {
   encounter: {
     title: "Encounter",
     tag: "Walka",
-    description: "Twórz spotkania opisowe dopasowane do poziomu zagrożenia i sytuacji przy stole.",
+    description: "TwĂłrz spotkania opisowe dopasowane do poziomu zagroĹĽenia i sytuacji przy stole.",
     tone: "red",
     icon: "swords",
     order: 20,
@@ -84,7 +84,7 @@ const CARD_META = {
   loot: {
     title: "Skarb",
     tag: "Wszystkie typy",
-    description: "Skarby, przedmioty magiczne, artefakty, mikstury i wyposażenie sklepów.",
+    description: "Skarby, przedmioty magiczne, artefakty, mikstury i wyposaĹĽenie sklepĂłw.",
     tone: "gold",
     icon: "chest",
     order: 40,
@@ -106,9 +106,9 @@ const CARD_META = {
     order: 60,
   },
   trap: {
-    title: "Pułapka",
-    tag: "Pułapki i zagrożenia",
-    description: "Pułapki, hazardy, zagadki i niebezpieczeństwa czekające na bohaterów.",
+    title: "PuĹ‚apka",
+    tag: "PuĹ‚apki i zagroĹĽenia",
+    description: "PuĹ‚apki, hazardy, zagadki i niebezpieczeĹ„stwa czekajÄ…ce na bohaterĂłw.",
     tone: "purple",
     icon: "gear",
     order: 70,
@@ -124,23 +124,23 @@ const CARD_META = {
   twist: {
     title: "Zwrot akcji",
     tag: "Komplikacje",
-    description: "Sekrety, komplikacje i zaskoczenia, które odmienią scenę.",
+    description: "Sekrety, komplikacje i zaskoczenia, ktĂłre odmieniÄ… scenÄ™.",
     tone: "red",
     icon: "spark",
     order: 85,
   },
   loot_fantasy: {
-    title: "Łup",
+    title: "Ĺup",
     tag: "Fantasy",
-    description: "Szybki łup: monety, główny przedmiot, dziwny detal i sekret.",
+    description: "Szybki Ĺ‚up: monety, gĹ‚Ăłwny przedmiot, dziwny detal i sekret.",
     tone: "gold",
     icon: "chest",
     order: 86,
   },
   clue: {
-    title: "Wskazówka",
+    title: "WskazĂłwka",
     tag: "Setting",
-    description: "Dowód albo ślad do sceny: opis, znaczenie i zwodniczy detal.",
+    description: "DowĂłd albo Ĺ›lad do sceny: opis, znaczenie i zwodniczy detal.",
     tone: "purple",
     icon: "scroll",
     order: 87,
@@ -148,7 +148,7 @@ const CARD_META = {
   name: {
     title: "Imiona",
     tag: "Imiona i nazwy",
-    description: "Imiona, nazwiska, nazwy miejsc, karczm, organizacji i artefaktów.",
+    description: "Imiona, nazwiska, nazwy miejsc, karczm, organizacji i artefaktĂłw.",
     tone: "gold",
     icon: "type",
     order: 90,
@@ -260,7 +260,7 @@ const CARD_META = {
   five_room_dungeon: {
     title: "Loch",
     tag: "Mapa",
-    description: "Pięciopokojowy loch z wejściem, wyzwaniem, komplikacją, konfliktem, nagrodą i prostą mapą.",
+    description: "PiÄ™ciopokojowy loch z wejĹ›ciem, wyzwaniem, komplikacjÄ…, konfliktem, nagrodÄ… i prostÄ… mapÄ….",
     tone: "red",
     icon: "map",
     order: 280,
@@ -300,6 +300,52 @@ const DEFAULT_META = {
   order: 200,
 };
 
+const TYPE_THEME = {
+  npc: { tone: "purple", icon: "hood" },
+  location: { tone: "teal", icon: "castle" },
+  settlement: { tone: "teal", icon: "castle" },
+  world: { tone: "cyan", icon: "planet" },
+  worldbuilding: { tone: "cyan", icon: "planet" },
+  encounter: { tone: "red", icon: "swords" },
+  item: { tone: "gold", icon: "chest" },
+  creature: { tone: "crimson", icon: "swords" },
+  clue: { tone: "violet", icon: "eye" },
+  resource: { tone: "amber", icon: "chest" },
+  event: { tone: "indigo", icon: "spark" },
+  mood: { tone: "pink", icon: "eye" },
+  complication: { tone: "orange", icon: "gear" },
+  obstacle: { tone: "red", icon: "gear" },
+  travel: { tone: "blue", icon: "map" },
+  sensory: { tone: "pink", icon: "eye" },
+  rumor: { tone: "green", icon: "scroll" },
+  social: { tone: "emerald", icon: "users" },
+  rule: { tone: "slate", icon: "scroll" },
+  faction: { tone: "emerald", icon: "shield" },
+  story: { tone: "green", icon: "scroll" },
+  quest: { tone: "green", icon: "scroll" },
+  threat: { tone: "crimson", icon: "swords" },
+  environment: { tone: "blue", icon: "storm" },
+  name: { tone: "yellow", icon: "type" },
+  scene: { tone: "indigo", icon: "spark" },
+};
+const GENERATOR_TYPE_OVERRIDES = {
+  encounter_quick: "story",
+  event_quick: "story",
+  complication_quick: "story",
+  food_quick: "item",
+};
+
+const TYPE_LABELS = {
+  npc: "NPC",
+  location: "Lokacja",
+  item: "Przedmiot",
+  clue: "Tropy",
+  faction: "Frakcje",
+  story: "Fabula",
+  environment: "Pogoda",
+  name: "Imiona",
+};
+
 const CANONICAL_GENERATOR_TYPES = [
   "npc",
   "encounter",
@@ -315,28 +361,11 @@ const CANONICAL_GENERATOR_TYPES = [
 const TYPE_FILTERS = [
   { value: "all", label: "Wszystkie" },
   { value: "npc", label: "NPC" },
-  { value: "location", label: "Lokacje" },
-  { value: "settlement", label: "Osady" },
-  { value: "world", label: "Swiaty" },
-  { value: "worldbuilding", label: "Worldbuilding" },
-  { value: "encounter", label: "Spotkania" },
-  { value: "item", label: "Przedmioty" },
-  { value: "creature", label: "Stworzenia" },
+  { value: "location", label: "Lokacja" },
+  { value: "item", label: "Przedmiot" },
   { value: "clue", label: "Tropy" },
-  { value: "resource", label: "Zasoby" },
-  { value: "event", label: "Wydarzenia" },
-  { value: "mood", label: "Nastrój" },
-  { value: "complication", label: "Komplikacje" },
-  { value: "obstacle", label: "Przeszkody" },
-  { value: "travel", label: "Podróż" },
-  { value: "sensory", label: "Zmysły" },
-  { value: "rumor", label: "Plotki" },
-  { value: "social", label: "Społeczne" },
-  { value: "rule", label: "Zasady" },
   { value: "faction", label: "Frakcje" },
-  { value: "story", label: "Fabuła" },
-  { value: "quest", label: "Questy" },
-  { value: "threat", label: "Zagrożenia" },
+  { value: "story", label: "Fabula" },
   { value: "environment", label: "Pogoda" },
   { value: "name", label: "Imiona" },
 ];
@@ -431,39 +460,39 @@ function buildInitialParams(item) {
 }
 
 function visibleParams(params = []) {
-  return params.filter((param) => !["system", "tone"].includes(param.key));
+  return params.filter((param) => param.key !== "system");
 }
 
 const NPC_ROLE_OPTIONS_BY_SETTING = {
-  Fantasy: ["Losowa", "Kupiec", "Strażnik", "Uczony", "Kapłan", "Przestępca", "Szlachcic", "Rzemieślnik", "Podróżnik", "Najemnik", "Zwiadowca", "Alchemik", "Bard", "Sędzia", "Herold"],
-  Horror: ["Losowa", "Śledczy", "Świadek", "Podejrzany", "Lekarz", "Bibliotekarz", "Okultysta", "Dziennikarz", "Ksiądz", "Dozorca", "Fotograf", "Patolog"],
-  "Sci-Fi": ["Losowa", "Mechanik", "Pilot", "Medyk", "Najemnik", "Analityk", "Przemytnik", "Oficer stacji", "Haker", "Dyplomata", "Inżynier napędu", "Kurier orbitalny"],
-  Postapo: ["Losowa", "Ocalały", "Lider osady", "Szabrownik", "Medyk", "Łowca zasobów", "Strażnik bramy", "Handlarz wodą", "Zwiadowca", "Mechanik", "Kaznodzieja"],
-  Realistyczny: ["Losowa", "Dziennikarz", "Policjant", "Lekarz", "Prawnik", "Kierowca", "Urzędnik", "Nauczyciel", "Ochroniarz", "Recepcjonistka", "Technik"],
+  Fantasy: ["Losowa", "Kupiec", "StraĹĽnik", "Uczony", "KapĹ‚an", "PrzestÄ™pca", "Szlachcic", "RzemieĹ›lnik", "PodrĂłĹĽnik", "Najemnik", "Zwiadowca", "Alchemik", "Bard", "SÄ™dzia", "Herold"],
+  Horror: ["Losowa", "Ĺšledczy", "Ĺšwiadek", "Podejrzany", "Lekarz", "Bibliotekarz", "Okultysta", "Dziennikarz", "KsiÄ…dz", "Dozorca", "Fotograf", "Patolog"],
+  "Sci-Fi": ["Losowa", "Mechanik", "Pilot", "Medyk", "Najemnik", "Analityk", "Przemytnik", "Oficer stacji", "Haker", "Dyplomata", "InĹĽynier napÄ™du", "Kurier orbitalny"],
+  Postapo: ["Losowa", "OcalaĹ‚y", "Lider osady", "Szabrownik", "Medyk", "Ĺowca zasobĂłw", "StraĹĽnik bramy", "Handlarz wodÄ…", "Zwiadowca", "Mechanik", "Kaznodzieja"],
+  Realistyczny: ["Losowa", "Dziennikarz", "Policjant", "Lekarz", "Prawnik", "Kierowca", "UrzÄ™dnik", "Nauczyciel", "Ochroniarz", "Recepcjonistka", "Technik"],
 };
 
 const LOCATION_TYPE_OPTIONS_BY_SETTING = {
-  Fantasy: ["Losowy", "Tawerna", "Sklep", "Osada", "Dzielnica", "Świątynia", "Biblioteka", "Port", "Las", "Ruiny", "Zamek", "Wieża maga", "Cmentarz", "Most", "Kopalnia", "Młyn", "Sąd"],
-  Horror: ["Losowy", "Miejsce śledztwa", "Archiwum", "Szpital", "Świątynia", "Las", "Motel", "Stary dom", "Kostnica", "Szkoła", "Sanatorium"],
-  "Sci-Fi": ["Losowy", "Statek kosmiczny", "Stacja kosmiczna", "Kolonia", "Planeta", "Laboratorium", "Port orbitalny", "Wrak", "Kopuła mieszkalna", "Kopalnia asteroid", "Archiwum danych"],
-  Postapo: ["Losowy", "Schronienie", "Ruiny miejskie", "Bunkier", "Farma", "Fabryka", "Posterunek", "Targ złomu", "Wieża radiowa", "Stacja benzynowa", "Tunel metra"],
+  Fantasy: ["Losowy", "Tawerna", "Sklep", "Osada", "Dzielnica", "ĹšwiÄ…tynia", "Biblioteka", "Port", "Las", "Ruiny", "Zamek", "WieĹĽa maga", "Cmentarz", "Most", "Kopalnia", "MĹ‚yn", "SÄ…d"],
+  Horror: ["Losowy", "Miejsce Ĺ›ledztwa", "Archiwum", "Szpital", "ĹšwiÄ…tynia", "Las", "Motel", "Stary dom", "Kostnica", "SzkoĹ‚a", "Sanatorium"],
+  "Sci-Fi": ["Losowy", "Statek kosmiczny", "Stacja kosmiczna", "Kolonia", "Planeta", "Laboratorium", "Port orbitalny", "Wrak", "KopuĹ‚a mieszkalna", "Kopalnia asteroid", "Archiwum danych"],
+  Postapo: ["Losowy", "Schronienie", "Ruiny miejskie", "Bunkier", "Farma", "Fabryka", "Posterunek", "Targ zĹ‚omu", "WieĹĽa radiowa", "Stacja benzynowa", "Tunel metra"],
   Realistyczny: ["Losowy", "Mieszkanie", "Biuro", "Bar", "Magazyn", "Dworzec", "Hotel", "Parking", "Kawiarnia", "Szpital", "Komisariat", "Warsztat"],
 };
 
 const FACTION_TYPE_OPTIONS_BY_SETTING = {
-  Fantasy: ["Losowy", "Gildia", "Zakon", "Rada miejska", "Kult", "Kompania najemna", "Cech", "Bractwo", "Ród", "Krąg magów", "Straż świątynna", "Liga kupiecka"],
-  Horror: ["Losowy", "Kult", "Towarzystwo okultystyczne", "Fundacja", "Krąg badaczy", "Rodzina wpływów", "Komitet parafialny", "Sanatorium", "Klub kolekcjonerów"],
-  "Sci-Fi": ["Losowy", "Korporacja", "Załoga", "Agencja", "Kartel", "Konsorcjum", "Ruch oporu", "Klan orbitalny", "Syndykat danych", "Flota najemna"],
-  Postapo: ["Losowy", "Osada", "Banda", "Karawana", "Milicja", "Klan", "Syndykat zasobów", "Radio-wspólnota", "Zakon wody", "Mechanicy"],
-  Realistyczny: ["Losowy", "Stowarzyszenie", "Firma", "Komitet", "Ruch społeczny", "Sieć kontaktów", "Fundacja", "Spółdzielnia", "Klub"],
+  Fantasy: ["Losowy", "Gildia", "Zakon", "Rada miejska", "Kult", "Kompania najemna", "Cech", "Bractwo", "RĂłd", "KrÄ…g magĂłw", "StraĹĽ Ĺ›wiÄ…tynna", "Liga kupiecka"],
+  Horror: ["Losowy", "Kult", "Towarzystwo okultystyczne", "Fundacja", "KrÄ…g badaczy", "Rodzina wpĹ‚ywĂłw", "Komitet parafialny", "Sanatorium", "Klub kolekcjonerĂłw"],
+  "Sci-Fi": ["Losowy", "Korporacja", "ZaĹ‚oga", "Agencja", "Kartel", "Konsorcjum", "Ruch oporu", "Klan orbitalny", "Syndykat danych", "Flota najemna"],
+  Postapo: ["Losowy", "Osada", "Banda", "Karawana", "Milicja", "Klan", "Syndykat zasobĂłw", "Radio-wspĂłlnota", "Zakon wody", "Mechanicy"],
+  Realistyczny: ["Losowy", "Stowarzyszenie", "Firma", "Komitet", "Ruch spoĹ‚eczny", "SieÄ‡ kontaktĂłw", "Fundacja", "SpĂłĹ‚dzielnia", "Klub"],
 };
 
 const CLUE_TYPE_OPTIONS_BY_SETTING = {
-  Fantasy: ["Losowy", "Ślad fizyczny", "Znak magiczny", "Plotka", "Dokument", "Relikwia", "Herb", "Przysięga", "Mapa", "Pieczęć"],
-  Horror: ["Losowy", "Ślad fizyczny", "Dokument", "Relacja świadka", "Nagranie", "Symbol", "Fotografia", "Próbka", "List", "Brakujący przedmiot"],
-  "Sci-Fi": ["Losowy", "Log systemowy", "Nagranie", "Uszkodzony sensor", "Dane biometryczne", "Brakujący plik", "Fałszywy identyfikator", "Sygnał", "Czarna skrzynka"],
-  Postapo: ["Losowy", "Ślad w terenie", "Porzucony przedmiot", "Mapa", "Radio", "Znak ostrzegawczy", "Świeże ognisko", "Łuska", "Filtr", "Opaska"],
-  Realistyczny: ["Losowy", "Dokument", "Monitoring", "Zeznanie", "Rzecz osobista", "Niepasujący detal", "Paragon", "Telefon", "Klucz", "Notatka"],
+  Fantasy: ["Losowy", "Ĺšlad fizyczny", "Znak magiczny", "Plotka", "Dokument", "Relikwia", "Herb", "PrzysiÄ™ga", "Mapa", "PieczÄ™Ä‡"],
+  Horror: ["Losowy", "Ĺšlad fizyczny", "Dokument", "Relacja Ĺ›wiadka", "Nagranie", "Symbol", "Fotografia", "PrĂłbka", "List", "BrakujÄ…cy przedmiot"],
+  "Sci-Fi": ["Losowy", "Log systemowy", "Nagranie", "Uszkodzony sensor", "Dane biometryczne", "BrakujÄ…cy plik", "FaĹ‚szywy identyfikator", "SygnaĹ‚", "Czarna skrzynka"],
+  Postapo: ["Losowy", "Ĺšlad w terenie", "Porzucony przedmiot", "Mapa", "Radio", "Znak ostrzegawczy", "ĹšwieĹĽe ognisko", "Ĺuska", "Filtr", "Opaska"],
+  Realistyczny: ["Losowy", "Dokument", "Monitoring", "Zeznanie", "Rzecz osobista", "NiepasujÄ…cy detal", "Paragon", "Telefon", "Klucz", "Notatka"],
 };
 
 function scopedParams(params = [], values = {}, generatorCode = "") {
@@ -524,14 +553,19 @@ function decorateCatalog(items) {
   const decorated = items
     .map((item) => {
     const meta = CARD_META[item.type] || DEFAULT_META;
+    const catalogTypeCode = GENERATOR_TYPE_OVERRIDES[item.type] || item.typeCode || item.type;
+    const typeTheme = TYPE_THEME[catalogTypeCode] || TYPE_THEME[item.type] || {};
+    const typeLabel = TYPE_LABELS[catalogTypeCode] || catalogTypeCode;
     return {
       ...item,
+      catalogTypeCode,
+      typeLabel,
       title: CARD_META[item.type] ? meta.title : item.label,
       label: CARD_META[item.type] ? meta.title : item.label,
-      cardTag: CARD_META[item.type] ? meta.tag : item.typeCode || meta.tag,
+      cardTag: typeLabel,
       cardDescription: CARD_META[item.type] ? meta.description : item.description || meta.description,
-      tone: meta.tone,
-      icon: item.iconKey || meta.icon,
+      tone: typeTheme.tone || meta.tone,
+      icon: typeTheme.icon || item.iconKey || meta.icon,
       order: item.displayOrder || meta.order,
     };
   });
@@ -673,6 +707,34 @@ function GeneratorIcon({ name }) {
       </IconBase>
     );
   }
+  if (name === "map") {
+    return (
+      <IconBase>
+        <path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3Z" />
+        <path d="M9 3v15" />
+        <path d="M15 6v15" />
+      </IconBase>
+    );
+  }
+  if (name === "planet") {
+    return (
+      <IconBase>
+        <circle cx="12" cy="12" r="5" />
+        <path d="M3 14c4.5-5.2 13.5-8.2 18-4" />
+        <path d="M4 15.5c5 2.8 12.5 2.2 16-2" />
+      </IconBase>
+    );
+  }
+  if (name === "users") {
+    return (
+      <IconBase>
+        <path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" />
+        <circle cx="9.5" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.8" />
+        <path d="M16 3.2a4 4 0 0 1 0 7.6" />
+      </IconBase>
+    );
+  }
   return (
     <IconBase>
       <path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8Z" />
@@ -727,7 +789,7 @@ function generatorPath(item) {
 
 function resultSections(result) {
   if (!result) return [];
-  if (Array.isArray(result.sections)) return result.sections;
+  if (Array.isArray(result.sections)) return result.sections.filter((section) => section.type !== "stats");
   return Object.entries(result.payload || {}).map(([key, value]) => ({
     title: key,
     content: renderValue(value),
@@ -781,23 +843,23 @@ function dungeonTileClass(tile) {
 
 function dungeonTileLabel(tile) {
   if (tile === "e") return "E";
-  if (tile === "u") return "↑";
-  if (tile === "v") return "↓";
+  if (tile === "u") return "â†‘";
+  if (tile === "v") return "â†“";
   const roomNumber = dungeonRoomNumber(tile);
   if (roomNumber) return String(roomNumber);
   return "";
 }
 
 function dungeonTileTitle(tile) {
-  if (tile === "e") return "Wejście";
-  if (tile === "u") return "Przejście na wyższy poziom";
-  if (tile === "v") return "Zejście na niższy poziom";
+  if (tile === "e") return "WejĹ›cie";
+  if (tile === "u") return "PrzejĹ›cie na wyĹĽszy poziom";
+  if (tile === "v") return "ZejĹ›cie na niĹĽszy poziom";
   if (tile === "1") return "Korytarz";
-  if (tile === "2") return "Pokój";
+  if (tile === "2") return "PokĂłj";
   if (tile === "3") return "Korytarz";
   const roomNumber = dungeonRoomNumber(tile);
-  if (roomNumber) return `Pokój #${roomNumber}`;
-  return "Ściana";
+  if (roomNumber) return `PokĂłj #${roomNumber}`;
+  return "Ĺšciana";
 }
 
 function renderDungeonMap(section) {
@@ -979,7 +1041,7 @@ export default function GeneratorsPage() {
         const definitions = await getGeneratorDefinitions(token, {
           category: "all",
           system: "all",
-          type: selectedType,
+          type: "all",
           tone: selectedTone,
         });
         const nextCatalog = decorateCatalog(flattenDefinitions(definitions));
@@ -1000,7 +1062,7 @@ export default function GeneratorsPage() {
         if (!cancelled) {
           const fallback = decorateCatalog(FALLBACK_CATALOG);
           setCatalogFallback(true);
-          setCatalogError(e?.message || "Nie udało się pobrać katalogu generatorów z API.");
+          setCatalogError(e?.message || "Nie udaĹ‚o siÄ™ pobraÄ‡ katalogu generatorĂłw z API.");
           setCatalog(fallback);
           setActiveKey((previous) => fallback.some((item) => buildKey(item) === previous) ? previous : fallback[0] ? buildKey(fallback[0]) : "");
         }
@@ -1013,7 +1075,7 @@ export default function GeneratorsPage() {
     return () => {
       cancelled = true;
     };
-  }, [token, selectedType, selectedTone, catalogReloadKey]);
+  }, [token, selectedTone, catalogReloadKey]);
 
   const activeDefinition = useMemo(
     () => catalog.find((item) => buildKey(item) === activeKey) || catalog[0],
@@ -1024,34 +1086,49 @@ export default function GeneratorsPage() {
     const query = catalogSearch.trim().toLowerCase();
     const filtered = catalog.filter((item) => {
       if (favoritesOnly && !favoriteKeys.has(buildKey(item))) return false;
+      if (selectedType !== "all" && item.catalogTypeCode !== selectedType) return false;
       if (!query) return true;
       return [
         item.label,
         item.cardDescription,
         item.cardTag,
         item.categoryCode,
-        item.typeCode,
+        item.typeLabel,
+        item.catalogTypeCode,
       ].filter(Boolean).some((value) => String(value).toLowerCase().includes(query));
     });
 
     return [...filtered].sort((left, right) => {
+      const favoriteDelta = Number(favoriteKeys.has(buildKey(right))) - Number(favoriteKeys.has(buildKey(left)));
+      if (favoriteDelta !== 0) return favoriteDelta;
       if (catalogSort === "name") return String(left.label).localeCompare(String(right.label), "pl");
-      if (catalogSort === "type") return String(left.typeCode || left.type).localeCompare(String(right.typeCode || right.type), "pl");
+      if (catalogSort === "type") return String(left.typeLabel || left.catalogTypeCode || left.type).localeCompare(String(right.typeLabel || right.catalogTypeCode || right.type), "pl");
       return (left.order || 0) - (right.order || 0);
     });
-  }, [catalog, catalogSearch, catalogSort, favoriteKeys, favoritesOnly]);
+  }, [catalog, catalogSearch, catalogSort, favoriteKeys, favoritesOnly, selectedType]);
+
+  const catalogCountBase = useMemo(() => {
+    const query = catalogSearch.trim().toLowerCase();
+    return catalog.filter((item) => {
+      if (favoritesOnly && !favoriteKeys.has(buildKey(item))) return false;
+      if (!query) return true;
+      return [
+        item.label,
+        item.cardDescription,
+        item.cardTag,
+        item.categoryCode,
+        item.typeLabel,
+        item.catalogTypeCode,
+      ].filter(Boolean).some((value) => String(value).toLowerCase().includes(query));
+    });
+  }, [catalog, catalogSearch, favoriteKeys, favoritesOnly]);
 
   const sidebarTypeFilters = TYPE_FILTERS.map((option) => ({
     ...option,
     label: option.value === "all"
       ? "Wszystkie typy"
-      : option.label
-          .replace("Lokacje", "Lokacja")
-          .replace("Przedmioty", "Przedmiot")
-          .replace("Stworzenia", "Stworzenie")
-          .replace("Wydarzenia", "Zdarzenie")
-          .replace("Zagrożenia", "Zagrożenie"),
-    count: option.value === "all" ? visibleCatalog.length : visibleCatalog.filter((item) => item.typeCode === option.value).length,
+      : option.label,
+    count: option.value === "all" ? catalogCountBase.length : catalogCountBase.filter((item) => item.catalogTypeCode === option.value).length,
   })).filter((option) => option.value === "all" || option.count > 0);
 
   function toggleFavorite(generator) {
@@ -1110,7 +1187,7 @@ export default function GeneratorsPage() {
             : buildInitialParams({ params }),
         }));
       } catch (e) {
-        if (!cancelled) setError(e?.message || "Nie udało się pobrać formularza generatora.");
+        if (!cancelled) setError(e?.message || "Nie udaĹ‚o siÄ™ pobraÄ‡ formularza generatora.");
       }
     }
 
@@ -1176,7 +1253,7 @@ export default function GeneratorsPage() {
       setCopyStatus("Skopiowano");
       setTimeout(() => setCopyStatus(""), 1400);
     } catch {
-      setCopyStatus("Nie udało się skopiować");
+      setCopyStatus("Nie udaĹ‚o siÄ™ skopiowaÄ‡");
       setTimeout(() => setCopyStatus(""), 1800);
     }
   }
@@ -1204,7 +1281,7 @@ export default function GeneratorsPage() {
       setResultIsNew(true);
       setTimeout(() => setResultIsNew(false), 600);
     } catch (e) {
-      setError(e?.message || "Nie udało się wygenerować treści.");
+      setError(e?.message || "Nie udaĹ‚o siÄ™ wygenerowaÄ‡ treĹ›ci.");
     } finally {
       setLoading(false);
     }
@@ -1224,13 +1301,13 @@ export default function GeneratorsPage() {
       const climateParam = weatherParams.find((param) => param.key === "climate") || {
         key: "climate",
         label: "Klimat",
-        options: ["Umiarkowany", "Tropikalny", "Suchy", "Zimny", "Górski", "Nadmorski", "Bagienny"],
+        options: ["Umiarkowany", "Tropikalny", "Suchy", "Zimny", "GĂłrski", "Nadmorski", "Bagienny"],
         defaultValue: "Umiarkowany",
       };
       const seasonParam = weatherParams.find((param) => param.key === "season") || {
         key: "season",
         label: "Pora roku",
-        options: ["Wiosna", "Lato", "Jesień", "Zima"],
+        options: ["Wiosna", "Lato", "JesieĹ„", "Zima"],
         defaultValue: "Wiosna",
       };
       const weatherDescription = sectionContent(sections, "Opis");
@@ -1253,7 +1330,7 @@ export default function GeneratorsPage() {
               </div>
             </div>
             <button type="button" className="weatherBackButton" onClick={() => navigate("/generators")}>
-              {"← Generatory"}
+              {"â† Generatory"}
             </button>
           </header>
 
@@ -1283,7 +1360,7 @@ export default function GeneratorsPage() {
 
               <button className="weatherPrimaryAction" type="button" onClick={() => handleGenerate(activeDefinition)} disabled={loading || catalogLoading}>
                 <GeneratorIcon name="spark" />
-                <span>{loading ? "Generowanie..." : "Generuj pogodę"}</span>
+                <span>{loading ? "Generowanie..." : "Generuj pogodÄ™"}</span>
               </button>
             </aside>
 
@@ -1304,7 +1381,7 @@ export default function GeneratorsPage() {
                         <span>{selectedSeason}</span>
                       </div>
                     </div>
-                    <div className="weatherImagePlaceholder" aria-label="Miejsce na przyszły obraz pogody" />
+                    <div className="weatherImagePlaceholder" aria-label="Miejsce na przyszĹ‚y obraz pogody" />
                   </article>
 
                   <div className="weatherResultGrid">
@@ -1318,7 +1395,7 @@ export default function GeneratorsPage() {
                     </article>
                     <article className="weatherResultCard">
                       <h3>Efekt przy stole</h3>
-                      <p>{weatherTableUse || "Użyj pogody jako tła sceny i lekkiej presji."}</p>
+                      <p>{weatherTableUse || "UĹĽyj pogody jako tĹ‚a sceny i lekkiej presji."}</p>
                     </article>
                   </div>
 
@@ -1331,7 +1408,7 @@ export default function GeneratorsPage() {
               ) : (
                 <div className="weatherEmptyState">
                   <GeneratorIcon name="storm" />
-                  <strong>Wynik pogody pojawi się tutaj</strong>
+                  <strong>Wynik pogody pojawi siÄ™ tutaj</strong>
                   <span>Wybierz klimat, opcje sceny i uruchom generator.</span>
                 </div>
               )}
@@ -1355,7 +1432,7 @@ export default function GeneratorsPage() {
             </div>
           </div>
           <button type="button" className="generatorBackButton" onClick={() => navigate("/generators")}>
-            {"← Generatory"}
+            {"â† Generatory"}
           </button>
         </header>
 
@@ -1370,7 +1447,7 @@ export default function GeneratorsPage() {
                   <Field key={param.key} param={param} value={activeValues[param.key]} onChange={setFieldValue} />
                 ))
               ) : (
-                <p className="generatorCatalogEmpty">Formularz jest wczytywany albo ten generator nie wymaga parametrów.</p>
+                <p className="generatorCatalogEmpty">Formularz jest wczytywany albo ten generator nie wymaga parametrĂłw.</p>
               )}
             </div>
 
@@ -1436,7 +1513,7 @@ export default function GeneratorsPage() {
             ) : (
               <div className="generatorWindowEmpty">
                 <GeneratorIcon name={activeDefinition?.icon || "spark"} />
-                <strong>Wynik pojawi się tutaj</strong>
+                <strong>Wynik pojawi siÄ™ tutaj</strong>
                 <span>Ustaw parametry po lewej i uruchom generator.</span>
               </div>
             )}
@@ -1464,12 +1541,12 @@ export default function GeneratorsPage() {
 
         <div className="generatorsCatalogActions">
           <label className="generatorsSearch">
-            <span className="generatorsSearchIcon" aria-hidden="true">⌕</span>
+            <span className="generatorsSearchIcon" aria-hidden="true">âŚ•</span>
             <input
               type="search"
               value={catalogSearch}
               onChange={(event) => setCatalogSearch(event.target.value)}
-              placeholder="Szukaj generatorów..."
+              placeholder="Szukaj generatorĂłw..."
             />
           </label>
           <button
@@ -1478,7 +1555,7 @@ export default function GeneratorsPage() {
             onClick={() => setFavoritesOnly((value) => !value)}
             aria-pressed={favoritesOnly}
           >
-            <span aria-hidden="true">{favoritesOnly ? "★" : "☆"}</span>
+            <span aria-hidden="true">{favoritesOnly ? "â…" : "â†"}</span>
             <span>Ulubione</span>
           </button>
         </div>
@@ -1487,17 +1564,17 @@ export default function GeneratorsPage() {
       {catalogFallback && (
         <section className="generatorCatalogWarning" role="status">
           <div>
-            <strong>Katalog generatorów działa w trybie awaryjnym.</strong>
-            <span>{catalogError || "Nie udało się pobrać pełnej listy generatorów z backendu."}</span>
+            <strong>Katalog generatorĂłw dziaĹ‚a w trybie awaryjnym.</strong>
+            <span>{catalogError || "Nie udaĹ‚o siÄ™ pobraÄ‡ peĹ‚nej listy generatorĂłw z backendu."}</span>
           </div>
           <button type="button" onClick={() => setCatalogReloadKey((value) => value + 1)} disabled={catalogLoading}>
-            {catalogLoading ? "Sprawdzam..." : "Spróbuj ponownie"}
+            {catalogLoading ? "Sprawdzam..." : "SprĂłbuj ponownie"}
           </button>
         </section>
       )}
 
       <div className="generatorsCatalogLayout">
-        <aside className="generatorsSidebar" aria-label="Filtry generatorów">
+        <aside className="generatorsSidebar" aria-label="Filtry generatorĂłw">
           <section className="generatorsFilterSection">
             <h2>Typ generatora</h2>
             <label className="generatorsFilterSelect">
@@ -1521,7 +1598,7 @@ export default function GeneratorsPage() {
             <label className="generatorsSort">
               <span>Sortuj:</span>
               <select value={catalogSort} onChange={(event) => setCatalogSort(event.target.value)}>
-                <option value="popular">Popularność</option>
+                <option value="popular">PopularnoĹ›Ä‡</option>
                 <option value="name">Nazwa</option>
                 <option value="type">Typ</option>
               </select>
@@ -1542,10 +1619,10 @@ export default function GeneratorsPage() {
                       toggleFavorite(generator);
                     }}
                     aria-pressed={isFavorite}
-                    aria-label={isFavorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
-                    title={isFavorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
+                    aria-label={isFavorite ? "UsuĹ„ z ulubionych" : "Dodaj do ulubionych"}
+                    title={isFavorite ? "UsuĹ„ z ulubionych" : "Dodaj do ulubionych"}
                   >
-                    {isFavorite ? "★" : "☆"}
+                    {isFavorite ? "â…" : "â†"}
                   </button>
                   <button
                     type="button"
@@ -1563,7 +1640,7 @@ export default function GeneratorsPage() {
                       <span className="generatorCardTitle">{generator.label}</span>
                       <span className="generatorCardDescription">{generator.cardDescription}</span>
                       <span className="generatorCardBadges">
-                        <span className="generatorBadge">{generator.typeCode || generator.type}</span>
+                        <span className="generatorBadge">{generator.typeLabel || generator.typeCode || generator.type}</span>
                         <span className="generatorBadge generatorBadge--variant">Opisowy</span>
                       </span>
                     </span>
@@ -1573,7 +1650,7 @@ export default function GeneratorsPage() {
             })}
             {!catalogLoading && visibleCatalog.length === 0 && (
               <div className="generatorCatalogEmpty">
-                Brak generatorów dla wybranych filtrów. Ta kategoria będzie uzupełniana w kolejnych etapach.
+                Brak generatorĂłw dla wybranych filtrĂłw. Ta kategoria bÄ™dzie uzupeĹ‚niana w kolejnych etapach.
               </div>
             )}
           </section>
@@ -1581,9 +1658,9 @@ export default function GeneratorsPage() {
           {visibleCatalog.length > 0 && (
             <div className="generatorsLoadMoreWrap">
               <button type="button" className="generatorsLoadMore">
-                <span aria-hidden="true">⌄</span>
-                <span>Załaduj więcej</span>
-                <span aria-hidden="true">⌄</span>
+                <span aria-hidden="true">âŚ„</span>
+                <span>ZaĹ‚aduj wiÄ™cej</span>
+                <span aria-hidden="true">âŚ„</span>
               </button>
             </div>
           )}

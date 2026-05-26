@@ -25,10 +25,12 @@ public class StoryHookQuickGeneratorStrategy implements GeneratorStrategy {
     public GeneratorStructuredResultResponse generate(GeneratorRequest request) {
         Map<String, Object> params = request == null || request.params() == null ? Map.of() : request.params();
         String storyType = stringParam(params, "storyType", "Losowy");
-        List<GeneratorOutputSection> sections = randomChoice(storyType) ? randomType() : forType(storyType);
+        String reliability = stringParam(params, "rumorReliability", "Losowa");
+        String source = stringParam(params, "rumorSource", "Losowe");
+        List<GeneratorOutputSection> sections = withRumorContext(randomChoice(storyType) ? randomType() : forType(storyType), reliability, source);
 
         return new GeneratorStructuredResultResponse(
-                null, GENERATOR, VARIANT, "Fabula i pogloski", "Szybkie haki fabularne", sections, "seed", OffsetDateTime.now()
+                null, GENERATOR, VARIANT, "Fabula i pogloski", "Haki fabularne i pogloski", sections, "seed", OffsetDateTime.now()
         );
     }
 
@@ -83,6 +85,19 @@ public class StoryHookQuickGeneratorStrategy implements GeneratorStrategy {
         };
     }
 
+    private List<GeneratorOutputSection> withRumorContext(List<GeneratorOutputSection> base, String reliability, String source) {
+        String resolvedReliability = randomChoice(reliability) ? pick("Prawdziwa", "Przesadzona", "Falszywa", "Czesciowo prawdziwa", "Celowo rozsiana") : reliability;
+        String resolvedSource = randomChoice(source) ? pick("Karczma", "Straz miejska", "Dziecko", "Kupiec", "Kaplan", "List", "Tablica ogloszen", "Podsluchana rozmowa") : source;
+        return List.of(
+                section("Zrodlo", resolvedSource),
+                section("Poziom wiarygodnosci", resolvedReliability),
+                base.get(0),
+                section("Co jest prawda", "W plotce jest przynajmniej jeden sprawdzalny szczegol: miejsce, nazwisko albo znak."),
+                section("Co jest znieksztalcone", "Skala problemu albo motyw osoby zaangazowanej zostaly opowiedziane wygodniej niz w rzeczywistosci."),
+                section("Jak gracze moga to sprawdzic", "Niech porownaja relacje z dokumentem, swiadkiem albo sladem w miejscu zdarzenia.")
+        );
+    }
+
     private GeneratorOutputSection section(String title, String content) {
         return new GeneratorOutputSection("text", title, content, List.of());
     }
@@ -94,11 +109,14 @@ public class StoryHookQuickGeneratorStrategy implements GeneratorStrategy {
 
     private boolean randomChoice(String value) {
         String normalized = normalize(value);
-        return normalized.equals("losowy") || normalized.equals("losowa") || normalized.equals("random");
+        return normalized.equals("losowy") || normalized.equals("losowa") || normalized.equals("losowe") || normalized.equals("random");
+    }
+
+    private String pick(String... values) {
+        return values[random.nextInt(values.length)];
     }
 
     private String normalize(String value) {
         return value == null ? "" : value.toLowerCase().trim();
     }
 }
-

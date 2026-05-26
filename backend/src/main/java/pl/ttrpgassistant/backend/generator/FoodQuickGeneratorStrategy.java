@@ -27,9 +27,10 @@ public class FoodQuickGeneratorStrategy implements GeneratorStrategy {
         String foodType = stringParam(params, "foodType", "Losowy");
 
         List<GeneratorOutputSection> sections = randomChoice(foodType) ? randomMeal() : mealFor(foodType);
+        String title = sectionContent(sections, "Nazwa", "Jedzenie");
 
         return new GeneratorStructuredResultResponse(
-                null, GENERATOR, VARIANT, "Jedzenie", "Szybki posilek lub napoj", sections, "seed", OffsetDateTime.now()
+                null, GENERATOR, VARIANT, title, foodType, sections, "seed", OffsetDateTime.now()
         );
     }
 
@@ -46,29 +47,27 @@ public class FoodQuickGeneratorStrategy implements GeneratorStrategy {
     private List<GeneratorOutputSection> mealFor(String foodType) {
         String key = normalize(foodType);
         return switch (key) {
-            case "sniadanie", "breakfast" -> withOptionalPrice("Owsianka Podroznika", "Gesty owies z jablkiem, orzechami i miodem.");
-            case "zupa", "soup" -> withOptionalPrice("Zupa Dymna", "Bulion warzywny z wedzona papryka i swiezym pieczywem.");
-            case "danie glowne", "main course", "main" -> withOptionalPrice("Pieczen Traktu", "Wolowina pieczona z cebula, marchewka i sosem z ziol.");
-            case "deser", "dessert" -> withOptionalPrice("Kruszonka z Sadu", "Cieple owoce pod warstwa maslanej kruszonki.");
-            case "napoj bezalkoholowy", "non-alcoholic drink", "non alcoholic drink" -> withOptionalPrice("Mietowa Lemoniada", "Lekki napoj z mieta, cytryna i odrobina miodu.");
-            case "napoj alkoholowy", "alcoholic drink" -> withOptionalPrice("Ciemne Piwo Karczmarza", "Pelne, lekko gorzkie, z nuta karmelu.");
-            default -> withOptionalPrice("Posilek Dnia", "Proste jedzenie, ale swieze i sycace.");
+            case "sniadanie", "breakfast" -> meal("Owsianka Podroznika", "Gesty owies z jablkiem, orzechami i miodem.");
+            case "zupa", "soup" -> meal("Zupa Dymna", "Bulion warzywny z wedzona papryka i swiezym pieczywem.");
+            case "danie glowne", "main course", "main" -> meal("Pieczen Traktu", "Wolowina pieczona z cebula, marchewka i sosem z ziol.");
+            case "deser", "dessert" -> meal("Kruszonka z Sadu", "Cieple owoce pod warstwa maslanej kruszonki.");
+            case "napoj bezalkoholowy", "non-alcoholic drink", "non alcoholic drink" -> meal("Mietowa Lemoniada", "Lekki napoj z mieta, cytryna i odrobina miodu.");
+            case "napoj alkoholowy", "alcoholic drink" -> meal("Ciemne Piwo Karczmarza", "Pelne, lekko gorzkie, z nuta karmelu.");
+            default -> meal("Posilek Dnia", "Proste jedzenie, ale swieze i sycace.");
         };
     }
 
-    private List<GeneratorOutputSection> withOptionalPrice(String name, String description) {
-        if (random.nextBoolean()) {
-            return List.of(
-                    section("Nazwa", name),
-                    section("Opis", description),
-                    section("Cena", pick("3 cp", "7 cp", "1 sp", "2 sp", "4 sp"))
-            );
-        }
+    private List<GeneratorOutputSection> meal(String name, String description) {
         return List.of(section("Nazwa", name), section("Opis", description));
     }
 
-    private String pick(String... values) {
-        return values[random.nextInt(values.length)];
+    private String sectionContent(List<GeneratorOutputSection> sections, String title, String fallback) {
+        return sections.stream()
+                .filter(section -> title.equals(section.title()))
+                .map(GeneratorOutputSection::content)
+                .filter(content -> content != null && !content.isBlank())
+                .findFirst()
+                .orElse(fallback);
     }
 
     private GeneratorOutputSection section(String title, String content) {
@@ -89,4 +88,3 @@ public class FoodQuickGeneratorStrategy implements GeneratorStrategy {
         return value == null ? "" : value.toLowerCase().trim();
     }
 }
-

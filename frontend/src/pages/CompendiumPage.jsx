@@ -67,6 +67,24 @@ function prettyKey(key) {
   return key.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
+function normalizeListData(data, systemCode, category) {
+  if (Array.isArray(data)) {
+    return {
+      systemCode,
+      category,
+      count: data.length,
+      results: data,
+    };
+  }
+  return {
+    ...data,
+    systemCode: data?.systemCode || systemCode,
+    category: data?.category || category,
+    count: data?.count ?? (Array.isArray(data?.results) ? data.results.length : 0),
+    results: Array.isArray(data?.results) ? data.results : [],
+  };
+}
+
 export default function CompendiumPage() {
   const { token } = useAuth();
   const [systems, setSystems] = useState([]);
@@ -112,10 +130,11 @@ export default function CompendiumPage() {
       try {
         const data = await getCompendiumList(token, systemCode, category);
         if (cancelled) return;
-        setListData(data);
-        const first = Array.isArray(data?.results) ? data.results[0] : null;
+        const normalizedData = normalizeListData(data, systemCode, category);
+        setListData(normalizedData);
+        const first = normalizedData.results[0] || null;
         if (first?.index) {
-          loadDetail(first.index);
+          loadDetail(first.index, first);
         }
       } catch (e) {
         if (!cancelled) {
@@ -130,13 +149,13 @@ export default function CompendiumPage() {
       }
     }
 
-    async function loadDetail(index) {
+    async function loadDetail(index, fallbackItem = null) {
       setDetailLoading(true);
       try {
         const data = await getCompendiumDetail(token, systemCode, category, index);
-        if (!cancelled) setDetail(data);
+        if (!cancelled) setDetail(data || fallbackItem);
       } catch {
-        if (!cancelled) setDetail(null);
+        if (!cancelled) setDetail(fallbackItem);
       } finally {
         if (!cancelled) setDetailLoading(false);
       }
@@ -163,8 +182,9 @@ export default function CompendiumPage() {
     setError("");
     try {
       const data = await getCompendiumDetail(token, systemCode, category, item.index);
-      setDetail(data);
+      setDetail(data || item);
     } catch (e) {
+      setDetail(item);
       setError(e?.message || "Nie udalo sie pobrac szczegolow.");
     } finally {
       setDetailLoading(false);
