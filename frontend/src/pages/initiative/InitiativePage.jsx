@@ -4,7 +4,7 @@ import { getDndMonsterDetails, searchDndMonsters } from "../../api/initiative";
 import "../../styles/initiative.css";
 
 const STORAGE_KEY = "ttrpg.quickInitiativeTracker";
-const LOOKUP_ERROR_MESSAGE = "Nie udało się pobrac danych z bazy D&D. Mozesz dodac uczestnika recznie.";
+const LOOKUP_ERROR_MESSAGE = "Nie udało się pobrać danych z bazy D&D. Możesz dodać uczestnika ręcznie.";
 const SYSTEM_DND = "dnd5e";
 const SYSTEM_COC = "coc7e";
 
@@ -25,6 +25,7 @@ const EMPTY_CUSTOM_FORM = {
   ac: "",
   hp: "",
   maxHp: "",
+  note: "",
 };
 
 function colorForType(type) {
@@ -129,12 +130,14 @@ export default function InitiativePage() {
   const [state, setState] = useState(createInitialState);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [participantNameError, setParticipantNameError] = useState("");
 
   const [isAddModalOpen, setAddModalOpen] = useState(false);
   const [customForm, setCustomForm] = useState(EMPTY_CUSTOM_FORM);
   const [monsterResults, setMonsterResults] = useState([]);
   const [monsterLoading, setMonsterLoading] = useState(false);
   const [selectedMonsterIndex, setSelectedMonsterIndex] = useState("");
+  const [isMoreOpen, setMoreOpen] = useState(false);
   const [draggedId, setDraggedId] = useState(null);
   const [dragOverId, setDragOverId] = useState(null);
 
@@ -227,9 +230,10 @@ export default function InitiativePage() {
   function handleAddCustomParticipant(event) {
     event.preventDefault();
     setError("");
+    setParticipantNameError("");
     const name = customForm.name.trim();
     if (!name) {
-      setError("Nazwa uczestnika jest wymagana.");
+      setParticipantNameError("Nazwa uczestnika jest wymagana.");
       return;
     }
     const initiative = toOptionalNumber(customForm.initiative);
@@ -246,6 +250,7 @@ export default function InitiativePage() {
       ac: toOptionalNumber(customForm.ac),
       hp,
       maxHp,
+      note: customForm.note,
       sourceType: selectedMonsterIndex ? "DND_MONSTER" : "CUSTOM",
       sourceIndex: selectedMonsterIndex || null,
       sourceName: selectedMonsterIndex ? name : null,
@@ -383,48 +388,88 @@ export default function InitiativePage() {
     setNotice("");
   }
 
+  function participantSubtitle(participant) {
+    const parts = [participant.sourceName, participant.note].filter(Boolean);
+    if (parts.length) return parts[0];
+    return participant.sourceType === "DND_MONSTER" ? "Potwór D&D" : typeLabel(participant.type);
+  }
+
+  function hpPercent(participant) {
+    const hp = Number(participant.hp);
+    const maxHp = Number(participant.maxHp);
+    if (!Number.isFinite(hp) || !Number.isFinite(maxHp) || maxHp <= 0) return null;
+    return Math.max(0, Math.min(100, Math.round((hp / maxHp) * 100)));
+  }
+
+  const combatSummary = useMemo(() => {
+    const total = orderedParticipants.length;
+    const npc = orderedParticipants.filter((item) => item.type !== "PLAYER").length;
+    const pc = orderedParticipants.filter((item) => item.type === "PLAYER").length;
+    const initiativeValues = orderedParticipants
+      .map((item) => (isDndMode ? item.initiative : item.dex))
+      .filter((value) => Number.isFinite(Number(value)));
+    const average = initiativeValues.length
+      ? (initiativeValues.reduce((sum, value) => sum + Number(value), 0) / initiativeValues.length).toFixed(1)
+      : null;
+    const highest = initiativeValues.length ? Math.max(...initiativeValues.map(Number)) : null;
+    const hpValues = orderedParticipants.filter((item) => Number.isFinite(Number(item.hp)));
+    const totalHp = hpValues.reduce((sum, item) => sum + Number(item.hp || 0), 0);
+    const totalMaxHp = orderedParticipants
+      .filter((item) => Number.isFinite(Number(item.maxHp)))
+      .reduce((sum, item) => sum + Number(item.maxHp || 0), 0);
+    return { total, npc, pc, average, highest, totalHp, totalMaxHp };
+  }, [isDndMode, orderedParticipants]);
+
   return (
     <div className="page page--wide initiativePage">
-      <div className="pageHeader">
-        <div>
-          <span className="pageEyebrow">Combat</span>
-          <h1 className="pageTitle">{isDndMode ? "Inicjatywa D&D" : "Inicjatywa Zew Cthulhu"}</h1>
-          <p className="pageSubtitle">{isDndMode ? "Szybki tracker walki D&D bez przypisywania do kampanii." : "Szybki tracker kolejnosci dla Zewu Cthulhu bez przypisywania do kampanii."}</p>
-        </div>
-      </div>
-
-      <section className="card initiativeControlsCard">
-        <div className="initiativeControlsSummary">
-          <p>Runda: <strong>{state.round}</strong></p>
-          <p>Aktywna tura: <strong>{activeParticipant ? activeParticipant.name : "Brak"}</strong></p>
-        </div>
-        <div className="initiativeActions">
-          <label>
-            System
+      <section className="card initiativeControlsCard" aria-label="Status walki">
+        <div className="initiativeStatusStrip">
+          <div className="initiativeStatusItem">
+            <span>Runda</span>
+            <strong>{state.round}</strong>
+          </div>
+          <div className="initiativeStatusItem initiativeStatusItem--wide">
+            <span>Aktywna tura</span>
+            <strong><i aria-hidden="true" />{activeParticipant ? activeParticipant.name : "Brak"}</strong>
+          </div>
+          <label className="initiativeSystemSelect">
+            <span>System</span>
             <select aria-label="System trackera" value={state.systemCode} onChange={(e) => handleSystemChange(e.target.value)}>
-              <option value={SYSTEM_DND}>D&D 5e</option>
+              <option value={SYSTEM_DND}>D&amp;D 5e</option>
               <option value={SYSTEM_COC}>Zew Cthulhu 7e</option>
             </select>
           </label>
-          <button className="btn btn-primary" type="button" onClick={() => setAddModalOpen(true)}>Dodaj uczestnika</button>
-          <button className="btn btn-primary" type="button" onClick={startCombat}>Start walki</button>
+        </div>
+        <div className="initiativeActions">
+          <button className="initiativeBtn initiativeBtn--ghost" type="button" onClick={() => setAddModalOpen(true)}>Dodaj uczestnika</button>
+          <button className="initiativeBtn initiativeBtn--primary" type="button" onClick={startCombat}>Start walki</button>
           {isDndMode ? (
-            <button className="btn" type="button" onClick={rollInitiative} disabled={state.initiativeRolled || state.participants.length === 0}>Losuj inicjatywę</button>
+            <button className="initiativeBtn initiativeBtn--ghost" type="button" onClick={rollInitiative} disabled={state.initiativeRolled || state.participants.length === 0}>Losuj inicjatywę</button>
           ) : null}
-          <button className="btn" type="button" onClick={sortBySystemAction}>{isDndMode ? "Sortuj po inicjatywie" : "Sortuj po ZR"}</button>
-          <button className="btn" type="button" onClick={() => moveTurn("next")}>Następna tura</button>
-          <button className="btn" type="button" onClick={() => moveTurn("prev")}>Poprzednia tura</button>
-          <button className="btn" type="button" onClick={resetTurns}>Reset tur</button>
-          <button className="btn" type="button" onClick={endCombat}>Zakończ walkę</button>
-          <button className="btn" type="button" onClick={clearAll}>Wyczyść wszystko</button>
+          <button className="initiativeBtn initiativeBtn--ghost" aria-label={isDndMode ? "Sortuj po inicjatywie" : "Sortuj po ZR"} type="button" onClick={sortBySystemAction}>Sortuj</button>
+          <button className="initiativeBtn initiativeBtn--ghost" type="button" onClick={() => moveTurn("prev")}>Poprzednia tura</button>
+          <button className="initiativeBtn initiativeBtn--ghost" type="button" onClick={() => moveTurn("next")}>Następna tura</button>
+          <div className="initiativeMore">
+            <button className="initiativeBtn initiativeBtn--muted" type="button" aria-expanded={isMoreOpen} onClick={() => setMoreOpen((value) => !value)}>Więcej</button>
+            {isMoreOpen ? (
+              <div className="initiativeMoreMenu" role="menu">
+                <button type="button" role="menuitem" onClick={() => { resetTurns(); setMoreOpen(false); }}>Reset tur</button>
+                <button type="button" role="menuitem" onClick={() => { endCombat(); setMoreOpen(false); }}>Zakończ walkę</button>
+                <button type="button" role="menuitem" onClick={() => { clearAll(); setMoreOpen(false); }}>Wyczyść wszystko</button>
+              </div>
+            ) : null}
+          </div>
         </div>
         {notice && <p className="initiativeNotice">{notice}</p>}
       </section>
 
       {error && <div className="campaignDetailsError">{error}</div>}
 
-      <section className="card">
-        <h2>Uczestnicy walki</h2>
+      <section className="card initiativeParticipantsCard">
+        <div className="initiativeSectionHeader">
+          <h2>Uczestnicy walki</h2>
+          <p>{orderedParticipants.length ? `${orderedParticipants.length} w kolejce` : "Kolejka jest pusta"}</p>
+        </div>
         {orderedParticipants.length === 0 ? (
           <p className="emptyText">Brak uczestników. Dodaj pierwszą postać lub przeciwnika.</p>
         ) : (
@@ -432,12 +477,13 @@ export default function InitiativePage() {
             <table className="initiativeTable">
               <thead>
                 <tr>
-                  <th>Typ / marker</th><th>Nazwa</th><th>{isDndMode ? "Inicjatywa" : "ZR / DEX"}</th>{isDndMode ? <th>AC</th> : null}<th>HP</th><th>Akcje</th>
+                  <th>Lp.</th><th>Typ</th><th>Nazwa</th><th>{isDndMode ? "Inicjatywa" : "ZR / DEX"}</th>{isDndMode ? <th>AC</th> : null}<th>HP</th><th>Akcje</th>
                 </tr>
               </thead>
               <tbody>
-                {orderedParticipants.map((participant) => {
+                {orderedParticipants.map((participant, index) => {
                   const isActive = state.started && state.activeParticipantId === participant.id && !participant.defeated;
+                  const hpBar = hpPercent(participant);
                   return (
                     <tr
                       key={participant.id}
@@ -448,27 +494,42 @@ export default function InitiativePage() {
                       onDrop={() => handleDrop(participant.id)}
                       onDragEnd={() => { setDraggedId(null); setDragOverId(null); }}
                     >
-                      <td><span className="initiativeColorDot" style={{ backgroundColor: participant.color || colorForType(participant.type) }} /> {typeLabel(participant.type)}</td>
-                      <td><strong>{participant.name}</strong>{isActive && <span className="initiativeBadge">Aktywna tura</span>}{participant.defeated && <span className="initiativeBadge initiativeBadgeMuted">Pokonany</span>}</td>
-                      <td>{isDndMode ? (participant.initiative ?? "-") : (participant.dex ?? "-")}</td>
-                      {isDndMode ? <td>{participant.ac ?? "-"}</td> : null}
+                      <td className="initiativeIndexCell">{index + 1}</td>
+                      <td><span className="initiativeTypePill"><span className="initiativeColorDot" style={{ backgroundColor: participant.color || colorForType(participant.type) }} /> {typeLabel(participant.type)}</span></td>
                       <td>
-                        <input
-                          className="initiativeHpInlineInput"
-                          aria-label={`HP ${participant.name}`}
-                          type="number"
-                          min="0"
-                          value={participant.hp ?? 0}
-                          onChange={(e) => {
-                            const nextHp = Math.max(0, Number(e.target.value || 0));
-                            patchParticipant(participant.id, (item) => ({ ...item, hp: nextHp, defeated: nextHp <= 0 }));
-                          }}
-                        />
-                        <span className="initiativeHpInlineMax">/ {participant.maxHp ?? "-"}</span>
+                        <div className="initiativeNameCell">
+                          <strong>{participant.name}</strong>
+                          <small>{participantSubtitle(participant)}</small>
+                          <span>
+                            {isActive && <span className="initiativeBadge">Aktywna tura</span>}
+                            {participant.defeated && <span className="initiativeBadge initiativeBadgeMuted">Pokonany</span>}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="initiativeNumberCell">{isDndMode ? (participant.initiative ?? "-") : (participant.dex ?? "-")}</td>
+                      {isDndMode ? <td className="initiativeNumberCell">{participant.ac ?? "-"}</td> : null}
+                      <td>
+                        <div className="initiativeHpCell">
+                          <label>
+                            <input
+                              className="initiativeHpInlineInput"
+                              aria-label={`HP ${participant.name}`}
+                              type="number"
+                              min="0"
+                              value={participant.hp ?? 0}
+                              onChange={(e) => {
+                                const nextHp = Math.max(0, Number(e.target.value || 0));
+                                patchParticipant(participant.id, (item) => ({ ...item, hp: nextHp, defeated: nextHp <= 0 }));
+                              }}
+                            />
+                            <span className="initiativeHpInlineMax">/ {participant.maxHp ?? "-"}</span>
+                          </label>
+                          {hpBar !== null ? <span className="initiativeHpBar"><i style={{ width: `${hpBar}%` }} /></span> : null}
+                        </div>
                       </td>
                       <td>
                         <div className="initiativeRowActions">
-                          <button type="button" className="initiativeDeleteBtn" aria-label={`Usuń ${participant.name}`} onClick={() => removeParticipant(participant.id)}>x</button>
+                          <button type="button" className="initiativeDeleteBtn" aria-label={`Usuń ${participant.name}`} onClick={() => removeParticipant(participant.id)}>×</button>
                         </div>
                       </td>
                     </tr>
@@ -478,39 +539,108 @@ export default function InitiativePage() {
             </table>
           </div>
         )}
+        {orderedParticipants.length ? (
+          <div className="initiativeCombatSummary" aria-label="Podsumowanie walki">
+            <div><span>Uczestnicy</span><strong>{combatSummary.total}</strong></div>
+            <div><span>NPC</span><strong>{combatSummary.npc}</strong></div>
+            <div><span>Gracze (PC)</span><strong>{combatSummary.pc}</strong></div>
+            {combatSummary.average !== null ? <div><span>Średnia inicjatywa</span><strong>{combatSummary.average}</strong></div> : null}
+            {combatSummary.highest !== null ? <div><span>Najwyższa inicjatywa</span><strong>{combatSummary.highest}</strong></div> : null}
+            <div><span>Łączne HP</span><strong>{combatSummary.totalMaxHp ? `${combatSummary.totalHp} / ${combatSummary.totalMaxHp}` : combatSummary.totalHp}</strong></div>
+          </div>
+        ) : null}
       </section>
 
       {isAddModalOpen && (
-        <div className="initiativeModalOverlay" role="dialog" aria-modal="true">
+        <div className="initiativeModalOverlay" role="dialog" aria-modal="true" aria-label="Dodaj uczestnika">
           <div className="initiativeModal">
             <div className="initiativeModalHeader">
               <h3>Dodaj uczestnika</h3>
-              <button type="button" className="btn" onClick={() => setAddModalOpen(false)}>Zamknij</button>
+              <button type="button" className="initiativeModalClose" aria-label="Zamknij" onClick={() => setAddModalOpen(false)}>×</button>
             </div>
             <form className="initiativeModalBody" onSubmit={handleAddCustomParticipant}>
               {isDndMode ? (
-                <select aria-label="Pula potworów" value={selectedMonsterIndex} onChange={(e) => void handleSelectMonster(e.target.value)}>
-                  <option value="">{monsterLoading ? "Ładowanie potworów..." : "Wybierz potwora (opcjonalnie)"}</option>
-                  {monsterResults.map((monster) => <option key={monster.index} value={monster.index}>{monster.name}</option>)}
-                </select>
+                <label className="initiativeField initiativeField--full">
+                  <span>Pula potworów</span>
+                  <select aria-label="Pula potworów" value={selectedMonsterIndex} onChange={(e) => void handleSelectMonster(e.target.value)}>
+                    <option value="">{monsterLoading ? "Ładowanie potworów..." : "Wybierz potwora (opcjonalnie)"}</option>
+                    {monsterResults.map((monster) => <option key={monster.index} value={monster.index}>{monster.name}</option>)}
+                  </select>
+                </label>
               ) : null}
-              <input aria-label="Nazwa uczestnika" placeholder="Nazwa" value={customForm.name} onChange={(e) => setCustomForm((prev) => ({ ...prev, name: e.target.value }))} />
-              <select aria-label="Typ" value={customForm.type} onChange={(e) => setCustomForm((prev) => ({ ...prev, type: e.target.value, color: colorForType(e.target.value) }))}>
-                {TYPE_OPTIONS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-              </select>
-              <input aria-label="Kolor" type="color" value={customForm.color} onChange={(e) => setCustomForm((prev) => ({ ...prev, color: e.target.value }))} />
+              <label className="initiativeField">
+                <span>Typ uczestnika</span>
+                <select aria-label="Typ" value={customForm.type} onChange={(e) => setCustomForm((prev) => ({ ...prev, type: e.target.value, color: colorForType(e.target.value) }))}>
+                  {TYPE_OPTIONS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                </select>
+              </label>
+              <label className="initiativeField">
+                <span>Nazwa</span>
+                <input
+                  aria-label="Nazwa uczestnika"
+                  aria-invalid={participantNameError ? "true" : "false"}
+                  placeholder="Np. Goblin wojownik"
+                  value={customForm.name}
+                  onChange={(e) => {
+                    setParticipantNameError("");
+                    setCustomForm((prev) => ({ ...prev, name: e.target.value }));
+                  }}
+                />
+                {participantNameError ? <small className="initiativeFieldError">{participantNameError}</small> : null}
+              </label>
+              <div className="initiativeField initiativeField--full">
+                <span>Marker / kolor</span>
+                <div className="initiativeColorPicker">
+                  {TYPE_OPTIONS.map((item) => (
+                    <button
+                      key={item.value}
+                      type="button"
+                      className={customForm.color === item.color ? "is-selected" : ""}
+                      style={{ backgroundColor: item.color }}
+                      aria-label={`Kolor ${item.label}`}
+                      onClick={() => setCustomForm((prev) => ({ ...prev, color: item.color }))}
+                    />
+                  ))}
+                  <input aria-label="Kolor" type="color" value={customForm.color} onChange={(e) => setCustomForm((prev) => ({ ...prev, color: e.target.value }))} />
+                </div>
+              </div>
               {isDndMode ? (
                 <>
-                  <input aria-label="Modyfikator inicjatywy" type="number" placeholder="Modyfikator inicjatywy" value={customForm.initiativeModifier} onChange={(e) => setCustomForm((prev) => ({ ...prev, initiativeModifier: e.target.value }))} />
-                  <input aria-label="Inicjatywa" type="number" placeholder="Inicjatywa reczna" value={customForm.initiative} onChange={(e) => setCustomForm((prev) => ({ ...prev, initiative: e.target.value }))} />
-                  <input aria-label="AC" type="number" placeholder="AC" value={customForm.ac} onChange={(e) => setCustomForm((prev) => ({ ...prev, ac: e.target.value }))} />
+                  <label className="initiativeField">
+                    <span>Modyfikator inicjatywy</span>
+                    <input aria-label="Modyfikator inicjatywy" type="number" placeholder="Np. 2" value={customForm.initiativeModifier} onChange={(e) => setCustomForm((prev) => ({ ...prev, initiativeModifier: e.target.value }))} />
+                  </label>
+                  <label className="initiativeField">
+                    <span>Inicjatywa</span>
+                    <input aria-label="Inicjatywa" type="number" placeholder="Np. 12" value={customForm.initiative} onChange={(e) => setCustomForm((prev) => ({ ...prev, initiative: e.target.value }))} />
+                  </label>
+                  <label className="initiativeField">
+                    <span>AC</span>
+                    <input aria-label="AC" type="number" placeholder="Np. 15" value={customForm.ac} onChange={(e) => setCustomForm((prev) => ({ ...prev, ac: e.target.value }))} />
+                  </label>
                 </>
               ) : (
-                <input aria-label="ZR / DEX" type="number" placeholder="ZR / DEX" value={customForm.dex} onChange={(e) => setCustomForm((prev) => ({ ...prev, dex: e.target.value }))} />
+                <label className="initiativeField">
+                  <span>ZR / DEX</span>
+                  <input aria-label="ZR / DEX" type="number" placeholder="Np. 60" value={customForm.dex} onChange={(e) => setCustomForm((prev) => ({ ...prev, dex: e.target.value }))} />
+                </label>
               )}
-              <input aria-label="HP" type="number" placeholder="HP" value={customForm.hp} onChange={(e) => setCustomForm((prev) => ({ ...prev, hp: e.target.value }))} />
-              <input aria-label="Max HP" type="number" placeholder="Max HP" value={customForm.maxHp} onChange={(e) => setCustomForm((prev) => ({ ...prev, maxHp: e.target.value }))} />
-              <button className="btn btn-primary" type="submit">Dodaj do walki</button>
+              <label className="initiativeField">
+                <span>HP</span>
+                <input aria-label="HP" type="number" placeholder="0" value={customForm.hp} onChange={(e) => setCustomForm((prev) => ({ ...prev, hp: e.target.value }))} />
+              </label>
+              <label className="initiativeField">
+                <span>Max HP</span>
+                <input aria-label="Max HP" type="number" placeholder="0" value={customForm.maxHp} onChange={(e) => setCustomForm((prev) => ({ ...prev, maxHp: e.target.value }))} />
+              </label>
+              <label className="initiativeField initiativeField--full">
+                <span>Notatka (opcjonalnie)</span>
+                <textarea aria-label="Notatka opcjonalna" placeholder="Dodatkowe informacje o uczestniku..." value={customForm.note} onChange={(e) => setCustomForm((prev) => ({ ...prev, note: e.target.value }))} />
+              </label>
+              <div className="initiativeModalFooter">
+                <button className="initiativeBtn initiativeBtn--ghost" type="button" onClick={() => setAddModalOpen(false)}>Zamknij</button>
+                <button className="initiativeBtn initiativeBtn--primary" type="submit">Dodaj do walki</button>
+              </div>
             </form>
           </div>
         </div>

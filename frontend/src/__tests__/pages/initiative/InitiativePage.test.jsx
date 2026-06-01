@@ -37,7 +37,7 @@ async function addParticipantCoc({ name, dex = "60", hp = "11", maxHp = "11" }) 
   await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
 }
 
-describe("InitiativePage v0.8.3 quick tracker", () => {
+describe("InitiativePage quick tracker", () => {
   beforeEach(() => {
     window.localStorage.clear();
     initiativeApi.searchDndMonsters.mockResolvedValue([]);
@@ -47,17 +47,19 @@ describe("InitiativePage v0.8.3 quick tracker", () => {
   it("defaults to D&D mode", () => {
     render(<InitiativePage />);
     expect(screen.getByLabelText("System trackera")).toHaveValue("dnd5e");
-    expect(screen.getByRole("button", { name: "Losuj inicjatywę" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Losuj inicjatyw/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Sortuj po inicjatywie" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Sortuj po ZR" })).not.toBeInTheDocument();
   });
 
-  it("does not render Marker and Stany columns", async () => {
+  it("renders compact participant columns without Marker and Stany", async () => {
     render(<InitiativePage />);
     await addParticipantDnd({ name: "Kolumny", initiative: "11", ac: "13" });
     expect(screen.queryByRole("columnheader", { name: "Marker" })).not.toBeInTheDocument();
     expect(screen.queryByRole("columnheader", { name: "Stany" })).not.toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "Typ / marker" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Lp." })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Typ" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Akcje" })).toBeInTheDocument();
   });
 
   it("does not render D&D Monster badge", async () => {
@@ -74,10 +76,10 @@ describe("InitiativePage v0.8.3 quick tracker", () => {
     render(<InitiativePage />);
     fireEvent.click(screen.getByRole("button", { name: "Dodaj uczestnika" }));
     await waitFor(() => expect(initiativeApi.searchDndMonsters).toHaveBeenCalled());
-    fireEvent.change(screen.getByLabelText("Pula potworów"), { target: { value: "goblin" } });
+    fireEvent.change(screen.getByLabelText(/Pula potwor/i), { target: { value: "goblin" } });
     await waitFor(() => expect(initiativeApi.getDndMonsterDetails).toHaveBeenCalled());
     fireEvent.click(screen.getByRole("button", { name: "Dodaj do walki" }));
-    await waitFor(() => expect(screen.getByText("Goblin")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getAllByText("Goblin").length).toBeGreaterThan(0));
     expect(screen.queryByText("D&D Monster")).not.toBeInTheDocument();
   });
 
@@ -93,13 +95,13 @@ describe("InitiativePage v0.8.3 quick tracker", () => {
   it("switches to CoC and shows ZR/DEX instead of Inicjatywa", async () => {
     render(<InitiativePage />);
     fireEvent.change(screen.getByLabelText("System trackera"), { target: { value: "coc7e" } });
-    expect(screen.queryByRole("button", { name: "Losuj inicjatywę" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Losuj inicjatyw/i })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Sortuj po ZR" })).toBeInTheDocument();
     await addParticipantCoc({ name: "Badacz", dex: "65" });
     expect(screen.getByRole("columnheader", { name: "ZR / DEX" })).toBeInTheDocument();
     expect(screen.queryByRole("columnheader", { name: "Inicjatywa" })).not.toBeInTheDocument();
     expect(screen.queryByRole("columnheader", { name: "AC" })).not.toBeInTheDocument();
-    expect(screen.getByText("65")).toBeInTheDocument();
+    expect(screen.getAllByText("65").length).toBeGreaterThan(0);
   });
 
   it("sorts correctly in D&D mode by initiative", async () => {

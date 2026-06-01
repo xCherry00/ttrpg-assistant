@@ -1,38 +1,43 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import RulesPage from "../../pages/RulesPage";
 
-describe("RulesPage v0.8.2", () => {
+describe("RulesPage simplified documentation layout", () => {
   beforeEach(() => {
     window.sessionStorage.removeItem("rulesSelectedSystem");
   });
 
-  it("renders Ogólne zasady RPG category and Rzuty kośćmi section", async () => {
+  it("renders system selector and two-panel rules content", () => {
     render(<RulesPage />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Ogólne zasady RPG" }));
-
-    await waitFor(() => {
-      expect(screen.getByRole("heading", { name: "Ogólne zasady RPG" })).toBeInTheDocument();
-      expect(screen.getByText(/systemy RPG/i)).toBeInTheDocument();
-      expect(screen.getByText(/Kości pomagają rozstrzygać niepewne sytuacje|Kosci pomagaja rozstrzygac niepewne sytuacje/i)).toBeInTheDocument();
-    });
-  });
-
-  it("renders Black Monk starter source for Call of Cthulhu", async () => {
-    render(<RulesPage />);
-
-    fireEvent.click(screen.getByRole("button", { name: "Call of Cthulhu 7e" }));
-
-    expect(await screen.findByText("Zew Cthulhu Starter (PL)")).toBeInTheDocument();
-  });
-
-  it("does not render dominant technical local summary text", async () => {
-    render(<RulesPage />);
-
-    fireEvent.click(screen.getByRole("button", { name: "D&D 5e" }));
-
-    expect(await screen.findByRole("heading", { name: "D&D 5e" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Szukaj systemu")).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: /Og/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Og/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Legalne zrodla" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Czym jest ten system/i })).toBeInTheDocument();
     expect(screen.queryByText(/Status danych:/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Ten system ma w aplikacji tylko podstawowy skrot zasad/i)).not.toBeInTheDocument();
+  });
+
+  it("filters systems and switches selected rules profile", () => {
+    render(<RulesPage />);
+
+    fireEvent.change(screen.getByLabelText("Szukaj systemu"), { target: { value: "Mork" } });
+    expect(screen.getByRole("option", { name: "Mork Borg" })).toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: "D&D 5e" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("option", { name: "Mork Borg" }));
+
+    expect(screen.getByRole("heading", { name: "Mork Borg" })).toBeInTheDocument();
+    expect(screen.getByText("MORK BORG Bare Bones Edition")).toBeInTheDocument();
+  });
+
+  it("opens accordion sections without rendering the old right rail", () => {
+    render(<RulesPage />);
+
+    fireEvent.click(screen.getByRole("option", { name: "D&D 5e" }));
+    fireEvent.click(screen.getByRole("button", { name: "Walka w skrocie" }));
+
+    expect(screen.getByText(/Walka dziala w rundach/i)).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Tematy zasad" })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Oficjalne materialy startowe")).not.toBeInTheDocument();
   });
 });

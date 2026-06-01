@@ -114,6 +114,12 @@ function Icon({ name, size = 18 }) {
       </>
     ),
     check: <path d="M20 6 9 17l-5-5" />,
+    eye: (
+      <>
+        <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+        <circle cx="12" cy="12" r="3" />
+      </>
+    ),
   };
 
   return <svg {...common}>{paths[name] || paths.user}</svg>;
@@ -125,6 +131,25 @@ function Field({ label, children }) {
       <span>{label}</span>
       {children}
     </label>
+  );
+}
+
+function PasswordInput({ value, onChange, placeholder, autoComplete }) {
+  const [visible, setVisible] = useState(false);
+  return (
+    <div className="settingsPasswordControl">
+      <input
+        className="settingsInput"
+        type={visible ? "text" : "password"}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+      />
+      <button type="button" onClick={() => setVisible((current) => !current)} aria-label={visible ? "Ukryj hasło" : "Pokaż hasło"}>
+        <Icon name="eye" size={16} />
+      </button>
+    </div>
   );
 }
 
@@ -173,7 +198,7 @@ export default function SettingsPage() {
         setNewEmail(me.email || "");
         setChatNickColor(me.chatNickColor || "");
       } catch {
-        if (!cancelled) setEmailError("Nie udało się pobrac danych konta.");
+        if (!cancelled) setEmailError("Nie udało się pobrać danych konta.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -196,11 +221,11 @@ export default function SettingsPage() {
       return;
     }
     if (!emailPassword) {
-      setEmailError("Podaj obecne haslo.");
+      setEmailError("Podaj obecne hasło.");
       return;
     }
     if (newEmail.trim().toLowerCase() === email.toLowerCase()) {
-      setEmailError("Nowy email musi byc inny niz obecny.");
+      setEmailError("Nowy email musi być inny niż obecny.");
       return;
     }
     try {
@@ -208,10 +233,10 @@ export default function SettingsPage() {
       setEmail(updated.email || "");
       setNewEmail(updated.email || "");
       setEmailPassword("");
-      setEmailSuccess("Email zostal zaktualizowany.");
+      setEmailSuccess("Email został zaktualizowany.");
       window.dispatchEvent(new Event("ttrpg-profile-updated"));
     } catch (err) {
-      setEmailError(err.message || "Nie udało się zmienic emaila.");
+      setEmailError(err.message || "Nie udało się zmienić emaila.");
     }
   }
 
@@ -220,15 +245,15 @@ export default function SettingsPage() {
     setPasswordError("");
     setPasswordSuccess("");
     if (!currentPassword) {
-      setPasswordError("Podaj obecne haslo.");
+      setPasswordError("Podaj obecne hasło.");
       return;
     }
     if (newPassword.length < 6) {
-      setPasswordError("Nowe haslo musi mieć co najmniej 6 znakow.");
+      setPasswordError("Nowe hasło musi mieć co najmniej 6 znaków.");
       return;
     }
     if (newPassword !== confirmPassword) {
-      setPasswordError("Nowe hasla nie sa takie same.");
+      setPasswordError("Nowe hasła nie są takie same.");
       return;
     }
     try {
@@ -236,9 +261,9 @@ export default function SettingsPage() {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      setPasswordSuccess("Haslo zostalo zmienione.");
+      setPasswordSuccess("Hasło zostało zmienione.");
     } catch (err) {
-      setPasswordError(err.message || "Nie udało się zmienic hasla.");
+      setPasswordError(err.message || "Nie udało się zmienić hasła.");
     }
   }
 
@@ -272,10 +297,10 @@ export default function SettingsPage() {
   async function handleDeleteAccount() {
     setDeleteError("");
     if (!deletePassword) {
-      setDeleteError("Podaj haslo, aby usunac konto.");
+      setDeleteError("Podaj hasło, aby usunąć konto.");
       return;
     }
-    const confirmed = window.confirm("Czy na pewno chcesz usunac konto? Tej operacji nie da sie cofnac.");
+    const confirmed = window.confirm("Czy na pewno chcesz usunąć konto? Tej operacji nie da się cofnąć.");
     if (!confirmed) return;
     try {
       await deleteAccount(token, deletePassword);
@@ -283,27 +308,16 @@ export default function SettingsPage() {
       logout();
       navigate("/register", { replace: true });
     } catch (err) {
-      setDeleteError(err.message || "Nie udało się usunac konta.");
+      setDeleteError(err.message || "Nie udało się usunąć konta.");
     }
   }
 
   function jumpToSection(id) {
     setActiveSection(id);
-    const target = document.getElementById(`settings-${id}`);
-    if (target && typeof target.scrollIntoView === "function") {
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
   }
 
   return (
     <div className="page settingsPage">
-      <div className="pageHeader">
-        <div>
-          <span className="pageEyebrow">konto</span>
-          <h1 className="pageTitle">Ustawienia</h1>
-          <p className="pageSubtitle">Zarządzaj kontem, bezpieczeństwem i wyglądem aplikacji.</p>
-        </div>
-      </div>
       <div className="settingsStudio">
         <aside className="settingsIndex settingsGlass">
           <h2>Kategorie</h2>
@@ -325,14 +339,14 @@ export default function SettingsPage() {
         </aside>
 
         <main className="settingsStack" aria-live="polite">
-          <section id="settings-account" className="settingsPanel settingsPanel--featured">
+          <section id="settings-account" className={`settingsPanel settingsPanel--featured${activeSection === "account" ? " is-active" : ""}`}>
               <div className="settingsPanelHead">
                 <span className="settingsPanelIcon">
-                  <Icon name="mail" />
+                  <Icon name="user" />
                 </span>
                 <div>
                   <h2>Konto</h2>
-                  <p>Adres email uzywany do logowania i odzyskiwania dostepu.</p>
+                  <p>Zarządzaj swoimi danymi konta i adresem email.</p>
                 </div>
               </div>
               {loading && <div className="settingsInfo">Ładowanie danych konta...</div>}
@@ -351,74 +365,70 @@ export default function SettingsPage() {
                     autoComplete="email"
                   />
                 </Field>
-                <Field label="Obecne haslo">
-                  <input
-                    className="settingsInput"
-                    type="password"
+                <Field label="Obecne hasło">
+                  <PasswordInput
                     value={emailPassword}
                     onChange={(e) => setEmailPassword(e.target.value)}
+                    placeholder="Wpisz obecne hasło"
                     autoComplete="current-password"
                   />
                 </Field>
                 <div className="settingsFormAction">
                   <button className="settingsBtn settingsBtnPrimary" type="submit">
                     <Icon name="check" />
-                    Zmien email
+                    Zmień email
                   </button>
                 </div>
               </form>
           </section>
 
-          <section id="settings-security" className="settingsPanel">
+          <section id="settings-security" className={`settingsPanel${activeSection === "security" ? " is-active" : ""}`}>
               <div className="settingsPanelHead">
                 <span className="settingsPanelIcon">
                   <Icon name="lock" />
                 </span>
                 <div>
                   <h2>Bezpieczeństwo</h2>
-                  <p>Zmieniaj haslo i pilnuj dostepu do swojej biblioteki kampanii.</p>
+                  <p>Zmień hasło i pilnuj dostępu do swojej biblioteki kampanii.</p>
                 </div>
               </div>
               <Message type="error">{passwordError}</Message>
               <Message type="success">{passwordSuccess}</Message>
               <form className="settingsFormGrid" onSubmit={handleChangePassword}>
-                <Field label="Obecne haslo">
-                  <input
-                    className="settingsInput"
-                    type="password"
+                <Field label="Obecne hasło">
+                  <PasswordInput
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="Wpisz obecne hasło"
                     autoComplete="current-password"
                   />
                 </Field>
-                <Field label="Nowe haslo">
-                  <input
-                    className="settingsInput"
-                    type="password"
+                <Field label="Nowe hasło">
+                  <PasswordInput
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Wpisz nowe hasło"
                     autoComplete="new-password"
                   />
                 </Field>
-                <Field label="Powtorz nowe haslo">
-                  <input
-                    className="settingsInput"
-                    type="password"
+                <Field label="Powtórz nowe hasło">
+                  <PasswordInput
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Powtórz nowe hasło"
                     autoComplete="new-password"
                   />
                 </Field>
                 <div className="settingsFormAction">
                   <button className="settingsBtn settingsBtnPrimary" type="submit">
                     <Icon name="check" />
-                    Zmien haslo
+                    Zmień hasło
                   </button>
                 </div>
               </form>
           </section>
 
-          <section id="settings-appearance" className="settingsPanel">
+          <section id="settings-appearance" className={`settingsPanel${activeSection === "appearance" ? " is-active" : ""}`}>
               <div className="settingsPanelHead">
                 <span className="settingsPanelIcon">
                   <Icon name="palette" />
@@ -436,6 +446,7 @@ export default function SettingsPage() {
                 >
                   <Icon name="moon" />
                   <strong>Ciemny</strong>
+                  <span>Motyw ciemny</span>
                 </button>
                 <button
                   type="button"
@@ -444,11 +455,12 @@ export default function SettingsPage() {
                 >
                   <Icon name="sun" />
                   <strong>Jasny</strong>
+                  <span>Motyw jasny</span>
                 </button>
               </div>
           </section>
 
-          <section id="settings-chat" className="settingsPanel">
+          <section id="settings-chat" className={`settingsPanel${activeSection === "chat" ? " is-active" : ""}`}>
               <div className="settingsPanelHead">
                 <span className="settingsPanelIcon">
                   <Icon name="sparkles" />
@@ -461,9 +473,9 @@ export default function SettingsPage() {
               <Message type="error">{chatColorError}</Message>
               <Message type="success">{chatColorSuccess}</Message>
               <div className="settingsChatPreview">
-                <span>Podglad</span>
+                <span>Podgląd</span>
                 <p>
-                  <strong style={{ color: displayColor }}>{profileName}</strong>: Przykladowa wiadomosc na czacie sesji.
+                  <strong style={{ color: displayColor }}>{profileName}</strong> Przykładowa wiadomość na czacie sesji.
                 </p>
               </div>
               <div className="chatColorGrid">
@@ -493,7 +505,7 @@ export default function SettingsPage() {
               </div>
           </section>
 
-          <section id="settings-local" className="settingsPanel">
+          <section id="settings-local" className={`settingsPanel${activeSection === "local" ? " is-active" : ""}`}>
               <div className="settingsPanelHead">
                 <span className="settingsPanelIcon">
                   <Icon name="database" />
@@ -504,35 +516,41 @@ export default function SettingsPage() {
                 </div>
               </div>
               <Message type="success">{miscSuccess}</Message>
+              <div className="settingsWarningBox settingsWarningBox--soft">
+                <Icon name="database" />
+                <span>Usunięcie danych lokalnych nie usuwa konta, kampanii ani postaci.</span>
+              </div>
               <button type="button" className="settingsBtn settingsBtnGhost settingsBtnInline" onClick={clearInitiativeCache}>
                 <Icon name="trash" />
                 Wyczyść cache aplikacji
               </button>
           </section>
 
-          <section id="settings-danger" className="settingsPanel settingsPanel--danger">
+          <section id="settings-danger" className={`settingsPanel settingsPanel--danger${activeSection === "danger" ? " is-active" : ""}`}>
               <div className="settingsPanelHead">
                 <span className="settingsPanelIcon">
                   <Icon name="trash" />
                 </span>
                 <div>
                   <h2>Strefa ryzyka</h2>
-                  <p>Usuńiecie konta jest trwałe i nie da się go cofnąć.</p>
+                  <p>Usunięcie konta jest trwałe i nie da się go cofnąć.</p>
                 </div>
               </div>
               <Message type="error">{deleteError}</Message>
               <div className="settingsDangerRow">
-                <input
-                  className="settingsInput"
-                  type="password"
+                <PasswordInput
                   value={deletePassword}
                   onChange={(e) => setDeletePassword(e.target.value)}
-                  placeholder="Podaj haslo..."
+                  placeholder="Podaj hasło, aby usunąć konto..."
                   autoComplete="current-password"
                 />
                 <button type="button" className="settingsBtn settingsBtnDanger" onClick={handleDeleteAccount}>
                   Usuń konto
                 </button>
+              </div>
+              <div className="settingsWarningBox settingsWarningBox--danger">
+                <Icon name="trash" />
+                <span><strong>Uwaga!</strong> Ta operacja jest nieodwracalna. Wszystkie Twoje dane zostaną trwale usunięte. Nie usuwamy kont innych graczy. Usuwasz tylko swoje konto.</span>
               </div>
           </section>
         </main>

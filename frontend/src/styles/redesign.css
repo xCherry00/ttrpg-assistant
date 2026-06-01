@@ -106,6 +106,10 @@ select {
   border-bottom: 1px solid var(--r-line);
 }
 
+.page .pageHeader > :first-child {
+  display: block !important;
+}
+
 .appPageHeader__title,
 .pageTitle {
   color: var(--r-ink);
@@ -362,4 +366,332 @@ select {
     font-size: 1.45rem;
   }
 
+}
+
+/* Unified SaaS workspace pass.
+   This layer intentionally wins over older page CSS that still carries dark,
+   purple or glass-era defaults. Keep page-specific layout in each page file. */
+
+.appMain :where(
+  .dashboardSaas,
+  .campaignsSaas,
+  .campaignDetailsPage,
+  .liveSessionPage,
+  .charactersPage,
+  .friendsPage,
+  .messagesPageWrap,
+  .messagesPage,
+  .generatorsPage,
+  .generatorDetailPage,
+  .initiativePage,
+  .dicePage,
+  .compendiumPage,
+  .rulesPage,
+  .settingsPage,
+  .profilePage,
+  .publicV2Page
+) {
+  color: var(--r-ink);
+  background: transparent;
+}
+
+.appMain :where(
+  .dashboardSaas,
+  .campaignsSaas,
+  .campaignDetailsPage,
+  .liveSessionPage,
+  .charactersPage,
+  .friendsPage,
+  .messagesPageWrap,
+  .messagesPage,
+  .generatorsPage,
+  .generatorDetailPage,
+  .initiativePage,
+  .dicePage,
+  .compendiumPage,
+  .rulesPage,
+  .settingsPage,
+  .profilePage,
+  .publicV2Page
+) :where(
+  .card,
+  .panel,
+  .panel-soft,
+  .campaignDetailsCard,
+  .campaignFormCard,
+  .dashboardPanel,
+  .dashboardCard,
+  .dashboardHero,
+  .campaignCard,
+  .campaignToolbar,
+  .charactersPanel,
+  .charactersListPanel,
+  .characterSheetPanel,
+  .friendsPanel,
+  .messagesPanel,
+  .messageThread,
+  .generatorCard,
+  .generatorDetailCard,
+  .initiativePanel,
+  .initiativeModalWindow,
+  .compendiumPanel,
+  .compendiumList,
+  .compendiumDetails,
+  .rulesContainer,
+  .rulesCard,
+  .settingsCard,
+  .profileCard
+) {
+  border: 1px solid var(--r-line);
+  color: var(--r-ink);
+  background: var(--r-surface-solid);
+  box-shadow: var(--r-shadow-soft);
+  backdrop-filter: none;
+}
+
+.appMain :where(
+  .dashboardSaas,
+  .campaignsSaas,
+  .campaignDetailsPage,
+  .liveSessionPage,
+  .charactersPage,
+  .friendsPage,
+  .messagesPageWrap,
+  .generatorsPage,
+  .generatorDetailPage,
+  .initiativePage,
+  .compendiumPage,
+  .rulesPage,
+  .settingsPage,
+  .profilePage
+) :where(
+  h1,
+  h2,
+  h3,
+  h4,
+  strong,
+  .pageTitle,
+  .campaignDetailsCardTitle,
+  .dashboardSectionTitle,
+  .campaignCardTitle,
+  .characterName,
+  .generatorCardTitle,
+  .initiativeTitle,
+  .compendiumTitle,
+  .rulesSystemTitle,
+  .rulesCardTitle,
+  .messageThreadTitle,
+  .profileName
+) {
+  color: var(--r-ink);
+  -webkit-text-fill-color: currentColor;
+  background: none;
+}
+
+.appMain :where(
+  .dashboardSaas,
+  .campaignsSaas,
+  .campaignDetailsPage,
+  .liveSessionPage,
+  .charactersPage,
+  .friendsPage,
+  .messagesPageWrap,
+  .generatorsPage,
+  .initiativePage,
+  .compendiumPage,
+  .rulesPage,
+  .profilePage
+) :where(
+  p,
+  small,
+  label,
+  .muted,
+  .helperText,
+  .campaignDetailsHelpText,
+  .campaignMaterialMeta,
+  .dashboardMeta,
+  .dashboardSubcopy,
+  .characterMeta,
+  .generatorDescription,
+  .initiativeMeta,
+  .compendiumMeta,
+  .rulesSummary,
+  .messagePreview,
+  .messageTime
+) {
+  color: var(--r-ink-soft);
+}
+
+.appMain :where(
+  .campaignDetailsPrimaryBtn,
+  .dashboardPrimaryBtn,
+  .campaignPrimaryBtn,
+  .generatorPrimaryBtn,
+  .initiativeBtn--primary,
+  .rulesExpandAllBtn,
+  .messageSendBtn
+) {
+  border-color: transparent;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--r-primary), var(--r-primary-2));
+  box-shadow: 0 10px 22px rgba(31, 118, 95, 0.18);
+}
+
+.appMain :where(
+  .campaignDetailsGhostBtn,
+  .campaignDetailsActionLink,
+  .dashboardGhostBtn,
+  .campaignGhostBtn,
+  .generatorGhostBtn,
+  .initiativeBtn--ghost,
+  .rulesSystemBtn,
+  .messageGhostBtn
+) {
+  border: 1px solid var(--r-line);
+  color: var(--r-ink);
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.appMain :where(
+  .campaignDetailsDangerBtn,
+  .initiativeBtn--danger,
+  .dangerBtn
+) {
+  border: 1px solid rgba(200, 92, 74, 0.28);
+  color: #9d3f31;
+  background: var(--r-coral-soft);
+  box-shadow: none;
+}
+
+.appMain :where(
+  table,
+  .dataTable,
+  .initiativeTable,
+  .campaignTable
+) {
+  color: var(--r-ink);
+  background: #ffffff;
+}
+
+.appMain :where(th, .tableHeader) {
+  color: var(--r-muted);
+  background: var(--r-panel);
+}
+
+.appMain :where(td, .tableCell) {
+  border-color: var(--r-line);
+  color: var(--r-ink-soft);
+}
+
+.appMain :where(
+  .badge,
+  .statusBadge,
+  .campaignStatusBadge,
+  .rulesCategoryBadge,
+  .initiativeBadge
+) {
+  border: 1px solid rgba(31, 118, 95, 0.2);
+  color: var(--r-primary);
+  background: var(--r-primary-soft);
+}
+
+.messageLauncher__fab {
+  border: 1px solid rgba(31, 118, 95, 0.22);
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--r-primary), var(--r-primary-2));
+  box-shadow: 0 18px 36px rgba(31, 118, 95, 0.24);
+}
+
+.messageLauncher__panel {
+  border: 1px solid var(--r-line);
+  color: var(--r-ink);
+  background: var(--r-surface-solid);
+  box-shadow: var(--r-shadow);
+  backdrop-filter: none;
+}
+
+.messageLauncher__header,
+.messageLauncher__searchRow {
+  border-color: var(--r-line);
+  background: var(--r-panel);
+}
+
+.messageLauncher__header h2,
+.messageLauncher__name {
+  color: var(--r-ink);
+}
+
+.messageLauncher__item,
+.messageLauncher__iconBtn,
+.messageLauncher__filterBtn,
+.messageLauncher__searchWrap {
+  border-color: var(--r-line);
+  color: var(--r-ink);
+  background: #ffffff;
+}
+
+.messageLauncher__item:hover,
+.messageLauncher__item.is-unread {
+  border-color: var(--r-line-strong);
+  background: var(--r-primary-soft);
+}
+
+.messageLauncher__preview,
+.messageLauncher__time,
+.messageLauncher__empty {
+  color: var(--r-ink-soft);
+}
+
+.messageLauncher__avatar,
+.messageLauncher__badge,
+.messageLauncher__fabBadge {
+  color: #ffffff;
+  background: var(--r-primary);
+}
+
+.messageLauncher__allBtn {
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--r-primary), var(--r-primary-2));
+}
+
+.notificationMenu,
+.topNav__menu {
+  background: #ffffff;
+  backdrop-filter: none;
+}
+
+.notificationMenu__state,
+.topNav__menuEmail,
+.topNav__menuRole,
+.topNav__menuStatus {
+  color: var(--r-ink-soft);
+}
+
+.sidebar,
+.sidebar__inner {
+  scrollbar-color: rgba(136, 204, 181, 0.42) transparent;
+}
+
+.sidebar ::-webkit-scrollbar-thumb {
+  background: rgba(136, 204, 181, 0.42);
+}
+
+.sidebar ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@media (max-width: 920px) {
+  .appMain :where(
+    .dashboardGrid,
+    .campaignDetailsGrid,
+    .liveSessionGrid,
+    .charactersLayout,
+    .messagesPage,
+    .generatorsLayout,
+    .initiativeLayout,
+    .compendiumPage
+  ) {
+    grid-template-columns: 1fr;
+  }
 }

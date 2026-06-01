@@ -1,330 +1,336 @@
 .rulesPage {
-  display: grid;
-  gap: 16px;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  color: var(--r-ink, #17231f);
 }
 
 .rulesContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(260px, 330px) minmax(0, 1fr);
+  gap: 18px;
+  overflow: hidden;
+}
+
+.rulesSystemFilter,
+.rulesReaderPanel {
+  min-height: 0;
+  border: 1px solid rgba(25, 83, 68, 0.14);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: none;
 }
 
 .rulesSystemFilter {
   display: grid;
-  gap: 10px;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
 }
 
-.system-filter {
-  display: grid;
-  gap: 10px;
+.rulesSearchBox {
+  position: relative;
+  padding: 16px;
+  border-bottom: 1px solid rgba(25, 83, 68, 0.1);
 }
 
-.rulesFilterLabel {
-  font-weight: 700;
-  font-size: 14px;
-}
-
-.rulesSystemButtons {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.rulesSystemButtons button {
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--card);
-  color: var(--text);
-  cursor: pointer;
-  font-weight: 700;
-  transition: all 0.2s ease;
-}
-
-.rulesSystemButtons button:hover {
-  border-color: color-mix(in srgb, var(--primary) 35%, var(--border) 65%);
-  background: var(--card-2);
-}
-
-.rulesSystemButtons button.active,
-.rulesSystemButtons button.rulesSystemBtn--active {
-  border-color: color-mix(in srgb, var(--primary) 65%, var(--border) 35%);
-  background: color-mix(in srgb, var(--primary) 18%, transparent 82%);
-}
-
-.rulesSystemTitle {
-  font-size: 18px;
-  margin: 6px 0 12px;
-  opacity: 0.95;
-}
-
-.rulesSearchRow {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
+.rulesSearchIcon {
+  position: absolute;
+  left: 30px;
+  top: 50%;
+  width: 17px;
+  height: 17px;
+  color: #61736d;
+  pointer-events: none;
+  transform: translateY(-50%);
 }
 
 .rulesSearchInput {
-  flex: 1;
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--card);
-  color: var(--text);
-  font-size: 14px;
+  width: 100%;
+  height: 46px;
+  border: 1px solid rgba(25, 83, 68, 0.16);
+  border-radius: 13px;
+  background: #fff;
+  color: var(--r-ink, #17231f);
+  font-size: 0.94rem;
+  font-weight: 650;
   outline: none;
-  transition: border-color 0.18s ease;
+  padding: 0 42px;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
 }
 
 .rulesSearchInput::placeholder {
-  color: var(--text-2);
+  color: #7a8983;
+  font-weight: 600;
 }
 
 .rulesSearchInput:focus {
-  border-color: color-mix(in srgb, var(--primary) 45%, var(--border) 55%);
-  box-shadow: var(--ring);
+  border-color: rgba(31, 118, 95, 0.46);
+  box-shadow: 0 0 0 3px rgba(31, 118, 95, 0.1);
 }
 
-.rulesCategorySelect {
-  max-width: 180px;
-}
-
-.rulesExpandAllBtn {
-  padding: 10px 16px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--card);
-  color: var(--text);
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 13px;
-  white-space: nowrap;
-  transition: all 0.2s ease;
-}
-
-.rulesExpandAllBtn:hover {
-  border-color: color-mix(in srgb, var(--primary) 35%, var(--border) 65%);
-  background: var(--card-2);
-}
-
-.rulesCards {
-  display: grid;
-  gap: 12px;
-}
-
-.rulesQuickRef {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.rulesQuickRefItem {
-  min-height: 96px;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--card) 88%, white 12%);
-  color: var(--text);
-  text-align: left;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.rulesQuickRefItem:hover {
-  border-color: color-mix(in srgb, var(--primary) 45%, var(--border) 55%);
-  background: color-mix(in srgb, var(--primary) 12%, var(--card) 88%);
-}
-
-.rulesQuickRefItem span,
-.rulesQuickRefItem small {
-  display: block;
-}
-
-.rulesQuickRefItem span {
-  font-weight: 800;
-}
-
-.rulesQuickRefItem small {
-  margin-top: 6px;
-  color: var(--text-2);
-  line-height: 1.45;
-}
-
-.rulesCard {
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  background: var(--card);
-  overflow: hidden;
-  transition: all 0.2s ease;
-}
-
-.rulesCard:hover {
-  background: var(--card-2);
-}
-
-.rulesCardHeader {
-  width: 100%;
-  border: none;
-  background: transparent;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  text-align: left;
-  padding: 14px 16px;
-  cursor: pointer;
-}
-
-.rulesCardTitle {
-  font-weight: 900;
-  font-size: 16px;
-}
-
-.rulesCategoryBadge {
-  margin-left: auto;
-  padding: 4px 8px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  color: var(--text-2);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.rulesCardChevron {
-  min-width: 22px;
-  height: 22px;
+.rulesSearchClear {
+  position: absolute;
+  right: 28px;
+  top: 50%;
+  width: 24px;
+  height: 24px;
   display: grid;
   place-items: center;
+  border: 0;
   border-radius: 999px;
-  border: 1px solid var(--border);
-  color: var(--text-2);
+  background: rgba(31, 118, 95, 0.08);
+  color: #1f765f;
+  cursor: pointer;
+  font-size: 0.9rem;
   font-weight: 900;
-  transition: transform 0.2s ease;
-  position: relative;
+  transform: translateY(-50%);
 }
 
-.rulesCardChevron::after {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
-  transform: rotate(-45deg);
+.rulesSystemList {
+  min-height: 0;
+  overflow: auto;
+  padding: 8px 0 12px;
+  scrollbar-gutter: stable;
 }
 
-.rulesCard.is-open .rulesCardChevron::after {
-  transform: rotate(45deg);
+.rulesSystemList::-webkit-scrollbar,
+.rulesReaderPanel::-webkit-scrollbar {
+  width: 8px;
 }
 
-.rulesCardBody {
-  color: var(--text-2);
+.rulesSystemList::-webkit-scrollbar-thumb,
+.rulesReaderPanel::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: rgba(31, 118, 95, 0.2);
+  background-clip: padding-box;
+}
+
+.rulesSystemItem {
+  width: 100%;
+  min-height: 58px;
+  border: 0;
+  border-bottom: 1px solid rgba(25, 83, 68, 0.08);
+  background: transparent;
+  color: var(--r-ink, #17231f);
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 850;
+  padding: 0 22px 0 24px;
+  text-align: left;
+  transition: background 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.rulesSystemItem:hover {
+  background: rgba(31, 118, 95, 0.045);
+}
+
+.rulesSystemItem:focus-visible {
+  outline: 3px solid rgba(31, 118, 95, 0.16);
+  outline-offset: -3px;
+}
+
+.rulesSystemItem.is-active {
+  background: rgba(31, 118, 95, 0.08);
+  color: #1f765f;
+  box-shadow: inset 3px 0 0 #1f765f;
+}
+
+.rulesReaderPanel {
+  overflow: auto;
+  padding: clamp(24px, 3vw, 42px);
+}
+
+.rulesReaderContent {
+  max-width: 980px;
+  display: grid;
+  align-content: start;
+  gap: 28px;
+}
+
+.rulesReaderHeader {
+  display: grid;
+  gap: 12px;
+  border-bottom: 1px solid rgba(25, 83, 68, 0.12);
+  padding-bottom: 24px;
+}
+
+.rulesReaderHeader h2 {
+  margin: 0;
+  color: var(--r-ink, #17231f);
+  font-family: var(--font-display, inherit);
+  font-size: clamp(2rem, 3vw, 3.1rem);
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.rulesReaderHeader p {
+  max-width: 76ch;
+  margin: 0;
+  color: #53655f;
+  font-size: clamp(1rem, 1.12vw, 1.08rem);
+  font-weight: 600;
   line-height: 1.65;
-  white-space: pre-wrap;
-  padding: 12px 16px 16px 16px;
-  border-top: 1px solid var(--border);
 }
 
-.rulesSummary {
-  margin: 0 0 12px;
-  color: var(--text);
-  font-weight: 700;
-  white-space: normal;
+.rulesLegalBox {
+  display: grid;
+  gap: 12px;
 }
 
-.rulesSource {
-  margin-top: 14px;
-  padding-top: 10px;
-  border-top: 1px solid var(--border);
-  color: var(--text-2);
-  font-size: 12px;
-  white-space: normal;
+.rulesLegalBox h3 {
+  margin: 0;
+  color: var(--r-ink, #17231f);
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.rulesLegalBox ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  border: 1px solid rgba(25, 83, 68, 0.14);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.62);
+  padding: 18px 22px 18px 34px;
+}
+
+.rulesLegalBox li {
+  color: #1d2b26;
+  font-size: 0.95rem;
+  font-weight: 650;
+  line-height: 1.55;
+}
+
+.rulesLegalBox a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.rulesLegalBox a:hover {
+  color: #1f765f;
+  text-decoration: underline;
+}
+
+.rulesLegalBox p,
+.rulesLegalBox small {
+  margin: 0;
+  color: #61736d;
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.rulesAccordion {
+  display: grid;
+  border: 1px solid rgba(25, 83, 68, 0.14);
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.74);
+}
+
+.rulesAccordionItem + .rulesAccordionItem {
+  border-top: 1px solid rgba(25, 83, 68, 0.1);
+}
+
+.rulesAccordionHeader {
+  width: 100%;
+  min-height: 60px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 24px;
+  align-items: center;
+  gap: 16px;
+  border: 0;
+  background: transparent;
+  color: var(--r-ink, #17231f);
+  cursor: pointer;
+  padding: 0 20px;
+  text-align: left;
+}
+
+.rulesAccordionHeader span:first-child {
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.rulesAccordionHeader:hover {
+  background: rgba(31, 118, 95, 0.04);
+}
+
+.rulesAccordionHeader:focus-visible {
+  outline: 3px solid rgba(31, 118, 95, 0.16);
+  outline-offset: -3px;
+}
+
+.rulesAccordionChevron {
+  width: 10px;
+  height: 10px;
+  justify-self: end;
+  border-right: 2px solid #33423d;
+  border-bottom: 2px solid #33423d;
+  transform: rotate(45deg);
+  transition: transform 0.16s ease;
+}
+
+.rulesAccordionItem.is-open .rulesAccordionChevron {
+  transform: rotate(225deg);
+}
+
+.rulesAccordionBody {
+  border-top: 1px solid rgba(25, 83, 68, 0.1);
+  background: rgba(248, 252, 250, 0.72);
+  padding: 16px 20px 18px;
+}
+
+.rulesAccordionBody p {
+  margin: 0;
+  color: #1d2b26;
+  font-size: 0.98rem;
+  font-weight: 560;
+  line-height: 1.75;
+}
+
+.rulesEmpty {
+  margin: 14px;
+  border: 1px dashed rgba(25, 83, 68, 0.18);
+  border-radius: 14px;
+  color: #61736d;
+  font-size: 0.9rem;
+  font-weight: 650;
+  padding: 18px;
+  text-align: center;
+}
+
+@media (max-width: 1100px) {
+  .rulesContainer {
+    grid-template-columns: minmax(230px, 285px) minmax(0, 1fr);
+    gap: 14px;
+  }
 }
 
 @media (max-width: 760px) {
-  .rulesSearchRow {
-    flex-direction: column;
+  .rulesPage {
+    height: auto;
+    overflow: visible;
   }
 
-  .rulesCategorySelect {
-    max-width: none;
-  }
-
-  .rulesQuickRef {
+  .rulesContainer {
+    height: auto;
     grid-template-columns: 1fr;
+    overflow: visible;
   }
-}
 
-.rulesError {
-  border: 1px solid var(--danger);
-  background: color-mix(in srgb, var(--danger) 12%, transparent 88%);
-  color: color-mix(in srgb, var(--danger) 80%, white 20%);
-  border-radius: var(--radius-sm);
-  padding: 12px 14px;
-  font-size: 13px;
-}
-
-/* v0.9 visual unification: knowledge pages */
-.rulesPage,
-.glossaryPage {
-  color: var(--r-ink);
-}
-
-.rulesSystemButtons button,
-.rulesSearchInput,
-.rulesExpandAllBtn,
-.rulesQuickRefItem,
-.rulesCard,
-.rulesResourceCard,
-.rulesLegalPanel {
-  border: 1px solid var(--r-line);
-  border-radius: 8px;
-  background: var(--r-surface);
-  color: var(--r-ink);
-  box-shadow: var(--r-shadow-soft);
-}
-
-.rulesSystemButtons button:hover,
-.rulesSystemButtons button.active,
-.rulesSystemButtons button.rulesSystemBtn--active,
-.rulesQuickRefItem:hover {
-  border-color: var(--r-line-strong);
-  background: var(--r-primary-soft);
-  color: var(--r-primary-2);
-}
-
-.rulesCard:hover {
-  background: var(--r-surface-solid);
-}
-
-.rulesCardHeader,
-.rulesCardBody,
-.rulesQuickRefItem small,
-.rulesResourceCard p {
-  color: var(--r-ink-soft);
-}
-
-.rulesCardTitle,
-.rulesQuickRefItem span,
-.rulesSystemTitle {
-  color: var(--r-ink);
-  font-family: var(--font-display);
-}
-
-.rulesSearchInput {
-  background: #ffffff;
-}
-
-@media (max-width: 900px) {
-  .rulesQuickRef {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .rulesSystemFilter {
+    max-height: 42vh;
   }
-}
 
-@media (max-width: 560px) {
-  .rulesSearchRow,
-  .rulesQuickRef {
-    grid-template-columns: 1fr;
-    display: grid;
+  .rulesReaderPanel {
+    min-height: 440px;
+    overflow: visible;
+    padding: 22px;
   }
 }

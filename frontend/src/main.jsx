@@ -11,7 +11,6 @@ import "./styles/topnav.css";
 import "./styles/sidebar.css";
 import "./styles/redesign.css";
 import "./styles/glossary.css";
-import "./styles/dice.css";
 import "./styles/auth.css";
 import "./styles/home.css";
 import "./styles/legal.css";
@@ -22,6 +21,8 @@ import "./styles/compendium.css";
 import "./styles/profile.css";
 import "./styles/friends.css";
 import "./styles/messages.css";
+import "./styles/dice.css";
+import "./styles/layout-redesign-2026.css";
 
 
 

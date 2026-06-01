@@ -14,10 +14,6 @@ vi.mock("../../components/NotificationBell", () => ({
   default: () => <div>NotificationBell</div>,
 }));
 
-vi.mock("../../components/MessageLauncher", () => ({
-  default: () => <div>MessageLauncher</div>,
-}));
-
 describe("AppShell layout", () => {
   it("does not render duplicated global top page header", () => {
     render(
@@ -33,5 +29,6 @@ describe("AppShell layout", () => {
     expect(screen.queryByLabelText("Globalny naglowek strony")).not.toBeInTheDocument();
     expect(screen.getByText("Sidebar")).toBeInTheDocument();
     expect(screen.getByText("AccountMenu")).toBeInTheDocument();
+    expect(screen.queryByText("MessageLauncher")).not.toBeInTheDocument();
   });
 });

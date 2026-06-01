@@ -1,369 +1,1056 @@
 .liveSessionPage {
+  --live-bg: #f7fbf8;
+  --live-surface: rgba(255, 255, 255, 0.92);
+  --live-surface-soft: #f5faf7;
+  --live-line: #dbe8df;
+  --live-line-strong: #c9ddd1;
+  --live-ink: #102019;
+  --live-muted: #60736a;
+  --live-primary: #19805f;
+  --live-primary-dark: #116b50;
+  --live-danger: #d85b4f;
+  --live-warning: #e3aa3f;
   display: grid;
   gap: 16px;
+  color: var(--live-ink);
+  grid-template-rows: none !important;
 }
 
-.liveSessionGrid {
-  display: grid;
-  grid-template-columns: minmax(320px, 1.05fr) minmax(320px, 1fr) minmax(320px, 1fr);
-  grid-template-areas:
-    "scene party requests"
-    "scene history stats";
-  gap: 16px;
-  align-items: start;
+.liveSessionPage * {
+  box-sizing: border-box;
 }
 
-.liveSessionGrid > * {
-  min-width: 0;
-}
-
-.liveSessionScenePanel {
-  grid-area: scene;
-}
-
-.liveSessionPartyPanel {
-  grid-area: party;
-}
-
-.liveSessionRequestsPanel {
-  grid-area: requests;
-}
-
-.liveSessionHistoryPanel {
-  grid-area: history;
-}
-
-.liveSessionStatsPanel {
-  grid-area: stats;
-}
-
-.liveSessionPage .pageHeader {
-  align-items: start;
-  gap: 16px;
-}
-
-.liveSessionPage .pageHeader > div:last-child {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: flex-end;
-}
-
-.liveSessionPage .campaignDetailsCard {
-  min-width: 0;
-}
-
-.liveSessionPage .campaignMaterialList {
-  max-height: 460px;
-  overflow: auto;
-  padding-right: 4px;
-}
-
-.liveSessionScenePanel .campaignMaterialList,
-.liveSessionRequestsPanel .campaignMaterialList {
-  max-height: none;
-  overflow: visible;
-}
-
+.liveSessionTopbar,
+.liveSessionPanel,
 .liveSessionState {
-  padding: 14px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--panel);
+  border: 1px solid var(--live-line);
+  border-radius: 18px;
+  background: var(--live-surface);
+  box-shadow: 0 12px 28px rgba(31, 54, 43, 0.06);
 }
 
-.liveSessionPlaceholder {
-  color: var(--muted);
-  margin: 0;
-}
-
-.liveSessionCharacterPortrait {
-  margin-top: 8px;
-}
-
-.liveSessionCharacterPortrait img {
-  width: 64px;
-  height: 64px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid var(--line);
-}
-
-.liveSessionPortraitPlaceholder {
-  width: 64px;
-  height: 64px;
-  border-radius: 8px;
-  border: 1px dashed var(--line);
-  display: grid;
-  place-items: center;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.liveSessionRollHistoryList {
-  margin: 0;
-  padding-left: 18px;
-  display: grid;
-  gap: 6px;
-}
-
-.liveSessionSceneForm {
-  display: grid;
-  gap: 12px;
-}
-
-.liveSessionSceneReadonly {
-  display: grid;
-  gap: 10px;
-}
-
-.liveSessionSceneReadonly h3 {
-  margin: 0;
-}
-
-.liveSessionSceneReadonly p {
-  margin: 0;
-}
-
-.liveSessionSceneImage {
-  width: 100%;
-  max-height: 360px;
-  object-fit: cover;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-}
-
-.liveSessionSceneImagePlaceholder {
-  min-height: 120px;
-  border-radius: 10px;
-  border: 1px dashed var(--line);
-  color: var(--muted);
-  display: grid;
-  place-items: center;
-  padding: 12px;
-}
-
-.liveInitiativeHeader {
+.liveSessionTopbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+}
+
+.liveSessionTopbar__main,
+.liveSessionTopbar__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.liveSessionTopbar__main strong {
+  font-size: 1.02rem;
+}
+
+.liveSessionStatusPill,
+.liveSessionTimeBadge,
+.liveSessionGmBadge,
+.liveSessionSoftBadge,
+.liveSessionActiveBadge,
+.liveSessionOnlineCount {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--live-line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--live-muted);
+  font-weight: 800;
+  font-size: 0.86rem;
+  padding: 8px 11px;
+  white-space: nowrap;
+}
+
+.liveSessionStatusPill.is-live,
+.liveSessionActiveBadge {
+  color: var(--live-primary);
+  background: #eaf6ef;
+  border-color: #cce7d7;
+}
+
+.liveSessionStatusPill span,
+.liveSessionOnlineCount span {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #37a26f;
+}
+
+.liveSessionTimeBadge::before {
+  content: "◷";
+  color: var(--live-muted);
+}
+
+.liveSessionDivider {
+  width: 1px;
+  height: 22px;
+  background: var(--live-line);
+}
+
+.liveSessionHeaderButton {
+  min-height: 42px;
+  border-radius: 10px !important;
+}
+
+.liveSessionDashboard {
+  display: grid;
+  gap: 16px;
+}
+
+.liveSessionMainGrid {
+  display: grid;
+  grid-template-columns: minmax(520px, 1.22fr) minmax(420px, 0.78fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.liveSessionSideColumn,
+.liveSessionSideSplit,
+.liveSessionBottomGrid {
+  display: grid;
+  gap: 16px;
+}
+
+.liveSessionSideSplit {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.liveSessionBottomGrid {
+  grid-template-columns: minmax(520px, 1.05fr) minmax(420px, 0.95fr);
+  align-items: start;
+}
+
+.liveSessionPanel {
+  padding: 18px;
+  min-width: 0;
+}
+
+.liveSessionPanel > h2,
+.liveSessionPanelHeader h2 {
+  margin: 0;
+  color: var(--live-ink);
+  font-size: 1.08rem;
+  line-height: 1.2;
+}
+
+.liveSessionPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.liveSessionScenePanel {
+  padding: 18px;
+  grid-row: auto !important;
+}
+
+.liveSessionPlayersPanel > div,
+.liveSessionHistoryPanel > div,
+.liveSessionAnalysisPanel > div,
+.liveSessionRequestsPanel > div,
+.liveSessionQuickActionsPanel > div {
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+
+.liveSessionSceneMedia {
+  position: relative;
+  overflow: hidden;
+  min-height: 380px;
+  border: 1px solid var(--live-line);
+  border-radius: 15px;
+  background: var(--live-surface-soft);
+}
+
+.liveSessionSceneMedia img {
+  display: block;
+  width: 100%;
+  height: clamp(380px, 45vh, 560px);
+  object-fit: cover;
+}
+
+.liveSessionScenePlaceholder {
+  min-height: clamp(380px, 45vh, 560px);
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  padding: 32px;
+  text-align: center;
+  background:
+    linear-gradient(135deg, rgba(25, 128, 95, 0.12), rgba(255, 255, 255, 0.88)),
+    repeating-linear-gradient(0deg, rgba(25, 128, 95, 0.08) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(90deg, rgba(25, 128, 95, 0.08) 0 1px, transparent 1px 28px);
+}
+
+.liveSessionScenePlaceholder strong {
+  max-width: 640px;
+  font-size: clamp(2rem, 5vw, 4.6rem);
+  line-height: 0.95;
+  color: var(--live-primary-dark);
+}
+
+.liveSessionScenePlaceholder span {
+  color: var(--live-muted);
+  font-weight: 700;
+}
+
+.liveSessionIconButton {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--live-line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--live-ink);
+  cursor: pointer;
+}
+
+.liveSessionIconButton svg,
+.liveSessionSceneActions svg,
+.liveSessionQuickTiles svg,
+.liveSessionSceneMeta svg {
+  width: 18px;
+  height: 18px;
+}
+
+.liveSessionSceneBody {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 0.34fr);
+  gap: 18px;
+  align-items: end;
+  margin-top: 18px;
+}
+
+.liveSessionSceneTitleLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 10px;
 }
 
-.liveInitiativeMeta {
-  margin: 0 0 10px;
-  color: var(--muted);
+.liveSessionSceneTitleLine h3 {
+  margin: 0;
+  font-size: clamp(1.55rem, 3vw, 2.05rem);
+  line-height: 1.1;
+}
+
+.liveSessionSceneCopy p {
+  max-width: 76ch;
+  margin: 12px 0 0;
+  color: var(--live-muted);
+  line-height: 1.65;
+}
+
+.liveSessionSceneMeta {
+  overflow: hidden;
+  border: 1px solid var(--live-line);
+  border-radius: 13px;
+  background: #fff;
+}
+
+.liveSessionSceneMeta > div {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 2px 10px;
+  padding: 12px 14px;
+}
+
+.liveSessionSceneMeta > div + div {
+  border-top: 1px solid var(--live-line);
+}
+
+.liveSessionSceneMeta svg {
+  grid-row: span 2;
+  align-self: center;
+  color: var(--live-primary);
+}
+
+.liveSessionSceneMeta span {
+  color: var(--live-primary);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.liveSessionSceneMeta strong {
+  color: var(--live-ink);
+}
+
+.liveSessionSceneActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.liveSessionSceneActions .campaignDetailsPrimaryBtn,
+.liveSessionSceneActions .campaignDetailsGhostBtn,
+.liveSessionQuickRollPanel .campaignDetailsPrimaryBtn,
+.liveSessionQuickRollPanel .campaignDetailsGhostBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.liveSessionSceneEditor {
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid var(--live-line);
+  border-radius: 14px;
+  background: var(--live-surface-soft);
+}
+
+.liveSessionPlayersPanel {
+  padding-bottom: 20px;
+}
+
+.liveSessionPlayerStrip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.liveSessionPlayerCard {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-height: 76px;
+  padding: 10px;
+  border: 1px solid var(--live-line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.liveSessionPlayerCard div:last-child {
+  min-width: 0;
+}
+
+.liveSessionPlayerCard span,
+.liveSessionPlayerCard small {
+  display: block;
+  color: var(--live-muted);
+  font-size: 0.78rem;
+}
+
+.liveSessionPlayerCard strong {
+  display: block;
+  overflow: hidden;
+  color: var(--live-ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.liveSessionAvatarWrap {
+  position: relative;
+}
+
+.liveSessionAvatar {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--live-line);
+  border-radius: 50%;
+  background: #e7f1ec;
+  color: var(--live-primary);
+  font-weight: 900;
+  object-fit: cover;
+}
+
+.liveSessionAvatar--sm {
+  width: 38px;
+  height: 38px;
+  font-size: 0.85rem;
+}
+
+.liveSessionOnlineDot {
+  position: absolute;
+  right: -1px;
+  bottom: 2px;
+  width: 11px;
+  height: 11px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #37a26f;
+}
+
+.liveSessionSideSplit .liveSessionPanel {
+  min-height: 360px;
+}
+
+.liveSessionTabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin: 14px 0;
+  padding: 5px;
+  border: 1px solid var(--live-line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.liveSessionTabs button {
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--live-muted);
+  font-weight: 800;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.liveSessionTabs button.is-active {
+  color: var(--live-primary);
+  box-shadow: inset 0 -2px 0 var(--live-primary);
+}
+
+.liveSessionRollList {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--live-line);
+  border-radius: 13px;
+  background: #fff;
+}
+
+.liveSessionRollRow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 11px;
+}
+
+.liveSessionRollRow + .liveSessionRollRow {
+  border-top: 1px solid var(--live-line);
+}
+
+.liveSessionRollRow strong,
+.liveSessionRollRow span {
+  display: block;
+}
+
+.liveSessionRollRow span,
+.liveSessionRollRow time,
+.liveSessionRollResult span {
+  color: var(--live-muted);
+  font-size: 0.8rem;
+}
+
+.liveSessionRollResult {
+  text-align: right;
+}
+
+.liveSessionRollResult strong {
+  color: var(--live-primary);
+  font-size: 1.35rem;
+}
+
+.liveSessionTextLink {
+  margin-top: 14px;
+  border: 0;
+  background: transparent;
+  color: var(--live-primary);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.liveSessionAnalysisBody {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.liveSessionDonut {
+  display: grid;
+  place-items: center;
+  width: 168px;
+  height: 168px;
+  border-radius: 50%;
+  background: conic-gradient(
+    #58a879 0 var(--success),
+    #efc062 var(--success) var(--partial),
+    #d86a62 var(--partial) var(--failed),
+    #87918d var(--failed) 100%
+  );
+}
+
+.liveSessionDonut > span {
+  display: grid;
+  place-items: center;
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--live-muted);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.liveSessionDonut strong {
+  color: var(--live-ink);
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.liveSessionDonut em {
+  font-style: normal;
+}
+
+.liveSessionLegend {
+  display: grid;
+  gap: 10px;
+}
+
+.liveSessionLegend span {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: center;
+  color: var(--live-muted);
+}
+
+.liveSessionLegend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.liveSessionLegend .is-success { background: #58a879; }
+.liveSessionLegend .is-partial { background: #efc062; }
+.liveSessionLegend .is-failed { background: #d86a62; }
+.liveSessionLegend .is-critical { background: #87918d; }
+
+.liveSessionAnalysisStats {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--live-line);
+  color: var(--live-muted);
+}
+
+.liveSessionAnalysisStats strong {
+  color: var(--live-ink);
+}
+
+.liveSessionWarningIcon {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid #f0a69f;
+  border-radius: 50%;
+  color: var(--live-danger);
+  font-size: 0.9rem;
+}
+
+.liveSessionRequiredRollCard {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(170px, 0.55fr) 90px 150px;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.liveSessionRequiredRollCard > div {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid var(--live-line);
+  border-radius: 11px;
+  background: #fff;
+}
+
+.liveSessionRequiredRollCard span,
+.liveSessionRequestHint {
+  color: var(--live-muted);
+}
+
+.liveSessionRequestHint {
+  display: block;
+  margin-top: 12px;
+  font-weight: 700;
 }
 
 .liveSessionQuickRollPanel {
-  margin-top: 10px;
-  max-height: 520px;
-  overflow: auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid var(--live-line);
+  border-radius: 14px;
+  background: var(--live-surface-soft);
 }
 
-.liveSessionTargetList {
+.liveSessionQuickRollPanel > .campaignDetailsGhostBtn,
+.liveSessionQuickRollPanel > .campaignDetailsPrimaryBtn,
+.liveSessionQuickRollPanel > .liveSessionTargetList,
+.liveSessionQuickRollPanel > .liveSessionAdvancedRollFields {
+  grid-column: 1 / -1;
+}
+
+.liveSessionTargetList,
+.liveSessionAdvancedRollFields {
   display: grid;
-  gap: 6px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 8px;
+  gap: 8px;
+  border: 1px solid var(--live-line);
+  border-radius: 12px;
+  padding: 10px;
+  background: #fff;
 }
 
 .liveSessionTargetItem {
   display: flex;
   align-items: center;
   gap: 8px;
+  color: var(--live-ink);
 }
 
-.liveSessionCharacterCard {
+.liveSessionQuickActionsPanel h2 {
+  margin: 0 0 14px;
+}
+
+.liveSessionQuickTiles {
   display: grid;
-  grid-template-columns: 56px 1fr;
-  gap: 10px;
-  align-items: center;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
 }
 
-.liveSessionCharacterAvatar,
-.liveSessionCharacterAvatarPlaceholder {
-  width: 56px;
-  height: 56px;
-  border-radius: 10px;
-}
-
-.liveSessionCharacterAvatar {
-  object-fit: cover;
-  border: 1px solid var(--line);
-}
-
-.liveSessionCharacterAvatarPlaceholder {
-  border: 1px dashed var(--line);
+.liveSessionQuickTiles button {
   display: grid;
   place-items: center;
-  font-size: 11px;
-  color: var(--muted);
+  gap: 10px;
+  min-height: 86px;
+  border: 1px solid var(--live-line);
+  border-radius: 13px;
+  background: #fff;
+  color: var(--live-ink);
+  font-weight: 800;
+  cursor: pointer;
 }
 
-.liveSessionStatsGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+.liveSessionQuickTiles button:disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
 }
 
-.liveSessionStatsGrid p {
+.liveSessionQuickTiles svg {
+  color: var(--live-primary);
+}
+
+.liveSessionPlaceholder {
   margin: 0;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 10px;
-  background: rgba(255, 255, 255, 0.025);
+  color: var(--live-muted);
 }
 
-.liveSessionBars {
-  display: grid;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.liveSessionBarRow {
-  display: grid;
-  grid-template-columns: minmax(70px, 120px) 1fr auto;
-  gap: 8px;
-  align-items: center;
-}
-
-.liveSessionBarTrack {
-  height: 8px;
-  border-radius: 999px;
-  background: var(--line);
-  overflow: hidden;
-}
-
-.liveSessionBarFill {
-  height: 100%;
-  background: var(--accent);
-}
-
-@media (max-width: 1280px) {
-  .liveSessionGrid {
-    grid-template-columns: minmax(300px, 1fr) minmax(300px, 1fr);
-    grid-template-areas:
-      "scene requests"
-      "party stats"
-      "history history";
-  }
-}
-
-@media (max-width: 760px) {
-  .liveSessionGrid {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "scene"
-      "party"
-      "requests"
-      "history"
-      "stats";
-  }
-
-  .liveSessionPage .pageHeader > div:last-child {
-    justify-content: stretch;
-  }
-
-  .liveSessionPage .pageHeader > div:last-child > * {
-    width: 100%;
-  }
-
-  .liveSessionStatsGrid,
-  .liveSessionBarRow {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* v0.9 visual unification: live session workspace */
-.liveSessionPage {
-  gap: 18px;
-  color: var(--r-ink);
-}
-
-.liveSessionGrid {
-  grid-template-columns: minmax(360px, 1.18fr) minmax(280px, 0.82fr) minmax(280px, 0.82fr);
-  gap: 18px;
-}
-
-.liveSessionPage .campaignDetailsCard,
-.liveSessionState,
-.liveSessionTargetList,
-.liveSessionStatsGrid p,
-.liveSessionSceneImagePlaceholder,
-.liveSessionPortraitPlaceholder,
-.liveSessionCharacterAvatarPlaceholder {
-  border: 1px solid var(--r-line);
-  border-radius: 8px;
-  background: var(--r-surface);
-  color: var(--r-ink);
-  box-shadow: var(--r-shadow-soft);
-}
-
-.liveSessionPage .campaignDetailsCard {
+.liveSessionState {
   padding: 16px;
 }
 
-.liveSessionPage .campaignDetailsCard h2,
-.liveSessionPage .campaignDetailsCard h3,
-.liveSessionSceneReadonly h3 {
-  color: var(--r-ink);
-  font-family: var(--font-display);
-  letter-spacing: 0;
+.liveSessionPage .campaignDetailsPrimaryBtn {
+  border-color: var(--live-primary) !important;
+  background: var(--live-primary) !important;
+  color: #fff !important;
 }
 
-.liveSessionPlaceholder,
-.liveInitiativeMeta,
-.liveSessionSceneReadonly p {
-  color: var(--r-ink-soft);
+.liveSessionPage .campaignDetailsPrimaryBtn:hover {
+  background: var(--live-primary-dark) !important;
 }
 
-.liveSessionSceneImage,
-.liveSessionCharacterPortrait img,
-.liveSessionCharacterAvatar {
-  border-color: var(--r-line);
-  border-radius: 8px;
+.liveSessionPage .campaignDetailsGhostBtn {
+  border-color: var(--live-line-strong) !important;
+  background: #fff !important;
+  color: var(--live-ink) !important;
 }
 
-.liveSessionTargetList,
-.liveSessionStatsGrid p {
-  background: #ffffff;
-  box-shadow: none;
+.liveSessionPage .campaignDetailsDangerBtn {
+  border-color: #efb3ad !important;
+  background: #fff7f6 !important;
+  color: #bf372f !important;
+}
+
+.liveSessionPage .campaignField {
+  display: grid;
+  gap: 7px;
 }
 
 .liveSessionPage input,
 .liveSessionPage select,
 .liveSessionPage textarea {
-  border-color: var(--r-line);
-  background: #ffffff;
-  color: var(--r-ink);
-  border-radius: 8px;
+  width: 100%;
+  border: 1px solid var(--live-line-strong);
+  border-radius: 11px;
+  background: #fff;
+  color: var(--live-ink);
 }
 
-.liveSessionPage .campaignDetailsPrimaryBtn {
-  background: linear-gradient(135deg, var(--r-primary), var(--r-primary-2));
-  color: #ffffff;
+.liveSessionTimeBadge::before {
+  content: none;
 }
 
-@media (max-width: 1240px) {
-  .liveSessionGrid {
-    grid-template-columns: repeat(2, minmax(280px, 1fr));
-    grid-template-areas:
-      "scene scene"
-      "party requests"
-      "history stats";
+.liveSessionTimeBadge svg {
+  width: 15px;
+  height: 15px;
+}
+
+.liveSessionSoftBadge.is-muted,
+.liveSessionOnlineCount.is-muted {
+  color: var(--live-muted);
+  background: #f7faf8;
+}
+
+.liveSessionOnlineCount.is-muted span {
+  background: #a8b6af;
+}
+
+.liveSessionVisibleBadge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #cce7d7;
+  border-radius: 999px;
+  background: #f1faf5;
+  color: var(--live-primary);
+  font-size: 0.78rem;
+  font-weight: 900;
+  padding: 7px 10px;
+}
+
+.liveSessionOnlineDot--online {
+  background: #37a26f;
+}
+
+.liveSessionOnlineDot--pending {
+  background: #e3aa3f;
+}
+
+.liveSessionOnlineDot--offline,
+.liveSessionOnlineDot--unknown {
+  background: #a8b6af;
+}
+
+.liveSessionMiniStats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.liveSessionMiniStats span {
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--live-line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--live-muted);
+  padding: 12px;
+}
+
+.liveSessionMiniStats strong {
+  color: var(--live-ink);
+  font-size: 1.25rem;
+}
+
+.liveSessionEmptyDonut {
+  display: grid;
+  place-items: center;
+  width: 168px;
+  height: 168px;
+  max-width: 100%;
+  margin: 22px auto 14px;
+  border-radius: 50%;
+  background: conic-gradient(#dbe8df 0 100%);
+}
+
+.liveSessionEmptyDonut span {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.liveSessionRequiredRollList {
+  display: grid;
+  gap: 10px;
+}
+
+.liveSessionRequiredRollCard {
+  grid-template-columns: minmax(220px, 1fr) minmax(170px, 0.55fr) 95px minmax(110px, 0.35fr) 140px;
+}
+
+.liveSessionQuickTiles a {
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  min-height: 86px;
+  border: 1px solid var(--live-line);
+  border-radius: 13px;
+  background: #fff;
+  color: var(--live-ink);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.liveSessionQuickTiles a svg {
+  color: var(--live-primary);
+}
+
+.liveSessionModalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(12, 25, 19, 0.34);
+  backdrop-filter: blur(4px);
+}
+
+.liveSessionModal {
+  width: min(860px, 100%);
+  max-height: min(86vh, 860px);
+  overflow: auto;
+  border: 1px solid var(--live-line);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 28px 70px rgba(12, 25, 19, 0.22);
+  padding: 20px;
+}
+
+.liveSessionModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--live-line);
+}
+
+.liveSessionModalHeader h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.liveSessionCloseButton {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--live-line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--live-ink);
+  cursor: pointer;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.liveSessionSceneFormGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.liveSessionSceneWideField {
+  grid-column: 1 / -1;
+}
+
+.liveSessionSceneVisibility {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--live-line);
+  border-radius: 12px;
+  background: var(--live-surface-soft);
+  color: var(--live-muted);
+  font-weight: 800;
+  padding: 12px;
+}
+
+.liveSessionSceneVisibility input {
+  width: auto;
+}
+
+.liveSessionModalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.liveSessionScenePicker {
+  display: grid;
+  gap: 12px;
+}
+
+.liveSessionSceneOption {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  border: 1px solid var(--live-line);
+  border-radius: 14px;
+  background: #fff;
+  padding: 12px;
+}
+
+.liveSessionSceneOption img,
+.liveSessionSceneThumbEmpty {
+  width: 120px;
+  height: 78px;
+  border: 1px solid var(--live-line);
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.liveSessionSceneThumbEmpty {
+  display: grid;
+  place-items: center;
+  background: var(--live-surface-soft);
+  color: var(--live-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.liveSessionSceneOption p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 5px 0;
+  color: var(--live-muted);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.liveSessionSceneOption small {
+  color: var(--live-primary);
+  font-weight: 900;
+}
+
+.liveSessionModalEmpty {
+  display: grid;
+  place-items: center;
+  gap: 14px;
+  min-height: 220px;
+  border: 1px dashed var(--live-line-strong);
+  border-radius: 16px;
+  background: var(--live-surface-soft);
+  color: var(--live-muted);
+  text-align: center;
+}
+
+@media (max-width: 1380px) {
+  .liveSessionMainGrid,
+  .liveSessionBottomGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .liveSessionSideSplit {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 760px) {
-  .liveSessionGrid {
+@media (max-width: 980px) {
+  .liveSessionTopbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .liveSessionTopbar__actions {
+    width: 100%;
+  }
+
+  .liveSessionSceneBody,
+  .liveSessionSideSplit,
+  .liveSessionRequiredRollCard,
+  .liveSessionAnalysisBody,
+  .liveSessionQuickRollPanel {
     grid-template-columns: 1fr;
-    grid-template-areas:
-      "scene"
-      "party"
-      "requests"
-      "history"
-      "stats";
+  }
+
+  .liveSessionPlayerStrip,
+  .liveSessionQuickTiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .liveSessionDashboard,
+  .liveSessionMainGrid,
+  .liveSessionSideColumn,
+  .liveSessionSideSplit,
+  .liveSessionBottomGrid {
+    display: contents;
+  }
+
+  .liveSessionScenePanel { order: 1; }
+  .liveSessionRequestsPanel { order: 2; }
+  .liveSessionPlayersPanel { order: 3; }
+  .liveSessionHistoryPanel { order: 4; }
+  .liveSessionAnalysisPanel { order: 5; }
+  .liveSessionQuickActionsPanel { order: 6; }
+}
+
+@media (max-width: 620px) {
+  .liveSessionPanel,
+  .liveSessionTopbar {
+    border-radius: 14px;
+    padding: 14px;
+  }
+
+  .liveSessionPlayerStrip,
+  .liveSessionQuickTiles {
+    grid-template-columns: 1fr;
+  }
+
+  .liveSessionSceneMedia,
+  .liveSessionSceneMedia img,
+  .liveSessionScenePlaceholder {
+    min-height: 300px;
+    height: 300px;
+  }
+
+  .liveSessionRollRow {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .liveSessionRollRow time {
+    grid-column: 2 / -1;
+  }
+
+  .liveSessionSceneFormGrid,
+  .liveSessionSceneOption {
+    grid-template-columns: 1fr;
+  }
+
+  .liveSessionSceneOption img,
+  .liveSessionSceneThumbEmpty {
+    width: 100%;
+    height: 150px;
+  }
+
+  .liveSessionModalOverlay {
+    padding: 10px;
+  }
+
+  .liveSessionModal {
+    border-radius: 16px;
+    padding: 14px;
   }
 }

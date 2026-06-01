@@ -122,6 +122,12 @@ class AuthSecurityIT {
     }
 
     @Test
+    void glossaryShouldBePublicReadOnly() throws Exception {
+        mockMvc.perform(get("/api/glossary"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void protectedEndpointShouldWorkWithValidToken() throws Exception {
         UserEntity user = createUser(uniqueEmail("token"), "password-123");
         String token = jwtService.createToken(user.getId(), "PLAYER", false);

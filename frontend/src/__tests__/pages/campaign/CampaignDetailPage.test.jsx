@@ -75,14 +75,14 @@ describe("CampaignDetailPage dashboard by role", () => {
     baseMocks();
   });
 
-  it("MG sees GM dashboard with session creation", async () => {
+  it("MG sees campaign workspace with session creation", async () => {
     campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "A", owner: true, status: "active", systemCode: "dnd5e", joinCode: "ABC123" });
     campaignsApi.listCampaignSessions.mockResolvedValue([{ id: 2, title: "Live S", status: "IN_PROGRESS", description: "test" }]);
 
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByText("MG Dashboard")).toBeInTheDocument();
+      expect(screen.queryByText("MG Dashboard")).not.toBeInTheDocument();
       expect(screen.getByRole("heading", { name: "Nadchodzaca sesja" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Zaplanuj sesje" })).toBeInTheDocument();
       expect(screen.queryByText("Kod zaproszenia")).not.toBeInTheDocument();
@@ -95,7 +95,7 @@ describe("CampaignDetailPage dashboard by role", () => {
     expect(screen.getByText("ABC123")).toBeInTheDocument();
   });
 
-  it("player sees player dashboard and no session creation", async () => {
+  it("player sees campaign workspace and no session creation", async () => {
     campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "A", owner: false, status: "active", systemCode: "dnd5e" });
     campaignsApi.listCampaignMembers.mockResolvedValue([{ id: 22, self: true, owner: false, mg: false, displayName: "P1", username: "p1" }]);
     campaignsApi.getCampaignCharacters.mockResolvedValue([{ characterId: 9, characterName: "Rogue", systemCode: "dnd5e", userId: 22 }]);
@@ -106,7 +106,7 @@ describe("CampaignDetailPage dashboard by role", () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByText("Player Dashboard")).toBeInTheDocument();
+      expect(screen.queryByText("Player Dashboard")).not.toBeInTheDocument();
       expect(screen.getByRole("tab", { name: /Sesja/i })).toHaveClass("is-active");
       expect(screen.queryByRole("button", { name: "Zaplanuj sesje" })).not.toBeInTheDocument();
     });
@@ -126,7 +126,7 @@ describe("CampaignDetailPage dashboard by role", () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByText("MG Dashboard")).toBeInTheDocument();
+      expect(screen.queryByText("MG Dashboard")).not.toBeInTheDocument();
       expect(screen.queryByRole("heading", { name: "Frekwencja / Glosowanie" })).not.toBeInTheDocument();
     });
   });
@@ -141,7 +141,7 @@ describe("CampaignDetailPage dashboard by role", () => {
 
     renderPage();
 
-    await screen.findByText("Player Dashboard");
+    await screen.findByRole("tab", { name: /Sesja/i });
     fireEvent.click(screen.getByRole("tab", { name: /Postacie/i }));
 
     await waitFor(() => {
@@ -155,7 +155,7 @@ describe("CampaignDetailPage dashboard by role", () => {
 
     renderPage();
 
-    await screen.findByText("MG Dashboard");
+    await screen.findByRole("tab", { name: /Sesja/i });
     fireEvent.click(screen.getByRole("tab", { name: /Postacie/i }));
 
     await waitFor(() => {

@@ -1,0 +1,4873 @@
+/*
+  Viewport Workspace Layout Pass (2026-05).
+  Locks authenticated app pages into SaaS workspaces: page chrome stays fixed,
+  and scrolling moves into explicit lists, tables, panels, threads and outputs.
+*/
+
+:root {
+  --vw-gap: 14px;
+  --vw-gap-lg: 18px;
+  --vw-radius: 16px;
+  --vw-radius-sm: 12px;
+  --vw-border: var(--r-line, rgba(15, 23, 42, 0.12));
+  --vw-surface: var(--r-surface-solid, #ffffff);
+  --vw-panel: var(--r-panel, #f8faf9);
+  --vw-shadow: var(--r-shadow-soft, 0 18px 48px rgba(15, 23, 42, 0.08));
+  --vw-header-h: 58px;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.appLayout,
+.appBody,
+.appMain,
+.appContent,
+.appContentInner {
+  min-height: 0 !important;
+}
+
+.appMain,
+.appLayout--dashboard .appMain {
+  overflow: hidden !important;
+}
+
+.appContent,
+.appLayout--dashboard .appContent {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  padding: 18px 22px 20px !important;
+  overflow: hidden;
+}
+
+.appContentInner {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+  overflow: hidden;
+}
+
+.appPageHeader {
+  min-height: 0;
+  margin: 0 !important;
+  padding: 0 246px 10px 0 !important;
+  display: grid;
+  align-content: end;
+  border-bottom: 1px solid color-mix(in srgb, var(--vw-border) 72%, transparent);
+}
+
+.appPageHeader__title {
+  font-size: clamp(1.2rem, 1.4vw, 1.62rem) !important;
+  line-height: 1.05;
+}
+
+.appPageHeader__subtitle {
+  margin-top: 4px !important;
+  font-size: 0.88rem !important;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: min(70ch, 100%);
+}
+
+@media (max-height: 780px) {
+  .appPageHeader__subtitle { display: none; }
+  .appPageHeader { padding-bottom: 8px !important; }
+}
+
+.appContentInner > .page,
+.viewportPage {
+  width: 100%;
+  max-width: min(100%, 1500px) !important;
+  height: 100%;
+  min-height: 0 !important;
+  margin: 0 auto !important;
+  overflow: hidden !important;
+}
+
+.viewportWorkspace,
+.viewportPanel,
+.scrollRegion {
+  min-height: 0;
+}
+
+.scrollRegion,
+.viewportPanel {
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+.appMain :where(.panel, .panel-soft, .card, .campaignDetailsCard, .campaignSideCard, .charactersPanel, .charactersSidebar, .messagesSidebar, .messagesMain, .messagesDetails, .generatorSettingsPanel, .generatorOutputPanel, .compendiumCategories, .compendiumTablePanel, .compendiumDetailPanel, .glossaryLeft, .glossaryRight, .rulesCard, .settingsPanel, .profileV2Identity, .profileStats, .profileActivity, .profileTools, .profileCampaigns, .profileAchievements, .publicV2Identity, .publicV2Stats, .publicV2Actions, .publicV2Info, .publicV2Achievements, .diceCard) {
+  border-radius: var(--vw-radius) !important;
+  border-color: var(--vw-border) !important;
+  box-shadow: none;
+}
+
+.appMain :where(.campaignToolbar, .charactersPageActions, .charactersActionBar, .liveSessionActions, .generatorPageActions, .generatorsCatalogHeader, .compendiumToolbar, .rulesSystemFilter, .settingsIndex, .friendsHero, .diceCommandPanel) {
+  border-radius: var(--vw-radius) !important;
+}
+
+/* Dashboard: session command + tile board + shared detail feel. */
+.dashboardSaas {
+  display: grid;
+  grid-template-rows: minmax(128px, 0.36fr) minmax(0, 1fr);
+  gap: var(--vw-gap);
+}
+
+.dashboardFeatureGrid,
+.dashboardLowerGrid,
+.dashboardCommandBoard,
+.dashboardLowerGrid > div {
+  min-height: 0;
+}
+
+.dashboardHero {
+  min-height: 0 !important;
+  height: 100%;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 0.32fr) !important;
+  padding: 18px !important;
+}
+
+.dashboardHero h2 { font-size: clamp(1.25rem, 1.8vw, 2rem) !important; }
+.dashboardHero__image { min-height: 90px !important; max-height: 100% !important; }
+
+.dashboardLowerGrid {
+  height: 100%;
+  grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.8fr) !important;
+  gap: var(--vw-gap);
+  overflow: hidden;
+}
+
+.dashboardLowerGrid > div:first-child,
+.dashboardLowerGrid > div:last-child {
+  display: grid;
+  gap: var(--vw-gap);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.dashboardLowerGrid > div:first-child {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: minmax(120px, 1fr);
+}
+
+.dashboardLowerGrid > div:last-child {
+  grid-auto-rows: minmax(0, 1fr);
+}
+
+.dashboardPanel {
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboardPanel__head { flex: 0 0 auto; }
+.dashboardMaterialList,
+.dashboardDonutLegend,
+.dashboardChartMeta { min-height: 0; overflow: auto; }
+.dashboardStatusMessage { position: absolute; right: 24px; bottom: 24px; z-index: 20; }
+
+/* Campaigns: toolbar fixed, grid and inspector scroll locally. */
+.campaignsSaas {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: var(--vw-gap);
+}
+
+.campaignListTabs,
+.campaignToolbar { min-height: 0; }
+.campaignToolbar { padding: 12px !important; }
+
+.campaignsLayout {
+  min-height: 0;
+  height: 100%;
+  grid-template-columns: minmax(0, 1fr) 310px !important;
+  gap: var(--vw-gap);
+  overflow: hidden;
+}
+
+.campaignsMain,
+.campaignsSide,
+.campaignGrid,
+.campaignInviteList,
+.campaignAdvancedFilters,
+.campaignLegend {
+  min-height: 0;
+}
+
+.campaignsMain,
+.campaignsSide,
+.campaignGrid {
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+.campaignGrid {
+  align-content: start;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
+  padding-right: 4px;
+}
+
+.campaignCard__visual { min-height: 118px !important; }
+.campaignCard__body { gap: 8px !important; }
+.campaignCard__body p { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* Campaign detail console. */
+.campaignDetailsPage {
+  display: grid !important;
+  grid-template-columns: 300px minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--vw-gap);
+}
+
+.campaignDetailsPage > .campaignDetailsGhostBtn,
+.campaignDetailsPage > .campaignDetailsNotice,
+.campaignDetailsPage > .campaignDetailsError,
+.campaignDetailsPage > .campaignDetailsState,
+.campaignDetailsPage > .campaignDetailsEmpty {
+  grid-column: 1 / -1;
+}
+
+.campaignDetailsPage > .campaignDetailsCard {
+  grid-row: 2;
+  grid-column: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.campaignDetailsPage > .campaignDetailsCard img {
+  max-height: 150px !important;
+}
+
+.campaignPanelTabs,
+.campaignTabs {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+  margin: 0 !important;
+  min-height: 0;
+}
+
+.campaignWorkspaceGrid {
+  grid-column: 2;
+  grid-row: 2;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.campaignDashboardRow,
+.campaignDashboardRow--session,
+.campaignDashboardRow--single {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.campaignDashboardRow .campaignDetailsCard,
+.campaignDashboardRow--single .campaignDetailsCard,
+.campaignDashboardRow--session .campaignDetailsCard {
+  min-height: 0;
+  overflow: auto;
+}
+
+/* Live session. */
+.liveSessionPage {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--vw-gap);
+}
+
+.liveSessionActions { min-height: 0; padding: 10px 12px !important; }
+.liveSessionGrid {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  grid-template-columns: minmax(360px, 1.2fr) minmax(260px, 0.8fr) minmax(260px, 0.8fr) !important;
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.liveSessionGrid > .campaignDetailsCard {
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.liveSessionGrid .campaignMaterialList,
+.liveSessionSceneForm,
+.liveSessionSceneReadonly,
+.liveSessionBars,
+.liveSessionQuickRollPanel,
+.liveSessionTargetList {
+  min-height: 0;
+  overflow: auto;
+}
+
+.liveSessionRequestsPanel .liveSessionQuickRollPanel {
+  position: absolute;
+  inset: 54px 14px 14px;
+  z-index: 5;
+  box-shadow: var(--vw-shadow);
+}
+
+.liveSessionScenePanel { position: relative; }
+.liveSessionSceneImage { max-height: 34vh !important; object-fit: cover; }
+
+/* Characters. */
+.charactersPage {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--vw-gap);
+}
+.charactersLayout {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  grid-template-columns: minmax(270px, 320px) minmax(0, 1fr) !important;
+}
+.charactersSidebar,
+.charactersDetail,
+.charactersPanel,
+.charactersCreatePanel {
+  min-height: 0;
+  overflow: hidden;
+}
+.charactersSidebar { display: grid; grid-template-rows: auto auto minmax(0, 1fr); }
+.charactersList,
+.charactersDetail,
+.charactersPanel,
+.charactersCreatePanel,
+.sheetLayout,
+.sheetStack,
+.sheetSimpleList { overflow: auto; scrollbar-gutter: stable; }
+.charactersActionBar { position: sticky; top: 0; z-index: 4; background: var(--vw-surface); }
+.sheetSection { min-height: 0; }
+
+/* Friends social inbox. */
+.friendsPage {
+  display: grid !important;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: var(--vw-gap);
+}
+.friendsHero { padding: 12px !important; grid-template-columns: minmax(0, 0.8fr) minmax(260px, 0.55fr) !important; }
+.friendsList,
+.friendsColumns,
+.friendsColumn { min-height: 0; overflow: auto; scrollbar-gutter: stable; }
+.socialCard { padding: 12px !important; }
+.socialCard__copy p { display: none; }
+.socialCard__meta { gap: 6px !important; }
+
+/* Messages. */
+.messagesPageWrap,
+.messagesPage {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+.messagesPage {
+  display: grid !important;
+  grid-template-columns: 300px minmax(0, 1fr) 280px !important;
+  gap: var(--vw-gap);
+}
+.messagesSidebar,
+.messagesMain,
+.messagesDetails { min-height: 0; overflow: hidden; }
+.messagesSidebar { display: grid; grid-template-rows: auto auto auto minmax(0, 1fr); }
+.messagesMain { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+.messagesConversationList,
+.messagesThread,
+.messagesDetails__content,
+.messagesDiscoverList { overflow: auto; min-height: 0; scrollbar-gutter: stable; }
+.messagesSidebar__discover { padding: 10px !important; }
+.messagesComposer textarea { min-height: 56px !important; max-height: 110px; }
+
+/* Generators. */
+.generatorsDashboard,
+.generatorsCatalogPage,
+.generatorWindowPage,
+.weatherGeneratorPage {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+.generatorsCatalogPage { display: grid !important; grid-template-rows: auto auto minmax(0, 1fr); gap: var(--vw-gap); }
+.generatorsCatalogHeader { margin: 0 !important; min-height: 0; }
+.generatorsCatalogLayout { min-height: 0; height: 100%; overflow: hidden; grid-template-columns: 230px minmax(0, 1fr) !important; }
+.generatorsSidebar,
+.generatorsContent,
+.generatorsGrid { min-height: 0; overflow: auto; scrollbar-gutter: stable; }
+.generatorsContent { display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.generatorsGrid { align-content: start; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important; padding-right: 4px; }
+.generatorWindowPage { display: grid !important; grid-template-rows: auto minmax(0, 1fr); gap: var(--vw-gap); }
+.generatorWindowWorkspace,
+.generatorWindowShell,
+.weatherGeneratorLayout { min-height: 0; height: 100%; overflow: hidden; }
+.generatorWindowShell { grid-template-columns: minmax(280px, 360px) minmax(0, 1fr) !important; }
+.generatorSettingsPanel,
+.generatorOutputPanel,
+.weatherSettingsCard,
+.weatherResultPanel,
+.generatorWindowSections,
+.generatorWindowResult { min-height: 0; overflow: auto; scrollbar-gutter: stable; }
+.generatorOutputPanel { display: grid; grid-template-rows: auto minmax(0, 1fr); }
+
+/* Dice workbench. */
+.dicePage { display: grid !important; grid-template-rows: auto minmax(0, 1fr); gap: var(--vw-gap); }
+.diceWorkspace { min-height: 0; height: 100%; overflow: hidden; grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.58fr) minmax(260px, 0.5fr) !important; }
+.diceArena,
+.diceConfig,
+.diceHistoryCard { min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+.diceVisualZone,
+.diceGenesysPool,
+.diceConfig,
+.diceHistoryList { overflow: auto; scrollbar-gutter: stable; }
+.diceCommandMode select { display: none; }
+.diceCommandMode { display: none !important; }
+.diceModeTabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.diceModeTabs button {
+  min-height: 38px;
+  border: 1px solid var(--dice-border, var(--vw-border));
+  border-radius: 999px;
+  background: var(--dice-panel, var(--vw-panel));
+  color: var(--dice-muted, var(--muted));
+  font-weight: 800;
+  cursor: pointer;
+}
+.diceModeTabs button.is-active {
+  background: var(--dice-accent, var(--r-primary));
+  color: white;
+}
+
+/* Initiative combat tracker. */
+.initiativePage { display: grid !important; grid-template-rows: auto minmax(0, 1fr); gap: var(--vw-gap); }
+.initiativeControlsCard { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; padding: 12px !important; }
+.initiativeActions { display: flex !important; flex-wrap: wrap; gap: 8px !important; align-content: start; max-height: 96px; overflow: auto; }
+.initiativePage > .card:last-of-type { min-height: 0; overflow: hidden; display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.initiativeTableWrap { min-height: 0; overflow: auto !important; scrollbar-gutter: stable; }
+.initiativeTable th { position: sticky; top: 0; z-index: 2; }
+.initiativeModalOverlay { align-items: stretch !important; justify-content: flex-end !important; }
+.initiativeModal { width: min(420px, 92vw); height: 100%; max-height: none !important; border-radius: var(--vw-radius) 0 0 var(--vw-radius) !important; }
+
+/* Compendium and glossary reference workspaces. */
+.compendiumPage { display: grid !important; grid-template-rows: auto minmax(0, 1fr); gap: var(--vw-gap); }
+.compendiumLayout { min-height: 0; height: 100%; overflow: hidden; grid-template-columns: 220px minmax(0, 1fr) 340px !important; }
+.compendiumCategories,
+.compendiumTablePanel,
+.compendiumDetailPanel,
+.compendiumTableWrap,
+.compendiumDetailRows,
+.compendiumDetailContent { min-height: 0; overflow: auto; scrollbar-gutter: stable; }
+.compendiumCategories button span { display: none; }
+.compendiumTablePanel,
+.compendiumDetailPanel { display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.compendiumDetailTitle { position: sticky; top: 0; z-index: 2; background: var(--vw-surface); padding-bottom: 10px; }
+
+.glossarySplit { height: 100% !important; min-height: 0 !important; overflow: hidden; grid-template-columns: minmax(260px, 330px) minmax(0, 1fr) !important; }
+.glossaryLeft,
+.glossaryRight { min-height: 0; overflow: hidden; }
+.glossaryLeft { display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.glossaryList,
+.glossaryRight { min-height: 0; overflow: auto; scrollbar-gutter: stable; }
+.glossaryDetail { min-height: 0; }
+
+/* Rules reader. */
+.rulesPage,
+.rulesContainer { height: 100%; min-height: 0; overflow: hidden; }
+.rulesContainer { display: grid !important; grid-template-columns: minmax(260px, 330px) minmax(0, 1fr) !important; grid-template-rows: minmax(0, 1fr); gap: 18px !important; }
+.rulesSystemFilter,
+.rulesReaderPanel { min-height: 0; overflow: hidden; }
+.rulesReaderPanel { overflow: auto; scrollbar-gutter: stable; }
+
+/* Profile and public profile dashboards. */
+.profileV2Page,
+.publicV2Page { display: grid !important; grid-template-rows: auto minmax(0, 1fr); gap: var(--vw-gap); }
+.profileV2Top,
+.publicV2Top { margin: 0 !important; padding: 12px !important; min-height: 0; }
+.profileV2Layout,
+.publicV2Layout { min-height: 0; height: 100%; overflow: hidden; grid-template-columns: minmax(260px, 330px) minmax(0, 1fr) !important; }
+.profileV2Identity,
+.publicV2Identity,
+.profileV2Main,
+.publicV2Main { min-height: 0; overflow: auto; scrollbar-gutter: stable; }
+.profileV2Main,
+.publicV2Main { display: grid; grid-template-rows: auto minmax(0, 1fr) minmax(0, 0.7fr); gap: var(--vw-gap); }
+.profileMiddle { min-height: 0; overflow: hidden; }
+.profileActivity,
+.profileTools,
+.profileCampaigns,
+.profileAchievements,
+.publicV2Actions,
+.publicV2Info,
+.publicV2Achievements { min-height: 0; overflow: auto; scrollbar-gutter: stable; }
+.profileAchievementsGrid,
+.publicV2AchievementsGrid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important; }
+
+/* Settings console: only active section is displayed. */
+.settingsPage,
+.settingsStudio { min-height: 0; overflow: visible; }
+.settingsStudio { grid-template-columns: 260px minmax(0, 920px) !important; }
+.settingsIndex,
+.settingsStack { min-height: 0; overflow: auto; scrollbar-gutter: stable; }
+.settingsStack { display: block !important; }
+.settingsPanel { display: none; min-height: 0; overflow: auto; }
+.settingsPanel.is-active { display: block; }
+
+/* Overlay unification. */
+.topNav__menu,
+.notificationMenu,
+.messageLauncher__panel,
+.appAccountDropdown,
+.accountMenu__dropdown {
+  border-radius: var(--vw-radius) !important;
+  border-color: var(--vw-border) !important;
+  background: var(--vw-surface) !important;
+  box-shadow: var(--vw-shadow) !important;
+  color: var(--r-ink, var(--text)) !important;
+}
+
+@media (max-width: 1240px) {
+  .campaignsLayout,
+  .liveSessionGrid,
+  .compendiumLayout,
+  .messagesPage,
+  .profileV2Layout,
+  .publicV2Layout,
+  .campaignDetailsPage {
+    grid-template-columns: 1fr !important;
+  }
+
+  .messagesDetails { display: none; }
+  .campaignDetailsPage > .campaignDetailsCard,
+  .campaignPanelTabs,
+  .campaignWorkspaceGrid { grid-column: 1; grid-row: auto; }
+  .campaignDetailsPage,
+  .profileV2Page,
+  .publicV2Page { overflow: auto !important; }
+}
+
+@media (max-width: 900px) {
+  .appContent { padding: 12px !important; overflow: auto; }
+  .appContentInner,
+  .appContentInner > .page { overflow: visible !important; height: auto; min-height: 100%; }
+  .appMain { overflow: auto !important; }
+  .appPageHeader { padding-right: 0 !important; }
+  .appShellTools { top: 10px !important; right: 12px !important; }
+
+  .dashboardSaas,
+  .dashboardLowerGrid,
+  .dashboardLowerGrid > div:first-child,
+  .charactersLayout,
+  .diceWorkspace,
+  .generatorsCatalogLayout,
+  .generatorWindowShell,
+  .weatherGeneratorLayout,
+  .settingsStudio,
+  .initiativeControlsCard {
+    grid-template-columns: 1fr !important;
+  }
+
+  .messagesPage { grid-template-columns: 1fr !important; }
+  .messagesSidebar { min-height: 260px; }
+  .messagesDetails { display: none; }
+  .friendsHero { grid-template-columns: 1fr !important; }
+}
+
+/* Dashboard command center polish: new shared-detail layout. */
+.dashboardSaas {
+  height: 100% !important;
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-rows: clamp(156px, 23vh, 210px) minmax(0, 1fr) !important;
+  gap: clamp(14px, 1.6vw, 22px) !important;
+  overflow: hidden !important;
+}
+
+.dashboardFeatureGrid {
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.dashboardHero {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  box-shadow: 0 18px 44px rgba(35, 48, 42, 0.16) !important;
+}
+
+.dashboardLowerGrid {
+  min-height: 0 !important;
+  height: 100% !important;
+  display: grid !important;
+  grid-template-columns: minmax(620px, 1.8fr) minmax(340px, 0.82fr) !important;
+  align-items: stretch !important;
+  gap: clamp(14px, 1.6vw, 22px) !important;
+  overflow: hidden !important;
+}
+
+.dashboardCommandBoard,
+.dashboardLowerGrid > div:first-child {
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  grid-auto-rows: unset !important;
+  gap: 14px !important;
+  overflow: hidden !important;
+}
+
+.dashboardSummaryGrid {
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.dashboardSummaryTile {
+  appearance: none;
+  width: 100%;
+  min-height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid rgba(24, 48, 39, 0.12);
+  border-radius: 16px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(244, 249, 246, 0.9));
+  color: var(--r-ink);
+  box-shadow: 0 12px 28px rgba(35, 48, 42, 0.08);
+  cursor: pointer;
+  text-align: left;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.dashboardSummaryTile:hover {
+  transform: translateY(-1px);
+  border-color: rgba(31, 118, 95, 0.32);
+  box-shadow: 0 16px 34px rgba(35, 48, 42, 0.12);
+}
+
+.dashboardSummaryTile.is-active {
+  border-color: rgba(31, 118, 95, 0.38);
+  background:
+    linear-gradient(145deg, rgba(234, 248, 241, 0.98), rgba(255, 255, 255, 0.95));
+  box-shadow: inset 0 0 0 1px rgba(31, 118, 95, 0.12), 0 18px 38px rgba(31, 118, 95, 0.14);
+}
+
+.dashboardSummaryTile span {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.dashboardSummaryTile strong {
+  color: var(--r-ink);
+  font-size: 1rem;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+}
+
+.dashboardSummaryTile small {
+  color: var(--r-ink-soft);
+  font-size: 0.76rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dashboardSummaryTile em {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(31, 118, 95, 0.11);
+  color: var(--r-green);
+  font-style: normal;
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+.dashboardSummaryTile.is-active em {
+  background: var(--r-green);
+  color: #fff;
+}
+
+.dashboardSharedDetail {
+  min-height: 0 !important;
+  height: 100% !important;
+  padding: 18px !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+}
+
+.dashboardSharedDetail .dashboardPanel__head {
+  align-items: center !important;
+  margin-bottom: 14px !important;
+}
+
+.dashboardSharedDetail .dashboardMaterialList {
+  min-height: 0 !important;
+  overflow: auto !important;
+  padding-right: 4px;
+}
+
+.dashboardSharedDetail .dashboardMaterialItem {
+  min-height: 68px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.dashboardLowerGrid > div:last-child {
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-rows: minmax(150px, 0.72fr) minmax(0, 1fr) minmax(0, 1fr) !important;
+  grid-auto-rows: unset !important;
+  gap: 14px !important;
+  overflow: hidden !important;
+}
+
+.dashboardLowerGrid > div:last-child .dashboardPanel {
+  min-height: 0 !important;
+  padding: 16px !important;
+}
+
+.dashboardLowerGrid > div:last-child .dashboardChartPanel {
+  min-height: 0 !important;
+  height: 100% !important;
+  display: grid !important;
+  grid-template-columns: minmax(120px, 0.75fr) minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 12px !important;
+  overflow: hidden !important;
+}
+
+.dashboardLowerGrid > div:last-child .dashboardDonut {
+  width: clamp(92px, 10vw, 126px) !important;
+  height: clamp(92px, 10vw, 126px) !important;
+}
+
+.dashboardLowerGrid > div:last-child .dashboardDonutLegend,
+.dashboardLowerGrid > div:last-child .dashboardChartMeta {
+  max-height: 100% !important;
+  overflow: auto !important;
+}
+
+@media (max-width: 1180px) {
+  .dashboardLowerGrid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    overflow: auto !important;
+  }
+
+  .dashboardSaas {
+    overflow: auto !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .dashboardSummaryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .dashboardSummaryTile {
+    min-height: 78px;
+  }
+}
+
+/* Professional SaaS workspace polish pass. */
+:root {
+  --pro-bg: #eef5f0;
+  --pro-surface: rgba(255, 255, 255, 0.94);
+  --pro-surface-strong: #ffffff;
+  --pro-ink: #1d2824;
+  --pro-muted: #60706a;
+  --pro-line: rgba(34, 58, 48, 0.14);
+  --pro-line-strong: rgba(34, 58, 48, 0.2);
+  --pro-green: #1f765f;
+  --pro-green-2: #2f8a70;
+  --pro-blue: #506fb3;
+  --pro-warn: #b7791f;
+  --pro-danger: #b64f43;
+  --pro-radius: 18px;
+  --pro-radius-sm: 13px;
+  --pro-shadow: 0 18px 46px rgba(31, 48, 40, 0.11);
+  --pro-shadow-soft: 0 10px 28px rgba(31, 48, 40, 0.075);
+}
+
+body,
+.appLayout,
+.appBody,
+.appMain {
+  color: var(--pro-ink) !important;
+  background:
+    linear-gradient(90deg, rgba(22, 33, 29, 0.035) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(22, 33, 29, 0.035) 1px, transparent 1px),
+    radial-gradient(circle at 18% 0%, rgba(31, 118, 95, 0.1), transparent 30%),
+    linear-gradient(135deg, #eef5f0 0%, #f8fbf8 48%, #e8f1eb 100%) !important;
+  background-size: 32px 32px, 32px 32px, auto, auto !important;
+}
+
+.appContent,
+.appLayout--dashboard .appContent {
+  padding: clamp(14px, 1.35vw, 22px) clamp(18px, 1.7vw, 28px) clamp(14px, 1.35vw, 22px) !important;
+}
+
+.appContentInner {
+  gap: 12px !important;
+}
+
+.appPageHeader {
+  min-height: 44px !important;
+  padding-right: 238px !important;
+  padding-bottom: 10px !important;
+  border-bottom: 1px solid var(--pro-line) !important;
+}
+
+.appPageHeader__title {
+  color: var(--pro-ink) !important;
+  letter-spacing: -0.025em !important;
+}
+
+.appPageHeader__subtitle {
+  color: var(--pro-muted) !important;
+}
+
+.appMain :where(
+  .dashboardPanel,
+  .campaignsMain,
+  .campaignsSide,
+  .campaignCard,
+  .campaignDetailsCard,
+  .campaignSideCard,
+  .charactersSidebar,
+  .charactersPanel,
+  .charactersCreatePanel,
+  .messagesSidebar,
+  .messagesMain,
+  .messagesDetails,
+  .generatorsSidebar,
+  .generatorCard,
+  .generatorSettingsPanel,
+  .generatorOutputPanel,
+  .weatherSettingsCard,
+  .weatherResultPanel,
+  .diceCard,
+  .initControlPanel,
+  .initiativePage > .card,
+  .compendiumCategories,
+  .compendiumTablePanel,
+  .compendiumDetailPanel,
+  .glossaryLeft,
+  .glossaryRight,
+  .rulesCard,
+  .rulesSource,
+  .settingsPanel,
+  .settingsIndex,
+  .profileV2Identity,
+  .profileStats,
+  .profileActivity,
+  .profileTools,
+  .profileCampaigns,
+  .profileAchievements,
+  .publicV2Identity,
+  .publicV2Stats,
+  .publicV2Actions,
+  .publicV2Info,
+  .publicV2Achievements,
+  .panel-soft,
+  .panel,
+  .card
+) {
+  border: 1px solid var(--pro-line) !important;
+  border-radius: var(--pro-radius) !important;
+  background: var(--pro-surface) !important;
+  box-shadow: var(--pro-shadow-soft) !important;
+  color: var(--pro-ink) !important;
+}
+
+.appMain :where(
+  .campaignToolbar,
+  .campaignListTabs,
+  .charactersPageActions,
+  .charactersActionBar,
+  .liveSessionActions,
+  .generatorPageActions,
+  .generatorsCatalogHeader,
+  .generatorsToolbar,
+  .compendiumToolbar,
+  .rulesSystemFilter,
+  .friendsHero,
+  .diceCommandPanel,
+  .initiativeControlsCard,
+  .profileV2Top,
+  .publicV2Top
+) {
+  border: 1px solid var(--pro-line) !important;
+  border-radius: var(--pro-radius) !important;
+  background: rgba(255, 255, 255, 0.78) !important;
+  box-shadow: none !important;
+}
+
+.appMain :where(button, a, input, select, textarea) {
+  font-family: var(--font-body, inherit);
+}
+
+.appMain :where(input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']), select, textarea) {
+  border-color: var(--pro-line-strong) !important;
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.86) !important;
+  color: var(--pro-ink) !important;
+}
+
+.appMain :where(input, select, textarea):focus {
+  border-color: rgba(31, 118, 95, 0.45) !important;
+  box-shadow: 0 0 0 4px rgba(31, 118, 95, 0.12) !important;
+}
+
+.appMain :where(.campaignDetailsPrimaryBtn, .primaryButton, .btnPrimary, .diceRollButton, .generatorRunButton) {
+  border: 0 !important;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, var(--pro-green), var(--pro-green-2)) !important;
+  color: #fff !important;
+  box-shadow: 0 12px 26px rgba(31, 118, 95, 0.2) !important;
+}
+
+.appMain :where(.campaignDetailsGhostBtn, .secondaryButton, .btnGhost) {
+  border: 1px solid var(--pro-line-strong) !important;
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.74) !important;
+  color: var(--pro-ink) !important;
+}
+
+.appMain :where(.campaignDetailsDangerBtn, .dangerButton, .btnDanger) {
+  border-radius: 12px !important;
+  border-color: rgba(182, 79, 67, 0.28) !important;
+  color: var(--pro-danger) !important;
+  background: rgba(182, 79, 67, 0.08) !important;
+}
+
+.appMain :where(.campaignMaterialList, .charactersList, .messagesConversationList, .messagesThread, .generatorsGrid, .compendiumTableWrap, .glossaryList, .rulesCards, .diceHistoryList, .initiativeTableWrap, .profileActivityList, .profileSimpleList, .friendsList) {
+  scrollbar-color: rgba(31, 118, 95, 0.36) transparent;
+}
+
+/* Dashboard: professional command center proportions. */
+.dashboardSaas {
+  grid-template-rows: clamp(150px, 22vh, 205px) minmax(0, 1fr) !important;
+  gap: clamp(14px, 1.5vw, 20px) !important;
+}
+
+.dashboardHero {
+  border: 1px solid var(--pro-line) !important;
+  border-radius: 18px !important;
+  background: linear-gradient(90deg, rgba(255,255,255,0.82), rgba(255,255,255,0.28)), var(--pro-surface) !important;
+}
+
+.dashboardHero__copy {
+  padding: clamp(18px, 2vw, 30px) !important;
+}
+
+.dashboardHero__copy > span {
+  width: min(560px, 62%) !important;
+  height: 18px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0 10px !important;
+  border-radius: 999px !important;
+  background: rgba(31, 118, 95, 0.12) !important;
+  color: var(--pro-green) !important;
+  font-size: 0.72rem !important;
+  font-weight: 900 !important;
+}
+
+.dashboardHero h2 {
+  margin-top: 12px !important;
+  color: var(--pro-ink) !important;
+  font-size: clamp(2rem, 3vw, 3.35rem) !important;
+  letter-spacing: -0.055em !important;
+}
+
+.dashboardHero__image {
+  filter: saturate(0.9) contrast(0.96) !important;
+}
+
+.dashboardLowerGrid {
+  grid-template-columns: minmax(640px, 1.75fr) minmax(330px, 0.82fr) !important;
+  gap: clamp(14px, 1.5vw, 20px) !important;
+}
+
+.dashboardCommandBoard {
+  grid-template-rows: auto minmax(0, 1fr) !important;
+}
+
+.dashboardSummaryGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+.dashboardSummaryTile {
+  min-height: clamp(82px, 9.5vh, 104px) !important;
+  border-color: var(--pro-line) !important;
+  border-radius: 17px !important;
+  background: linear-gradient(145deg, #fff, rgba(245, 250, 247, 0.92)) !important;
+  box-shadow: var(--pro-shadow-soft) !important;
+}
+
+.dashboardSharedDetail {
+  padding: 18px !important;
+  background: var(--pro-surface-strong) !important;
+  box-shadow: var(--pro-shadow-soft) !important;
+}
+
+.dashboardMaterialItem {
+  border-color: var(--pro-line) !important;
+  background: rgba(255,255,255,0.78) !important;
+}
+
+.dashboardLowerGrid > div:last-child {
+  grid-template-rows: minmax(140px, 0.68fr) minmax(0, 1fr) minmax(0, 0.9fr) !important;
+}
+
+.dashboardLowerGrid > div:last-child .dashboardPanel {
+  overflow: hidden !important;
+}
+
+.dashboardPanel__head h2,
+.campaignDetailsCardTitle,
+.generatorPanelNumber,
+.weatherPanelHeading,
+.settingsPanelHead h2,
+.messagesMain__header h2,
+.compediumPanelHeader h2 {
+  letter-spacing: -0.025em !important;
+}
+
+/* Campaign grids and details. */
+.campaignsSaas {
+  grid-template-rows: auto auto minmax(0, 1fr) !important;
+}
+
+.campaignListTabs {
+  padding: 6px !important;
+  display: flex !important;
+  gap: 6px !important;
+}
+
+.campaignListTabs button,
+.campaignTabs button,
+.dashboardTabs button,
+.generatorTypePill,
+.settingsIndex button,
+.rulesSystemFilter button {
+  border-radius: 12px !important;
+}
+
+.campaignToolbar {
+  gap: 10px !important;
+  align-items: center !important;
+}
+
+.campaignsLayout {
+  grid-template-columns: minmax(0, 1fr) minmax(286px, 330px) !important;
+}
+
+.campaignsMain,
+.campaignsSide {
+  padding: 14px !important;
+}
+
+.campaignGrid {
+  gap: 14px !important;
+  grid-template-columns: repeat(auto-fill, minmax(248px, 1fr)) !important;
+}
+
+.campaignCard {
+  min-height: 228px !important;
+  overflow: hidden !important;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.campaignCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(31, 118, 95, 0.32) !important;
+  box-shadow: var(--pro-shadow) !important;
+}
+
+.campaignCard__visual {
+  min-height: 102px !important;
+  max-height: 122px !important;
+}
+
+.campaignDetailsPage {
+  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr) !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+}
+
+.campaignDetailsPage > .campaignDetailsCard {
+  padding: 16px !important;
+}
+
+.campaignPanelTabs {
+  padding: 7px !important;
+  background: rgba(255,255,255,0.8) !important;
+  border: 1px solid var(--pro-line) !important;
+  border-radius: var(--pro-radius) !important;
+}
+
+.campaignWorkspaceGrid {
+  gap: 14px !important;
+}
+
+.campaignWorkspaceGrid > .campaignDetailsCard,
+.campaignDashboardRow .campaignDetailsCard {
+  padding: 16px !important;
+}
+
+/* Live session scene-first. */
+.liveSessionActions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  overflow: auto !important;
+}
+
+.liveSessionGrid {
+  gap: 14px !important;
+  grid-template-columns: minmax(420px, 1.35fr) minmax(260px, 0.72fr) minmax(260px, 0.72fr) !important;
+}
+
+.liveSessionScenePanel {
+  grid-row: 1 / span 2 !important;
+}
+
+.liveSessionGrid .campaignDetailsCard {
+  padding: 16px !important;
+}
+
+.liveSessionSceneImage {
+  border-radius: 14px !important;
+  border: 1px solid var(--pro-line) !important;
+}
+
+/* Characters master-detail. */
+.charactersPageActions {
+  padding: 10px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.charactersLayout {
+  gap: 14px !important;
+  grid-template-columns: minmax(278px, 330px) minmax(0, 1fr) !important;
+}
+
+.charactersSidebar,
+.charactersPanel,
+.charactersCreatePanel {
+  padding: 14px !important;
+}
+
+.charactersList {
+  padding-right: 4px !important;
+}
+
+.characterListItem,
+.charactersList button,
+.sheetSection {
+  border-radius: 14px !important;
+}
+
+.sheetLayout {
+  gap: 14px !important;
+}
+
+.sheetSection {
+  border: 1px solid var(--pro-line) !important;
+  background: rgba(255,255,255,0.74) !important;
+}
+
+/* Social and messenger. */
+.friendsPage {
+  grid-template-rows: auto auto minmax(0, 1fr) !important;
+}
+
+.friendsHero {
+  min-height: 96px !important;
+}
+
+.friendsList {
+  display: grid !important;
+  align-content: start !important;
+  gap: 10px !important;
+}
+
+.socialCard {
+  min-height: 76px !important;
+  border-radius: 15px !important;
+}
+
+.messagesPage {
+  grid-template-columns: minmax(270px, 320px) minmax(0, 1fr) minmax(250px, 300px) !important;
+  gap: 14px !important;
+}
+
+.messagesSidebar,
+.messagesMain,
+.messagesDetails {
+  padding: 14px !important;
+}
+
+.messagesMain__header,
+.messagesComposer,
+.messagesSidebar__header {
+  border-color: var(--pro-line) !important;
+}
+
+.messagesThread {
+  padding: 14px !important;
+}
+
+.messageBubble {
+  border-radius: 16px !important;
+}
+
+/* Generators catalogue and output. */
+.generatorsCatalogHeader,
+.generatorPageActions {
+  padding: 12px 14px !important;
+}
+
+.generatorsCatalogLayout {
+  grid-template-columns: minmax(210px, 250px) minmax(0, 1fr) !important;
+  gap: 14px !important;
+}
+
+.generatorsSidebar,
+.generatorsContent,
+.generatorSettingsPanel,
+.generatorOutputPanel,
+.weatherSettingsCard,
+.weatherResultPanel {
+  padding: 14px !important;
+}
+
+.generatorsGrid {
+  gap: 14px !important;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important;
+}
+
+.generatorCard {
+  min-height: 178px !important;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.generatorCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(31, 118, 95, 0.32) !important;
+  box-shadow: var(--pro-shadow) !important;
+}
+
+.generatorWindowShell,
+.weatherGeneratorLayout {
+  gap: 14px !important;
+}
+
+.generatorWindowShell {
+  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr) !important;
+}
+
+/* Dice and initiative. */
+.diceCommandPanel {
+  padding: 12px 14px !important;
+}
+
+.diceWorkspace {
+  gap: 14px !important;
+  grid-template-columns: minmax(0, 1.16fr) minmax(290px, 0.58fr) minmax(260px, 0.48fr) !important;
+}
+
+.diceArena,
+.diceConfig,
+.diceHistoryCard {
+  padding: 16px !important;
+}
+
+.diceRollButton {
+  min-height: 48px !important;
+}
+
+.initiativePage {
+  gap: 14px !important;
+}
+
+.initiativeControlsCard {
+  grid-template-columns: minmax(210px, 300px) minmax(0, 1fr) !important;
+  align-items: center !important;
+}
+
+.initiativeTableWrap table,
+.compendiumTableWrap table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+.initiativeTable th,
+.compendiumTableWrap th {
+  background: #f3f8f5 !important;
+  color: var(--pro-muted) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  font-size: 0.72rem !important;
+}
+
+/* Reference pages. */
+.compendiumLayout {
+  grid-template-columns: minmax(190px, 230px) minmax(0, 1fr) minmax(310px, 360px) !important;
+  gap: 14px !important;
+}
+
+.compendiumCategories,
+.compendiumTablePanel,
+.compendiumDetailPanel,
+.glossaryLeft,
+.rulesCard,
+.rulesSource {
+  padding: 14px !important;
+}
+
+.rulesSystemFilter {
+  padding: 0 !important;
+}
+
+.glossaryLeft {
+  padding: 0 !important;
+}
+
+.glossarySplit {
+  gap: 18px !important;
+  grid-template-columns: minmax(260px, 330px) minmax(0, 1fr) !important;
+}
+
+.glossaryDetailTitle,
+.compendiumDetailTitle {
+  letter-spacing: -0.04em !important;
+}
+
+.rulesContainer {
+  grid-template-columns: minmax(260px, 330px) minmax(0, 1fr) !important;
+  gap: 18px !important;
+}
+
+.rulesCards {
+  display: grid !important;
+  gap: 12px !important;
+}
+
+.rulesCardBody {
+  max-height: none !important;
+}
+
+/* Profile and settings. */
+.profileV2Top,
+.publicV2Top {
+  min-height: 92px !important;
+}
+
+.profileV2Layout,
+.publicV2Layout {
+  gap: 14px !important;
+  grid-template-columns: minmax(270px, 330px) minmax(0, 1fr) !important;
+}
+
+.profileV2Identity,
+.publicV2Identity,
+.profileStats,
+.profileActivity,
+.profileTools,
+.profileCampaigns,
+.profileAchievements,
+.publicV2Stats,
+.publicV2Actions,
+.publicV2Info,
+.publicV2Achievements {
+  padding: 16px !important;
+}
+
+.settingsStudio {
+  gap: 20px !important;
+  grid-template-columns: 260px minmax(0, 920px) !important;
+  justify-content: center !important;
+  align-items: start !important;
+  margin-top: clamp(96px, 13vh, 140px) !important;
+}
+
+.settingsIndex,
+.settingsPanel {
+  padding: 16px !important;
+}
+
+.settingsPanel.is-active {
+  display: grid !important;
+  align-content: start !important;
+  gap: 16px !important;
+}
+
+/* Stronger responsive behavior. */
+@media (max-width: 1320px) {
+  .dashboardLowerGrid,
+  .liveSessionGrid,
+  .diceWorkspace {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.75fr) !important;
+  }
+
+  .dashboardLowerGrid > div:last-child,
+  .liveSessionStatsPanel,
+  .diceHistoryCard {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1100px) {
+  .dashboardSummaryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .dashboardLowerGrid,
+  .campaignsLayout,
+  .charactersLayout,
+  .messagesPage,
+  .generatorsCatalogLayout,
+  .generatorWindowShell,
+  .compendiumLayout,
+  .profileV2Layout,
+  .publicV2Layout,
+  .settingsStudio {
+    grid-template-columns: 1fr !important;
+  }
+
+  .messagesDetails,
+  .generatorsSidebar,
+  .compendiumDetailPanel {
+    display: none !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .appPageHeader {
+    padding-right: 0 !important;
+  }
+
+  .appPageHeader__subtitle {
+    display: none !important;
+  }
+
+  .dashboardHero {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboardHero__image {
+    display: none !important;
+  }
+
+  .dashboardSummaryGrid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Rules reader finalized workspace. */
+.rulesReaderWorkspace {
+  min-height: 0;
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(210px, 250px) minmax(0, 1fr) minmax(280px, 330px);
+  gap: 14px;
+  overflow: hidden;
+}
+
+.rulesTopicNav,
+.rulesReadingPane,
+.rulesResourceRail {
+  min-height: 0;
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+.rulesTopicNav,
+.rulesReadingPane,
+.rulesResourceRail {
+  border: 1px solid var(--pro-line) !important;
+  border-radius: var(--pro-radius) !important;
+  background: var(--pro-surface) !important;
+  box-shadow: var(--pro-shadow-soft) !important;
+  padding: 14px !important;
+}
+
+.rulesTopicNav {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.rulesTopicNav button {
+  width: 100%;
+  min-height: 40px;
+  padding: 10px 12px;
+  border: 1px solid var(--pro-line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--pro-ink);
+  text-align: left;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.rulesTopicNav button.is-active {
+  border-color: rgba(31, 118, 95, 0.38);
+  background: rgba(31, 118, 95, 0.11);
+  color: var(--pro-green);
+}
+
+.rulesReadingPane {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.rulesActiveTopic {
+  min-height: 0;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  box-shadow: none !important;
+}
+
+.rulesActiveTopic .rulesCardBody {
+  min-height: 0;
+  overflow: auto;
+  font-size: clamp(1rem, 1.05vw, 1.1rem);
+  line-height: 1.75;
+}
+
+.rulesResourceRail {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.rulesResourceRail .rulesCards {
+  overflow: visible;
+}
+
+@media (max-width: 1240px) {
+  .rulesReaderWorkspace {
+    grid-template-columns: minmax(190px, 240px) minmax(0, 1fr) !important;
+  }
+
+  .rulesResourceRail {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .rulesReaderWorkspace {
+    grid-template-columns: 1fr !important;
+    overflow: visible;
+  }
+
+  .rulesTopicNav,
+  .rulesReadingPane {
+    overflow: visible;
+  }
+}
+
+/* Final page root stabilization for reference/social pages. */
+.glossaryPage {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.friendsPage:has(.friendsList:first-of-type) {
+  grid-template-rows: auto minmax(0, 1fr) !important;
+}
+
+.friendsPage > .friendsList:first-of-type {
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--pro-line);
+  border-radius: var(--pro-radius);
+  background: var(--pro-surface);
+  box-shadow: var(--pro-shadow-soft);
+  padding: 14px;
+}
+
+/* Profile dashboard tabs: only one working section at a time. */
+.profileV2Main,
+.publicV2Main {
+  grid-template-rows: auto auto minmax(0, 1fr) !important;
+}
+
+.profileWorkspaceTabs,
+.publicV2Tabs {
+  min-height: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--pro-line);
+  border-radius: var(--pro-radius);
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.profileWorkspaceTabs button,
+.publicV2Tabs button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--pro-muted);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.profileWorkspaceTabs button.is-active,
+.publicV2Tabs button.is-active {
+  border-color: rgba(31, 118, 95, 0.28);
+  background: var(--pro-green);
+  color: #fff;
+}
+
+.profileV2Main > :where(.profileActivity, .profileTools, .profileCampaigns, .profileAchievements),
+.publicV2Main > :where(.publicV2Actions, .publicV2Info, .publicV2Achievements) {
+  min-height: 0;
+  height: 100%;
+  overflow: auto;
+}
+
+.profileAchievementsGrid,
+.publicV2AchievementsGrid {
+  align-content: start;
+}
+
+/* Messenger context rail empty state. */
+.messagesDetails__empty {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  text-align: center;
+  color: var(--pro-muted);
+}
+
+.messagesDetails__empty h3 {
+  margin: 10px 0 4px;
+  color: var(--pro-ink);
+}
+
+.messagesDetails__empty p {
+  max-width: 24ch;
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* Dashboard final composition fix: compact, balanced, no cropped analytics. */
+.dashboardSaas {
+  grid-template-rows: clamp(112px, 15vh, 148px) minmax(0, 1fr) !important;
+  gap: 16px !important;
+}
+
+.dashboardFeatureGrid {
+  max-height: 148px !important;
+}
+
+.dashboardHero {
+  height: 100% !important;
+  min-height: 0 !important;
+  grid-template-columns: minmax(420px, 0.72fr) minmax(0, 1fr) !important;
+  padding: 0 !important;
+  border-radius: 18px !important;
+}
+
+.dashboardHero__copy {
+  align-content: center !important;
+  padding: 18px 30px !important;
+  background: linear-gradient(90deg, rgba(255,255,255,0.92), rgba(255,255,255,0.68) 72%, transparent) !important;
+  z-index: 2;
+}
+
+.dashboardHero__copy > span {
+  width: min(330px, 100%) !important;
+  height: 16px !important;
+  font-size: 0.66rem !important;
+}
+
+.dashboardHero h2 {
+  margin: 10px 0 12px !important;
+  font-size: clamp(2rem, 2.8vw, 3rem) !important;
+  line-height: 0.95 !important;
+}
+
+.dashboardHero p {
+  margin: 0 0 12px !important;
+  max-width: 42ch !important;
+}
+
+.dashboardHero__actions {
+  gap: 10px !important;
+}
+
+.dashboardHero__actions a {
+  min-height: 38px !important;
+  padding: 0 14px !important;
+  border-radius: 11px !important;
+}
+
+.dashboardHero__image {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  opacity: 0.84 !important;
+  mask-image: linear-gradient(90deg, transparent 0%, #000 16%);
+}
+
+.dashboardLowerGrid {
+  grid-template-columns: minmax(680px, 1.72fr) minmax(330px, 0.8fr) !important;
+  gap: 16px !important;
+}
+
+.dashboardCommandBoard,
+.dashboardLowerGrid > div:first-child {
+  grid-template-rows: auto minmax(210px, 0.62fr) minmax(0, 0.38fr) !important;
+  align-content: start !important;
+}
+
+.dashboardSummaryGrid {
+  gap: 12px !important;
+}
+
+.dashboardSummaryTile {
+  min-height: 78px !important;
+  padding: 14px 16px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(31, 118, 95, 0.08), transparent 36%),
+    linear-gradient(145deg, #fff, rgba(248, 251, 249, 0.96)) !important;
+}
+
+.dashboardSummaryTile strong {
+  font-size: 1.02rem !important;
+}
+
+.dashboardSummaryTile em {
+  width: 34px !important;
+  height: 34px !important;
+  flex-basis: 34px !important;
+}
+
+.dashboardSharedDetail {
+  height: auto !important;
+  min-height: 210px !important;
+  max-height: 270px !important;
+  align-self: start !important;
+  padding: 16px !important;
+}
+
+.dashboardSharedDetail .dashboardPanel__head {
+  min-height: 36px !important;
+  margin-bottom: 12px !important;
+}
+
+.dashboardSharedDetail .dashboardMaterialList {
+  display: grid !important;
+  align-content: start !important;
+  gap: 10px !important;
+  overflow: auto !important;
+}
+
+.dashboardSharedDetail .dashboardMaterialItem {
+  min-height: 62px !important;
+  padding: 12px !important;
+}
+
+.dashboardCommandBoard::after {
+  content: "Szybki podglad: wybierz kafel, aby zmienic zawartosc panelu. Najwazniejsze akcje pozostaja dostepne bez przewijania strony.";
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  padding: 16px 18px;
+  border: 1px dashed rgba(31, 118, 95, 0.22);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.48);
+  color: var(--pro-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.dashboardLowerGrid > div:last-child {
+  grid-template-rows: minmax(118px, 0.72fr) minmax(170px, 1fr) minmax(170px, 1fr) !important;
+  gap: 14px !important;
+}
+
+.dashboardLowerGrid > div:last-child .dashboardPanel {
+  padding: 14px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.dashboardLowerGrid > div:last-child .dashboardPanel__head {
+  min-height: 28px !important;
+  margin-bottom: 10px !important;
+}
+
+.dashboardLowerGrid > div:last-child .dashboardMaterialItem {
+  min-height: auto !important;
+  padding: 10px 12px !important;
+  display: block !important;
+  line-height: 1.35 !important;
+}
+
+.dashboardLowerGrid > div:last-child .dashboardMaterialItem strong {
+  display: block !important;
+  max-width: 100% !important;
+}
+
+.dashboardLowerGrid > div:last-child .dashboardChartPanel,
+.dashboardLowerGrid > div:last-child .dashboardChartPanel--stacked {
+  height: 100% !important;
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(96px, 126px) minmax(0, 1fr) !important;
+  place-items: center stretch !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 8px !important;
+  overflow: hidden !important;
+}
+
+.dashboardLowerGrid > div:last-child .dashboardChartPanel--stacked {
+  grid-template-columns: 1fr !important;
+}
+
+.dashboardLowerGrid > div:last-child .dashboardDonut {
+  width: clamp(86px, 7.2vw, 112px) !important;
+  height: clamp(86px, 7.2vw, 112px) !important;
+  flex: 0 0 auto !important;
+}
+
+.dashboardLowerGrid > div:last-child .dashboardDonut span {
+  font-size: clamp(1.05rem, 1.4vw, 1.45rem) !important;
+}
+
+.dashboardLowerGrid > div:last-child .dashboardDonut small {
+  font-size: 0.58rem !important;
+  max-width: 58px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.dashboardLowerGrid > div:last-child .dashboardDonutLegend {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  max-height: 52px !important;
+  overflow: auto !important;
+}
+
+.dashboardLowerGrid > div:last-child .dashboardChartMeta {
+  align-content: center !important;
+  justify-content: start !important;
+  overflow: auto !important;
+}
+
+.dashboardLowerGrid > div:last-child .dashboardChartMeta strong {
+  white-space: normal !important;
+}
+
+@media (max-width: 1500px) {
+  .dashboardHero {
+    grid-template-columns: minmax(380px, 0.68fr) minmax(0, 1fr) !important;
+  }
+
+  .dashboardLowerGrid {
+    grid-template-columns: minmax(610px, 1.55fr) minmax(310px, 0.82fr) !important;
+  }
+}
+
+/* Workflow workspace completion pass: campaign, live, tools and reference screens. */
+@media (min-width: 980px) {
+  .campaignsSaas,
+  .campaignDetailsPage,
+  .liveSessionPage,
+  .charactersPage,
+  .generatorsCatalogPage,
+  .generatorsPage:not(.generatorsCatalogPage),
+  .initiativePage,
+  .compendiumPage {
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .campaignsSaas {
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    gap: 14px !important;
+  }
+
+  .campaignsHero,
+  .campaignsStats,
+  .campaignsInvites {
+    display: none !important;
+  }
+
+  .campaignsToolbar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 5 !important;
+    min-height: 64px !important;
+    padding: 10px 14px !important;
+    border-radius: 18px !important;
+    background: rgba(255, 255, 255, 0.86) !important;
+    backdrop-filter: blur(18px) !important;
+    box-shadow: 0 14px 34px rgba(15, 37, 31, 0.08) !important;
+  }
+
+  .campaignsToolbar input,
+  .campaignsToolbar select {
+    min-height: 40px !important;
+  }
+
+  .campaignsLayout {
+    min-height: 0 !important;
+    height: 100% !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 340px) !important;
+    gap: 14px !important;
+    overflow: hidden !important;
+  }
+
+  .campaignsMain,
+  .campaignsSide {
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .campaignsMain {
+    display: grid !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+  }
+
+  .campaignsPanel,
+  .campaignsSideCard,
+  .campaignCard,
+  .campaignCreateTile,
+  .campaignJoinCard {
+    border: 1px solid rgba(25, 83, 68, 0.14) !important;
+    background: rgba(255, 255, 255, 0.84) !important;
+    box-shadow: 0 18px 42px rgba(15, 37, 31, 0.08) !important;
+  }
+
+  .campaignsPanel {
+    min-height: 0 !important;
+    overflow: hidden !important;
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    padding: 14px !important;
+  }
+
+  .campaignsPanelHeader {
+    min-height: 38px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .campaignGrid {
+    min-height: 0 !important;
+    overflow: auto !important;
+    align-content: start !important;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+    gap: 12px !important;
+    padding: 2px 2px 8px !important;
+  }
+
+  .campaignCard {
+    min-height: 190px !important;
+    max-height: 246px !important;
+    overflow: hidden !important;
+  }
+
+  .campaignsSide {
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    gap: 14px !important;
+  }
+
+  .campaignsSide > * {
+    min-height: 0 !important;
+    overflow: auto !important;
+  }
+
+  .campaignDetailsPage {
+    display: grid !important;
+    grid-template-columns: minmax(260px, 320px) minmax(0, 1fr) !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    gap: 14px !important;
+    align-items: stretch !important;
+  }
+
+  .campaignDetailsPage > .campaignDetailsGhostBtn:first-child {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    justify-self: start !important;
+    min-height: 36px !important;
+    padding: 0 13px !important;
+  }
+
+  .campaignDetailsPage > .campaignDetailsCard.panel-soft:first-of-type {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow: auto !important;
+    align-self: stretch !important;
+  }
+
+  .campaignDetailsPage > .campaignDetailsCard.panel-soft:first-of-type img {
+    max-height: 150px !important;
+  }
+
+  .campaignDetailsPage > .campaignPanelTabs {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    align-self: end !important;
+    min-height: 42px !important;
+    margin-left: 0 !important;
+    overflow-x: auto !important;
+  }
+
+  .campaignDetailsPage > .campaignWorkspaceGrid {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .campaignWorkspaceGrid,
+  .campaignDashboardRow,
+  .campaignDashboardRow--single,
+  .campaignDashboardRow--session {
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .campaignDashboardRow,
+  .campaignDashboardRow--session {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+  }
+
+  .campaignDashboardRow--single {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .campaignWorkspaceGrid .campaignDetailsCard {
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow: auto !important;
+  }
+
+  .liveSessionPage {
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .liveSessionActions {
+    min-height: 44px !important;
+    padding: 8px 10px !important;
+    border: 1px solid rgba(25, 83, 68, 0.12) !important;
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, 0.78) !important;
+  }
+
+  .liveSessionGrid {
+    min-height: 0 !important;
+    height: 100% !important;
+    display: grid !important;
+    grid-template-columns: minmax(430px, 1.45fr) minmax(280px, 0.78fr) minmax(260px, 0.72fr) !important;
+    grid-auto-rows: minmax(0, 1fr) !important;
+    gap: 14px !important;
+    overflow: hidden !important;
+  }
+
+  .liveSessionScenePanel {
+    grid-row: 1 / span 2 !important;
+  }
+
+  .liveSessionGrid > .campaignDetailsCard {
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+  }
+
+  .liveSessionSceneForm,
+  .liveSessionSceneReadonly,
+  .liveSessionTargetList,
+  .liveSessionHistoryPanel > div,
+  .liveSessionRequestsPanel > div,
+  .liveSessionStatsPanel > div,
+  .liveSessionPartyPanel > div {
+    min-height: 0 !important;
+    overflow: auto !important;
+  }
+
+  .liveSessionQuickRollPanel {
+    max-height: min(66vh, 560px) !important;
+    overflow: auto !important;
+  }
+
+  .charactersPage {
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .charactersPageActions {
+    justify-content: flex-end !important;
+    min-height: 42px !important;
+  }
+
+  .charactersLayout {
+    min-height: 0 !important;
+    height: 100% !important;
+    display: grid !important;
+    grid-template-columns: minmax(250px, 320px) minmax(0, 1fr) !important;
+    gap: 14px !important;
+    overflow: hidden !important;
+  }
+
+  .charactersLayout > aside,
+  .charactersDetail,
+  .charactersPanel {
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .charactersLayout > aside {
+    border: 1px solid rgba(25, 83, 68, 0.14) !important;
+    border-radius: 20px !important;
+    background: rgba(255, 255, 255, 0.8) !important;
+    box-shadow: 0 18px 42px rgba(15, 37, 31, 0.08) !important;
+  }
+
+  .charactersDetail {
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    border: 1px solid rgba(25, 83, 68, 0.14) !important;
+    border-radius: 20px !important;
+    background: rgba(255, 255, 255, 0.78) !important;
+    box-shadow: 0 18px 42px rgba(15, 37, 31, 0.08) !important;
+    padding: 14px !important;
+  }
+
+  .charactersActionBar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 3 !important;
+    margin: -14px -14px 12px !important;
+    padding: 10px 14px !important;
+    border-bottom: 1px solid rgba(25, 83, 68, 0.12) !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(16px) !important;
+  }
+
+  .charactersDetail > :not(.charactersActionBar) {
+    min-height: 0 !important;
+  }
+
+  .charactersDetail > form,
+  .charactersDetail > div:not(.charactersActionBar),
+  .charactersDetail > section {
+    overflow: auto !important;
+  }
+
+  .generatorsCatalogPage {
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .generatorsCatalogHeader {
+    min-height: 54px !important;
+    padding: 8px 12px !important;
+    border: 1px solid rgba(25, 83, 68, 0.12) !important;
+    border-radius: 18px !important;
+    background: rgba(255, 255, 255, 0.82) !important;
+  }
+
+  .generatorsCatalogLayout {
+    min-height: 0 !important;
+    height: 100% !important;
+    display: grid !important;
+    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) !important;
+    gap: 14px !important;
+    overflow: hidden !important;
+  }
+
+  .generatorsSidebar,
+  .generatorsContent {
+    min-height: 0 !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(25, 83, 68, 0.14) !important;
+    border-radius: 20px !important;
+    background: rgba(255, 255, 255, 0.78) !important;
+    box-shadow: 0 18px 42px rgba(15, 37, 31, 0.08) !important;
+  }
+
+  .generatorsContent {
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) auto !important;
+    padding: 14px !important;
+  }
+
+  .generatorsGrid {
+    min-height: 0 !important;
+    overflow: auto !important;
+    align-content: start !important;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
+    gap: 12px !important;
+    padding: 2px 2px 8px !important;
+  }
+
+  .generatorCard {
+    min-height: 174px !important;
+  }
+
+  .generatorWindowWorkspace,
+  .generatorWindowShell {
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .generatorWindowShell {
+    display: grid !important;
+    grid-template-columns: minmax(280px, 360px) minmax(0, 1fr) !important;
+    gap: 14px !important;
+  }
+
+  .generatorSettingsPanel,
+  .generatorOutputPanel {
+    min-height: 0 !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(25, 83, 68, 0.14) !important;
+    border-radius: 22px !important;
+    background: rgba(255, 255, 255, 0.82) !important;
+    box-shadow: 0 18px 42px rgba(15, 37, 31, 0.08) !important;
+  }
+
+  .generatorSettingsPanel {
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) auto !important;
+  }
+
+  .generatorWindowFields,
+  .generatorOutputBody,
+  .generatorWindowSections {
+    min-height: 0 !important;
+    overflow: auto !important;
+  }
+
+  .initiativePage {
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .initiativeControlsCard {
+    min-height: 70px !important;
+    padding: 12px 14px !important;
+    border-radius: 18px !important;
+    display: grid !important;
+    grid-template-columns: minmax(190px, 260px) minmax(0, 1fr) !important;
+    gap: 12px !important;
+    align-items: center !important;
+  }
+
+  .initiativeControlsSummary {
+    display: grid !important;
+    gap: 4px !important;
+  }
+
+  .initiativeControlsSummary p {
+    margin: 0 !important;
+  }
+
+  .initiativeActions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    max-height: 92px !important;
+    overflow: auto !important;
+  }
+
+  .initiativePage > .card:not(.initiativeControlsCard) {
+    min-height: 0 !important;
+    overflow: hidden !important;
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    border-radius: 20px !important;
+  }
+
+  .initiativeTableWrap {
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow: auto !important;
+  }
+
+  .compendiumPage {
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .compendiumToolbar {
+    min-height: 54px !important;
+    padding: 8px 12px !important;
+    border-radius: 18px !important;
+    background: rgba(255, 255, 255, 0.82) !important;
+  }
+
+  .compendiumLayout {
+    min-height: 0 !important;
+    height: 100% !important;
+    display: grid !important;
+    grid-template-columns: minmax(190px, 240px) minmax(420px, 1fr) minmax(300px, 0.72fr) !important;
+    gap: 14px !important;
+    overflow: hidden !important;
+  }
+
+  .compendiumCategories,
+  .compendiumTablePanel,
+  .compendiumDetailPanel {
+    min-height: 0 !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(25, 83, 68, 0.14) !important;
+    border-radius: 20px !important;
+    background: rgba(255, 255, 255, 0.8) !important;
+    box-shadow: 0 18px 42px rgba(15, 37, 31, 0.08) !important;
+  }
+
+  .compendiumCategories {
+    padding: 10px !important;
+    overflow: auto !important;
+  }
+
+  .compendiumCategories button {
+    min-height: 42px !important;
+    padding: 10px 12px !important;
+    text-align: left !important;
+  }
+
+  .compendiumCategories button span {
+    display: none !important;
+  }
+
+  .compendiumTablePanel {
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+  }
+
+  .compendiumTableWrap,
+  .compendiumDetailRows,
+  .compendiumDetailContent {
+    min-height: 0 !important;
+    overflow: auto !important;
+  }
+
+  .compendiumDetailPanel {
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+  }
+
+  .compendiumDetailTitle {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 2 !important;
+    background: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: blur(14px) !important;
+  }
+}
+
+@media (max-width: 979px) {
+  .campaignsSaas,
+  .campaignDetailsPage,
+  .liveSessionPage,
+  .charactersPage,
+  .generatorsCatalogPage,
+  .generatorsPage,
+  .initiativePage,
+  .compendiumPage {
+    overflow: auto !important;
+  }
+
+  .campaignsLayout,
+  .campaignDetailsPage,
+  .liveSessionGrid,
+  .charactersLayout,
+  .generatorsCatalogLayout,
+  .generatorWindowShell,
+  .compendiumLayout {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    min-width: 0 !important;
+  }
+}
+
+/* Dashboard quality gate: no filler panels, no cropped analytics. */
+@media (min-width: 980px) {
+  .dashboardSaas {
+    grid-template-rows: clamp(104px, 14vh, 134px) minmax(0, 1fr) !important;
+    gap: 16px !important;
+    overflow: hidden !important;
+  }
+
+  .dashboardFeatureGrid {
+    max-height: none !important;
+    height: 100% !important;
+  }
+
+  .dashboardHero {
+    height: 100% !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+  }
+
+  .dashboardHero__copy {
+    padding: 18px 28px !important;
+  }
+
+  .dashboardHero h2 {
+    font-size: clamp(2rem, 3vw, 3.25rem) !important;
+    line-height: 0.95 !important;
+    margin: 10px 0 0 !important;
+  }
+
+  .dashboardHero__actions {
+    margin-top: 14px !important;
+  }
+
+  .dashboardLowerGrid {
+    min-height: 0 !important;
+    height: 100% !important;
+    grid-template-columns: minmax(650px, 1fr) minmax(350px, 470px) !important;
+    gap: 16px !important;
+    overflow: hidden !important;
+  }
+
+  .dashboardCommandBoard,
+  .dashboardLowerGrid > div:first-child {
+    min-height: 0 !important;
+    height: 100% !important;
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    gap: 14px !important;
+    overflow: hidden !important;
+  }
+
+  .dashboardCommandBoard::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  .dashboardSummaryGrid {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .dashboardSummaryTile {
+    min-height: 76px !important;
+    padding: 14px 16px !important;
+    border-radius: 18px !important;
+  }
+
+  .dashboardSummaryTile strong {
+    font-size: 1rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .dashboardSummaryTile small {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .dashboardSummaryTile em {
+    width: 36px !important;
+    height: 36px !important;
+    flex: 0 0 36px !important;
+  }
+
+  .dashboardSharedDetail {
+    min-height: 0 !important;
+    max-height: none !important;
+    height: 100% !important;
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    overflow: hidden !important;
+    padding: 16px !important;
+  }
+
+  .dashboardSharedDetail .dashboardPanel__head {
+    min-height: 42px !important;
+    margin: 0 0 12px !important;
+  }
+
+  .dashboardSharedDetail .dashboardMaterialList {
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow: auto !important;
+    display: grid !important;
+    align-content: start !important;
+    gap: 10px !important;
+    padding-right: 4px !important;
+  }
+
+  .dashboardSharedDetail .dashboardMaterialItem {
+    min-height: 58px !important;
+    height: auto !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 11px 13px !important;
+    overflow: hidden !important;
+  }
+
+  .dashboardSharedDetail .dashboardMaterialItem > span:first-child {
+    min-width: 0 !important;
+    display: grid !important;
+    gap: 3px !important;
+  }
+
+  .dashboardSharedDetail .dashboardMaterialItem strong,
+  .dashboardSharedDetail .dashboardMaterialItem small {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .dashboardSharedDetail .dashboardTag {
+    position: static !important;
+    width: auto !important;
+    min-width: 74px !important;
+    justify-self: end !important;
+    text-align: center !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .dashboardLowerGrid > div:last-child {
+    min-height: 0 !important;
+    height: 100% !important;
+    display: grid !important;
+    grid-template-rows: minmax(118px, 0.68fr) minmax(184px, 1fr) minmax(184px, 1fr) !important;
+    gap: 14px !important;
+    overflow: hidden !important;
+  }
+
+  .dashboardLowerGrid > div:last-child .dashboardPanel {
+    min-height: 0 !important;
+    height: 100% !important;
+    padding: 14px !important;
+    overflow: hidden !important;
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    align-content: stretch !important;
+  }
+
+  .dashboardLowerGrid > div:last-child .dashboardPanel__head {
+    min-height: 28px !important;
+    margin: 0 0 10px !important;
+  }
+
+  .dashboardLowerGrid > div:last-child .dashboardMaterialItem {
+    min-height: 44px !important;
+    height: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 10px 12px !important;
+    overflow: hidden !important;
+  }
+
+  .dashboardLowerGrid > div:last-child .dashboardMaterialItem strong {
+    display: block !important;
+    white-space: normal !important;
+    line-height: 1.35 !important;
+  }
+
+  .dashboardChartPanel,
+  .dashboardChartPanel--stacked {
+    min-height: 0 !important;
+    height: 100% !important;
+    display: grid !important;
+    grid-template-columns: minmax(104px, 128px) minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 14px !important;
+    padding: 10px !important;
+    overflow: hidden !important;
+  }
+
+  .dashboardChartPanel--stacked {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboardChartPanel--stacked .dashboardDonutBlock {
+    display: grid !important;
+    grid-template-columns: minmax(104px, 128px) minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 14px !important;
+    min-height: 0 !important;
+    height: 100% !important;
+  }
+
+  .dashboardDonutBlock {
+    min-height: 0 !important;
+    display: contents !important;
+  }
+
+  .dashboardChartPanel--stacked .dashboardDonutBlock {
+    display: grid !important;
+  }
+
+  .dashboardDonut {
+    width: clamp(84px, 7vw, 112px) !important;
+    height: clamp(84px, 7vw, 112px) !important;
+    align-self: center !important;
+    justify-self: center !important;
+    flex: 0 0 auto !important;
+  }
+
+  .dashboardDonut span {
+    font-size: clamp(1rem, 1.35vw, 1.35rem) !important;
+    line-height: 1 !important;
+  }
+
+  .dashboardDonut small {
+    max-width: 64px !important;
+    font-size: 0.56rem !important;
+    line-height: 1.05 !important;
+    white-space: normal !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .dashboardDonutLegend,
+  .dashboardChartMeta {
+    min-height: 0 !important;
+    max-height: 100% !important;
+    overflow: auto !important;
+    align-self: center !important;
+  }
+
+  .dashboardDonutLegend {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+    justify-content: stretch !important;
+    font-size: 0.78rem !important;
+  }
+
+  .dashboardDonutLegend__item {
+    min-width: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .dashboardChartMeta {
+    display: grid !important;
+    gap: 5px !important;
+    align-content: center !important;
+  }
+
+  .dashboardChartMeta strong,
+  .dashboardChartMeta small,
+  .dashboardChartMeta a {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+}
+
+@media (min-width: 980px) and (max-height: 820px) {
+  .dashboardSaas {
+    grid-template-rows: 108px minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .dashboardLowerGrid {
+    gap: 12px !important;
+  }
+
+  .dashboardSummaryTile {
+    min-height: 66px !important;
+    padding: 11px 14px !important;
+  }
+
+  .dashboardLowerGrid > div:last-child {
+    grid-template-rows: minmax(96px, 0.62fr) minmax(158px, 1fr) minmax(158px, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .dashboardDonut {
+    width: 82px !important;
+    height: 82px !important;
+  }
+
+  .dashboardSharedDetail .dashboardMaterialItem {
+    min-height: 50px !important;
+  }
+}
+
+/* Dashboard 2026 product workspace rebuild. */
+.dashboardWorkbench2026 {
+  width: 100%;
+  max-width: none !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-rows: clamp(150px, 21vh, 220px) minmax(0, 1fr) !important;
+  gap: 18px !important;
+  overflow: hidden !important;
+  color: var(--pro-ink) !important;
+}
+
+.dashboardHero2026 {
+  min-height: 0 !important;
+  height: 100% !important;
+  grid-template-columns: minmax(360px, 0.52fr) minmax(0, 1fr) !important;
+  border: 1px solid rgba(25, 83, 68, 0.14) !important;
+  border-radius: 22px !important;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.95), rgba(255,255,255,0.72) 52%, rgba(255,255,255,0.16)),
+    linear-gradient(135deg, rgba(31, 118, 95, 0.08), rgba(83, 111, 174, 0.08)) !important;
+  box-shadow: 0 22px 58px rgba(15, 37, 31, 0.12) !important;
+}
+
+.dashboardHero2026 .dashboardHero__copy {
+  padding: clamp(18px, 2.5vw, 34px) !important;
+  align-content: center !important;
+  background: transparent !important;
+}
+
+.dashboardHero2026 .dashboardHero__copy > span {
+  width: fit-content !important;
+  height: auto !important;
+  padding: 5px 10px !important;
+  border-radius: 999px !important;
+  background: rgba(31, 118, 95, 0.1) !important;
+  color: #1f765f !important;
+  font-size: 0.68rem !important;
+  line-height: 1 !important;
+  letter-spacing: 0.06em !important;
+}
+
+.dashboardHero2026 h2 {
+  margin: 12px 0 8px !important;
+  color: var(--pro-ink) !important;
+  font-size: clamp(2rem, 3.1vw, 3.8rem) !important;
+  line-height: 0.95 !important;
+}
+
+.dashboardHero2026 p {
+  max-width: 56ch !important;
+  margin: 0 !important;
+  color: var(--pro-muted) !important;
+  font-size: 0.95rem !important;
+}
+
+.dashboardHero2026 .dashboardHero__actions {
+  margin-top: 18px !important;
+  display: flex !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+}
+
+.dashboardHero2026 .dashboardHero__actions a {
+  min-height: 40px !important;
+  padding: 0 15px !important;
+  border-radius: 12px !important;
+}
+
+.dashboardHero2026 .dashboardHero__image {
+  height: 100% !important;
+  width: 100% !important;
+  min-height: 0 !important;
+  object-fit: cover !important;
+  opacity: 0.78 !important;
+  mask-image: linear-gradient(90deg, transparent 0%, #000 18%) !important;
+}
+
+.dashboardWorkspaceGrid2026 {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 420px);
+  gap: 18px;
+  overflow: hidden;
+}
+
+.dashboardMainColumn2026,
+.dashboardRightColumn2026 {
+  min-height: 0;
+  display: grid;
+  gap: 16px;
+  overflow: hidden;
+}
+
+.dashboardMainColumn2026 {
+  grid-template-rows: auto minmax(220px, 0.88fr) minmax(150px, 0.58fr);
+}
+
+.dashboardRightColumn2026 {
+  grid-template-rows: minmax(230px, 0.72fr) minmax(0, 1fr);
+}
+
+.dashboardStatsGrid2026 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.dashboardStatCard,
+.dashboardPanel {
+  border: 1px solid rgba(25, 83, 68, 0.14) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(31, 118, 95, 0.05), transparent 34%),
+    rgba(255, 255, 255, 0.88) !important;
+  box-shadow: 0 18px 42px rgba(15, 37, 31, 0.08) !important;
+}
+
+.dashboardStatCard {
+  min-height: 86px;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 18px;
+}
+
+.dashboardStatIcon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: rgba(31, 118, 95, 0.1);
+  color: #1f765f;
+}
+
+.dashboardStatCard span:last-child {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.dashboardStatCard strong {
+  color: var(--pro-ink);
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.dashboardStatCard small {
+  color: var(--pro-ink);
+  font-weight: 800;
+}
+
+.dashboardStatCard em {
+  color: var(--pro-muted);
+  font-style: normal;
+  font-size: 0.78rem;
+}
+
+.dashboardMainSplit2026 {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  overflow: hidden;
+}
+
+.dashboardListPanel2026,
+.dashboardActivityPanel2026,
+.dashboardRolePanel2026,
+.dashboardAvailabilityPanel2026 {
+  min-height: 0 !important;
+  height: 100% !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  overflow: hidden !important;
+  padding: 16px !important;
+  border-radius: 20px !important;
+}
+
+.dashboardPanelHead2026 {
+  min-height: 34px !important;
+  margin: 0 0 12px !important;
+  gap: 12px !important;
+}
+
+.dashboardPanelHead2026 h2 {
+  margin: 0 !important;
+  color: var(--pro-ink) !important;
+  font-size: 1.05rem !important;
+  line-height: 1.15 !important;
+}
+
+.dashboardPanelHead2026 small {
+  color: var(--pro-muted) !important;
+  font-size: 0.78rem !important;
+}
+
+.dashboardPanelHead2026 a {
+  min-height: 34px !important;
+  padding: 0 12px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(25, 83, 68, 0.14) !important;
+  border-radius: 11px !important;
+  color: var(--pro-ink) !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  font-weight: 800 !important;
+  font-size: 0.75rem !important;
+}
+
+.dashboardList2026,
+.dashboardActivityList2026 {
+  min-height: 0;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.dashboardCampaignRow2026,
+.dashboardSessionRow2026,
+.dashboardActivityRow2026 {
+  min-width: 0;
+  display: grid;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(25, 83, 68, 0.12);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--pro-ink);
+  text-decoration: none;
+}
+
+.dashboardCampaignRow2026,
+.dashboardSessionRow2026 {
+  min-height: 64px;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  padding: 9px 11px;
+}
+
+.dashboardCampaignRow2026:hover,
+.dashboardSessionRow2026:hover {
+  border-color: rgba(31, 118, 95, 0.28);
+  transform: translateY(-1px);
+}
+
+.dashboardRowThumb2026,
+.dashboardDateBadge2026 {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: rgba(31, 118, 95, 0.1);
+  color: #1f765f;
+}
+
+.dashboardDateBadge2026 {
+  gap: 0;
+  color: var(--pro-ink);
+  line-height: 1;
+  text-align: center;
+}
+
+.dashboardDateBadge2026 strong {
+  font-size: 1rem;
+}
+
+.dashboardDateBadge2026 small {
+  color: var(--pro-muted);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+}
+
+.dashboardCampaignRow2026 > span:nth-child(2),
+.dashboardSessionRow2026 > span:nth-child(2) {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.dashboardCampaignRow2026 strong,
+.dashboardCampaignRow2026 small,
+.dashboardSessionRow2026 strong,
+.dashboardSessionRow2026 small,
+.dashboardActivityRow2026 strong,
+.dashboardActivityRow2026 small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboardCampaignRow2026 small,
+.dashboardSessionRow2026 small,
+.dashboardActivityRow2026 small {
+  color: var(--pro-muted);
+}
+
+.dashboardCampaignRow2026 em,
+.dashboardSessionRow2026 em {
+  color: var(--pro-muted);
+  font-size: 0.76rem;
+  font-style: normal;
+}
+
+.dashboardActivityRow2026 {
+  min-height: 42px;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  padding: 8px 10px;
+}
+
+.dashboardActivityRow2026 > span {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  color: #1f765f;
+  background: rgba(31, 118, 95, 0.09);
+}
+
+.dashboardActivityRow2026 strong {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.dashboardActivityRow2026 small {
+  font-size: 0.74rem;
+}
+
+.dashboardRolePanel2026 .dashboardRoleDonut,
+.dashboardRolePanel2026 .dashboardDonutBlock {
+  min-height: 0 !important;
+  height: 100% !important;
+  display: grid !important;
+  grid-template-columns: minmax(108px, 132px) minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 14px !important;
+}
+
+.dashboardRolePanel2026 .dashboardDonut {
+  width: clamp(96px, 8vw, 124px) !important;
+  height: clamp(96px, 8vw, 124px) !important;
+}
+
+.dashboardRolePanel2026 .dashboardDonutLegend {
+  display: grid !important;
+  gap: 8px !important;
+  overflow: auto !important;
+}
+
+.dashboardRoleChart2026 {
+  position: relative;
+  min-height: 0;
+  height: auto;
+  display: grid;
+  grid-template-columns: minmax(138px, 172px) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 10px 16px;
+  align-items: center;
+  padding: 0 2px;
+}
+
+.dashboardRoleSvg2026 {
+  width: clamp(96px, 7vw, 118px);
+  height: clamp(96px, 7vw, 118px);
+  justify-self: center;
+  overflow: visible;
+  transform: rotate(-90deg);
+}
+
+.dashboardWorkbench2026 .dashboardRolePanel2026 svg.dashboardRoleSvg2026 {
+  width: clamp(100px, 7vw, 124px) !important;
+  height: clamp(100px, 7vw, 124px) !important;
+  max-width: none !important;
+  max-height: none !important;
+  flex: 0 0 auto !important;
+}
+
+.dashboardRoleTrack2026,
+.dashboardRoleSegment2026 {
+  fill: none;
+  stroke-width: 16;
+}
+
+.dashboardWorkbench2026 .dashboardRoleSvg2026 .dashboardRoleTrack2026,
+.dashboardWorkbench2026 .dashboardRoleSvg2026 .dashboardRoleSegment2026 {
+  fill: none !important;
+  stroke-linecap: round !important;
+  vector-effect: none !important;
+}
+
+.dashboardRoleTrack2026 {
+  stroke: rgba(31, 118, 95, 0.12);
+}
+
+.dashboardRoleSegment2026 {
+  cursor: pointer;
+  outline: none;
+  transition: opacity 0.18s ease, stroke-width 0.18s ease, filter 0.18s ease;
+}
+
+.dashboardRoleSegment2026:hover,
+.dashboardRoleSegment2026:focus,
+.dashboardRoleSegment2026.is-active {
+  opacity: 0.9;
+  stroke-width: 20;
+  filter: drop-shadow(0 8px 12px rgba(15, 37, 31, 0.18));
+}
+
+.dashboardRoleLegend2026 {
+  min-height: 0;
+  display: grid;
+  gap: 10px;
+  align-content: center;
+  align-self: center;
+}
+
+.dashboardRoleLegendItem2026 {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(25, 83, 68, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.62);
+  padding: 11px 12px;
+  color: var(--pro-ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.dashboardRoleLegendItem2026:hover,
+.dashboardRoleLegendItem2026:focus,
+.dashboardRoleLegendItem2026.is-active {
+  border-color: rgba(31, 118, 95, 0.34);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.dashboardRoleLegendItem2026 span {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.dashboardRoleLegendItem2026 strong {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.86rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboardRoleLegendItem2026 em {
+  font-style: normal;
+  font-weight: 900;
+}
+
+.dashboardRoleTooltip2026 {
+  grid-column: 1 / -1;
+  min-height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(25, 83, 68, 0.12);
+  border-radius: 12px;
+  background: rgba(245, 250, 247, 0.84);
+  color: var(--pro-muted);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.dashboardRoleTooltip2026.is-visible {
+  color: #1f765f;
+  border-color: rgba(31, 118, 95, 0.24);
+}
+
+.dashboardAvailabilityTableWrap2026 {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.dashboardAvailabilityPanel2026 {
+  grid-template-rows: auto auto minmax(0, 1fr) !important;
+}
+
+.dashboardCampaignTabs2026 {
+  min-height: 0;
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  padding: 0 2px 10px;
+  scrollbar-width: thin;
+}
+
+.dashboardCampaignTab2026 {
+  max-width: 160px;
+  min-height: 32px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(25, 83, 68, 0.13);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--pro-muted);
+  cursor: pointer;
+  font-size: 0.74rem;
+  font-weight: 850;
+  overflow: hidden;
+  padding: 0 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboardCampaignTab2026:hover,
+.dashboardCampaignTab2026:focus,
+.dashboardCampaignTab2026.is-active {
+  border-color: rgba(31, 118, 95, 0.3);
+  background: #1f765f;
+  color: #fff;
+  outline: none;
+}
+
+.dashboardAvailabilityTable2026 {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+  overflow: hidden;
+  padding-bottom: 4px;
+}
+
+.dashboardAvailabilityHeader2026,
+.dashboardAvailabilityRow2026 {
+  display: grid;
+  grid-template-columns: minmax(70px, 1fr) repeat(7, minmax(22px, 28px));
+  align-items: center;
+  gap: 4px;
+}
+
+.dashboardAvailabilityHeader2026 span {
+  color: var(--pro-muted);
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.dashboardAvailabilityHeader2026 span:first-child,
+.dashboardAvailabilityRow2026 strong {
+  text-align: left;
+}
+
+.dashboardAvailabilityRow2026 {
+  min-height: 30px;
+  padding: 5px 0;
+  border-top: 1px solid rgba(25, 83, 68, 0.08);
+}
+
+.dashboardAvailabilityRow2026 strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--pro-ink);
+  font-size: 0.76rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboardAvailabilityDot {
+  width: 11px;
+  height: 11px;
+  justify-self: center;
+  display: inline-block;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5);
+}
+
+.dashboardAvailabilityDot.is-available { background: #1f765f; }
+.dashboardAvailabilityDot.is-maybe { background: #d7a545; }
+.dashboardAvailabilityDot.is-unavailable { background: #c85c4a; }
+.dashboardAvailabilityDot.is-none { background: #b6c0bd; }
+
+.dashboardAvailabilityLegend2026 {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 7px 10px;
+  color: var(--pro-muted);
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.dashboardAvailabilityLegend2026 span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dashboardEmpty2026 {
+  min-height: 64px;
+  display: grid;
+  place-items: center;
+  border: 1px dashed rgba(25, 83, 68, 0.18);
+  border-radius: 15px;
+  color: var(--pro-muted);
+  text-align: center;
+  padding: 14px;
+}
+
+/* Campaign availability workspace. */
+.campaignAvailabilityPanel {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden !important;
+}
+
+.campaignAvailabilityHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.campaignAvailabilityWorkspace {
+  min-height: 0;
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(300px, 0.85fr) minmax(0, 1fr);
+  gap: 14px;
+  overflow: hidden;
+}
+
+.campaignAvailabilityVoteCard,
+.campaignAvailabilityTableCard {
+  min-height: 0;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  border: 1px solid rgba(25, 83, 68, 0.14);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 14px;
+  overflow: auto;
+}
+
+.campaignAvailabilityVoteCard > strong,
+.campaignAvailabilityTableCard > strong {
+  color: var(--pro-ink);
+  font-size: 1rem;
+}
+
+.campaignAvailabilityVoteCard > small {
+  color: var(--pro-muted);
+}
+
+.campaignAvailabilityWeekEditor {
+  display: grid;
+  gap: 9px;
+}
+
+.campaignAvailabilityDayEditor {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.campaignAvailabilityDayEditor > span {
+  color: var(--pro-ink);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.campaignAvailabilityDayEditor > div {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.campaignAvailabilityChoice {
+  min-height: 32px;
+  border: 1px solid rgba(25, 83, 68, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.74);
+  color: var(--pro-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.campaignAvailabilityChoice.is-active {
+  color: #fff;
+}
+
+.campaignAvailabilityChoice.is-available.is-active { background: #1f765f; }
+.campaignAvailabilityChoice.is-maybe.is-active { background: #d7a545; }
+.campaignAvailabilityChoice.is-unavailable.is-active { background: #c85c4a; }
+.campaignAvailabilityChoice.is-none.is-active { background: #8a9693; }
+
+.campaignAvailabilityTable {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+  overflow: hidden;
+}
+
+.campaignAvailabilityTableHead,
+.campaignAvailabilityTableRow {
+  display: grid;
+  grid-template-columns: minmax(94px, 1fr) repeat(7, minmax(28px, 1fr));
+  align-items: center;
+  gap: 5px;
+}
+
+.campaignAvailabilityTableHead span {
+  color: var(--pro-muted);
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.campaignAvailabilityTableHead span:first-child,
+.campaignAvailabilityTableRow strong {
+  text-align: left;
+}
+
+.campaignAvailabilityTableRow {
+  min-height: 34px;
+  border-top: 1px solid rgba(25, 83, 68, 0.08);
+}
+
+.campaignAvailabilityTableRow strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--pro-ink);
+  font-size: 0.82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.campaignAvailabilityDot {
+  width: 13px;
+  height: 13px;
+  justify-self: center;
+  display: inline-block;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.48);
+}
+
+.campaignAvailabilityDot.is-available { background: #1f765f; }
+.campaignAvailabilityDot.is-maybe { background: #d7a545; }
+.campaignAvailabilityDot.is-unavailable { background: #c85c4a; }
+.campaignAvailabilityDot.is-none { background: #b6c0bd; }
+
+.campaignAvailabilityLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  color: var(--pro-muted);
+  font-size: 0.76rem;
+}
+
+.campaignAvailabilityLegend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Global scrollbar polish: light SaaS track, muted green thumb, no dark native buttons. */
+* {
+  scrollbar-color: rgba(31, 118, 95, 0.38) rgba(244, 250, 247, 0.72) !important;
+}
+
+*::-webkit-scrollbar {
+  width: 10px !important;
+  height: 10px !important;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(244, 250, 247, 0.72) !important;
+  border-radius: 999px !important;
+}
+
+*::-webkit-scrollbar-thumb {
+  min-height: 42px !important;
+  border: 3px solid rgba(244, 250, 247, 0.72) !important;
+  border-radius: 999px !important;
+  background: rgba(31, 118, 95, 0.42) !important;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(31, 118, 95, 0.62) !important;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent !important;
+}
+
+*::-webkit-scrollbar-button {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+@media (max-width: 1280px) {
+  .dashboardWorkspaceGrid2026 {
+    grid-template-columns: minmax(0, 1fr) minmax(330px, 370px);
+  }
+
+  .dashboardStatsGrid2026 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 979px) {
+  .dashboardWorkbench2026 {
+    height: auto !important;
+    overflow: auto !important;
+    grid-template-rows: auto auto !important;
+  }
+
+  .dashboardHero2026,
+  .dashboardWorkspaceGrid2026,
+  .dashboardMainSplit2026 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboardMainColumn2026,
+  .dashboardRightColumn2026 {
+    overflow: visible;
+  }
+
+  .dashboardStatsGrid2026 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 980px) and (max-height: 820px) {
+  .dashboardWorkbench2026 {
+    grid-template-rows: 138px minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .dashboardWorkspaceGrid2026,
+  .dashboardMainColumn2026,
+  .dashboardRightColumn2026,
+  .dashboardMainSplit2026 {
+    gap: 12px;
+  }
+
+  .dashboardMainColumn2026 {
+    grid-template-rows: auto minmax(190px, 0.9fr) minmax(126px, 0.52fr);
+  }
+
+  .dashboardRightColumn2026 {
+    grid-template-rows: minmax(196px, 0.66fr) minmax(0, 1fr);
+  }
+
+  .dashboardStatCard {
+    min-height: 70px;
+    padding: 10px 12px;
+  }
+
+  .dashboardListPanel2026,
+  .dashboardActivityPanel2026,
+  .dashboardRolePanel2026,
+  .dashboardAvailabilityPanel2026 {
+    padding: 12px !important;
+  }
+}
+
+/* Account and notification dropdown polish (2026-05). */
+.appShellTools {
+  z-index: 120 !important;
+}
+
+.appAccountMenu,
+.notificationBell {
+  position: relative;
+}
+
+.appShellBell {
+  width: 52px !important;
+  height: 52px !important;
+  border: 1px solid rgba(25, 83, 68, 0.14) !important;
+  border-radius: 999px !important;
+  color: #16211d !important;
+  background: #ffffff !important;
+  box-shadow: 0 14px 32px rgba(15, 37, 31, 0.1) !important;
+  backdrop-filter: none !important;
+}
+
+.appShellBell:hover,
+.notificationBell:has(.notificationMenu) .appShellBell {
+  border-color: rgba(31, 118, 95, 0.36) !important;
+  color: #1f765f !important;
+  background: #f7fbf8 !important;
+  box-shadow: 0 16px 36px rgba(31, 118, 95, 0.14) !important;
+}
+
+.notificationBell.has-unread .appShellBell::after {
+  content: "";
+  position: absolute;
+  right: 9px;
+  bottom: 8px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid #ffffff;
+  border-radius: 999px;
+  background: #1f9a65;
+}
+
+.topNav__avatarBtn {
+  min-width: 246px !important;
+  min-height: 58px !important;
+  border: 1px solid rgba(25, 83, 68, 0.14) !important;
+  border-radius: 16px !important;
+  background: #ffffff !important;
+  color: #16211d !important;
+  box-shadow: 0 14px 32px rgba(15, 37, 31, 0.1) !important;
+  backdrop-filter: none !important;
+  padding: 8px 12px !important;
+}
+
+.topNav__avatarBtn:hover {
+  border-color: rgba(31, 118, 95, 0.32) !important;
+  background: #f8fbf9 !important;
+  box-shadow: 0 16px 36px rgba(31, 118, 95, 0.13) !important;
+}
+
+.topNav__avatar,
+.topNav__avatarImg {
+  order: -1;
+  flex: 0 0 42px !important;
+  width: 42px !important;
+  height: 42px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, #e9f4ee, #d8ebe2) !important;
+  color: #116047 !important;
+  font-size: 1.16rem !important;
+  font-weight: 900 !important;
+  box-shadow: inset 0 0 0 1px rgba(31, 118, 95, 0.08) !important;
+}
+
+.topNav__avatarImg {
+  object-fit: cover !important;
+}
+
+.topNav__avatarMeta {
+  gap: 1px !important;
+}
+
+.topNav__avatarLabel {
+  display: none !important;
+}
+
+.topNav__avatarName {
+  color: #101a17 !important;
+  font-size: 1rem !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.topNav__avatarRole {
+  color: #56645d !important;
+  font-size: 0.8rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0 !important;
+  text-transform: uppercase !important;
+}
+
+.topNav__avatarChevron {
+  color: #9aa7a0 !important;
+}
+
+.topNav__menu,
+.notificationMenu {
+  right: 0 !important;
+  z-index: 140 !important;
+  border: 1px solid rgba(25, 83, 68, 0.14) !important;
+  border-radius: 20px !important;
+  background: #ffffff !important;
+  color: #16211d !important;
+  box-shadow: 0 28px 70px rgba(15, 37, 31, 0.16) !important;
+  backdrop-filter: none !important;
+  overflow: hidden !important;
+}
+
+.topNav__menu {
+  width: min(360px, calc(100vw - 24px)) !important;
+  top: calc(100% + 14px) !important;
+}
+
+.notificationMenu {
+  width: min(470px, calc(100vw - 24px)) !important;
+  top: calc(100% + 14px) !important;
+}
+
+.topNav__menu::before,
+.notificationMenu::before {
+  top: -8px !important;
+  right: 48px !important;
+  width: 16px !important;
+  height: 16px !important;
+  border-top: 1px solid rgba(25, 83, 68, 0.14) !important;
+  border-left: 1px solid rgba(25, 83, 68, 0.14) !important;
+  background: #ffffff !important;
+}
+
+.notificationMenu::before {
+  right: 19px !important;
+}
+
+.topNav__menuHeader {
+  grid-template-columns: 86px minmax(0, 1fr) !important;
+  gap: 18px !important;
+  align-items: center !important;
+  border-bottom: 1px solid #e4ece7 !important;
+  background: #ffffff !important;
+  padding: 28px 24px 24px !important;
+}
+
+.topNav__menuAvatarWrap {
+  position: relative;
+  width: 86px;
+  height: 86px;
+  display: block;
+  flex: 0 0 auto;
+}
+
+.topNav__menuAvatar,
+.topNav__menuAvatarImg {
+  width: 86px !important;
+  height: 86px !important;
+  border: 5px solid #ffffff !important;
+  border-radius: 999px !important;
+  display: grid !important;
+  place-items: center !important;
+  object-fit: cover !important;
+  background: linear-gradient(135deg, #edf6f1, #d8ebe2) !important;
+  color: #116047 !important;
+  font-size: 2rem !important;
+  font-weight: 900 !important;
+  box-shadow: 0 14px 28px rgba(15, 37, 31, 0.12) !important;
+}
+
+.topNav__menuAvatarWrap i {
+  position: absolute;
+  right: 3px;
+  bottom: 4px;
+  width: 18px;
+  height: 18px;
+  border: 3px solid #ffffff;
+  border-radius: 999px;
+  background: #0f9f68;
+  box-shadow: 0 4px 10px rgba(15, 159, 104, 0.28);
+}
+
+.topNav__menuIdentity {
+  gap: 7px !important;
+}
+
+.topNav__menuName {
+  color: #101a17 !important;
+  font-family: var(--font-display) !important;
+  font-size: 1.48rem !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.03em !important;
+}
+
+.topNav__menuEmail {
+  color: #53645c !important;
+  font-size: 1rem !important;
+  line-height: 1.2 !important;
+}
+
+.topNav__menuRoleList {
+  margin-top: 4px !important;
+  gap: 8px !important;
+}
+
+.topNav__menuRole {
+  margin: 0 !important;
+  min-height: 30px !important;
+  align-items: center !important;
+  border: 1px solid rgba(31, 118, 95, 0.28) !important;
+  border-radius: 999px !important;
+  background: rgba(31, 118, 95, 0.1) !important;
+  color: #195d4a !important;
+  font-size: 0.83rem !important;
+  font-weight: 900 !important;
+  padding: 4px 13px !important;
+}
+
+.topNav__menuSection {
+  border-bottom: 1px solid #e4ece7 !important;
+  padding: 18px 14px !important;
+}
+
+.topNav__menuSection--bottom {
+  border-bottom: 0 !important;
+  padding-top: 14px !important;
+  padding-bottom: 18px !important;
+}
+
+.topNav__menuSectionTitle {
+  margin: 0 14px 10px !important;
+  color: #8a9690 !important;
+  font-size: 0.82rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.05em !important;
+}
+
+.topNav__menuItem {
+  min-height: 54px !important;
+  border-radius: 14px !important;
+  color: #16211d !important;
+  background: transparent !important;
+  font-size: 1.04rem !important;
+  font-weight: 850 !important;
+  grid-template-columns: 26px minmax(0, 1fr) !important;
+  gap: 14px !important;
+  padding: 0 16px !important;
+}
+
+.topNav__menuItem svg {
+  width: 23px !important;
+  height: 23px !important;
+  color: #26342f !important;
+}
+
+.topNav__menuItem:hover {
+  background: rgba(31, 118, 95, 0.08) !important;
+  color: #0f6049 !important;
+}
+
+.topNav__menuItem:hover svg {
+  color: #0f6049 !important;
+}
+
+.topNav__menuItem.is-danger {
+  color: #e54848 !important;
+}
+
+.topNav__menuItem.is-danger svg {
+  color: #ff4545 !important;
+}
+
+.topNav__menuItem.is-danger:hover {
+  background: rgba(229, 72, 72, 0.08) !important;
+  color: #d73434 !important;
+}
+
+.topNav__menuStatus {
+  padding: 0 24px 18px !important;
+  color: #53645c !important;
+  font-size: 0.82rem !important;
+}
+
+.notificationMenu__head {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto auto !important;
+  align-items: center !important;
+  gap: 14px !important;
+  border-bottom: 1px solid #e4ece7 !important;
+  background: #ffffff !important;
+  padding: 22px 24px !important;
+}
+
+.notificationMenu__head strong {
+  color: #101a17 !important;
+  font-family: var(--font-display) !important;
+  font-size: 1.42rem !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.025em !important;
+  text-transform: none !important;
+}
+
+.notificationMenu__head small {
+  margin-top: 2px !important;
+  color: #66756e !important;
+  font-size: 0.84rem !important;
+}
+
+.notificationMenu__head button {
+  min-height: 40px !important;
+  max-width: 150px !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  padding: 0 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  color: #0f6049 !important;
+  background: transparent !important;
+  font-size: 0.88rem !important;
+  font-weight: 850 !important;
+  line-height: 1.2 !important;
+  text-align: left !important;
+}
+
+.notificationMenu__head button:hover:not(:disabled) {
+  background: rgba(31, 118, 95, 0.08) !important;
+}
+
+.notificationMenu__head button:disabled {
+  color: #a8b4ae !important;
+  opacity: 1 !important;
+}
+
+.notificationMenu__head button svg {
+  width: 19px !important;
+  height: 19px !important;
+  flex: 0 0 auto !important;
+}
+
+.notificationMenu__list {
+  max-height: min(430px, calc(100vh - 180px)) !important;
+  gap: 8px !important;
+  padding: 12px !important;
+  background: #ffffff !important;
+}
+
+.notificationMenu__state {
+  min-height: 310px !important;
+  color: #53645c !important;
+  padding: 36px 28px !important;
+  gap: 12px !important;
+}
+
+.notificationMenu__stateIcon {
+  width: 104px !important;
+  height: 104px !important;
+  border: 0 !important;
+  background: linear-gradient(135deg, #edf6f1, #dcefe6) !important;
+  color: #1f765f !important;
+}
+
+.notificationMenu__stateIcon svg {
+  width: 48px !important;
+  height: 48px !important;
+}
+
+.notificationMenu__state strong {
+  color: #101a17 !important;
+  font-family: var(--font-display) !important;
+  font-size: 1.26rem !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.notificationMenu__state p {
+  max-width: 300px;
+  margin: 0;
+  color: #53645c;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.notificationMenu__state.is-error {
+  min-height: auto !important;
+  margin: 6px !important;
+  border: 1px solid rgba(200, 63, 54, 0.2) !important;
+  border-radius: 12px !important;
+  background: rgba(200, 63, 54, 0.08) !important;
+  color: #b93832 !important;
+}
+
+.notificationItem {
+  border: 1px solid #e1ebe5 !important;
+  border-radius: 14px !important;
+  background: #ffffff !important;
+  color: #16211d !important;
+  padding: 0 10px 0 0 !important;
+}
+
+.notificationItem:hover,
+.notificationItem.is-unread {
+  border-color: rgba(31, 118, 95, 0.26) !important;
+  background: #f7fbf8 !important;
+}
+
+.notificationItem__main {
+  grid-template-columns: 8px 42px minmax(0, 1fr) !important;
+  padding: 11px 4px 11px 11px !important;
+}
+
+.notificationItem:not(.is-unread) .notificationItem__main {
+  grid-template-columns: 0 42px minmax(0, 1fr) !important;
+}
+
+.notificationItem__dot {
+  width: 8px !important;
+  height: 8px !important;
+  background: #1f765f !important;
+  box-shadow: none !important;
+}
+
+.notificationItem__avatar {
+  border: 1px solid rgba(31, 118, 95, 0.16) !important;
+  background: rgba(31, 118, 95, 0.1) !important;
+  color: #195d4a !important;
+  box-shadow: none !important;
+}
+
+.notificationItem__copy strong {
+  color: #16211d !important;
+  font-size: 0.94rem !important;
+}
+
+.notificationItem__copy small {
+  color: #53645c !important;
+  font-size: 0.84rem !important;
+}
+
+.notificationItem__copy em {
+  color: #84928b !important;
+  font-size: 0.76rem !important;
+}
+
+.notificationItem__action {
+  border: 1px solid #dce7df !important;
+  color: #53645c !important;
+  background: #ffffff !important;
+}
+
+.notificationItem__action:hover {
+  background: #f4f8f6 !important;
+}
+
+.notificationItem__action.is-accept {
+  border-color: rgba(31, 118, 95, 0.28) !important;
+  color: #1f765f !important;
+  background: rgba(31, 118, 95, 0.08) !important;
+}
+
+.notificationItem__action.is-reject:hover {
+  border-color: rgba(200, 63, 54, 0.22) !important;
+  color: #c83f36 !important;
+  background: rgba(200, 63, 54, 0.08) !important;
+}
+
+.notificationItem__saving {
+  color: #84928b !important;
+}
+
+@media (max-width: 720px) {
+  .appShellTools {
+    right: 10px !important;
+    top: 10px !important;
+    gap: 8px !important;
+  }
+
+  .topNav__avatarBtn {
+    min-width: 52px !important;
+    width: 52px !important;
+    padding: 5px !important;
+  }
+
+  .topNav__avatarMeta,
+  .topNav__avatarChevron {
+    display: none !important;
+  }
+
+  .topNav__menu,
+  .notificationMenu {
+    position: fixed !important;
+    top: 72px !important;
+    right: 10px !important;
+    left: 10px !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+
+  .topNav__menu::before,
+  .notificationMenu::before {
+    display: none !important;
+  }
+
+  .notificationMenu__head {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .notificationMenu__head button {
+    max-width: none !important;
+    justify-content: flex-start !important;
+  }
+}
+
+/* Targeted visual QA fixes from annotated screenshots, 2026-05-27. */
+.appContentInner > .page {
+  background: transparent !important;
+}
+
+.dicePage {
+  align-content: start !important;
+}
+
+.diceWorkbench {
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.42fr) !important;
+  gap: 14px !important;
+}
+
+.diceMainPanel {
+  grid-template-rows: auto auto !important;
+  align-content: start !important;
+}
+
+.diceResultPanel {
+  grid-auto-rows: auto !important;
+  grid-template-rows: none !important;
+  align-content: start !important;
+  min-height: 0 !important;
+}
+
+.diceResultHero {
+  min-height: 118px !important;
+  padding: 18px !important;
+}
+
+.diceResultHero--fate {
+  grid-template-columns: minmax(120px, 0.32fr) minmax(0, 1fr) !important;
+  min-height: 118px !important;
+}
+
+.diceBigNumber {
+  font-size: clamp(2.5rem, 5.2vw, 4.2rem) !important;
+}
+
+.diceFateDie {
+  width: 54px !important;
+  height: 54px !important;
+  border-radius: 14px !important;
+}
+
+.diceGenesysResult {
+  grid-template-columns: minmax(220px, 0.62fr) minmax(0, 1fr) !important;
+  min-height: 118px !important;
+  padding: 16px !important;
+}
+
+.diceGenesysLegend {
+  margin: 10px 0 !important;
+}
+
+.diceSummaryGrid {
+  align-self: start !important;
+}
+
+.diceSummaryGrid div {
+  min-height: 56px !important;
+  padding: 10px 12px !important;
+}
+
+.diceSidePanel {
+  grid-template-rows: auto minmax(260px, 1fr) !important;
+}
+
+.diceConfigPanel {
+  max-height: 300px !important;
+}
+
+.diceHistoryCard {
+  min-height: 0 !important;
+}
+
+.diceHistoryList {
+  max-height: none !important;
+}
+
+.initiativePage {
+  grid-template-rows: auto minmax(0, 1fr) !important;
+}
+
+.initiativeControlsCard {
+  grid-template-columns: minmax(300px, 0.7fr) minmax(0, 1fr) !important;
+  align-self: start !important;
+  min-height: 0 !important;
+  padding: 12px 16px !important;
+}
+
+.initiativeStatusStrip {
+  min-height: 58px !important;
+  align-items: center !important;
+}
+
+.initiativeActions {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.initiativeParticipantsCard {
+  min-height: 0 !important;
+}
+
+.initiativeParticipantsCard > .emptyText {
+  display: flex !important;
+  align-items: flex-start !important;
+  min-height: 220px !important;
+  padding: 22px !important;
+  border: 1px dashed #dfe8e3 !important;
+  border-radius: 14px !important;
+  background: #fbfdfc !important;
+}
+
+.generatorsCatalogPage,
+.generatorWindowPage {
+  min-height: 0 !important;
+}
+
+.generatorsCatalogLayout {
+  grid-template-columns: 250px minmax(0, 1fr) !important;
+}
+
+.generatorsContent {
+  min-height: 0 !important;
+}
+
+.generatorsGrid {
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important;
+  align-content: start !important;
+}
+
+.generatorCardBody {
+  min-height: 132px !important;
+}
+
+.generatorWindowShell,
+.generatorWindowWorkspace {
+  min-height: 0 !important;
+  height: 100% !important;
+}
+
+.generatorWindowShell {
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr) !important;
+}
+
+.generatorSettingsPanel,
+.generatorOutputPanel {
+  min-height: 0 !important;
+  max-height: 100% !important;
+}
+
+.generatorOutputPanel {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+}
+
+.generatorOutputBody,
+.generatorWindowResult,
+.generatorWindowSections,
+.generatorTypedResult {
+  min-height: 0 !important;
+  overflow: auto !important;
+}
+
+.generatorWindowEmpty {
+  min-height: 220px !important;
+}
+
+.messagesPage {
+  grid-template-columns: minmax(260px, 300px) minmax(0, 1fr) minmax(250px, 280px) !important;
+  min-height: 0 !important;
+  height: 100% !important;
+}
+
+.messagesSidebar,
+.messagesMain,
+.messagesDetails {
+  min-height: 0 !important;
+  max-height: 100% !important;
+}
+
+.messagesDetails__content {
+  gap: 16px !important;
+  padding: 18px !important;
+}
+
+.messagesDetails__avatar {
+  width: 92px !important;
+  height: 92px !important;
+  margin-top: 8px !important;
+}
+
+.messagesInfoBlock dl div {
+  padding: 10px 0 !important;
+}
+
+.messagesDetailsFiles button {
+  padding: 8px !important;
+}
+
+.friendsDesk {
+  grid-template-columns: minmax(240px, 280px) minmax(360px, 1fr) minmax(280px, 330px) !important;
+  gap: 14px !important;
+  min-height: 0 !important;
+  height: 100% !important;
+}
+
+.friendsRail,
+.friendsListPanel,
+.friendsDetailsPanel {
+  min-height: 0 !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+}
+
+.friendsListPanel {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) auto !important;
+}
+
+.friendsContactList,
+.friendsDetailsPanel {
+  min-height: 0 !important;
+  overflow: auto !important;
+}
+
+.friendsRail {
+  padding: 14px !important;
+}
+
+.friendsListPanel {
+  padding: 16px !important;
+}
+
+.friendsDetailsPanel {
+  gap: 12px !important;
+  padding: 16px !important;
+}
+
+.friendsAvatar--lg {
+  width: 86px !important;
+  height: 86px !important;
+  font-size: 2rem !important;
+}
+
+.friendsDetailsHero h2 {
+  margin-top: 10px !important;
+  font-size: 1.35rem !important;
+}
+
+.friendsDetailsActions {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 42px !important;
+  gap: 8px !important;
+}
+
+.friendsPrimaryAction,
+.friendsSecondaryAction {
+  min-height: 42px !important;
+  padding: 0 10px !important;
+}
+
+.friendsInfoCard {
+  padding: 14px !important;
+}
+
+.friendsInfoCard dl div {
+  padding: 9px 0 !important;
+}
+
+.friendsSoftEmpty {
+  padding: 10px !important;
+}
+
+.notificationMenu {
+  width: min(430px, calc(100vw - 24px)) !important;
+}
+
+.notificationMenu__head {
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 8px !important;
+  padding: 16px 18px !important;
+}
+
+.notificationMenu__head > div:first-child {
+  grid-row: 1 / 3;
+}
+
+.notificationMenu__head strong {
+  font-size: 1.22rem !important;
+}
+
+.notificationMenu__head small {
+  font-size: 0.78rem !important;
+}
+
+.notificationMenu__head button {
+  justify-content: flex-start !important;
+  min-height: 32px !important;
+  max-width: 180px !important;
+  font-size: 0.78rem !important;
+  line-height: 1.1 !important;
+}
+
+.notificationMenu__list {
+  max-height: min(360px, calc(100vh - 150px)) !important;
+}
+
+.notificationItem__main {
+  grid-template-columns: 7px 38px minmax(0, 1fr) !important;
+  padding: 9px 4px 9px 10px !important;
+}
+
+.notificationItem__avatar {
+  width: 38px !important;
+  height: 38px !important;
+}
+
+@media (max-width: 1280px) {
+  .messagesPage {
+    grid-template-columns: minmax(260px, 300px) minmax(0, 1fr) !important;
+  }
+
+  .messagesDetails {
+    display: none !important;
+  }
+
+  .friendsDesk {
+    grid-template-columns: minmax(230px, 270px) minmax(0, 1fr) !important;
+  }
+
+  .friendsDetailsPanel {
+    grid-column: 1 / -1 !important;
+    max-height: 360px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .diceWorkbench,
+  .generatorWindowShell,
+  .generatorsCatalogLayout,
+  .friendsDesk,
+  .messagesPage,
+  .initiativeControlsCard {
+    grid-template-columns: 1fr !important;
+  }
+
+  .diceSidePanel,
+  .friendsDetailsPanel {
+    max-height: none !important;
+  }
+}
+
+/* Initiative modal and compact friends polish. */
+.initiativeModalOverlay {
+  align-items: flex-start !important;
+  justify-content: center !important;
+  padding: 42px 18px !important;
+  background: rgba(222, 232, 226, 0.62) !important;
+  backdrop-filter: blur(2px) !important;
+}
+
+.initiativeModal {
+  width: min(620px, calc(100vw - 36px)) !important;
+  height: auto !important;
+  max-height: calc(100vh - 84px) !important;
+  border: 1px solid rgba(186, 204, 194, 0.92) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 24px 72px rgba(26, 42, 35, 0.18) !important;
+}
+
+.initiativeModalHeader h3,
+.initiativeModalHeader {
+  text-align: center !important;
+}
+
+.initiativeModalHeader h3 {
+  flex: 1 1 auto !important;
+}
+
+.initiativeFieldError {
+  margin-top: -2px !important;
+  color: #b42318 !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+  text-align: left !important;
+}
+
+.initiativeField input[aria-invalid="true"] {
+  border-color: rgba(180, 35, 24, 0.55) !important;
+  box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.08) !important;
+}
+
+.initiativeMoreMenu {
+  min-width: 190px !important;
+  padding: 8px !important;
+  border-color: rgba(190, 205, 196, 0.9) !important;
+  box-shadow: 0 18px 46px rgba(27, 42, 35, 0.14) !important;
+}
+
+.initiativeMoreMenu button {
+  justify-content: center !important;
+  min-height: 40px !important;
+  padding: 0 14px !important;
+  text-align: center !important;
+  border-radius: 10px !important;
+}
+
+.friendsRail {
+  align-content: start !important;
+}
+
+.friendsHelpBox {
+  display: none !important;
+}
+
+/* Targeted layout repairs for Dice, Generators and Friends.
+   These rules intentionally live at the end so they win over older redesign overrides. */
+.diceWorkbench {
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 420px) !important;
+  align-items: start !important;
+  overflow: visible !important;
+}
+
+.diceSidePanel {
+  display: grid !important;
+  grid-template-rows: auto auto !important;
+  align-content: start !important;
+  gap: 14px !important;
+  overflow: visible !important;
+  max-height: none !important;
+}
+
+.diceConfigPanel {
+  width: 100% !important;
+  max-height: none !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.diceGenesysPool {
+  max-height: min(52vh, 500px) !important;
+  overflow-y: auto !important;
+  padding-right: 4px !important;
+}
+
+.diceHistoryCard {
+  max-height: min(46vh, 430px) !important;
+}
+
+.generatorWindowPage {
+  display: grid !important;
+  grid-template-rows: auto auto !important;
+  align-content: start !important;
+  height: auto !important;
+  min-height: auto !important;
+  overflow: visible !important;
+}
+
+.generatorPageActions {
+  width: min(100%, 1500px) !important;
+  margin-inline: auto !important;
+}
+
+.generatorWindowWorkspace {
+  width: min(100%, 1500px) !important;
+  margin-inline: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+
+.generatorWindowShell {
+  display: grid !important;
+  grid-template-columns: minmax(320px, 380px) minmax(0, 1fr) !important;
+  align-items: stretch !important;
+  gap: 18px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+
+.generatorSettingsPanel {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.generatorOutputPanel {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(360px, auto) !important;
+}
+
+.generatorWindowEmpty {
+  min-height: 360px !important;
+}
+
+.friendsDesk {
+  width: min(100%, 1480px) !important;
+  margin-inline: auto !important;
+  grid-template-columns: minmax(260px, 300px) minmax(420px, 1fr) minmax(320px, 370px) !important;
+  align-items: stretch !important;
+  gap: 16px !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.friendsRail,
+.friendsListPanel,
+.friendsDetailsPanel {
+  max-height: none !important;
+  min-height: min(720px, calc(100vh - 170px)) !important;
+}
+
+.friendsRail {
+  overflow: visible !important;
+}
+
+.friendsListPanel {
+  overflow: hidden !important;
+}
+
+.friendsContactList {
+  overflow: auto !important;
+}
+
+.friendsContactList > .friendsState,
+.friendsListPanel .friendsState {
+  min-height: 240px !important;
+  display: grid !important;
+  place-items: center !important;
+  text-align: center !important;
+}
+
+@media (max-width: 1180px) {
+  .friendsDesk {
+    grid-template-columns: minmax(240px, 290px) minmax(0, 1fr) !important;
+  }
+
+  .friendsDetailsPanel {
+    grid-column: 1 / -1 !important;
+    min-height: 0 !important;
+  }
+}
+
+@media (max-width: 980px) {
+  .diceWorkbench,
+  .generatorWindowShell,
+  .friendsDesk {
+    grid-template-columns: 1fr !important;
+  }
+
+  .diceGenesysPool,
+  .diceHistoryCard {
+    max-height: none !important;
+  }
+
+  .generatorOutputPanel {
+    grid-template-rows: auto minmax(260px, auto) !important;
+  }
+
+  .friendsRail,
+  .friendsListPanel,
+  .friendsDetailsPanel {
+    min-height: 0 !important;
+  }
+}
+
+/* Fine-tune topbar controls, Genesys dice controls, generator details and initiative spacing. */
+.appShellTools {
+  top: 16px !important;
+  right: 32px !important;
+  gap: 10px !important;
+  align-items: flex-start !important;
+}
+
+.appShellBell {
+  width: 44px !important;
+  height: 44px !important;
+}
+
+.appShellBell svg {
+  width: 17px !important;
+  height: 17px !important;
+}
+
+.notificationBell.has-unread .appShellBell::after {
+  right: 7px !important;
+  bottom: 7px !important;
+  width: 9px !important;
+  height: 9px !important;
+}
+
+.topNav__avatarBtn {
+  width: max-content !important;
+  min-width: 174px !important;
+  max-width: 220px !important;
+  min-height: 50px !important;
+  padding: 6px 10px !important;
+  gap: 9px !important;
+}
+
+.topNav__avatar,
+.topNav__avatarImg {
+  flex-basis: 38px !important;
+  width: 38px !important;
+  height: 38px !important;
+  font-size: 1rem !important;
+}
+
+.topNav__avatarMeta {
+  max-width: 112px !important;
+}
+
+.topNav__avatarName {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.notificationMenu {
+  width: min(390px, calc(100vw - 24px)) !important;
+  top: calc(100% + 10px) !important;
+}
+
+.topNav__menu {
+  width: min(320px, calc(100vw - 24px)) !important;
+  top: calc(100% + 10px) !important;
+}
+
+.diceGenesysDieBadge {
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: inherit !important;
+}
+
+.diceGenesysDieControl.is-bad .diceGenesysDieBadge {
+  background: transparent !important;
+}
+
+.diceGenesysDieBadge .genesysSymbol.is-green { color: var(--dice-green) !important; }
+.diceGenesysDieBadge .genesysSymbol.is-violet { color: var(--dice-violet) !important; }
+.diceGenesysDieBadge .genesysSymbol.is-gold { color: var(--dice-gold) !important; }
+.diceGenesysDieBadge .genesysSymbol.is-red { color: var(--dice-red) !important; }
+.diceGenesysDieBadge .genesysSymbol.is-slate { color: var(--dice-slate) !important; }
+.diceGenesysDieBadge .genesysSymbol.is-black { color: #111827 !important; }
+
+.diceGenesysDieBadge .genesysSymbol,
+.diceGenesysDieBadge .genesysSymbol svg {
+  width: 28px !important;
+  height: 28px !important;
+}
+
+.generatorWindowWorkspace {
+  display: block !important;
+  justify-self: stretch !important;
+}
+
+.generatorWindowShell {
+  display: flex !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+}
+
+.generatorSettingsPanel {
+  flex: 0 0 clamp(320px, 25vw, 380px) !important;
+}
+
+.generatorOutputPanel {
+  flex: 1 1 auto !important;
+  min-width: 520px !important;
+}
+
+.generatorWindowResult,
+.generatorWindowEmpty {
+  width: 100% !important;
+}
+
+.initiativePage {
+  gap: 10px !important;
+}
+
+.initiativeControlsCard {
+  margin-bottom: 0 !important;
+}
+
+.initiativeParticipantsCard {
+  margin-top: 0 !important;
+}
+
+@media (max-width: 980px) {
+  .generatorWindowShell {
+    flex-direction: column !important;
+  }
+
+  .generatorSettingsPanel,
+  .generatorOutputPanel {
+    flex-basis: auto !important;
+    min-width: 0 !important;
+  }
+}

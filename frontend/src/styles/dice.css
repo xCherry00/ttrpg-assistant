@@ -1,1029 +1,683 @@
-/* â”€â”€ Dice page tokens â”€â”€ */
 .dicePage {
-  --dice-surface: rgba(13, 20, 36, 0.86);
-  --dice-surface-strong: rgba(8, 13, 25, 0.96);
-  --dice-surface-soft: rgba(18, 27, 48, 0.74);
-  --dice-bg: radial-gradient(circle at 16% 0%, rgba(31, 118, 95, 0.18) 0%, transparent 42%),
-    radial-gradient(circle at 90% 10%, rgba(14, 165, 233, 0.08) 0%, transparent 32%);
-  --dice-card: linear-gradient(180deg, rgba(17, 24, 43, 0.94), rgba(9, 15, 29, 0.94));
-  --dice-line: rgba(31, 118, 95, 0.32);
-  --dice-line-soft: rgba(161, 173, 204, 0.14);
-  --dice-text: #f8f6ff;
-  --dice-muted: rgba(226, 232, 255, 0.68);
-  --dice-accent: var(--r-primary);
-  --dice-accent-2: #36d7e8;
-  --dice-success: #64d987;
-  --dice-fail: #ff5d63;
-  --dice-gold: #e8b558;
-  display: grid;
-  gap: 16px;
-  min-height: calc(100vh - 50px);
-  padding-bottom: 24px;
+  --dice-bg: #f7fbf8;
+  --dice-surface: rgba(255, 255, 255, 0.88);
+  --dice-panel: #f5faf7;
+  --dice-line: rgba(25, 83, 68, 0.14);
+  --dice-line-strong: rgba(25, 83, 68, 0.24);
+  --dice-text: #17231f;
+  --dice-muted: #61736d;
+  --dice-green: #1f765f;
+  --dice-green-soft: rgba(31, 118, 95, 0.1);
+  --dice-red: #d05a4a;
+  --dice-gold: #d9a63d;
+  --dice-violet: #6554c0;
+  --dice-slate: #35423f;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
   color: var(--dice-text);
+}
+
+.diceWorkbench {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(340px, 0.62fr);
+  gap: 16px;
+  overflow: hidden;
+}
+
+.diceMainPanel,
+.diceSidePanel {
+  min-height: 0;
+  display: grid;
+  gap: 14px;
+  overflow: hidden;
+}
+
+.diceMainPanel {
   grid-template-rows: auto minmax(0, 1fr);
 }
 
-/* â”€â”€ Page header â”€â”€ */
-.dicePageHeader {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  margin: -22px -28px 4px;
-  padding: 22px 274px 14px 28px;
-  align-items: flex-end;
-  gap: 18px;
-  border-bottom: 1px solid rgba(161, 173, 204, 0.1);
-  background:
-    radial-gradient(circle at 18% 0%, rgba(31, 118, 95, 0.18), transparent 34%),
-    linear-gradient(90deg, rgba(8, 13, 25, 0.96), rgba(11, 18, 32, 0.96));
-  backdrop-filter: blur(14px);
+.diceSidePanel {
+  grid-template-rows: auto minmax(0, 1fr);
 }
 
-.dicePageTitle {
-  color: var(--dice-text);
-  margin: 0;
-}
-
-.dicePage .pageEyebrow {
-  color: rgba(31, 118, 95, 0.88);
-}
-
-.dicePage .pageSubtitle {
-  color: var(--dice-muted);
-}
-
-.dicePageControlRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  align-self: flex-end;
-}
-
-/* â”€â”€ Tabs â”€â”€ */
-.diceTabs {
-  display: flex;
-  gap: 6px;
-  border: 1px solid var(--dice-line-soft);
-  border-radius: 12px;
-  background: rgba(8, 13, 25, 0.62);
-  padding: 4px;
-}
-
-.diceTab {
-  min-height: 34px;
-  padding: 0 14px;
-  border: 0;
-  border-radius: 9px;
-  background: transparent;
-  color: var(--dice-muted);
-  font-weight: 800;
-  font-size: 0.86rem;
-  cursor: pointer;
-  transition: color 0.15s, background 0.15s;
-}
-
-.diceTab:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
-
-.diceTab.is-active {
-  color: #ffffff;
-  background: linear-gradient(135deg, rgba(31, 118, 95, 0.72), rgba(21, 88, 68, 0.72));
-}
-
-.diceManageBtn {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 0 14px;
-  height: 36px;
-  border-radius: 10px;
-  border: 1px solid var(--dice-line);
-  background: rgba(10,14,28,0.85);
-  color: #d0d8f8;
-  font-weight: 600;
-  font-size: 0.88rem;
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
-}
-
-.diceManageBtn:hover {
-  border-color: var(--dice-accent);
-  background: var(--primary-dim);
-}
-
-/* â”€â”€ Card base â”€â”€ */
+.diceCommandPanel,
 .diceCard {
-  border-radius: 14px;
-  border: 1px solid var(--dice-line-soft);
-  background: var(--dice-card);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 20px 50px rgba(0, 0, 0, 0.28);
-  color: var(--dice-text);
-  position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(12px);
+  border: 1px solid var(--dice-line);
+  border-radius: 20px;
+  background: var(--dice-surface);
+  box-shadow: 0 18px 42px rgba(15, 37, 31, 0.08);
 }
 
-.diceCard::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--dice-bg);
-  opacity: 0.72;
-  pointer-events: none;
-}
-
-.diceCard > * { position: relative; z-index: 1; }
-
-/* â”€â”€ Workbench â”€â”€ */
-.diceWorkbench {
+.diceCommandPanel {
   display: grid;
-  grid-template-columns: minmax(420px, 1.45fr) minmax(320px, 0.85fr);
-  gap: 16px;
-  align-items: stretch;
-}
-
-.diceTabPanel {
-  min-height: calc(100vh - 190px);
-}
-
-.diceTabPanel > .diceCard,
-.diceTabPanel > .diceBottomGrid,
-.diceWorkbench > .diceCard {
-  min-height: 100%;
-}
-
-/* â”€â”€ Arena (left) â”€â”€ */
-.diceArena { padding: 18px; }
-
-.diceArenaTop {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.diceArenaFormula {
-  flex: 1;
-  border: 1px solid var(--dice-line-soft);
-  border-radius: 10px;
-  min-height: 46px;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  font-size: 1.72rem;
-  font-weight: 900;
-  letter-spacing: 0;
-  color: #ffffff;
-  background: rgba(5, 9, 19, 0.78);
-}
-
-.diceGhostBtn {
-  min-height: 42px;
-  padding: 0 16px;
-  border-radius: 10px;
-  border: 1px solid var(--dice-line-soft);
-  background: rgba(255, 255, 255, 0.045);
-  color: rgba(244, 247, 255, 0.82);
-  font-weight: 800;
-  cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
-  white-space: nowrap;
-}
-
-.diceGhostBtn:hover { border-color: var(--dice-line); color: #ffffff; background: rgba(31, 118, 95, 0.13); }
-
-.diceArenaModTag {
-  margin-top: 10px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  border-radius: 99px;
-  border: 1px solid rgba(31, 118, 95, 0.32);
-  background: rgba(31, 118, 95, 0.14);
-  font-size: 0.85rem;
-  color: rgba(244, 247, 255, 0.78);
-}
-
-.diceArenaModTag strong { color: #67e8f9; }
-
-/* â”€â”€ Dice visual zone â”€â”€ */
-.diceVisualZone {
-  margin-top: 14px;
-  min-height: 168px;
-  border: 1px solid var(--dice-line-soft);
-  border-radius: 12px;
-  background:
-    radial-gradient(circle at 50% 0%, rgba(31, 118, 95, 0.14), transparent 44%),
-    rgba(5, 9, 19, 0.66);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 14px;
-}
-
-.diceVisualZone:has(.diceNarrativeResult) {
-  align-items: stretch;
-}
-
-.diceVisualDiceRow {
-  display: flex;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 14px;
-  flex-wrap: wrap;
-  justify-content: center;
+  padding: 16px;
 }
 
-/* Individual die */
-.diceArenaDie {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.diceArenaDieSvg {
-  width: clamp(88px, 12vw, 130px);
-  height: clamp(88px, 12vw, 130px);
-  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--primary) 34%, transparent));
-}
-
-.diceArenaDiePath {
-  stroke: color-mix(in srgb, var(--primary) 62%, transparent);
-  stroke-width: 1.5;
-}
-
-.diceArenaDieTxt {
-  font-size: 32px;
-  font-weight: 800;
-  color: #ffffff;
-  fill: #d8baff;
-  letter-spacing: 0;
-}
-
-.diceArenaDieType {
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--dice-muted);
-}
-
-/* Modifier badge next to dice */
-.diceArenaModBadge {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.diceArenaModVal {
-  font-size: clamp(1.6rem, 3vw, 2.2rem);
-  font-weight: 800;
-  color: var(--dice-accent-2);
-  line-height: 1;
-}
-
-.diceArenaModLbl {
-  font-size: 0.66rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--dice-muted);
-}
-
-/* Placeholder */
-.diceVisualEmpty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  color: var(--dice-muted);
-  font-size: 0.9rem;
-}
-
-.diceVisualPlaceholderSvg {
-  width: 60px;
-  height: 60px;
-  opacity: 0.25;
-}
-
-.diceVisualPlaceholderSvg path {
-  fill: none;
-  stroke: var(--dice-text);
-  stroke-width: 2;
-}
-
-/* â”€â”€ Result â”€â”€ */
-.diceFinalWrap {
-  margin-top: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.diceFinalLabel {
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--dice-muted);
-}
-
-.diceFinalValue {
-  font-size: clamp(2.4rem, 4vw, 3.6rem);
-  font-weight: 800;
-  color: #c084fc;
-  line-height: 1;
-}
-
-.diceFinalHint {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-weight: 700;
-  font-size: 0.95rem;
-  margin-top: 2px;
-}
-
-.diceFinalHint.is-success { color: var(--dice-success); }
-.diceFinalHint.is-critical { color: var(--dice-gold); }
-.diceFinalHint.is-fail { color: var(--dice-fail); }
-
-/* â”€â”€ Main actions â”€â”€ */
-.diceMainActions {
-  margin-top: 16px;
+.diceFormulaBox {
   display: grid;
-  grid-template-columns: 1fr;
   gap: 8px;
+}
+
+.diceFormulaBox span,
+.diceSideHeader p,
+.diceSummaryGrid span,
+.diceField span,
+.diceStepper > span {
+  color: var(--dice-muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.diceFormulaBox strong {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--dice-line);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--dice-text);
+  font-family: var(--font-display, inherit);
+  font-size: clamp(1.15rem, 1.8vw, 1.55rem);
+  font-weight: 900;
+  padding: 0 14px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.diceActionRow {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+}
+
+.diceModeTabs {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.diceModeTabs button,
+.dicePrimaryBtn,
+.diceGhostBtn,
+.diceRollTypeGrid button,
+.diceHistoryHead button {
+  min-height: 42px;
+  border: 1px solid var(--dice-line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--dice-text);
+  cursor: pointer;
+  font-weight: 850;
+  padding: 0 16px;
+}
+
+.diceModeTabs button.is-active,
+.diceRollTypeGrid button.is-active {
+  border-color: rgba(31, 118, 95, 0.36);
+  background: var(--dice-green);
+  color: #fff;
 }
 
 .dicePrimaryBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 44px;
-  border-radius: 10px;
   border: 0;
-  cursor: pointer;
-  font-size: 0.95rem;
-  font-weight: 900;
-  color: #ffffff;
-  background: linear-gradient(135deg, var(--r-primary), var(--r-primary-2) 54%, #0891b2);
-  box-shadow: 0 12px 26px rgba(31, 118, 95, 0.3);
-  transition: transform 0.15s, box-shadow 0.15s;
+  background: var(--dice-green);
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(31, 118, 95, 0.18);
 }
 
-.dicePrimaryBtn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 16px 32px rgba(31, 118, 95, 0.38);
+.diceGhostBtn:hover,
+.diceModeTabs button:hover,
+.diceRollTypeGrid button:hover,
+.diceHistoryHead button:hover {
+  border-color: var(--dice-line-strong);
+  background: var(--dice-green-soft);
 }
 
-.diceSecondaryBtn {
-  min-height: 44px;
-  padding: 0 14px;
-  border-radius: 10px;
-  border: 1px solid var(--dice-line);
-  background: rgba(255, 255, 255, 0.045);
-  color: #e9d5ff;
-  font-weight: 900;
-  cursor: pointer;
-  font-size: 0.88rem;
-  white-space: nowrap;
-  transition: border-color 0.15s;
-}
-
-.diceSecondaryBtn:hover { border-color: var(--r-primary); background: rgba(31, 118, 95, 0.13); }
-
-
-/* â”€â”€ Config panel (middle) â”€â”€ */
-.diceConfig { padding: 18px; }
-
-.diceColumnHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
-}
-
-.diceColumnTitle { font-size: 1.2rem; font-weight: 700; }
-
-.diceColumnTitle,
-.diceHistoryTitle {
-  color: #ffffff;
-}
-
-.diceCollapseIcon { color: var(--dice-muted); cursor: pointer; }
-
-/* Config rows */
-.diceConfigRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.diceConfigLabel {
-  font-size: 0.84rem;
-  color: rgba(226, 232, 255, 0.72);
-  font-weight: 800;
-}
-
-.diceOptional {
-  font-size: 0.76rem;
-  opacity: 0.7;
-}
-
-.diceConfigField {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 12px;
-}
-
-/* Qty stepper */
-.diceQtyControl {
-  display: flex;
-  align-items: center;
-  border: 1px solid var(--dice-line-soft);
-  border-radius: 8px;
+.diceResultPanel,
+.diceConfigPanel,
+.diceHistoryCard {
+  min-height: 0;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 18px;
   overflow: hidden;
-  background: rgba(5, 9, 19, 0.88);
 }
 
-.diceQtyStep {
-  width: 36px;
-  height: 36px;
-  border: 0;
-  background: transparent;
-  color: #ffffff;
-  font-size: 1rem;
-  font-weight: 800;
-  cursor: pointer;
-  transition: background 0.12s;
+.diceResultPanel {
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
 }
 
-.diceQtyStep:hover:not(:disabled) { background: rgba(145,116,255,0.22); }
-.diceQtyStep:disabled { opacity: 0.3; cursor: not-allowed; }
-
-.diceQtyNum {
-  min-width: 40px;
-  text-align: center;
-  font-weight: 700;
-  font-size: 0.9rem;
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.055);
-  border: 0;
-  border-inline: 1px solid var(--dice-line-soft);
-  line-height: 36px;
+.diceSectionHeader,
+.diceSideHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-/* Select */
-.diceSelect {
-  width: 100%;
-  height: 40px;
-  border-radius: 8px;
-  border: 1px solid var(--dice-line-soft);
-  background-color: rgba(5, 9, 19, 0.9);
-  color: #ffffff;
-  padding: 0 10px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2391a0c4' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
+.diceSectionHeader h2,
+.diceSideHeader h2 {
+  margin: 0;
+  color: var(--dice-text);
+  font-family: var(--font-display, inherit);
+  font-size: 1.08rem;
+  font-weight: 900;
 }
 
-.diceSelect--sm { height: 34px; font-size: 0.84rem; width: auto; min-width: 110px; }
-
-/* Input / textarea */
-.diceInput {
-  width: 100%;
-  height: 40px;
-  border-radius: 8px;
-  border: 1px solid var(--dice-line-soft);
-  background: rgba(5, 9, 19, 0.9);
-  color: #ffffff;
-  padding: 0 12px;
-  font-size: 0.9rem;
-  box-sizing: border-box;
-}
-
-.diceInput:focus, .diceSelect:focus, .diceTextarea:focus {
-  outline: none;
-  border-color: rgba(31, 118, 95, 0.55);
-  box-shadow: 0 0 0 3px rgba(31, 118, 95, 0.14);
-}
-
-.diceTextarea {
-  width: 100%;
-  border-radius: 8px;
-  border: 1px solid var(--dice-line-soft);
-  background: rgba(5, 9, 19, 0.9);
-  color: #ffffff;
-  padding: 10px 12px;
+.diceSectionHeader p,
+.diceSideHeader p {
+  margin: 4px 0 0;
+  color: var(--dice-muted);
   font-size: 0.88rem;
-  resize: vertical;
-  font-family: inherit;
-  box-sizing: border-box;
 }
 
-.diceTextarea::placeholder, .diceInput::placeholder { color: rgba(148, 163, 184, 0.62); }
+.diceResultHero {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  border: 1px solid var(--dice-line);
+  border-radius: 18px;
+  background: linear-gradient(145deg, #fff, #f8fbf9);
+  padding: clamp(18px, 3vw, 32px);
+}
 
-.diceFieldError {
-  color: var(--dice-fail);
+.diceResultHero--fate {
+  grid-template-columns: minmax(140px, 0.35fr) minmax(0, 1fr);
+  align-items: center;
+}
+
+.diceBigNumber {
+  color: var(--dice-green);
+  font-family: var(--font-display, inherit);
+  font-size: clamp(3rem, 7vw, 5.4rem);
+  font-weight: 950;
+  line-height: 0.95;
+}
+
+.diceBreakdown,
+.diceOutcomeText {
+  color: var(--dice-muted);
+  font-weight: 800;
+}
+
+.diceOutcomeText {
+  color: var(--dice-green);
+}
+
+.diceDiceStage {
+  min-height: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  gap: 12px;
+  overflow: auto;
+  border: 1px dashed var(--dice-line-strong);
+  border-radius: 18px;
+  background:
+    linear-gradient(90deg, rgba(31, 118, 95, 0.04) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(31, 118, 95, 0.04) 1px, transparent 1px),
+    var(--dice-panel);
+  background-size: 26px 26px;
+  padding: 18px;
+}
+
+.diceStandardDie {
+  width: 78px;
+  height: 78px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 4px;
+  border: 1px solid var(--dice-line);
+  border-radius: 24px;
+  background: #fff;
+  color: var(--dice-muted);
+}
+
+.diceStandardDie.is-selected {
+  border-color: rgba(31, 118, 95, 0.42);
+  background: var(--dice-green);
+  color: #fff;
+}
+
+.diceStandardDie strong {
+  font-size: 1.6rem;
+  font-weight: 950;
+}
+
+.diceStandardDie span,
+.diceEmptyStage {
+  color: inherit;
   font-size: 0.78rem;
   font-weight: 800;
 }
 
-/* Checkbox */
-.diceCheckboxRow {
+.diceFateDice {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  font-size: 0.88rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.diceFateDie {
+  width: 68px;
+  height: 68px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--dice-line);
+  border-radius: 16px;
+  background: #fff;
   color: var(--dice-muted);
-  margin-top: 4px;
+  font-size: 1.8rem;
+  font-weight: 950;
 }
 
-.diceCheckbox {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--dice-accent);
-  cursor: pointer;
+.diceFateDie.is-plus { color: var(--dice-green); }
+.diceFateDie.is-minus { color: var(--dice-red); }
+.diceFateDie.is-zero { color: var(--dice-muted); }
+
+.diceSummaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--dice-line);
+  border-radius: 16px;
+  background: #fff;
 }
 
-/* â”€â”€ History panel (right) â”€â”€ */
-.diceHistoryCard {
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
+.diceSummaryGrid div {
+  display: grid;
+  gap: 6px;
+  min-height: 70px;
+  border-right: 1px solid var(--dice-line);
+  padding: 14px;
 }
 
-.diceHistoryHeader {
-  display: flex;
+.diceSummaryGrid div:last-child {
+  border-right: 0;
+}
+
+.diceSummaryGrid strong {
+  color: var(--dice-text);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.diceGenesysResult {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.7fr) minmax(0, 1fr);
+  gap: 16px;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 12px;
-  flex-shrink: 0;
+  border: 1px solid var(--dice-line);
+  border-radius: 18px;
+  background: #fff;
+  padding: 18px;
 }
 
-.diceHistoryTitle {
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 700;
+.diceGenesysHeadline {
+  color: var(--dice-text);
+  font-family: var(--font-display, inherit);
+  font-size: clamp(1.7rem, 3vw, 2.8rem);
+  font-weight: 950;
+  line-height: 1.05;
+}
+
+.diceGenesysResult p {
+  margin: 10px 0 0;
+  color: var(--dice-muted);
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.diceGenesysSymbolGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 10px;
+}
+
+.diceGenesysResultItem {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  border: 1px solid var(--dice-line);
+  border-radius: 16px;
+  background: var(--dice-panel);
+  padding: 12px;
+  text-align: center;
+}
+
+.diceGenesysResultItem span {
+  color: var(--dice-muted);
+  font-weight: 800;
+}
+
+.diceGenesysResultItem strong {
+  color: var(--dice-text);
+}
+
+.genesysSymbol {
+  width: 28px;
+  height: 28px;
+  display: inline-grid;
+  place-items: center;
+  color: currentColor;
+}
+
+.genesysSymbol svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.genesysSymbol.is-green { color: var(--dice-green); }
+.genesysSymbol.is-violet { color: var(--dice-violet); }
+.genesysSymbol.is-gold { color: var(--dice-gold); }
+.genesysSymbol.is-red { color: var(--dice-red); }
+.genesysSymbol.is-slate { color: var(--dice-slate); }
+.genesysSymbol.is-black { color: #111827; }
+
+.diceGenesysLegend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 16px;
+  color: var(--dice-muted);
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.diceGenesysLegend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.diceConfigPanel {
+  max-height: min(48vh, 430px);
+  overflow: auto;
+}
+
+.diceField,
+.diceStepper {
+  display: grid;
+  gap: 8px;
+}
+
+.diceField select,
+.diceStepper input {
+  min-height: 42px;
+  border: 1px solid var(--dice-line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--dice-text);
+  font-weight: 800;
+  padding: 0 12px;
+}
+
+.diceStepper {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.diceStepper > div {
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid var(--dice-line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.diceStepper button {
+  width: 38px;
+  border: 0;
+  background: #fff;
+  color: var(--dice-green);
+  cursor: pointer;
+  font-weight: 950;
+}
+
+.diceStepper button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.diceStepper input {
+  width: 58px;
+  min-height: 38px;
+  border: 0;
+  border-inline: 1px solid var(--dice-line);
+  border-radius: 0;
+  text-align: center;
+}
+
+.diceRollTypeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.diceGenesysPool {
+  display: grid;
+  gap: 10px;
+}
+
+.diceGenesysDieControl {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--dice-line);
+  border-radius: 14px;
+  background: var(--dice-panel);
+  padding: 10px;
+}
+
+.diceGenesysDieBadge {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--dice-green);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 950;
+}
+
+.diceGenesysDieBadge .genesysSymbol {
+  width: 21px;
+  height: 21px;
+  color: currentColor;
+}
+
+.diceGenesysDieBadge .genesysSymbol svg {
+  stroke-width: 2.4;
+}
+
+.diceGenesysDieControl.is-bad .diceGenesysDieBadge {
+  background: var(--dice-red);
+}
+
+.diceGenesysDieControl strong {
+  color: var(--dice-text);
+}
+
+.diceGenesysDieControl .diceStepper {
+  display: block;
+}
+
+.diceGenesysDieControl .diceStepper > span {
+  display: none;
+}
+
+.diceHistoryCard {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.diceHistoryHead button {
+  min-height: 34px;
+  padding: 0 10px;
+  font-size: 0.78rem;
 }
 
 .diceHistoryList {
-  flex: 1;
+  min-height: 0;
   display: grid;
+  align-content: start;
   gap: 8px;
-  overflow-y: auto;
-  max-height: 480px;
-  padding-right: 2px;
+  overflow: auto;
+  padding-right: 3px;
 }
 
+.diceHistoryItem,
 .diceHistoryEmpty {
-  border: 1px dashed var(--dice-line-soft);
-  border-radius: 10px;
-  min-height: 68px;
-  display: grid;
-  place-items: center;
-  color: rgba(226, 232, 255, 0.68);
-  font-size: 0.86rem;
-  text-align: center;
-  padding: 12px;
-}
-
-.diceHistoryItem {
-  border: 1px solid var(--dice-line-soft);
-  border-radius: 10px;
-  padding: 10px 12px;
-  background: rgba(5, 9, 19, 0.72);
+  border: 1px solid var(--dice-line);
+  border-radius: 14px;
+  background: var(--dice-panel);
+  padding: 10px;
 }
 
 .diceHistoryTop {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.diceHistoryFormula { color: #ffffff; font-size: 0.95rem; font-weight: 800; }
-
-.diceHistoryTotal {
-  color: #e8b558;
-  font-size: 1.9rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.diceHistoryMeta {
-  color: var(--dice-muted);
-  font-size: 0.76rem;
-  margin-top: 2px;
-}
-
-.diceHistoryBreakdown {
-  color: rgba(191, 219, 254, 0.88);
-  font-size: 0.82rem;
-  margin-top: 4px;
-}
-
-.diceHistoryBadge {
-  display: inline-block;
-  margin-top: 6px;
-  padding: 2px 9px;
-  border-radius: 99px;
-  font-size: 0.76rem;
-  font-weight: 700;
-}
-
-.diceHistoryBadge.is-success { color: var(--dice-success); background: rgba(54,220,138,0.12); }
-.diceHistoryBadge.is-critical { color: var(--dice-gold); background: rgba(245,197,24,0.12); }
-.diceHistoryBadge.is-fail { color: var(--dice-fail); background: rgba(255,92,122,0.12); }
-
-
-/* â”€â”€ Bottom grid â”€â”€ */
-.diceNarrativeResult {
-  display: grid;
   gap: 12px;
-  color: var(--dice-muted);
-  font-size: 0.92rem;
-  width: 100%;
-  max-width: 620px;
-  justify-items: center;
-  text-align: center;
 }
 
-.diceNarrativeResult strong {
-  color: #ffffff;
-  font-size: clamp(2rem, 4vw, 3rem);
-  line-height: 1;
-}
-
-.diceGenesysSymbols {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
-}
-
-.diceGenesysSymbol {
-  min-height: 72px;
-  display: grid;
-  place-items: center;
-  gap: 4px;
-  border: 1px solid rgba(161, 173, 204, 0.18);
-  border-radius: 12px;
-  background: rgba(5, 9, 19, 0.68);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
-.diceGenesysSymbol strong {
-  color: #ffffff;
-  font-size: 1.45rem;
-}
-
-.diceGenesysSymbol em {
-  color: var(--dice-muted);
-  font-size: 0.74rem;
+.diceHistoryTop strong,
+.diceHistoryTop em {
+  color: var(--dice-text);
   font-style: normal;
   font-weight: 900;
 }
 
-.diceGenesysSymbol.is-success,
-.diceGenesysSymbol.is-advantage,
-.diceGenesysSymbol.is-triumph {
-  border-color: rgba(100, 217, 135, 0.32);
+.diceHistoryTop em {
+  color: var(--dice-green);
+  text-align: right;
 }
 
-.diceGenesysSymbol.is-failure,
-.diceGenesysSymbol.is-threat,
-.diceGenesysSymbol.is-despair {
-  border-color: rgba(255, 93, 99, 0.34);
+.diceHistoryItem span,
+.diceHistoryItem p,
+.diceHistoryEmpty {
+  color: var(--dice-muted);
+  font-size: 0.84rem;
+  font-weight: 700;
 }
 
-.diceGenesysSymbol.is-triumph strong {
-  color: var(--dice-gold);
-}
-
-.diceGenesysSymbol.is-despair strong {
-  color: var(--dice-fail);
-}
-
-.diceGenesysNet {
+.diceHistorySymbols {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-}
-
-.diceGenesysNet span,
-.diceGenesysNeutral {
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.055);
-  padding: 4px 10px;
-  color: var(--dice-muted);
-  font-size: 0.82rem;
-  font-weight: 800;
-}
-
-.diceGenesysPool {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.diceGenesysDie {
-  display: grid;
-  gap: 10px;
-  border: 1px solid var(--dice-line-soft);
-  border-radius: 12px;
-  padding: 12px;
-  background: rgba(5, 9, 19, 0.42);
-}
-
-.diceGenesysDie.is-positive {
-  background:
-    radial-gradient(circle at 0% 0%, rgba(45, 212, 191, 0.12), transparent 48%),
-    rgba(5, 9, 19, 0.42);
-}
-
-.diceGenesysDie.is-negative {
-  background:
-    radial-gradient(circle at 0% 0%, rgba(248, 113, 113, 0.12), transparent 48%),
-    rgba(5, 9, 19, 0.42);
-}
-
-.diceGenesysDieHead {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  min-width: 0;
-}
-
-.diceGenesysDieMark {
-  width: 30px;
-  height: 30px;
-  display: grid;
-  place-items: center;
-  flex: 0 0 auto;
-  border-radius: 9px;
-  border: 1px solid rgba(161, 173, 204, 0.2);
-  background: rgba(255, 255, 255, 0.06);
-  color: #ffffff;
-  font-weight: 900;
-  font-size: 0.9rem;
-}
-
-.diceGenesysDie.is-positive .diceGenesysDieMark {
-  color: #67e8f9;
-  border-color: rgba(45, 212, 191, 0.32);
-}
-
-.diceGenesysDie.is-negative .diceGenesysDieMark {
-  color: #fecaca;
-  border-color: rgba(248, 113, 113, 0.32);
-}
-
-.diceGenesysDieLabel {
-  min-width: 0;
-  color: rgba(244, 247, 255, 0.84);
-  font-size: 0.9rem;
-  font-weight: 900;
-  overflow-wrap: anywhere;
-}
-
-.diceQtyControl--compact {
-  width: 100%;
-}
-
-.diceQtyControl--compact .diceQtyNum {
-  flex: 1;
-}
-
-.diceQtyInput {
-  text-align: center;
-}
-
-.diceBottomGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  align-items: stretch;
-}
-
-.diceBottomGrid .diceChartCard {
-  grid-column: 1 / -1;
-}
-
-.dicePage option {
-  background: #0b1020;
-  color: #ffffff;
-}
-
-.dicePage input[type="number"]::-webkit-outer-spin-button,
-.dicePage input[type="number"]::-webkit-inner-spin-button {
-  margin: 0;
-}
-
-/* â”€â”€ Stats card â”€â”€ */
-.diceStatsCard, .diceChartCard { padding: 18px; }
-
-.diceStatsHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-
-.diceStatFormula {
-  font-size: 0.84rem;
-  color: var(--dice-muted);
-  border: 1px solid var(--dice-line-soft);
-  border-radius: 7px;
-  padding: 4px 10px;
-  background: rgba(8,12,22,0.7);
-  cursor: pointer;
-}
-
-.diceMetrics {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin-bottom: 14px;
-}
-
-.diceMetricBox {
-  border: 1px solid var(--dice-line-soft);
-  border-radius: 10px;
-  padding: 10px;
-  background: rgba(5, 9, 19, 0.72);
-  display: flex;
-  flex-direction: column;
   gap: 6px;
+  margin-top: 7px;
 }
 
-.diceMetricLabel {
-  color: var(--dice-muted);
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-}
-
-.diceMetricValue {
-  font-size: 1.35rem;
-  font-weight: 800;
-  color: #ffffff;
-}
-
-.diceMetricBox.is-high .diceMetricValue { color: var(--dice-success); }
-.diceMetricBox.is-low .diceMetricValue { color: var(--dice-fail); }
-
-/* Success/fail bars */
-.diceSuccessBars { display: grid; gap: 10px; }
-
-.diceSuccessRow {
-  display: grid;
-  grid-template-columns: 60px 1fr auto;
-  align-items: center;
-  gap: 10px;
-}
-
-.diceSuccessLabel { font-size: 0.84rem; color: var(--dice-muted); }
-
-.diceSuccessTrack {
-  height: 12px;
-  border-radius: 99px;
-  background: rgba(133,152,204,0.18);
-  overflow: hidden;
-}
-
-.diceSuccessBar {
-  height: 100%;
-  border-radius: inherit;
-  transition: width 0.4s ease;
-}
-
-.diceSuccessBar.is-success { background: linear-gradient(90deg, #2acb7f, #60f6a6); }
-.diceSuccessBar.is-fail { background: linear-gradient(90deg, #e04060, #ff6080); }
-
-.diceSuccessPct { font-size: 0.8rem; color: var(--dice-muted); white-space: nowrap; }
-
-/* â”€â”€ Chart card â”€â”€ */
-.diceBarChart {
-  min-height: 140px;
-  display: flex;
-  align-items: flex-end;
-}
-
-.diceBarChartInner {
-  display: flex;
-  align-items: flex-end;
-  gap: 6px;
-  width: 100%;
-  height: 140px;
-}
-
-.diceBarCol {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+.diceHistorySymbols span {
+  display: inline-flex;
   align-items: center;
   gap: 4px;
-  height: 100%;
+  border: 1px solid var(--dice-line);
+  border-radius: 999px;
+  background: #fff;
+  padding: 3px 7px;
 }
 
-.diceBarCount {
+.diceHistorySymbols .genesysSymbol {
+  width: 17px;
+  height: 17px;
+}
+
+.diceHistorySymbols strong,
+.diceHistorySymbols em {
+  color: var(--dice-text);
+  font-style: normal;
   font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.diceHistorySymbols em {
   color: var(--dice-muted);
-  line-height: 1;
 }
 
-.diceBarTrack {
-  flex: 1;
-  width: 100%;
-  border-radius: 4px 4px 0 0;
-  background: rgba(146,167,218,0.12);
-  display: flex;
-  align-items: flex-end;
-  overflow: hidden;
+.diceHistoryItem p {
+  margin: 4px 0 0;
+  line-height: 1.35;
 }
 
-.diceBarFill {
-  width: 100%;
-  border-radius: 4px 4px 0 0;
-  background: linear-gradient(180deg, var(--primary), var(--secondary));
-  transition: height 0.3s ease;
-}
-
-.diceBarLabel {
-  font-size: 0.7rem;
-  color: var(--dice-muted);
-  line-height: 1;
-}
-
-/* â”€â”€ Responsive â”€â”€ */
-@media (max-width: 1240px) {
-  .diceWorkbench { grid-template-columns: 1fr 1fr; }
-  .diceHistoryCard { grid-column: 1 / -1; }
-  .diceHistoryList { max-height: 320px; }
-  .diceMetrics { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 840px) {
-  .diceWorkbench { grid-template-columns: 1fr; }
-  .diceBottomGrid { grid-template-columns: 1fr; }
-  .diceArenaFormula { font-size: 1.3rem; }
-  .diceMainActions { grid-template-columns: 1fr; }
-  .dicePageControlRow { flex-direction: column; align-items: flex-start; }
-  .diceTabs { overflow-x: auto; }
-  .diceMetrics { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 560px) {
-  .dicePageHeader {
-    align-items: stretch;
+@media (max-width: 1180px) {
+  .diceWorkbench {
+    grid-template-columns: minmax(0, 1fr) minmax(310px, 0.56fr);
   }
 
-  .dicePageControlRow {
-    width: 100%;
+  .diceGenesysResult {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .dicePage {
+    height: auto;
+    overflow: visible;
   }
 
-  .diceTabs {
-    width: 100%;
-  }
-
-  .diceTab {
-    flex: 1;
-    padding-inline: 10px;
-  }
-
-  .diceMainActions {
+  .diceWorkbench,
+  .diceMainPanel,
+  .diceSidePanel {
+    height: auto;
+    overflow: visible;
     grid-template-columns: 1fr;
   }
 
-  .diceSecondaryBtn {
-    width: 100%;
+  .diceConfigPanel,
+  .diceHistoryCard {
+    max-height: none;
+  }
+
+  .diceHistoryList {
+    max-height: 360px;
   }
 }
 
-/* Modern design adapter: dice tools use the shared SaaS accent palette. */
-.dicePrimaryBtn {
-  background: linear-gradient(135deg, var(--r-primary), var(--r-primary-2));
-  box-shadow: 0 10px 22px rgba(31, 118, 95, 0.18);
-}
+@media (max-width: 640px) {
+  .diceCommandPanel,
+  .diceResultPanel,
+  .diceConfigPanel,
+  .diceHistoryCard {
+    padding: 12px;
+  }
 
-.diceSecondaryBtn:hover {
-  border-color: var(--r-line-strong);
-  background: var(--r-primary-soft);
-}
+  .diceCommandPanel,
+  .diceResultHero--fate,
+  .diceStepper,
+  .diceGenesysDieControl {
+    grid-template-columns: 1fr;
+  }
 
-.diceBarFill {
-  background: linear-gradient(180deg, var(--r-primary), var(--r-indigo));
+  .diceActionRow,
+  .diceModeTabs {
+    width: 100%;
+  }
+
+  .diceActionRow > *,
+  .diceModeTabs button {
+    flex: 1;
+  }
+
+  .diceRollTypeGrid {
+    grid-template-columns: 1fr;
+  }
 }

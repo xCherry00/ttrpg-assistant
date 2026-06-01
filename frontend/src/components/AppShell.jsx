@@ -1,6 +1,5 @@
 import Sidebar from "./Sidebar";
 import AccountMenu from "./AccountMenu";
-import MessageLauncher from "./MessageLauncher";
 import NotificationBell from "./NotificationBell";
 import { Outlet, useLocation } from "react-router-dom";
 
@@ -8,7 +7,8 @@ const PAGE_META = [
   { match: (path) => path === "/dashboard", title: "Dashboard", description: "Panel główny aplikacji TTRPG Assistant." },
   { match: (path) => path.startsWith("/campaigns"), title: "Kampanie", description: "Zarządzanie kampaniami i światami gry." },
   { match: (path) => path.startsWith("/characters"), title: "Postacie", description: "Zarządzanie kartami postaci i danymi bohaterów." },
-  { match: (path) => path === "/initiative" || path.includes("/sessions/"), title: "Sesje", description: "Planowanie i prowadzenie sesji RPG." },
+  { match: (path) => path === "/initiative", title: "Tracker inicjatywy", description: "Zarządzanie walką, turami i uczestnikami." },
+  { match: (path) => path.includes("/sessions/"), title: "Sesje", description: "Planowanie i prowadzenie sesji RPG." },
   { match: (path) => path.startsWith("/generators"), title: "Generatory", description: "Narzędzia do tworzenia treści RPG." },
   { match: (path) => path === "/settings", title: "Ustawienia", description: "Zarządzaj kontem, bezpieczeństwem i wyglądem aplikacji." },
   { match: (path) => path === "/glossary", title: "Słownik", description: "Pojęcia i terminy ze świata TTRPG. Wybierz hasło z listy po lewej." },
@@ -50,7 +50,6 @@ export default function AppShell() {
               ) : null}
               <Outlet />
             </div>
-            <MessageLauncher />
           </div>
         </main>
       </div>

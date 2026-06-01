@@ -4,15 +4,37 @@ import { RULES_STARTER_RESOURCES } from "../data/rulesResources";
 import "../styles/rules.css";
 
 const SECTION_DEFS = [
-  { key: "overview", label: "Czym jest ten system?", generalLabel: "Czym sa gry RPG?" },
-  { key: "core-test", label: "Podstawowa mechanika testow", generalLabel: "Testy, decyzje i konsekwencje" },
-  { key: "character-creation", label: "Tworzenie postaci w skrócie", generalLabel: "Rola gracza i postać gracza" },
-  { key: "combat", label: "Walka w skrócie", generalLabel: "Rola Mistrza Gry" },
-  { key: "health", label: "Zdrowie i obrazenia", generalLabel: "Jak wyglada typowa sesja?" },
-  { key: "progression", label: "Rozwój postaci", generalLabel: "Odgrywanie postaci i wspólna historia" },
-  { key: "game-flow", label: "Minimalny flow gry", generalLabel: "Kampanie, sceny i dluzsza gra" },
-  { key: "dice-rolls", label: "Rzuty kośćmi", generalLabel: "Kości i różne systemy RPG" },
+  { key: "overview", label: "Czym jest ten system?" },
+  { key: "core-test", label: "Podstawowa mechanika testow" },
+  { key: "character-creation", label: "Tworzenie postaci w skrocie" },
+  { key: "combat", label: "Walka w skrocie" },
+  { key: "health", label: "Zdrowie i obrazenia" },
+  { key: "progression", label: "Rozwoj postaci" },
+  { key: "game-flow", label: "Minimalny flow gry" },
 ];
+
+function shortDescription(profile) {
+  return profile.sections?.overview || profile.legalNote || "Krotki opis systemu RPG i jego podstawowego stylu gry.";
+}
+
+function legalResources(profile, starterResources) {
+  const sourceRows = (profile.sources || []).map((source) => ({
+    name: source.name,
+    url: source.url,
+  }));
+  const starterRows = starterResources.map((resource) => ({
+    name: resource.label,
+    url: resource.url,
+  }));
+
+  const seen = new Set();
+  return [...sourceRows, ...starterRows].filter((row) => {
+    const key = `${row.name}-${row.url}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return row.name && row.url;
+  });
+}
 
 export default function RulesPage() {
   const [selectedSystem, setSelectedSystem] = useState(() => {
@@ -23,12 +45,14 @@ export default function RulesPage() {
       return BASIC_RULES[0].rulesApiCode;
     }
   });
+  const [query, setQuery] = useState("");
+  const [openSections, setOpenSections] = useState({ overview: true });
 
   useEffect(() => {
     try {
       window.sessionStorage.setItem("rulesSelectedSystem", selectedSystem);
     } catch {
-      // ignore
+      // Session storage can be unavailable in private browsing.
     }
   }, [selectedSystem]);
 
@@ -36,96 +60,125 @@ export default function RulesPage() {
     return BASIC_RULES_BY_API_CODE[selectedSystem] || BASIC_RULES[0];
   }, [selectedSystem]);
 
+  const filteredSystems = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    return BASIC_RULES.filter((system) => !needle || system.name.toLowerCase().includes(needle));
+  }, [query]);
+
+  const visibleSections = useMemo(() => {
+    return SECTION_DEFS.filter((section) => selectedProfile.sections?.[section.key]);
+  }, [selectedProfile]);
+
+  useEffect(() => {
+    setOpenSections({ overview: true });
+  }, [selectedSystem]);
+
   const starterResources = [...(RULES_STARTER_RESOURCES[selectedSystem] || [])].sort((a, b) => (a.priority || 999) - (b.priority || 999));
+  const resources = legalResources(selectedProfile, starterResources);
+
+  function selectSystem(systemCode) {
+    setSelectedSystem(systemCode);
+  }
+
+  function toggleSection(key) {
+    setOpenSections((current) => (current[key] ? {} : { [key]: true }));
+  }
 
   return (
     <div className="page rulesPage">
-      <div className="pageHeader">
-        <div>
-          <span className="pageEyebrow">baza wiedzy</span>
-          <h1 className="pageTitle">Zasady TTRPG</h1>
-          <p className="pageSubtitle">
-            Podstawowe zasady do rozpoczecia gry. Aplikacja prezentuje tylko wlasne streszczenia, legalne linki i minimalne podstawy, nie pelne podreczniki.
-          </p>
-        </div>
-      </div>
-
       <div className="rulesContainer">
-        <div className="rulesSystemFilter">
-          <div className="rulesFilterLabel">Wybierz system:</div>
-          <div className="rulesSystemButtons">
-            {BASIC_RULES.map((system) => (
-              <button
-                key={system.rulesApiCode}
-                type="button"
-                onClick={() => setSelectedSystem(system.rulesApiCode)}
-                className={selectedSystem === system.rulesApiCode ? "rulesSystemBtn--active" : ""}
-              >
-                {system.name}
+        <aside className="rulesSystemFilter" aria-label="Lista systemow">
+          <div className="rulesSearchBox">
+            <svg className="rulesSearchIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              className="rulesSearchInput"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Szukaj systemu..."
+              aria-label="Szukaj systemu"
+            />
+            {query ? (
+              <button className="rulesSearchClear" type="button" onClick={() => setQuery("")} aria-label="Wyczysc wyszukiwanie">
+                x
               </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <h2 className="rulesSystemTitle">{selectedProfile.name}</h2>
-
-          <section className="rulesCards" aria-label="Basic rules sections">
-            {SECTION_DEFS.map((section) => (
-              selectedProfile.sections?.[section.key] ? (
-              <article className="rulesCard is-open" key={section.key}>
-                <div className="rulesCardHeader">
-                  <span className="rulesCardTitle">{selectedProfile.rulesApiCode === "general" ? section.generalLabel : section.label}</span>
-                </div>
-                <div className="rulesCardBody">
-                  <p className="rulesSummary">{selectedProfile.sections?.[section.key] || "Brak lokalnego opisu tej sekcji."}</p>
-                </div>
-              </article>
-              ) : null
-            ))}
-          </section>
-
-          <div className="rulesSource">
-            Legalne zrodla:
-            <ul>
-              {selectedProfile.sources.map((link) => (
-                <li key={link.url}><a href={link.url} target="_blank" rel="noreferrer">{link.name}</a></li>
-              ))}
-            </ul>
+            ) : null}
           </div>
 
-          <div className="rulesSource"><small>{selectedProfile.legalNote}</small></div>
+          <div className="rulesSystemList" role="listbox" aria-label="Systemy RPG">
+            {filteredSystems.length === 0 ? (
+              <div className="rulesEmpty">Brak systemow dla tej frazy.</div>
+            ) : filteredSystems.map((system) => {
+              const active = selectedSystem === system.rulesApiCode;
+              return (
+                <button
+                  key={system.rulesApiCode}
+                  type="button"
+                  role="option"
+                  aria-selected={active}
+                  className={`rulesSystemItem${active ? " is-active" : ""}`}
+                  onClick={() => selectSystem(system.rulesApiCode)}
+                >
+                  {system.name}
+                </button>
+              );
+            })}
+          </div>
+        </aside>
 
-          <h3 className="rulesSystemTitle">Oficjalne materialy startowe</h3>
-          {selectedSystem === "wh4e" && (
-            <p className="rulesSummary">
-              Dla WFRP 4e nie dodano pelnego darmowego SRD. Ponizsze linki prowadza do oficjalnych darmowych materialow pomocniczych.
-            </p>
-          )}
-          <section className="rulesCards" aria-label="Starter resources">
-            {starterResources.map((resource) => (
-              <article className="rulesCard is-open" key={resource.url}>
-                <div className="rulesCardHeader">
-                  <span className="rulesCardTitle">{resource.label}</span>
-                  <span className="rulesCategoryBadge">{resource.type}</span>
-                </div>
-                <div className="rulesCardBody">
-                  <p className="rulesSummary"><strong>Zrodlo:</strong> {resource.sourceName}</p>
-                  <p className="rulesSummary">{resource.description}</p>
-                  <p className="rulesSummary"><strong>Uwagi:</strong> {resource.usageNote}</p>
-                  <a
-                    className="rulesExpandAllBtn"
-                    href={resource.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {String(resource.type).includes("pdf") ? "Pobierz / otwórz PDF" : "Otwórz zrodlo"}
-                  </a>
-                </div>
-              </article>
-            ))}
-          </section>
-        </div>
+        <main className="rulesReaderPanel">
+          <div className="rulesReaderContent">
+            <header className="rulesReaderHeader">
+              <h2>{selectedProfile.name}</h2>
+              <p>{shortDescription(selectedProfile)}</p>
+            </header>
+
+            <section className="rulesAccordion" aria-label="Sekcje zasad">
+              {visibleSections.map((section) => {
+                const isOpen = Boolean(openSections[section.key]);
+                return (
+                  <article key={section.key} className={`rulesAccordionItem${isOpen ? " is-open" : ""}`}>
+                    <button
+                      type="button"
+                      className="rulesAccordionHeader"
+                      onClick={() => toggleSection(section.key)}
+                      aria-expanded={isOpen}
+                    >
+                      <span>{section.label}</span>
+                      <span className="rulesAccordionChevron" aria-hidden="true" />
+                    </button>
+                    {isOpen ? (
+                      <div className="rulesAccordionBody">
+                        <p>{selectedProfile.sections?.[section.key] || "Brak lokalnego opisu tej sekcji."}</p>
+                      </div>
+                    ) : null}
+                  </article>
+                );
+              })}
+            </section>
+
+            <section className="rulesLegalBox" aria-label="Legalne zrodla">
+              <h3>Legalne zrodla</h3>
+              {resources.length === 0 ? (
+                <p>Brak zdefiniowanych zrodel dla tego systemu.</p>
+              ) : (
+                <ul>
+                  {resources.map((resource) => (
+                    <li key={`${resource.name}-${resource.url}`}>
+                      {resource.url === "#" ? (
+                        <span>{resource.name}</span>
+                      ) : (
+                        <a href={resource.url} target="_blank" rel="noreferrer">{resource.name}</a>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </div>
+        </main>
       </div>
     </div>
   );

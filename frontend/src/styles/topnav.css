@@ -46,7 +46,7 @@
 }
 
 .topNav__logo::before {
-  content: "âś¦";
+  content: "*";
   font-size: 18px;
   background: linear-gradient(135deg, var(--primary), #f5d080);
   -webkit-background-clip: text;

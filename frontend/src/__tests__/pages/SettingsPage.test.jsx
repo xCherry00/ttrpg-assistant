@@ -47,13 +47,13 @@ describe("SettingsPage v0.8.1", () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
   });
 
-  it("renders header and left categories", async () => {
+  it("renders left categories without a duplicate page header", async () => {
     renderPage();
 
-    expect(await screen.findByRole("heading", { name: "Ustawienia" })).toBeInTheDocument();
-    expect(screen.getByText("Zarządzaj kontem, bezpieczeństwem i wyglądem aplikacji.")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Ustawienia" })).not.toBeInTheDocument();
+    expect(screen.queryByText("Zarządzaj kontem, bezpieczeństwem i wyglądem aplikacji.")).not.toBeInTheDocument();
 
-    const categoriesPanel = screen.getByRole("heading", { name: "Kategorie" }).closest("aside");
+    const categoriesPanel = (await screen.findByRole("heading", { name: "Kategorie" })).closest("aside");
     expect(within(categoriesPanel).getByRole("button", { name: /Konto/i })).toBeInTheDocument();
     expect(within(categoriesPanel).getByRole("button", { name: /Bezpieczeństwo/i })).toBeInTheDocument();
     expect(within(categoriesPanel).getByRole("button", { name: /Wygląd/i })).toBeInTheDocument();

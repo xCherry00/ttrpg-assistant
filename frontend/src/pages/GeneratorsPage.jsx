@@ -56,6 +56,25 @@ const FAVORITES_STORAGE_KEY = "ttrpg.generatorFavorites";
 const GENERATOR_HISTORY_STORAGE_KEY = "ttrpg.generatorHistory";
 const GENERATOR_HISTORY_LIMIT = 10;
 
+const GENERATOR_CATEGORY_CONFIG = [
+  { value: "all", label: "Wszystkie typy", icon: "spark", aliases: [] },
+  { value: "characters", label: "Postacie", icon: "hood", aliases: ["name", "npc", "coc_investigator_npc", "character", "person"] },
+  { value: "locations", label: "Lokacje", icon: "castle", aliases: ["location", "tavern", "shop_fantasy", "settlement_fantasy", "district_fantasy", "castle_fantasy", "place"] },
+  { value: "organizations", label: "Organizacje", icon: "shield", aliases: ["faction", "organization", "organisations", "organizations"] },
+  { value: "world", label: "Swiat", icon: "planet", aliases: ["fantasy_world", "calendar_fantasy", "demographics_fantasy", "scifi_world", "star_system", "world"] },
+  { value: "adventures", label: "Przygody", icon: "scroll", aliases: ["hook", "quest_fantasy", "encounter", "encounter_quick", "complication_quick", "adventure", "scene"] },
+  { value: "items", label: "Przedmioty", icon: "chest", aliases: ["loot", "loot_fantasy", "magic_item", "item", "treasure"] },
+  { value: "clues", label: "Wskazowki", icon: "eye", aliases: ["clue", "document_quick", "hint", "evidence"] },
+  { value: "dungeons", label: "Lochy", icon: "gear", aliases: ["five_room_dungeon", "dungeon_advanced", "dungeon_concept", "dungeon_room", "dungeon", "room"] },
+  { value: "events", label: "Wydarzenia", icon: "bolt", aliases: ["event_quick", "event", "twist"] },
+  { value: "food", label: "Jedzenie", icon: "bowl", aliases: ["food_quick", "food", "meal"] },
+];
+
+const GENERATOR_CATEGORY_BY_ALIAS = GENERATOR_CATEGORY_CONFIG.reduce((map, category) => {
+  for (const alias of category.aliases) map[alias] = category.value;
+  return map;
+}, {});
+
 const CARD_META = {
   npc: {
     title: "NPC",
@@ -148,7 +167,7 @@ const CARD_META = {
   name: {
     title: "Imiona",
     tag: "Imiona i nazwy",
-    description: "Imiona, nazwiska, nazwy miejsc, karczm, organizacji i artefaktów.",
+    description: "Generator tworzy tylko imiona i nazwiska postaci.",
     tone: "gold",
     icon: "type",
     order: 90,
@@ -358,17 +377,6 @@ const CANONICAL_GENERATOR_TYPES = [
   "name",
 ];
 
-const TYPE_FILTERS = [
-  { value: "all", label: "Wszystkie" },
-  { value: "npc", label: "NPC" },
-  { value: "location", label: "Lokacja" },
-  { value: "item", label: "Przedmiot" },
-  { value: "clue", label: "Tropy" },
-  { value: "faction", label: "Frakcje" },
-  { value: "story", label: "Fabula" },
-  { value: "environment", label: "Pogoda" },
-  { value: "name", label: "Imiona" },
-];
 
 const TONE_OPTIONS_BY_CATEGORY = {
   FANTASY: [
@@ -812,17 +820,6 @@ function resultToText(result) {
   return lines.join("\n").trim();
 }
 
-function sectionContent(sections, title) {
-  return sections.find((section) => section.title === title)?.content || "";
-}
-
-function linesFromContent(content) {
-  return String(content || "")
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
-}
-
 function dungeonMapRows(content) {
   return String(content || "")
     .split("\n")
@@ -1008,6 +1005,346 @@ function formatGeneratedAt(value) {
   }).format(date);
 }
 
+
+function normalizeText(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function generatorCategoryId(item) {
+  if (!item) return "all";
+  const probes = [item.type, item.generatorCode, item.typeCode, item.catalogTypeCode, item.categoryCode, item.category, item.label, item.title]
+    .filter(Boolean)
+    .map((value) => normalizeText(value));
+  for (const probe of probes) {
+    if (GENERATOR_CATEGORY_BY_ALIAS[probe]) return GENERATOR_CATEGORY_BY_ALIAS[probe];
+    const match = Object.entries(GENERATOR_CATEGORY_BY_ALIAS).find(([alias]) => probe.includes(alias));
+    if (match) return match[1];
+  }
+  return "world";
+}
+
+function generatorCategoryLabel(item) {
+  const category = GENERATOR_CATEGORY_CONFIG.find((option) => option.value === generatorCategoryId(item));
+  return category?.label || "Inne";
+}
+
+function safeResultValue(value, fallback = "Brak danych") {
+  if (value === undefined || value === null) return fallback;
+  if (Array.isArray(value)) {
+    const parts = value.map((item) => safeResultValue(item, "")).filter(Boolean);
+    return parts.length ? parts.join(", ") : fallback;
+  }
+  if (typeof value === "object") {
+    if (value.label || value.value) return [value.label, value.value].filter(Boolean).join(": ");
+    return Object.entries(value)
+      .map(([key, entry]) => `${key}: ${safeResultValue(entry, "")}`)
+      .filter(Boolean)
+      .join(", ") || fallback;
+  }
+  const text = String(value).trim();
+  return text || fallback;
+}
+
+function findSectionLoose(sections, labels) {
+  const normalizedLabels = labels.map(normalizeText);
+  return sections.find((section) => {
+    const title = normalizeText(section.title);
+    return normalizedLabels.some((label) => title === label || title.includes(label) || label.includes(title));
+  });
+}
+
+function sectionValueLoose(sections, labels) {
+  const section = findSectionLoose(sections, labels);
+  if (!section) return "";
+  if (section.content) return safeResultValue(section.content, "");
+  if (Array.isArray(section.items) && section.items.length) {
+    return section.items.map((item) => {
+      const label = item.label ? `${item.label}: ` : "";
+      return `${label}${safeResultValue(item.value, "")}`.trim();
+    }).filter(Boolean).join("\n");
+  }
+  return "";
+}
+
+function itemValueLoose(sections, labels) {
+  const normalizedLabels = labels.map(normalizeText);
+  for (const section of sections) {
+    if (!Array.isArray(section.items)) continue;
+    const item = section.items.find((entry) => {
+      const label = normalizeText(entry.label);
+      return normalizedLabels.some((expected) => label === expected || label.includes(expected) || expected.includes(label));
+    });
+    if (item) return safeResultValue(item.value, "");
+  }
+  return "";
+}
+
+function resultValueFor(sections, labels) {
+  return itemValueLoose(sections, labels) || sectionValueLoose(sections, labels);
+}
+
+function resultLines(value) {
+  return String(value || "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function cleanNameLine(value) {
+  const text = safeResultValue(value, "").replace(/^\s*(?:\d+|wynik\s*\d+)\s*[:.)-]\s*/i, "").trim();
+  if (!text) return "";
+  if (/^imiona?\s*:/i.test(text) || /^names?\s*:/i.test(text)) return "";
+  return text;
+}
+
+function isNameMetadata(value) {
+  const normalized = normalizeText(value).trim();
+  return ["kultura", "culture", "plec", "gender", "format"].includes(normalized);
+}
+
+function isNameResultSection(section) {
+  const title = normalizeText(section?.title);
+  return section?.type === "table" || title.includes("imion") || title.includes("name") || title.includes("alias");
+}
+
+function nameValueFromItem(item) {
+  const label = cleanNameLine(item?.label);
+  const value = cleanNameLine(item?.value);
+  const normalizedValue = normalizeText(value).trim();
+  if (label && !isNameMetadata(label)) return label;
+  if (value && !["meska", "zenska", "neutralna", "male", "female", "neutral", "losowa"].includes(normalizedValue)) {
+    return value;
+  }
+  return "";
+}
+
+function collectNameResults(result, sections) {
+  const collected = [];
+  sections.forEach((section) => {
+    if (isNameResultSection(section) && Array.isArray(section.items)) {
+      section.items.forEach((item) => {
+        const value = nameValueFromItem(item);
+        if (value) collected.push(value);
+      });
+    }
+    if (isNameResultSection(section) && !isNameMetadata(section.title)) {
+      resultLines(section.content).forEach((line) => {
+        const value = cleanNameLine(line);
+        if (value) collected.push(value);
+      });
+    }
+  });
+
+  if (collected.length) return [...new Set(collected)];
+
+  const loose = resultValueFor(sections, ["imiona", "wyniki", "names", "lista"]);
+  const looseLines = resultLines(loose).map(cleanNameLine).filter(Boolean);
+  if (looseLines.length) return [...new Set(looseLines)];
+
+  const fallback = cleanNameLine(result?.subtitle || result?.title);
+  return fallback ? [fallback] : [];
+}
+
+const GENERATOR_RESULT_KINDS = {
+  name: ["name"],
+  npc: ["npc", "coc_investigator_npc"],
+  location: ["location", "tavern", "shop_fantasy", "settlement_fantasy", "district_fantasy", "castle_fantasy"],
+  organization: ["faction"],
+  weather: ["weather"],
+  adventure: ["hook", "quest_fantasy", "encounter", "encounter_quick", "complication_quick"],
+  loot: ["loot", "loot_fantasy", "magic_item"],
+  clue: ["clue", "document_quick"],
+  dungeon: ["five_room_dungeon", "dungeon_concept", "dungeon_room"],
+  dungeonAdvanced: ["dungeon_advanced"],
+  event: ["event_quick", "twist"],
+  food: ["food_quick"],
+};
+
+const GENERATOR_RESULT_FIELDS = {
+  npc: [
+    ["Imie", ["imie", "name", "nazwa"]],
+    ["Rola", ["rola", "role", "profesja", "zawod"]],
+    ["Wyglad", ["wyglad", "appearance"]],
+    ["Osobowosc", ["osobowosc", "personality"]],
+    ["Sekret", ["sekret", "secret"]],
+    ["Haczyk fabularny", ["haczyk", "hook", "motywacja", "motivation"]],
+  ],
+  location: [
+    ["Nazwa lokacji", ["nazwa", "nazwa lokacji", "name"]],
+    ["Typ", ["typ", "type"]],
+    ["Klimat", ["klimat", "atmosfera", "mood"]],
+    ["Opis", ["opis", "description"]],
+    ["Wazny detal", ["detal", "wazny detal"]],
+    ["Zagrozenie lub tajemnica", ["zagrozenie", "tajemnica", "sekret", "secret"]],
+  ],
+  organization: [
+    ["Nazwa", ["nazwa", "name"]],
+    ["Cel", ["cel", "goal"]],
+    ["Metody", ["metody", "methods"]],
+    ["Zasoby", ["zasoby", "resources"]],
+    ["Sekret", ["sekret", "secret"]],
+    ["Konflikt", ["konflikt", "conflict"]],
+  ],
+  weather: [
+    ["Opis pogody", ["opis", "pogoda", "weather"]],
+    ["Temperatura", ["temperatura", "temperature"]],
+    ["Wiatr", ["wiatr", "wind"]],
+    ["Opady", ["opady", "deszcz", "precipitation"]],
+    ["Efekt na scene", ["efekt", "przy stole", "scena", "scene"]],
+  ],
+  adventure: [
+    ["Problem", ["problem", "co sie dzieje"]],
+    ["Zleceniodawca / zrodlo", ["zleceniodawca", "zrodlo", "source"]],
+    ["Komplikacja / twist", ["komplikacja", "twist", "zwrot"]],
+    ["Pierwszy trop", ["trop", "wskazowka", "wskazowka", "clue"]],
+    ["Konsekwencja porazki", ["konsekwencja", "porazka", "failure"]],
+  ],
+  loot: [
+    ["Monety", ["monety", "coins"]],
+    ["Glowny przedmiot", ["glowny", "przedmiot", "item"]],
+    ["Dziwny detal", ["dziwny", "detal", "quirk"]],
+    ["Sekret albo ukryta wlasciwosc", ["sekret", "ukryta", "wlasciwosc"]],
+  ],
+  clue: [
+    ["Dowod / slad", ["dowod", "slad", "clue"]],
+    ["Znaczenie", ["znaczenie", "meaning"]],
+    ["Ukryty detal", ["ukryty", "detal"]],
+    ["Dokad prowadzi", ["dokad", "prowadzi", "leads"]],
+  ],
+  dungeon: [
+    ["Nazwa lochu", ["nazwa", "name"]],
+    ["Wejscie", ["wejscie", "entrance"]],
+    ["Pokoj 1", ["pokoj 1", "room 1"]],
+    ["Pokoj 2", ["pokoj 2", "room 2"]],
+    ["Pokoj 3", ["pokoj 3", "room 3"]],
+    ["Pokoj 4", ["pokoj 4", "room 4"]],
+    ["Pokoj 5", ["pokoj 5", "room 5"]],
+  ],
+  dungeonAdvanced: [
+    ["Nazwa lochu", ["nazwa", "name"]],
+    ["Legenda", ["legenda", "legend"]],
+    ["Lista pomieszczen", ["pomieszczenia", "rooms"]],
+    ["Specjalne zagrozenia", ["zagrozenia", "hazards"]],
+    ["Skarb albo cel wyprawy", ["skarb", "cel", "treasure", "goal"]],
+  ],
+  event: [
+    ["Wydarzenie", ["wydarzenie", "event"]],
+    ["Uczestnicy", ["uczestnicy", "participants"]],
+    ["Miejsce", ["miejsce", "place", "location"]],
+    ["Skutek", ["skutek", "effect"]],
+    ["Mozliwa reakcja graczy", ["reakcja", "graczy", "reaction"]],
+  ],
+  food: [
+    ["Nazwa potrawy", ["nazwa", "potrawa", "dish"]],
+    ["Skladniki", ["skladniki", "ingredients"]],
+    ["Smak", ["smak", "taste"]],
+    ["Cena albo dostepnosc", ["cena", "dostepnosc", "price"]],
+    ["Efekt fabularny", ["efekt", "fabularny", "story"]],
+  ],
+};
+
+function generatorResultKind(code) {
+  const normalized = normalizeText(code);
+  for (const [kind, aliases] of Object.entries(GENERATOR_RESULT_KINDS)) {
+    if (aliases.some((alias) => normalized === alias || normalized.includes(alias))) return kind;
+  }
+  return "generic";
+}
+
+function GeneratorResultField({ label, value }) {
+  const lines = resultLines(value);
+  return (
+    <article className="generatorResultField">
+      <span>{label}</span>
+      {lines.length > 1 ? (
+        <ul>{lines.map((line) => <li key={line}>{line}</li>)}</ul>
+      ) : (
+        <p>{lines[0] || "Brak danych"}</p>
+      )}
+    </article>
+  );
+}
+
+function NameGeneratorResult({ result, sections, activeValues, icon }) {
+  const displayNames = collectNameResults(result, sections);
+  return (
+    <section className="generatorTypedResult generatorTypedResult--names">
+      <div className="generatorTypedHero">
+        <span className="generatorTypedIcon"><GeneratorIcon name={icon || "type"} /></span>
+        <div>
+          <h2>Wygenerowane imiona i nazwiska</h2>
+          <p>
+            Kultura: {safeResultValue(activeValues?.culture || activeValues?.Culture, "Losowa")}  - Format: {safeResultValue(activeValues?.nameFormat || activeValues?.format, "Imie + nazwisko")}  - Plec: {safeResultValue(activeValues?.gender, "Losowa")}
+          </p>
+        </div>
+      </div>
+      <div className="generatorNameList">
+        {(displayNames.length ? displayNames : ["Brak danych"]).map((name, index) => (
+          <div key={`${name}-${index}`} className="generatorNameRow">
+            <strong>{index + 1}</strong>
+            <span>{name}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function TypedGeneratorResult({ result, generatorCode, activeValues, icon, displayedSections, dungeonFloors, showDungeonFloorTabs, activeDungeonFloor, setActiveDungeonFloor }) {
+  const sections = displayedSections || [];
+  const kind = generatorResultKind(generatorCode);
+  if (kind === "name") {
+    return <NameGeneratorResult result={result} sections={sections} activeValues={activeValues} icon={icon} />;
+  }
+
+  const fields = GENERATOR_RESULT_FIELDS[kind];
+  const mapSection = sections.find((section) => section.type === "dungeon_map" || section.type === "map");
+
+  return (
+    <section className={`generatorTypedResult generatorTypedResult--${kind}`}>
+      <div className="generatorTypedHero">
+        <span className="generatorTypedIcon"><GeneratorIcon name={icon || "spark"} /></span>
+        <div>
+          <h2>{safeResultValue(result?.title, "Wynik generatora")}</h2>
+          <p>{safeResultValue(result?.subtitle || formatGeneratedAt(result?.generatedAt), "Gotowy wynik")}</p>
+        </div>
+      </div>
+
+      {showDungeonFloorTabs && (
+        <div className="generatorTypedMap">
+          <DungeonFloorTabs floors={dungeonFloors} activeIndex={activeDungeonFloor} onChange={setActiveDungeonFloor} />
+        </div>
+      )}
+      {!showDungeonFloorTabs && mapSection && (
+        <div className="generatorTypedMap">
+          <h3>Mapa</h3>
+          {renderDungeonMap(mapSection)}
+        </div>
+      )}
+
+      {fields ? (
+        <div className="generatorTypedFields">
+          {fields.map(([label, labels]) => (
+            <GeneratorResultField key={label} label={label} value={resultValueFor(sections, labels)} />
+          ))}
+        </div>
+      ) : (
+        <div className="generatorWindowSections generatorWindowSections--minimal">
+          {sections.length ? sections.map((section, index) => (
+            <article key={`${section.title}-${index}`}>
+              <h3>{section.title || "Sekcja"}</h3>
+              {renderGenericSection(section)}
+            </article>
+          )) : <GeneratorResultField label="Wynik" value={result?.title || result?.subtitle} />}
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default function GeneratorsPage() {
   const { token } = useAuth();
   const navigate = useNavigate();
@@ -1086,7 +1423,7 @@ export default function GeneratorsPage() {
     const query = catalogSearch.trim().toLowerCase();
     const filtered = catalog.filter((item) => {
       if (favoritesOnly && !favoriteKeys.has(buildKey(item))) return false;
-      if (selectedType !== "all" && item.catalogTypeCode !== selectedType) return false;
+      if (selectedType !== "all" && generatorCategoryId(item) !== selectedType) return false;
       if (!query) return true;
       return [
         item.label,
@@ -1095,6 +1432,7 @@ export default function GeneratorsPage() {
         item.categoryCode,
         item.typeLabel,
         item.catalogTypeCode,
+        generatorCategoryLabel(item),
       ].filter(Boolean).some((value) => String(value).toLowerCase().includes(query));
     });
 
@@ -1119,16 +1457,16 @@ export default function GeneratorsPage() {
         item.categoryCode,
         item.typeLabel,
         item.catalogTypeCode,
+        generatorCategoryLabel(item),
       ].filter(Boolean).some((value) => String(value).toLowerCase().includes(query));
     });
   }, [catalog, catalogSearch, favoriteKeys, favoritesOnly]);
 
-  const sidebarTypeFilters = TYPE_FILTERS.map((option) => ({
+  const sidebarTypeFilters = GENERATOR_CATEGORY_CONFIG.map((option) => ({
     ...option,
-    label: option.value === "all"
-      ? "Wszystkie typy"
-      : option.label,
-    count: option.value === "all" ? catalogCountBase.length : catalogCountBase.filter((item) => item.catalogTypeCode === option.value).length,
+    count: option.value === "all"
+      ? catalogCountBase.length
+      : catalogCountBase.filter((item) => generatorCategoryId(item) === option.value).length,
   })).filter((option) => option.value === "all" || option.count > 0);
 
   function toggleFavorite(generator) {
@@ -1289,237 +1627,85 @@ export default function GeneratorsPage() {
 
   if (generatorCode) {
     const sections = resultSections(result);
-    const isWeatherGenerator = activeGeneratorCode() === "weather";
     const dungeonFloors = dungeonFloorsFromSections(sections);
     const showDungeonFloorTabs = activeGeneratorCode() === "dungeon_advanced" && dungeonFloors.length > 1;
     const displayedSections = showDungeonFloorTabs
       ? sections.filter((section) => section.type !== "dungeon_map" && section.type !== "dungeon_rooms")
       : sections;
+    const currentParams = scopedParams(activeDefinition?.params, activeValues, activeGeneratorCode());
 
-    if (isWeatherGenerator) {
-      const weatherParams = activeDefinition?.params || [];
-      const climateParam = weatherParams.find((param) => param.key === "climate") || {
-        key: "climate",
-        label: "Klimat",
-        options: ["Umiarkowany", "Tropikalny", "Suchy", "Zimny", "Górski", "Nadmorski", "Bagienny"],
-        defaultValue: "Umiarkowany",
-      };
-      const seasonParam = weatherParams.find((param) => param.key === "season") || {
-        key: "season",
-        label: "Pora roku",
-        options: ["Wiosna", "Lato", "Jesień", "Zima"],
-        defaultValue: "Wiosna",
-      };
-      const weatherDescription = sectionContent(sections, "Opis");
-      const weatherConditionLines = linesFromContent(sectionContent(sections, "Warunki"));
-      const weatherTableUse = sectionContent(sections, "Przy stole");
-      const selectedClimate = activeValues.climate || climateParam.defaultValue || "Umiarkowany";
-      const selectedSeason = activeValues.season || seasonParam.defaultValue || "Wiosna";
+    return (
+      <div className={`page generatorsPage generatorsDashboard generatorWindowPage generatorWindowPage--${activeDefinition?.tone || "green"}`}>
+        <div className="generatorPageActions">
+          <button type="button" className="generatorBackButton" onClick={() => navigate("/generators")}>
+            {"<- Generatory"}
+          </button>
+        </div>
 
-      return (
-        <div className="page generatorsPage generatorsDashboard weatherGeneratorPage">
-          <header className="pageHeader weatherGeneratorHeader">
-            <div className="weatherHeaderIdentity">
-              <div className="weatherHeaderIcon" aria-hidden="true">
-                <GeneratorIcon name="storm" />
+        <div className="generatorWindowWorkspace">
+          <div className="generatorWindowShell">
+            <aside className="generatorSettingsPanel">
+              <div className="generatorPanelNumber">1. Ustawienia</div>
+              <div className="generatorSettingsIntro">
+                <strong>{activeDefinition?.label || "Generator"}</strong>
+                <span>{activeDefinition?.cardDescription || activeDefinition?.description || "Dostosuj parametry i wygeneruj wynik."}</span>
               </div>
-              <div>
-                <span className="pageEyebrow">generatory</span>
-                <h1 className="pageTitle">Generator Pogody</h1>
-                <p className="pageSubtitle">Uniwersalny generator warunkow pogodowych</p>
-              </div>
-            </div>
-            <button type="button" className="weatherBackButton" onClick={() => navigate("/generators")}>
-              {"← Generatory"}
-            </button>
-          </header>
 
-          <div className="weatherGeneratorLayout">
-            <aside className="weatherSettingsCard">
-              <div className="weatherPanelHeading">Ustawienia</div>
-              <div className="weatherControlStack">
-                <label className="weatherControl">
-                  <span>Klimat</span>
-                  <select value={selectedClimate} onChange={(event) => setFieldValue("climate", event.target.value)}>
-                    {(climateParam.options || []).map((option) => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
-                </label>
-                <label className="weatherControl">
-                  <span>Pora roku</span>
-                  <select value={selectedSeason} onChange={(event) => setFieldValue("season", event.target.value)}>
-                    {(seasonParam.options || []).map((option) => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
-                </label>
+              <div className="generatorWindowFields">
+                {currentParams.length ? (
+                  currentParams.map((param) => (
+                    <Field key={param.key} param={param} value={activeValues[param.key]} onChange={setFieldValue} />
+                  ))
+                ) : (
+                  <p className="generatorCatalogEmpty">Ten generator nie wymaga dodatkowych ustawien.</p>
+                )}
               </div>
 
               {error && <div className="generatorError">{error}</div>}
 
-              <button className="weatherPrimaryAction" type="button" onClick={() => handleGenerate(activeDefinition)} disabled={loading || catalogLoading}>
+              <button className="generatorWindowGenerate" type="button" onClick={() => handleGenerate(activeDefinition)} disabled={loading || catalogLoading}>
                 <GeneratorIcon name="spark" />
-                <span>{loading ? "Generowanie..." : "Generuj pogodę"}</span>
+                <span>{loading ? "Generowanie..." : "Przelosuj"}</span>
               </button>
             </aside>
 
-            <main className="weatherResultPanel">
-              {result ? (
-                <section className={`weatherResultContent${resultIsNew ? " is-new" : ""}`}>
-                  <footer className="weatherResultFooter">
-                    <span><small>Klimat</small><strong>{selectedClimate}</strong></span>
-                    <span><small>Pora roku</small><strong>{selectedSeason}</strong></span>
-                    <span><small>Wygenerowano</small><strong>{formatGeneratedAt(result.generatedAt)}</strong></span>
-                  </footer>
-
-                  <article className="weatherHeroCard">
-                    <div className="weatherHeroCopy">
-                      <h2>{result.title || "Pogoda"}</h2>
-                      <div className="weatherChips">
-                        <span>{selectedClimate} klimat</span>
-                        <span>{selectedSeason}</span>
-                      </div>
-                    </div>
-                    <div className="weatherImagePlaceholder" aria-label="Miejsce na przyszły obraz pogody" />
-                  </article>
-
-                  <div className="weatherResultGrid">
-                    <article className="weatherResultCard weatherResultCard--wide">
-                      <h3>Opis</h3>
-                      <ul>
-                        {[weatherDescription, ...weatherConditionLines].filter(Boolean).map((line) => (
-                          <li key={line}>{line}</li>
-                        ))}
-                      </ul>
-                    </article>
-                    <article className="weatherResultCard">
-                      <h3>Efekt przy stole</h3>
-                      <p>{weatherTableUse || "Użyj pogody jako tła sceny i lekkiej presji."}</p>
-                    </article>
+            <main className="generatorOutputPanel">
+              <div className="generatorOutputTop">
+                <div className="generatorPanelNumber">2. Wynik</div>
+                {result && (
+                  <div className="generatorResultActions">
+                    <button type="button" onClick={copyResult}>Kopiuj wynik</button>
+                    <button type="button" onClick={() => handleGenerate(activeDefinition)} disabled={loading || catalogLoading}>
+                      {loading ? "Generowanie..." : "Regeneruj"}
+                    </button>
+                    {copyStatus && <span>{copyStatus}</span>}
                   </div>
+                )}
+              </div>
 
-                  <footer className="weatherResultFooter">
-                    <span><small>Klimat</small><strong>{selectedClimate}</strong></span>
-                    <span><small>Pora roku</small><strong>{selectedSeason}</strong></span>
-                    <span><small>Wygenerowano</small><strong>{formatGeneratedAt(result.generatedAt)}</strong></span>
-                  </footer>
-                </section>
+              {result ? (
+                <div className={`generatorWindowResult${resultIsNew ? " is-new" : ""}`}>
+                  <TypedGeneratorResult
+                    result={result}
+                    generatorCode={activeGeneratorCode()}
+                    activeValues={activeValues}
+                    icon={activeDefinition?.icon}
+                    displayedSections={displayedSections}
+                    dungeonFloors={dungeonFloors}
+                    showDungeonFloorTabs={showDungeonFloorTabs}
+                    activeDungeonFloor={activeDungeonFloor}
+                    setActiveDungeonFloor={setActiveDungeonFloor}
+                  />
+                </div>
               ) : (
-                <div className="weatherEmptyState">
-                  <GeneratorIcon name="storm" />
-                  <strong>Wynik pogody pojawi się tutaj</strong>
-                  <span>Wybierz klimat, opcje sceny i uruchom generator.</span>
+                <div className="generatorWindowEmpty">
+                  <GeneratorIcon name={activeDefinition?.icon || "spark"} />
+                  <strong>Wynik pojawi sie tutaj</strong>
+                  <span>Ustaw parametry po lewej i uruchom generator.</span>
                 </div>
               )}
             </main>
           </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className={`page generatorsPage generatorsDashboard generatorWindowPage generatorWindowPage--${activeDefinition?.tone || "green"}`}>
-        <header className="pageHeader generatorWindowHero">
-          <div className="generatorWindowTitle">
-            <div className="generatorsHeroIcon" aria-hidden="true">
-              <GeneratorIcon name={activeDefinition?.icon || "spark"} />
-            </div>
-            <div>
-              <span className="pageEyebrow">generatory</span>
-              <h1 className="pageTitle">{activeDefinition?.label || "Generator"} Generator</h1>
-              <p className="pageSubtitle">{activeDefinition?.cardDescription || activeDefinition?.description || "Wygeneruj element dopasowany do swoich potrzeb."}</p>
-            </div>
-          </div>
-          <button type="button" className="generatorBackButton" onClick={() => navigate("/generators")}>
-            {"← Generatory"}
-          </button>
-        </header>
-
-        <div className="generatorWindowWorkspace">
-        <div className="generatorWindowShell">
-          <aside className="generatorSettingsPanel">
-            <div className="generatorPanelNumber">1. Ustawienia</div>
-
-            <div className="generatorWindowFields">
-              {scopedParams(activeDefinition?.params, activeValues, activeGeneratorCode()).length ? (
-                scopedParams(activeDefinition?.params, activeValues, activeGeneratorCode()).map((param) => (
-                  <Field key={param.key} param={param} value={activeValues[param.key]} onChange={setFieldValue} />
-                ))
-              ) : (
-                <p className="generatorCatalogEmpty">Formularz jest wczytywany albo ten generator nie wymaga parametrów.</p>
-              )}
-            </div>
-
-            {error && <div className="generatorError">{error}</div>}
-
-            <button className="generatorWindowGenerate" type="button" onClick={() => handleGenerate(activeDefinition)} disabled={loading || catalogLoading}>
-              <GeneratorIcon name="spark" />
-              <span>{loading ? "Generowanie..." : result ? "Przelosuj" : `Generuj ${activeDefinition?.label || ""}`}</span>
-            </button>
-          </aside>
-
-          <main className="generatorOutputPanel">
-            <div className="generatorOutputTop">
-              <div className="generatorPanelNumber">2. Wynik</div>
-              {result && (
-                <div className="generatorResultActions">
-                  <button type="button" onClick={copyResult}>Kopiuj wynik</button>
-                  <button type="button" onClick={() => handleGenerate(activeDefinition)} disabled={loading || catalogLoading}>
-                    {loading ? "Generowanie..." : "Regeneruj"}
-                  </button>
-                  {copyStatus && <span>{copyStatus}</span>}
-                </div>
-              )}
-            </div>
-
-            {result ? (
-              <section className={`generatorWindowResult${resultIsNew ? " is-new" : ""}`}>
-                <div className="generatorResultIdentity">
-                  <div className="generatorPortrait" aria-hidden="true">
-                    <GeneratorIcon name={activeDefinition?.icon || "spark"} />
-                  </div>
-                  <div>
-                    <h2>{result.title}</h2>
-                    <p>{result.subtitle || SYSTEM_LABELS[result.system] || result.system}</p>
-                  </div>
-                </div>
-
-
-                <div className="generatorWindowSections">
-                  {showDungeonFloorTabs && (
-                    <DungeonFloorTabs
-                      floors={dungeonFloors}
-                      activeIndex={activeDungeonFloor}
-                      onChange={setActiveDungeonFloor}
-                    />
-                  )}
-                  {displayedSections.map((section, index) => {
-                    const isDungeonMap = section.type === "dungeon_map" || section.type === "map";
-                    const hasItems = Array.isArray(section.items) && section.items.length > 0;
-                    const sectionType = section.type === "map" ? "dungeon_map" : section.type;
-                    return (
-                      <article
-                        key={`${section.title}-${index}`}
-                        className={[hasItems ? "has-items" : "", isDungeonMap ? "is-dungeon-map" : "", sectionType ? `is-${sectionType}` : ""].filter(Boolean).join(" ")}
-                      >
-                        <h3>{section.title}</h3>
-                        {isDungeonMap ? renderDungeonMap(section) : renderGenericSection(section)}
-                      </article>
-                    );
-                  })}
-                </div>
-              </section>
-            ) : (
-              <div className="generatorWindowEmpty">
-                <GeneratorIcon name={activeDefinition?.icon || "spark"} />
-                <strong>Wynik pojawi się tutaj</strong>
-                <span>Ustaw parametry po lewej i uruchom generator.</span>
-              </div>
-            )}
-          </main>
-        </div>
-
         </div>
       </div>
     );
@@ -1527,78 +1713,60 @@ export default function GeneratorsPage() {
 
   return (
     <div className="page generatorsPage generatorsDashboard generatorsCatalogPage">
-      <header className="pageHeader generatorsCatalogHeader">
-        <div className="generatorsCatalogBrand">
-          <div className="generatorsHeroIcon" aria-hidden="true">
-            <GeneratorIcon name="spark" />
-          </div>
-          <div>
-            <span className="pageEyebrow">narzedzia</span>
-            <h1 className="pageTitle">Generator Losowego Kontentu</h1>
-            <p className="pageSubtitle">Wybierz generator i stworz cos niesamowitego do swojej sesji RPG</p>
-          </div>
-        </div>
-
-        <div className="generatorsCatalogActions">
-          <label className="generatorsSearch">
-            <span className="generatorsSearchIcon" aria-hidden="true">⌕</span>
-            <input
-              type="search"
-              value={catalogSearch}
-              onChange={(event) => setCatalogSearch(event.target.value)}
-              placeholder="Szukaj generatorów..."
-            />
-          </label>
-          <button
-            type="button"
-            className={`generatorsFavoritesButton${favoritesOnly ? " is-active" : ""}`}
-            onClick={() => setFavoritesOnly((value) => !value)}
-            aria-pressed={favoritesOnly}
-          >
-            <span aria-hidden="true">{favoritesOnly ? "★" : "☆"}</span>
-            <span>Ulubione</span>
-          </button>
-        </div>
-      </header>
-
       {catalogFallback && (
         <section className="generatorCatalogWarning" role="status">
           <div>
-            <strong>Katalog generatorów działa w trybie awaryjnym.</strong>
-            <span>{catalogError || "Nie udało się pobrać pełnej listy generatorów z backendu."}</span>
+            <strong>Katalog generatorow dziala w trybie awaryjnym.</strong>
+            <span>{catalogError || "Nie udalo sie pobrac pelnej listy generatorow z backendu."}</span>
           </div>
           <button type="button" onClick={() => setCatalogReloadKey((value) => value + 1)} disabled={catalogLoading}>
-            {catalogLoading ? "Sprawdzam..." : "Spróbuj ponownie"}
+            {catalogLoading ? "Sprawdzam..." : "Sprobuj ponownie"}
           </button>
         </section>
       )}
 
       <div className="generatorsCatalogLayout">
-        <aside className="generatorsSidebar" aria-label="Filtry generatorów">
-          <section className="generatorsFilterSection">
-            <h2>Typ generatora</h2>
-            <label className="generatorsFilterSelect">
-              <select value={selectedType} onChange={(event) => setSelectedType(event.target.value)}>
-                {sidebarTypeFilters.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label} ({option.count})
-                  </option>
-                ))}
-              </select>
-            </label>
-          </section>
-
+        <aside className="generatorsSidebar" aria-label="Kategorie generatorow">
+          <nav className="generatorsCategoryList">
+            {sidebarTypeFilters.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={`generatorsCategoryItem${selectedType === option.value ? " is-active" : ""}`}
+                onClick={() => setSelectedType(option.value)}
+              >
+                <span className="generatorsCategoryIcon"><GeneratorIcon name={option.icon || "spark"} /></span>
+                <span>{option.label}</span>
+                <strong>{option.count}</strong>
+              </button>
+            ))}
+          </nav>
         </aside>
 
         <main className="generatorsContent">
-          <div className="generatorsToolbar">
-            <div className="generatorsFound">
-              Znaleziono: <strong>{visibleCatalog.length}</strong> generatory
-            </div>
+          <div className="generatorsTopbar">
+            <label className="generatorsSearch">
+              <span className="generatorsSearchIcon" aria-hidden="true">S</span>
+              <input
+                type="search"
+                value={catalogSearch}
+                onChange={(event) => setCatalogSearch(event.target.value)}
+                placeholder="Szukaj generatorow..."
+              />
+            </label>
+            <button
+              type="button"
+              className={`generatorsFavoritesButton${favoritesOnly ? " is-active" : ""}`}
+              onClick={() => setFavoritesOnly((value) => !value)}
+              aria-pressed={favoritesOnly}
+            >
+              <span aria-hidden="true">{favoritesOnly ? "\u2605" : "\u2606"}</span>
+              <span>Ulubione</span>
+            </button>
             <label className="generatorsSort">
               <span>Sortuj:</span>
               <select value={catalogSort} onChange={(event) => setCatalogSort(event.target.value)}>
-                <option value="popular">Popularność</option>
+                <option value="popular">Popularnosc</option>
                 <option value="name">Nazwa</option>
                 <option value="type">Typ</option>
               </select>
@@ -1619,28 +1787,24 @@ export default function GeneratorsPage() {
                       toggleFavorite(generator);
                     }}
                     aria-pressed={isFavorite}
-                    aria-label={isFavorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
-                    title={isFavorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
+                    aria-label={isFavorite ? "Usun z ulubionych" : "Dodaj do ulubionych"}
+                    title={isFavorite ? "Usun z ulubionych" : "Dodaj do ulubionych"}
                   >
-                    {isFavorite ? "★" : "☆"}
+                    {isFavorite ? "\u2605" : "\u2606"}
                   </button>
                   <button
                     type="button"
                     className="generatorCardBody"
-                    onClick={() => {
-                      navigate(generatorPath(generator));
-                    }}
+                    onClick={() => navigate(generatorPath(generator))}
                   >
-                    <span className="generatorCardMedia">
-                    </span>
                     <span className="generatorCardIcon">
                       <GeneratorIcon name={generator.icon} />
                     </span>
                     <span className="generatorCardContent">
                       <span className="generatorCardTitle">{generator.label}</span>
-                      <span className="generatorCardDescription">{generator.cardDescription}</span>
+                      <span className="generatorCardDescription">{generator.cardDescription || "Praktyczny generator do szybkiego uzycia przy stole."}</span>
                       <span className="generatorCardBadges">
-                        <span className="generatorBadge">{generator.typeLabel || generator.typeCode || generator.type}</span>
+                        <span className="generatorBadge">{generatorCategoryLabel(generator)}</span>
                         <span className="generatorBadge generatorBadge--variant">Opisowy</span>
                       </span>
                     </span>
@@ -1650,20 +1814,10 @@ export default function GeneratorsPage() {
             })}
             {!catalogLoading && visibleCatalog.length === 0 && (
               <div className="generatorCatalogEmpty">
-                Brak generatorów dla wybranych filtrów. Ta kategoria będzie uzupełniana w kolejnych etapach.
+                Brak generatorow dla wybranych filtrow. Zmien kategorie lub wyszukiwana fraze.
               </div>
             )}
           </section>
-
-          {visibleCatalog.length > 0 && (
-            <div className="generatorsLoadMoreWrap">
-              <button type="button" className="generatorsLoadMore">
-                <span aria-hidden="true">↻</span>
-                <span>Załaduj więcej</span>
-                <span aria-hidden="true">↻</span>
-              </button>
-            </div>
-          )}
         </main>
       </div>
     </div>

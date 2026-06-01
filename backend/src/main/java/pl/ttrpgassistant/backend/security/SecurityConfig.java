@@ -48,8 +48,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/generator-results/recent").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/generators/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/compendium/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/glossary/**").permitAll()
 
-                // ✅ public read-only monsters
+                // Public read-only knowledge/tool endpoints stay available without login.
 
                 .anyRequest().authenticated()
             )

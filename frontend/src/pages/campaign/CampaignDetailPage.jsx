@@ -22,6 +22,7 @@ import {
 } from "../../api/campaigns";
 import "../../styles/campaign-details.css";
 import CampaignCharactersPanel from "./components/CampaignCharactersPanel";
+import CampaignAvailabilityPanel from "./components/CampaignAvailabilityPanel";
 import CampaignMaterialsPanel from "./components/CampaignMaterialsPanel";
 import CampaignOverviewPanel from "./components/CampaignOverviewPanel";
 import CampaignPlayerNotesPanel from "./components/CampaignPlayerNotesPanel";
@@ -69,7 +70,7 @@ export default function CampaignDetailPage() {
       setMaterials(Array.isArray(materialsData) ? materialsData : []);
       setPlayerNotes(Array.isArray(playerNotesData) ? playerNotesData : []);
     } catch (err) {
-      setError(err?.message || "Nie uda�o si� pobrac workspace kampanii.");
+      setError(err?.message || "Nie udało się pobrać workspace kampanii.");
     } finally {
       setLoading(false);
     }
@@ -102,7 +103,7 @@ export default function CampaignDetailPage() {
   }
 
   function handleDeleteCampaign() {
-    if (!window.confirm("Usu�ac kampanie (soft-delete)?")) return;
+    if (!window.confirm("Usunąć kampanię (soft-delete)?")) return;
     return runAction(async () => {
       await deleteCampaign(token, campaignId);
       navigate("/campaigns");
@@ -112,14 +113,14 @@ export default function CampaignDetailPage() {
   function handleAssignCharacter(characterId) {
     return runAction(async () => {
       await assignCharacterToCampaign(token, campaignId, characterId);
-      setNotice("Przypisano posta�.");
+      setNotice("Przypisano postać.");
     });
   }
 
   function handleDetachCharacter(characterId) {
     return runAction(async () => {
       await detachCharacterFromCampaign(token, campaignId, characterId);
-      setNotice("Odpieto posta�.");
+      setNotice("Odpięto postać.");
     });
   }
 
@@ -140,7 +141,7 @@ export default function CampaignDetailPage() {
   function handleFinishSession(sessionId) {
     return runAction(async () => {
       await finishCampaignSession(token, campaignId, sessionId);
-      setNotice("Sesja zako�czona.");
+      setNotice("Sesja zakończona.");
     });
   }
 
@@ -161,7 +162,7 @@ export default function CampaignDetailPage() {
   function handleDeletePlayerNote(noteId) {
     return runAction(async () => {
       await deleteCampaignPlayerNote(token, campaignId, noteId);
-      setNotice("Usu�ieto notatke.");
+      setNotice("Usunięto notatkę.");
     });
   }
 
@@ -178,6 +179,7 @@ export default function CampaignDetailPage() {
   const campaignTabs = isOwner
     ? [
       { key: "session", label: "Sesja" },
+      { key: "availability", label: "Dostępność" },
       { key: "characters", label: "Postacie" },
       { key: "players", label: "Gracze" },
       ...(showMaterialsPanel ? [{ key: "materials", label: "Materiały" }] : []),
@@ -186,6 +188,7 @@ export default function CampaignDetailPage() {
     ]
     : [
       { key: "session", label: "Sesja" },
+      { key: "availability", label: "Dostępność" },
       { key: "characters", label: "Postacie" },
       { key: "players", label: "Gracze" },
       ...(showMaterialsPanel ? [{ key: "materials", label: "Materiały" }] : []),
@@ -196,39 +199,12 @@ export default function CampaignDetailPage() {
     <div className="page campaignDetailsPage">
       <Link className="campaignDetailsGhostBtn" to="/campaigns">Powrot do kampanii</Link>
 
-      {loading && <div className="campaignDetailsState">�adowanie workspace kampanii...</div>}
+      {loading && <div className="campaignDetailsState">Ładowanie workspace kampanii...</div>}
       {error && <div className="campaignDetailsError">{error}</div>}
       {notice && <div className="campaignDetailsNotice">{notice}</div>}
 
       {!loading && campaign && (
         <>
-          <section className="campaignDetailsCard panel-soft">
-            <div className="campaignMaterialCard__top">
-              <div>
-                <h1 className="campaignDetailsCardTitle">{campaign.title || "Kampania"}</h1>
-                <p className="campaignDetailsHelpText">{campaign.description || "Brak opisu kampanii."}</p>
-              </div>
-              <span className="campaignMemberBadge">{isOwner ? "MG Dashboard" : "Player Dashboard"}</span>
-            </div>
-            <div className="campaignMaterialMeta">
-              <span>System: {campaign.systemCode || "-"}</span>
-              <span>Status: {campaign.status || "-"}</span>
-              <span>Widocznosc: {campaign.visibility || "-"}</span>
-            </div>
-            {campaign.coverImageUrl ? (
-              <img
-                src={campaign.coverImageUrl}
-                alt={`Okladka kampanii ${campaign.title || ""}`}
-                style={{ width: "100%", maxHeight: 240, objectFit: "cover", borderRadius: 12 }}
-              />
-            ) : null}
-            {isOwner ? (
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                <button type="button" className="campaignDetailsPrimaryBtn" onClick={() => setActiveTab("settings")}>Edytuj kampanie</button>
-              </div>
-            ) : null}
-          </section>
-
           <nav className="campaignTabs campaignPanelTabs" role="tablist" aria-label="Panel kampanii">
             {campaignTabs.map((tab) => (
               <button
@@ -276,6 +252,14 @@ export default function CampaignDetailPage() {
                   onAssign={handleAssignCharacter}
                   onDetach={handleDetachCharacter}
                 />
+              </div>
+            </div>
+          ) : null}
+
+          {isOwner && activeTab === "availability" ? (
+            <div className="campaignWorkspaceGrid">
+              <div className="campaignDashboardRow campaignDashboardRow--single">
+                <CampaignAvailabilityPanel campaignId={campaignId} sessions={sessions} members={members} />
               </div>
             </div>
           ) : null}
@@ -385,6 +369,14 @@ export default function CampaignDetailPage() {
                   onAssign={handleAssignCharacter}
                   onDetach={handleDetachCharacter}
                 />
+              </div>
+            </div>
+          ) : null}
+
+          {!isOwner && activeTab === "availability" ? (
+            <div className="campaignWorkspaceGrid">
+              <div className="campaignDashboardRow campaignDashboardRow--single">
+                <CampaignAvailabilityPanel campaignId={campaignId} sessions={sessions} members={members} />
               </div>
             </div>
           ) : null}

@@ -807,9 +807,10 @@ button:active:not(:disabled) { transform: translateY(0px); }
 }
 
 .publicContainer {
-  width: min(1240px, calc(100vw - 32px));
-  margin: 0 auto;
-  padding: 24px 0 40px;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
 /* â”€â”€â”€ SELECT COLORS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */

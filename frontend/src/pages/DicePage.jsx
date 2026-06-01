@@ -10,22 +10,18 @@ const MODES = [
 const STANDARD_DICE = [4, 6, 8, 10, 12, 20, 100];
 const ROLL_TYPES = [
   { value: "normal", label: "Zwykły" },
-  { value: "advantage", label: "Ulatwienie" },
-  { value: "disadvantage", label: "Utrudnienie" },
+  { value: "advantage", label: "Advantage" },
+  { value: "disadvantage", label: "Disadvantage" },
 ];
 
 const FATE_LADDER = {
-  "-2": "Fatalny",
-  "-1": "Slaby",
-  0: "Przecietny",
-  1: "Niezly",
+  "-2": "Słabo",
+  "-1": "Słabo",
+  0: "Przeciętnie",
+  1: "Niezły",
   2: "Dobry",
-  3: "Bardzo dobry",
-  4: "Swietny",
-  5: "Znakomity",
-  6: "Fantastyczny",
-  7: "Epicki",
-  8: "Legendarny",
+  3: "Świetny",
+  4: "Wybitny",
 };
 
 const GENESYS_DICE = {
@@ -38,39 +34,44 @@ const GENESYS_DICE = {
 };
 
 const GENESYS_LABELS = {
-  ability: "Ability",
-  proficiency: "Proficiency",
-  boost: "Boost",
-  difficulty: "Difficulty",
-  challenge: "Challenge",
-  setback: "Setback",
+  ability: "Zdolność",
+  proficiency: "Biegłość",
+  boost: "Wsparcie",
+  difficulty: "Trudność",
+  challenge: "Wyzwanie",
+  setback: "Utrudnienie",
 };
 
 const GENESYS_DIE_META = {
-  ability: { mark: "A", tone: "positive" },
-  proficiency: { mark: "P", tone: "positive" },
-  boost: { mark: "B", tone: "positive" },
-  difficulty: { mark: "D", tone: "negative" },
-  challenge: { mark: "C", tone: "negative" },
-  setback: { mark: "S", tone: "negative" },
+  ability: { symbol: "success", tone: "good" },
+  proficiency: { symbol: "triumph", tone: "good" },
+  boost: { symbol: "advantage", tone: "good" },
+  difficulty: { symbol: "failure", tone: "bad" },
+  challenge: { symbol: "despair", tone: "bad" },
+  setback: { symbol: "threat", tone: "bad" },
 };
 
 const GENESYS_SYMBOLS = {
-  success: { mark: "S", label: "Sukces" },
-  failure: { mark: "F", label: "Porazka" },
-  advantage: { mark: "A", label: "Przewaga" },
-  threat: { mark: "T", label: "Zagrozenie" },
-  triumph: { mark: "TR", label: "Triumf" },
-  despair: { mark: "DS", label: "Rozpacz" },
+  success: { label: "Sukces", color: "green" },
+  advantage: { label: "Przewaga", color: "violet" },
+  triumph: { label: "Triumf", color: "gold" },
+  failure: { label: "Porażka", color: "red" },
+  threat: { label: "Zagrożenie", color: "slate" },
+  despair: { label: "Rozpacz", color: "black" },
+};
+
+const GENESYS_RESULT_WORDS = {
+  success: ["Sukces", "Sukcesy"],
+  advantage: ["Przewaga", "Przewagi"],
+  triumph: ["Triumf", "Triumfy"],
+  failure: ["Porażka", "Porażki"],
+  threat: ["Zagrożenie", "Zagrożenia"],
+  despair: ["Rozpacz", "Rozpacze"],
 };
 
 function clampInt(value, min, max) {
   const parsed = Math.trunc(Number(value));
   return Number.isFinite(parsed) ? Math.max(min, Math.min(max, parsed)) : min;
-}
-
-function nowLabel() {
-  return new Date().toLocaleString("pl-PL", { dateStyle: "short", timeStyle: "short" });
 }
 
 function id() {
@@ -81,16 +82,8 @@ function rollDie(sides) {
   return Math.floor(Math.random() * sides) + 1;
 }
 
-function formatStandardFormula(groups, modifier = 0) {
-  const parts = groups.map((group) => group.qty === 1 ? `k${group.die}` : `${group.qty}k${group.die}`);
-  if (modifier) parts.push(`${modifier > 0 ? "+" : "-"} ${Math.abs(modifier)}`);
-  return parts.join(" + ").replace("+ -", "-");
-}
-
-function fateFormula(qty, modifier) {
-  const mod = Number(modifier) || 0;
-  if (mod === 0) return `${qty}dF`;
-  return `${qty}dF${mod > 0 ? "+" : ""}${mod}`;
+function nowLabel() {
+  return new Date().toLocaleString("pl-PL", { dateStyle: "short", timeStyle: "short" });
 }
 
 function modeLabel(mode) {
@@ -101,15 +94,46 @@ function rollTypeLabel(rollType) {
   return ROLL_TYPES.find((item) => item.value === rollType)?.label || rollType;
 }
 
+function signed(value) {
+  const number = Number(value) || 0;
+  if (number === 0) return "0";
+  return `${number > 0 ? "+" : "-"}${Math.abs(number)}`;
+}
+
+function formatStandardFormula(qty, die, modifier = 0, rollType = "normal") {
+  const dice = qty === 1 ? `1k${die}` : `${qty}k${die}`;
+  const mod = Number(modifier) ? ` ${Number(modifier) > 0 ? "+" : "-"} ${Math.abs(Number(modifier))}` : "";
+  const suffix = rollType === "normal" ? "" : ` (${rollTypeLabel(rollType)})`;
+  return `${dice}${mod}${suffix}`;
+}
+
+function fateFormula(qty, modifier) {
+  const mod = Number(modifier) || 0;
+  if (!mod) return `${qty}dF`;
+  return `${qty}dF ${mod > 0 ? "+" : "-"} ${Math.abs(mod)}`;
+}
+
+function genesysFormula(pool) {
+  return Object.entries(pool)
+    .filter(([, count]) => Number(count) > 0)
+    .map(([key, count]) => `${count} ${GENESYS_LABELS[key]}`)
+    .join(", ") || "Pula narracyjna";
+}
+
 function rollFateDie() {
-  const sides = [-1, -1, 0, 0, 1, 1];
-  return sides[Math.floor(Math.random() * sides.length)];
+  return [-1, -1, 0, 0, 1, 1][Math.floor(Math.random() * 6)];
 }
 
 function fateSymbol(value) {
   if (value > 0) return "+";
   if (value < 0) return "-";
   return "0";
+}
+
+function fateDescription(total) {
+  if (total <= -1) return "Słabo";
+  if (total >= 4) return "Świetny";
+  return FATE_LADDER[total] || "Przeciętnie";
 }
 
 function emptySymbols() {
@@ -122,165 +146,140 @@ function addSymbols(target, source = {}) {
   });
 }
 
+function genesysNetItems(entry) {
+  if (!entry) return [];
+  return [
+    { key: "success", count: entry.netSuccess || 0 },
+    { key: "failure", count: entry.netFailure || 0 },
+    { key: "advantage", count: entry.netAdvantage || 0 },
+    { key: "threat", count: entry.netThreat || 0 },
+    { key: "triumph", count: entry.triumph || 0 },
+    { key: "despair", count: entry.despair || 0 },
+  ].filter((item) => item.count > 0);
+}
+
+function genesysCountLabel(item) {
+  const words = GENESYS_RESULT_WORDS[item.key] || [GENESYS_SYMBOLS[item.key]?.label || item.key, GENESYS_SYMBOLS[item.key]?.label || item.key];
+  return `${item.count} ${item.count === 1 ? words[0] : words[1]}`;
+}
+
+function genesysSummary(entry) {
+  const items = genesysNetItems(entry);
+  if (!items.length) return "Wynik neutralny";
+  return items.map(genesysCountLabel).join(", ");
+}
+
 function interpretGenesys(entry) {
-  const lines = [];
-  if (entry.netSuccess > 0 && entry.netAdvantage > 0) lines.push("Akcja udana z dodatkową korzyścią.");
-  else if (entry.netSuccess > 0 && entry.netThreat > 0) lines.push("Akcja udana, ale z komplikacją.");
-  else if (entry.netFailure > 0 && entry.netAdvantage > 0) lines.push("Akcja nieudana, ale pojawia się korzystny efekt uboczny.");
-  else if (entry.netFailure > 0 && entry.netThreat > 0) lines.push("Akcja nieudana i pojawia się komplikacja.");
-  else if (entry.netSuccess > 0) lines.push("Akcja udana.");
-  else if (entry.netFailure > 0) lines.push("Akcja nieudana.");
-  else lines.push("Wynik neutralny albo remisowy.");
-  if (entry.triumph > 0) lines.push("Występuje potężny pozytywny zwrot narracyjny.");
-  if (entry.despair > 0) lines.push("Występuje poważny negatywny zwrot narracyjny.");
-  return lines.join(" ");
+  if (entry.netSuccess > 0 && entry.netAdvantage > 0) return "Akcja udana z dodatkową korzyścią.";
+  if (entry.netSuccess > 0 && entry.netThreat > 0) return "Akcja udana, ale z komplikacją.";
+  if (entry.netFailure > 0 && entry.netAdvantage > 0) return "Akcja nieudana, ale pojawia się korzystny efekt uboczny.";
+  if (entry.netFailure > 0 && entry.netThreat > 0) return "Akcja nieudana i pojawia się komplikacja.";
+  if (entry.netSuccess > 0) return "Akcja udana.";
+  if (entry.netFailure > 0) return "Akcja nieudana.";
+  return "Wynik neutralny albo remisowy.";
 }
 
 function standardBreakdown(entry) {
-  if (Array.isArray(entry.rollDetails) && entry.rollDetails.length) {
-    const dice = entry.rollDetails
-      .map((group) => `${group.qty || group.rolls?.length || 1}k${group.die} [${(group.rolls || []).join(" + ")}]`)
-      .join(" + ");
-    return `${dice}${entry.modifier ? ` ${entry.modifier > 0 ? "+" : ""}${entry.modifier}` : ""}`;
-  }
-  const dropped = entry.droppedRoll ? `, odrzucono ${entry.droppedRoll}` : "";
+  const dice = entry.selectedRoll ?? entry.rolls.reduce((sum, value) => sum + value, 0);
+  const mod = entry.modifier ? ` ${entry.modifier > 0 ? "+" : "-"} ${Math.abs(entry.modifier)}` : "";
   const selected = entry.selectedRoll ? `, wybrano ${entry.selectedRoll}` : "";
-  return `${entry.rolls.join(" + ")}${entry.modifier ? ` ${entry.modifier > 0 ? "+" : ""}${entry.modifier}` : ""}${selected}${dropped}`;
+  const dropped = entry.droppedRoll ? `, odrzucono ${entry.droppedRoll}` : "";
+  return `${dice}${mod}${selected}${dropped}`;
 }
 
 function historyTitle(entry) {
-  if (entry.mode === "genesys") return Object.entries(entry.dicePool).filter(([, count]) => count > 0).map(([key, count]) => `${count} ${GENESYS_LABELS[key]}`).join(" + ") || "Genesys";
+  if (entry.mode === "genesys") return genesysFormula(entry.dicePool);
   return entry.formula;
 }
 
 function historyTotal(entry) {
-  if (entry.mode === "genesys") {
-    if (entry.netSuccess > 0) return `+${entry.netSuccess} sukces`;
-    if (entry.netFailure > 0) return `${entry.netFailure} porażka`;
-    return "0";
-  }
-  return entry.total;
+  if (entry.mode === "genesys") return genesysSummary(entry);
+  return String(entry.total);
 }
 
 function historyBreakdown(entry) {
-  if (entry.mode === "fate") return `${entry.fateRolls.join(" ")} | kości ${entry.diceTotal}, mod ${entry.modifier >= 0 ? "+" : ""}${entry.modifier}`;
-  if (entry.mode === "genesys") return `S:${entry.netSuccess || 0} F:${entry.netFailure || 0} A:${entry.netAdvantage || 0} T:${entry.netThreat || 0} Triumph:${entry.triumph} Despair:${entry.despair}`;
+  if (entry.mode === "fate") return `${entry.fateRolls.join(" ")} | ${signed(entry.modifier)}`;
+  if (entry.mode === "genesys") return entry.interpretation || genesysSummary(entry);
   return standardBreakdown(entry);
-}
-
-function genesysSymbolItems(entry) {
-  if (!entry?.rawSymbols) return [];
-  return Object.entries(GENESYS_SYMBOLS)
-    .map(([key, meta]) => ({ key, ...meta, value: Number(entry.rawSymbols[key] || 0) }))
-    .filter((item) => item.value > 0);
-}
-
-function genesysNetItems(entry) {
-  if (!entry) return [];
-  return [
-    { key: "netSuccess", label: "Sukcesy netto", value: entry.netSuccess || 0 },
-    { key: "netFailure", label: "Porazki netto", value: entry.netFailure || 0 },
-    { key: "netAdvantage", label: "Przewagi netto", value: entry.netAdvantage || 0 },
-    { key: "netThreat", label: "Zagrozenia netto", value: entry.netThreat || 0 },
-    { key: "triumph", label: "Triumf", value: entry.triumph || 0 },
-    { key: "despair", label: "Rozpacz", value: entry.despair || 0 },
-  ].filter((item) => item.value > 0);
 }
 
 export default function DicePage() {
   const [mode, setMode] = useState("standard");
   const [lastRoll, setLastRoll] = useState(null);
-
+  const [history, setHistory] = useState([]);
   const [standard, setStandard] = useState({ qty: 1, die: 20, modifier: 0, rollType: "normal" });
   const [fate, setFate] = useState({ qty: 4, modifier: 0 });
   const [genesysPool, setGenesysPool] = useState({ ability: 1, proficiency: 0, boost: 0, difficulty: 1, challenge: 0, setback: 0 });
 
+  const currentFormula = useMemo(() => {
+    if (mode === "fate") return fateFormula(fate.qty, fate.modifier);
+    if (mode === "genesys") return genesysFormula(genesysPool);
+    return formatStandardFormula(standard.qty, standard.die, standard.modifier, standard.rollType);
+  }, [fate, genesysPool, mode, standard]);
+
   function completeRoll(entry) {
     setLastRoll(entry);
+    setHistory((current) => [entry, ...current].slice(0, 60));
   }
 
-  function rollStandard(override = {}) {
-    const cfg = { ...standard, ...override };
-    const rollType = cfg.rollType || "normal";
-    const isAdvantage = rollType === "advantage" || rollType === "disadvantage";
-    const modifier = clampInt(cfg.modifier, -9999, 9999);
-    const die = clampInt(cfg.die, 2, 10000);
-    const groups = isAdvantage
-      ? [{ qty: 2, die }]
-      : [{ qty: clampInt(cfg.qty, 1, 100), die }];
-    const formulaText = isAdvantage
-      ? `${formatStandardFormula(groups, modifier)} ${rollTypeLabel(rollType)}`
-      : formatStandardFormula(groups, modifier);
-    const rollDetails = groups.map((group) => ({
-      ...group,
-      rolls: Array.from({ length: group.qty }, () => rollDie(group.die)),
-    }));
-    const rolls = rollDetails.flatMap((group) => group.rolls);
-    const lowerIsBetter = die === 100;
-    const selectedRoll = isAdvantage
-      ? rollType === "advantage"
-        ? (lowerIsBetter ? Math.min(...rolls) : Math.max(...rolls))
-        : (lowerIsBetter ? Math.max(...rolls) : Math.min(...rolls))
+  function rollStandard() {
+    const modifier = clampInt(standard.modifier, -9999, 9999);
+    const die = clampInt(standard.die, 2, 10000);
+    const qty = clampInt(standard.qty, 1, 100);
+    const isAdv = standard.rollType === "advantage" || standard.rollType === "disadvantage";
+    const rollQty = isAdv ? 2 : qty;
+    const rolls = Array.from({ length: rollQty }, () => rollDie(die));
+    const selectedRoll = isAdv
+      ? standard.rollType === "advantage" ? Math.max(...rolls) : Math.min(...rolls)
       : null;
-    const droppedRoll = isAdvantage
-      ? rollType === "advantage"
-        ? (lowerIsBetter ? Math.max(...rolls) : Math.min(...rolls))
-        : (lowerIsBetter ? Math.min(...rolls) : Math.max(...rolls))
+    const droppedRoll = isAdv
+      ? standard.rollType === "advantage" ? Math.min(...rolls) : Math.max(...rolls)
       : null;
-    const diceTotal = selectedRoll ?? rolls.reduce((a, b) => a + b, 0);
+    const diceTotal = selectedRoll ?? rolls.reduce((sum, value) => sum + value, 0);
     const total = diceTotal + modifier;
-    const entry = {
+    completeRoll({
       id: id(),
       mode: "standard",
       modeLabel: "Standard",
-      formula: formulaText,
+      formula: formatStandardFormula(qty, die, modifier, standard.rollType),
       rolls,
-      rollDetails,
+      die,
+      qty,
+      modifier,
+      rollType: standard.rollType,
       selectedRoll,
       droppedRoll,
-      die: rollDetails.length === 1 ? rollDetails[0].die : null,
-      qty: rolls.length,
-      modifier,
+      diceTotal,
       total,
-      dc: null,
-      isSuccess: null,
-      isCritical: rollDetails.some((group) => group.die === 20 && group.rolls.includes(20)),
-      isFumble: !rollDetails.some((group) => group.die === 20 && group.rolls.includes(20)) && rollDetails.some((group) => group.die === 20 && group.rolls.includes(1)),
+      isCritical: die === 20 && rolls.includes(20),
+      isFumble: die === 20 && rolls.includes(1) && !rolls.includes(20),
       timestamp: nowLabel(),
-    };
-    setStandard((previous) => ({ ...previous, ...cfg, qty: groups[0].qty, die: groups[0].die, modifier }));
-    completeRoll(entry);
+    });
   }
 
-  function rollFate(override = {}) {
-    const cfg = { ...fate, ...override };
-    const q = clampInt(cfg.fateQty ?? cfg.qty, 1, 20);
-    const modifier = clampInt(cfg.fateMod ?? cfg.modifier, -20, 20);
-    const numericRolls = Array.from({ length: q }, rollFateDie);
-    const diceTotal = numericRolls.reduce((a, b) => a + b, 0);
+  function rollFate() {
+    const qty = clampInt(fate.qty, 1, 20);
+    const modifier = clampInt(fate.modifier, -20, 20);
+    const numericRolls = Array.from({ length: qty }, rollFateDie);
+    const diceTotal = numericRolls.reduce((sum, value) => sum + value, 0);
     const total = diceTotal + modifier;
-    const entry = {
+    completeRoll({
       id: id(),
       mode: "fate",
       modeLabel: "Fate / Fudge",
-      formula: fateFormula(q, modifier),
-      fateRolls: numericRolls.map(fateSymbol),
+      formula: fateFormula(qty, modifier),
       numericRolls,
+      fateRolls: numericRolls.map(fateSymbol),
       diceTotal,
       modifier,
       total,
-      ladderLabel: FATE_LADDER[total] || (total > 8 ? "Ponad legendarny" : "Ponizej fatalnego"),
-      dc: null,
-      isSuccess: null,
+      ladderLabel: fateDescription(total),
       timestamp: nowLabel(),
-    };
-    setFate({ qty: q, modifier });
-    completeRoll(entry);
+    });
   }
 
-  function rollGenesys(override = {}) {
-    const pool = { ...genesysPool, ...override };
-    const dicePool = Object.fromEntries(Object.entries(GENESYS_LABELS).map(([key]) => [key, clampInt(pool[key] || 0, 0, 20)]));
+  function rollGenesys() {
+    const dicePool = Object.fromEntries(Object.entries(GENESYS_LABELS).map(([key]) => [key, clampInt(genesysPool[key] || 0, 0, 20)]));
     const rawSymbols = emptySymbols();
     Object.entries(dicePool).forEach(([dieKey, count]) => {
       const sides = GENESYS_DICE[dieKey] || [];
@@ -290,8 +289,6 @@ export default function DicePage() {
     });
     const successTotal = rawSymbols.success + rawSymbols.triumph;
     const failureTotal = rawSymbols.failure + rawSymbols.despair;
-    const advantageTotal = rawSymbols.advantage;
-    const threatTotal = rawSymbols.threat;
     const entry = {
       id: id(),
       mode: "genesys",
@@ -300,14 +297,13 @@ export default function DicePage() {
       rawSymbols,
       netSuccess: Math.max(0, successTotal - failureTotal),
       netFailure: Math.max(0, failureTotal - successTotal),
-      netAdvantage: Math.max(0, advantageTotal - threatTotal),
-      netThreat: Math.max(0, threatTotal - advantageTotal),
+      netAdvantage: Math.max(0, rawSymbols.advantage - rawSymbols.threat),
+      netThreat: Math.max(0, rawSymbols.threat - rawSymbols.advantage),
       triumph: rawSymbols.triumph,
       despair: rawSymbols.despair,
       timestamp: nowLabel(),
     };
     entry.interpretation = interpretGenesys(entry);
-    setGenesysPool(dicePool);
     completeRoll(entry);
   }
 
@@ -317,255 +313,300 @@ export default function DicePage() {
     return rollStandard();
   }
 
-  function resetRoll() {
-    setLastRoll(null);
-  }
-
-  const currentFormula = useMemo(() => {
-    if (mode === "fate") return fateFormula(fate.qty, fate.modifier);
-    if (mode === "genesys") return Object.entries(genesysPool).filter(([, count]) => count > 0).map(([key, count]) => `${count} ${GENESYS_LABELS[key]}`).join(" + ") || "Pula narracyjna";
-    return standard.rollType === "advantage" || standard.rollType === "disadvantage"
-      ? `${formatStandardFormula([{ qty: 2, die: standard.die }], standard.modifier)} ${rollTypeLabel(standard.rollType)}`
-      : formatStandardFormula([{ qty: standard.qty, die: standard.die }], standard.modifier);
-  }, [fate, genesysPool, mode, standard]);
+  const activeRoll = lastRoll?.mode === mode ? lastRoll : null;
 
   return (
     <div className="page dicePage">
-      <div className="pageHeader dicePageHeader">
-        <div>
-          <span className="pageEyebrow">narzędzia</span>
-          <h1 className="pageTitle dicePageTitle">Kości</h1>
-          <p className="pageSubtitle">Uniwersalny roller: klasyczne kosci, Fate/Fudge i Genesys/Narrative.</p>
-        </div>
-      </div>
-
-      <div className="diceWorkbench diceTabPanel">
-          <section className="diceCard diceArena">
-            <div className="diceArenaTop">
-              <div className="diceArenaFormula">{currentFormula}</div>
-              <button type="button" className="diceGhostBtn" onClick={resetRoll}>Wyczyść</button>
-            </div>
-
-            <div className="diceArenaModTag">
-              Tryb <strong>{modeLabel(mode)}</strong>
-            </div>
-
-            <div className="diceVisualZone">
-              {lastRoll ? (
-                <div className="diceVisualDiceRow">
-                  {lastRoll.mode === "genesys" ? (
-                    <div className="diceNarrativeResult">
-                      <div className="diceGenesysSymbols">
-                        {genesysSymbolItems(lastRoll).length ? genesysSymbolItems(lastRoll).map((item) => (
-                          <span key={item.key} className={`diceGenesysSymbol is-${item.key}`}>
-                            <strong>{item.mark}</strong>
-                            <em>x{item.value}</em>
-                          </span>
-                        )) : <span className="diceGenesysNeutral">Brak symboli</span>}
-                      </div>
-                      <div className="diceGenesysNet">
-                        {genesysNetItems(lastRoll).length ? genesysNetItems(lastRoll).map((item) => (
-                          <span key={item.key}>{item.label}: <strong>{item.value}</strong></span>
-                        )) : <span>Wynik neutralny</span>}
-                      </div>
-                    </div>
-                  ) : lastRoll.mode === "fate" ? (
-                    lastRoll.fateRolls.map((value, index) => <div key={index} className="diceArenaDie"><strong className="diceArenaDieTxt">{value}</strong><span className="diceArenaDieType">Fate</span></div>)
-                  ) : (
-                    (lastRoll.rollDetails?.flatMap((group) => group.rolls.map((value) => ({ value, die: group.die }))) || lastRoll.rolls.map((value) => ({ value, die: lastRoll.die })))
-                      .slice(0, 12)
-                      .map((item, index) => <div key={index} className="diceArenaDie"><strong className="diceArenaDieTxt">{item.value}</strong><span className="diceArenaDieType">k{item.die}</span></div>)
-                  )}
-                </div>
-              ) : (
-                <div className="diceVisualEmpty">
-                  <span>Brak rzutu. Ustaw tryb i kliknij "Rzuć".</span>
-                </div>
-              )}
-            </div>
-
-            <div className="diceFinalWrap">
-              <div className="diceFinalLabel">WYNIK</div>
-              <div className="diceFinalValue">{lastRoll ? historyTotal(lastRoll) : "—"}</div>
-              {lastRoll?.ladderLabel && <div className="diceFinalHint is-success">{lastRoll.ladderLabel}</div>}
-              {lastRoll?.isCritical && <div className="diceFinalHint is-critical">Naturalne 20</div>}
-              {lastRoll?.isFumble && <div className="diceFinalHint is-fail">Naturalne 1</div>}
-              {lastRoll?.mode === "genesys" && <div className="diceFinalHint is-success">{lastRoll.interpretation}</div>}
-            </div>
-
-            <div className="diceMainActions">
-              <button type="button" className="dicePrimaryBtn" onClick={rollCurrent}>Rzuć</button>
-            </div>
-          </section>
-
-          <section className="diceCard diceConfig">
-            <div className="diceColumnHeader">
-              <span className="diceColumnTitle">Konfiguracja</span>
-            </div>
-
-            <div className="diceConfigField">
-              <label className="diceConfigLabel">Tryb kości</label>
-              <select className="diceSelect" value={mode} onChange={(event) => setMode(event.target.value)}>
-                {MODES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-              </select>
-            </div>
-
-            {mode === "standard" && (
-              <>
-                <div className="diceConfigField">
-                  <label className="diceConfigLabel">Kosc</label>
-                  <select className="diceSelect" value={standard.die} onChange={(event) => setStandard((cfg) => ({ ...cfg, die: clampInt(event.target.value, 2, 10000) }))}>
-                    {STANDARD_DICE.map((sides) => <option key={sides} value={sides}>k{sides}</option>)}
-                  </select>
-                </div>
-                <NumberStepper label="Ilo�� rzut�w" value={standard.qty} min={1} max={100} onChange={(value) => setStandard((cfg) => ({ ...cfg, qty: value }))} />
-                <NumberStepper label="Modyfikator" value={standard.modifier} min={-9999} max={9999} onChange={(value) => setStandard((cfg) => ({ ...cfg, modifier: value }))} />
-                <div className="diceConfigField">
-                  <label className="diceConfigLabel">Typ rzutu</label>
-                  <select className="diceSelect" value={standard.rollType} onChange={(event) => setStandard((cfg) => ({ ...cfg, rollType: event.target.value }))}>
-                    {ROLL_TYPES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-                  </select>
-                </div>
-              </>
-            )}
-
-            {mode === "fate" && (
-              <>
-                <NumberStepper label="Liczba kości Fate" value={fate.qty} min={1} max={20} onChange={(value) => setFate((cfg) => ({ ...cfg, qty: value }))} />
-                <NumberStepper label="Modyfikator / umiejętność" value={fate.modifier} min={-20} max={20} onChange={(value) => setFate((cfg) => ({ ...cfg, modifier: value }))} />
-              </>
-            )}
-
-            {mode === "genesys" && (
-              <div className="diceGenesysPool">
-                {Object.entries(GENESYS_LABELS).map(([key, label]) => (
-                  <GenesysDieControl key={key} dieKey={key} label={label} value={genesysPool[key]} min={0} max={20} onChange={(value) => setGenesysPool((pool) => ({ ...pool, [key]: value }))} />
-                ))}
-              </div>
-            )}
-
-          </section>
-
+      <div className="diceWorkbench">
+        <main className="diceMainPanel">
+          <DiceCommandBar formula={currentFormula} mode={mode} setMode={setMode} onRoll={rollCurrent} onClear={() => setLastRoll(null)} />
+          {mode === "standard" && <StandardRollView config={standard} roll={activeRoll} />}
+          {mode === "fate" && <FateRollView config={fate} roll={activeRoll} />}
+          {mode === "genesys" && <GenesysRollView pool={genesysPool} roll={activeRoll} />}
+        </main>
+        <aside className="diceSidePanel">
+          <DiceConfigPanel
+            mode={mode}
+            setMode={setMode}
+            standard={standard}
+            setStandard={setStandard}
+            fate={fate}
+            setFate={setFate}
+            genesysPool={genesysPool}
+            setGenesysPool={setGenesysPool}
+          />
+          <HistoryPanel history={history} onClear={() => setHistory([])} />
+        </aside>
       </div>
     </div>
+  );
+}
+
+function DiceCommandBar({ formula, mode, setMode, onRoll, onClear }) {
+  return (
+    <section className="diceCommandPanel" aria-label="Komenda rzutu">
+      <div className="diceFormulaBox">
+        <span>Aktualna formuła</span>
+        <strong>{formula}</strong>
+      </div>
+      <div className="diceActionRow">
+        <button type="button" className="dicePrimaryBtn" onClick={onRoll}>Rzuć</button>
+        <button type="button" className="diceGhostBtn" onClick={onClear}>Wyczyść</button>
+      </div>
+      <div className="diceModeTabs" role="tablist" aria-label="Tryb rzutu">
+        {MODES.map((item) => (
+          <button key={item.value} type="button" role="tab" aria-selected={mode === item.value} className={mode === item.value ? "is-active" : ""} onClick={() => setMode(item.value)}>
+            {item.label}
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function StandardRollView({ config, roll }) {
+  return (
+    <section className="diceCard diceResultPanel">
+      <ResultHeader title="Wynik" subtitle="Standardowy rzut kośćmi" />
+      <div className="diceResultHero">
+        <div className="diceBigNumber">{roll ? roll.total : "-"}</div>
+        <div className="diceBreakdown">{roll ? standardBreakdown(roll) : "Ustaw parametry i wykonaj rzut."}</div>
+      </div>
+      <div className="diceDiceStage">
+        {roll ? roll.rolls.map((value, index) => <StandardDie key={`${value}-${index}`} value={value} die={roll.die} selected={!roll.selectedRoll || value === roll.selectedRoll} />) : <div className="diceEmptyStage">Brak rzutu.</div>}
+      </div>
+      <SummaryGrid items={[
+        ["Kość", `k${config.die}`],
+        ["Liczba rzutów", config.qty],
+        ["Modyfikator", signed(config.modifier)],
+        ["Typ rzutu", rollTypeLabel(config.rollType)],
+      ]} />
+    </section>
+  );
+}
+
+function FateRollView({ config, roll }) {
+  return (
+    <section className="diceCard diceResultPanel">
+      <ResultHeader title="Wynik" subtitle="Fate / Fudge" />
+      <div className="diceResultHero diceResultHero--fate">
+        <div>
+          <div className="diceBigNumber">{roll ? roll.total : "-"}</div>
+          <div className="diceOutcomeText">{roll ? roll.ladderLabel : "Opis pojawi się po rzucie."}</div>
+        </div>
+        <div className="diceFateDice">
+          {roll ? roll.fateRolls.map((symbol, index) => <span key={`${symbol}-${index}`} className={`diceFateDie is-${symbol === "+" ? "plus" : symbol === "-" ? "minus" : "zero"}`}>{symbol}</span>) : Array.from({ length: config.qty }, (_, index) => <span key={index} className="diceFateDie">0</span>)}
+        </div>
+      </div>
+      <SummaryGrid items={[
+        ["Kości Fate", config.qty],
+        ["Modyfikator", signed(config.modifier)],
+        ["Wynik surowy", roll ? roll.diceTotal : "-"],
+        ["Wynik końcowy", roll ? roll.total : "-"],
+        ["Opis", roll ? roll.ladderLabel : "-"],
+      ]} />
+    </section>
+  );
+}
+
+function GenesysRollView({ pool, roll }) {
+  const summary = roll ? genesysSummary(roll) : "Wynik pojawi się po rzucie.";
+  return (
+    <section className="diceCard diceResultPanel">
+      <ResultHeader title="Wynik" subtitle="Genesys / Narrative" />
+      <div className="diceGenesysResult">
+        <div>
+          <div className="diceGenesysHeadline">{summary}</div>
+          <p>{roll ? roll.interpretation : "Zbuduj pulę kości i wykonaj rzut narracyjny."}</p>
+        </div>
+        <div className="diceGenesysSymbolGrid">
+          {roll && genesysNetItems(roll).length ? genesysNetItems(roll).map((item) => (
+            <div key={item.key} className="diceGenesysResultItem">
+              <GenesysSymbol type={item.key} />
+              <span>{item.label}</span>
+              <strong>x{item.count}</strong>
+            </div>
+          )) : <div className="diceEmptyStage">Brak symboli.</div>}
+        </div>
+      </div>
+      <GenesysSymbolLegend />
+      <SummaryGrid items={[
+        ["Zdolność", pool.ability],
+        ["Biegłość", pool.proficiency],
+        ["Wsparcie", pool.boost],
+        ["Trudność", pool.difficulty],
+        ["Wyzwanie", pool.challenge],
+        ["Utrudnienie", pool.setback],
+        ["Wynik", summary],
+      ]} />
+    </section>
+  );
+}
+
+function ResultHeader({ title, subtitle }) {
+  return (
+    <div className="diceSectionHeader">
+      <div>
+        <h2>{title}</h2>
+        <p>{subtitle}</p>
+      </div>
+    </div>
+  );
+}
+
+function StandardDie({ value, die, selected }) {
+  return (
+    <div className={`diceStandardDie${selected ? " is-selected" : ""}`}>
+      <strong>{value}</strong>
+      <span>k{die}</span>
+    </div>
+  );
+}
+
+function SummaryGrid({ items }) {
+  return (
+    <div className="diceSummaryGrid">
+      {items.map(([label, value]) => (
+        <div key={label}>
+          <span>{label}</span>
+          <strong>{value ?? "Brak danych"}</strong>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function DiceConfigPanel({ mode, setMode, standard, setStandard, fate, setFate, genesysPool, setGenesysPool }) {
+  return (
+    <section className="diceCard diceConfigPanel">
+      <div className="diceSideHeader">
+        <h2>Konfiguracja</h2>
+        <p>{modeLabel(mode)}</p>
+      </div>
+      <label className="diceField">
+        <span>Tryb kości</span>
+        <select value={mode} onChange={(event) => setMode(event.target.value)} aria-label="Tryb kości">
+          {MODES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+        </select>
+      </label>
+      {mode === "standard" && (
+        <>
+          <label className="diceField">
+            <span>Kość</span>
+            <select value={standard.die} onChange={(event) => setStandard((current) => ({ ...current, die: clampInt(event.target.value, 2, 10000) }))}>
+              {STANDARD_DICE.map((die) => <option key={die} value={die}>k{die}</option>)}
+            </select>
+          </label>
+          <NumberStepper label="Liczba rzutów" value={standard.qty} min={1} max={100} onChange={(value) => setStandard((current) => ({ ...current, qty: value }))} />
+          <NumberStepper label="Modyfikator" value={standard.modifier} min={-9999} max={9999} onChange={(value) => setStandard((current) => ({ ...current, modifier: value }))} />
+          <div className="diceRollTypeGrid">
+            {ROLL_TYPES.map((item) => (
+              <button key={item.value} type="button" className={standard.rollType === item.value ? "is-active" : ""} onClick={() => setStandard((current) => ({ ...current, rollType: item.value }))}>
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+      {mode === "fate" && (
+        <>
+          <NumberStepper label="Liczba kości Fate" value={fate.qty} min={1} max={20} onChange={(value) => setFate((current) => ({ ...current, qty: value }))} />
+          <NumberStepper label="Modyfikator" value={fate.modifier} min={-20} max={20} onChange={(value) => setFate((current) => ({ ...current, modifier: value }))} />
+        </>
+      )}
+      {mode === "genesys" && (
+        <div className="diceGenesysPool">
+          {Object.entries(GENESYS_LABELS).map(([key, label]) => (
+            <GenesysDieControl key={key} dieKey={key} label={label} value={genesysPool[key]} onChange={(value) => setGenesysPool((current) => ({ ...current, [key]: value }))} />
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
 
 function NumberStepper({ label, value, min, max, onChange }) {
   return (
-    <div className="diceConfigRow">
-      <span className="diceConfigLabel">{label}</span>
-      <div className="diceQtyControl">
-        <button type="button" className="diceQtyStep" onClick={() => onChange(clampInt(value - 1, min, max))} disabled={value <= min}>-</button>
-        <input className="diceQtyNum diceQtyInput" type="number" value={value} min={min} max={max} onChange={(event) => onChange(clampInt(event.target.value, min, max))} />
-        <button type="button" className="diceQtyStep" onClick={() => onChange(clampInt(value + 1, min, max))} disabled={value >= max}>+</button>
+    <div className="diceStepper">
+      <span>{label}</span>
+      <div>
+        <button type="button" onClick={() => onChange(clampInt(value - 1, min, max))} disabled={value <= min}>-</button>
+        <input type="number" value={value} min={min} max={max} onChange={(event) => onChange(clampInt(event.target.value, min, max))} />
+        <button type="button" onClick={() => onChange(clampInt(value + 1, min, max))} disabled={value >= max}>+</button>
       </div>
     </div>
   );
 }
 
-function GenesysDieControl({ dieKey, label, value, min, max, onChange }) {
-  const meta = GENESYS_DIE_META[dieKey] || { mark: label.slice(0, 1), tone: "neutral" };
+function GenesysDieControl({ dieKey, label, value, onChange }) {
+  const meta = GENESYS_DIE_META[dieKey];
   return (
-    <div className={`diceGenesysDie is-${meta.tone}`}>
-      <div className="diceGenesysDieHead">
-        <span className="diceGenesysDieMark">{meta.mark}</span>
-        <span className="diceGenesysDieLabel">{label}</span>
-      </div>
-      <div className="diceQtyControl diceQtyControl--compact">
-        <button type="button" className="diceQtyStep" onClick={() => onChange(clampInt(value - 1, min, max))} disabled={value <= min}>-</button>
-        <input className="diceQtyNum diceQtyInput" type="number" value={value} min={min} max={max} onChange={(event) => onChange(clampInt(event.target.value, min, max))} />
-        <button type="button" className="diceQtyStep" onClick={() => onChange(clampInt(value + 1, min, max))} disabled={value >= max}>+</button>
-      </div>
+    <div className={`diceGenesysDieControl is-${meta.tone}`}>
+      <span className="diceGenesysDieBadge"><GenesysSymbol type={meta.symbol} /></span>
+      <strong>{label}</strong>
+      <NumberStepper label="" value={value} min={0} max={20} onChange={onChange} />
     </div>
   );
 }
 
-function HistoryPanel({ history, filter, setFilter, onClear, compact = false }) {
+function GenesysSymbol({ type }) {
+  const meta = GENESYS_SYMBOLS[type] || GENESYS_SYMBOLS.success;
+  return (
+    <span className={`genesysSymbol is-${meta.color}`} aria-label={meta.label} title={meta.label}>
+      {type === "success" && <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M19.1 4.9l-2.8 2.8M7.7 16.3l-2.8 2.8" /></svg>}
+      {type === "advantage" && <svg viewBox="0 0 24 24"><path d="M12 3l9 9-9 9-9-9 9-9Z" /></svg>}
+      {type === "triumph" && <svg viewBox="0 0 24 24"><path d="M12 2l2.8 6 6.2.8-4.6 4.4 1.2 6.4L12 16.5 6.4 19.6l1.2-6.4L3 8.8 9.2 8 12 2Z" /></svg>}
+      {type === "failure" && <svg viewBox="0 0 24 24"><path d="M12 21L3 5h18l-9 16Z" /></svg>}
+      {type === "threat" && <svg viewBox="0 0 24 24"><path d="M12 20L4 6h16l-8 14Z" /><path d="M12 10v4" /></svg>}
+      {type === "despair" && <svg viewBox="0 0 24 24"><path d="M5 6h14l-7 7-7-7Z" /><path d="M5 13h14l-7 7-7-7Z" /></svg>}
+    </span>
+  );
+}
+
+function GenesysSymbolLegend() {
+  return (
+    <div className="diceGenesysLegend">
+      {Object.entries(GENESYS_SYMBOLS).map(([key, meta]) => (
+        <span key={key}><GenesysSymbol type={key} /> {meta.label}</span>
+      ))}
+    </div>
+  );
+}
+
+function HistoryPanel({ history, onClear }) {
   return (
     <section className="diceCard diceHistoryCard">
-      <div className="diceHistoryHeader">
-        <h3 className="diceHistoryTitle">Historia rzutów</h3>
-        <select className="diceSelect diceSelect--sm" value={filter} onChange={(event) => setFilter(event.target.value)}>
-          <option value="all">Wszystkie</option>
-          {MODES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-        </select>
+      <div className="diceSideHeader diceHistoryHead">
+        <div>
+          <h2>Historia rzutów</h2>
+          <p>{history.length ? `${history.length} ostatnich wpisów` : "Brak historii"}</p>
+        </div>
+        <button type="button" onClick={onClear}>Wyczyść</button>
       </div>
       <div className="diceHistoryList">
-        {history.length === 0 && <div className="diceHistoryEmpty">Brak historii.</div>}
+        {history.length === 0 ? <div className="diceHistoryEmpty">Historia pojawi się po pierwszym rzucie.</div> : null}
         {history.map((entry) => (
           <article key={entry.id} className="diceHistoryItem">
             <div className="diceHistoryTop">
-              <strong className="diceHistoryFormula">{historyTitle(entry)}</strong>
-              <span className="diceHistoryTotal">{historyTotal(entry)}</span>
+              <strong>{historyTitle(entry)}</strong>
+              <em>{historyTotal(entry)}</em>
             </div>
-            <div className="diceHistoryMeta">{entry.modeLabel || modeLabel(entry.mode)} | {entry.timestamp}</div>
-            <div className="diceHistoryBreakdown">{historyBreakdown(entry)}</div>
-            {entry.isCritical && <span className="diceHistoryBadge is-critical">Krytyk</span>}
-            {entry.isFumble && <span className="diceHistoryBadge is-fail">Fumble</span>}
-            {entry.isSuccess === true && <span className="diceHistoryBadge is-success">Sukces</span>}
-            {entry.isSuccess === false && <span className="diceHistoryBadge is-fail">Porażka</span>}
+            <span>{entry.modeLabel} | {entry.timestamp}</span>
+            {entry.mode === "genesys" && genesysNetItems(entry).length ? (
+              <div className="diceHistorySymbols">
+                {genesysNetItems(entry).map((item) => (
+                  <span key={item.key}>
+                    <GenesysSymbol type={item.key} />
+                    <strong>x{item.count}</strong>
+                    <em>{GENESYS_SYMBOLS[item.key]?.label || item.key}</em>
+                  </span>
+                ))}
+              </div>
+            ) : null}
+            <p>{historyBreakdown(entry) || "Brak szczegółów"}</p>
           </article>
         ))}
       </div>
-      {!compact && onClear && <button type="button" className="diceSecondaryBtn" onClick={onClear}>Wyczyść historię</button>}
     </section>
-  );
-}
-
-function StatsPanel({ stats, distribution }) {
-  return (
-    <div className="diceBottomGrid">
-      <section className="diceCard diceStatsCard">
-        <div className="diceStatsHeader"><h3 className="diceHistoryTitle">Statystyki numeryczne</h3></div>
-        <div className="diceMetrics">
-          {[
-            ["RZUTY", stats.count],
-            ["ŚREDNIA", stats.average !== null ? stats.average.toFixed(2) : "—"],
-            ["MIN", stats.min ?? "—"],
-            ["MAX", stats.max ?? "—"],
-            ["SUKCESY", stats.successes],
-            ["PORAŻKI", stats.failures],
-            ["KRYTYKI", stats.criticals],
-            ["FUMBLE", stats.fumbles],
-          ].map(([label, value]) => (
-            <article key={label} className="diceMetricBox"><span className="diceMetricLabel">{label}</span><strong className="diceMetricValue">{value}</strong></article>
-          ))}
-        </div>
-      </section>
-      <section className="diceCard diceStatsCard">
-        <div className="diceStatsHeader"><h3 className="diceHistoryTitle">Genesys / Narrative</h3></div>
-        <div className="diceMetrics">
-          {[
-            ["RZUTY", stats.genesysCount],
-            ["UDANE AKCJE", stats.successfulActions],
-            ["NIEUDANE AKCJE", stats.failedActions],
-            ["TRIUMPH", stats.totalTriumph],
-            ["DESPAIR", stats.totalDespair],
-            ["NET SUCCESS", stats.totalNetSuccess],
-            ["NET FAILURE", stats.totalNetFailure],
-            ["NET ADV/THREAT", `${stats.totalNetAdvantage}/${stats.totalNetThreat}`],
-          ].map(([label, value]) => (
-            <article key={label} className="diceMetricBox"><span className="diceMetricLabel">{label}</span><strong className="diceMetricValue">{value}</strong></article>
-          ))}
-        </div>
-      </section>
-      <section className="diceCard diceChartCard">
-        <div className="diceStatsHeader"><h3 className="diceHistoryTitle">Rozkład wyników</h3></div>
-        <div className="diceBarChart">
-          {distribution.rows.length === 0 ? <div className="diceHistoryEmpty">Wykonaj rzuty numeryczne, aby zobaczyć rozkład.</div> : (
-            <div className="diceBarChartInner">
-              {distribution.rows.map(([value, count]) => (
-                <div key={value} className="diceBarCol">
-                  <span className="diceBarCount">{count}</span>
-                  <div className="diceBarTrack"><div className="diceBarFill" style={{ height: `${(count / distribution.peak) * 100}%` }} /></div>
-                  <span className="diceBarLabel">{value}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-    </div>
   );
 }

@@ -111,9 +111,10 @@ describe("GeneratorsPage practical generators", () => {
     expect(screen.getByText("Poziom zagrozenia")).toBeInTheDocument();
     expect(screen.getByText("Ton")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /Generuj/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Przelosuj/i }));
 
-    expect(await screen.findByText("Co sie dzieje?")).toBeInTheDocument();
+    expect(await screen.findByText("Problem")).toBeInTheDocument();
+    expect(screen.getByText("Scena testowa.")).toBeInTheDocument();
     expect(screen.queryByText("Podsumowanie")).not.toBeInTheDocument();
     expect(generateVariantContent).toHaveBeenCalledWith("test-token", "encounter_quick", "general.quick", expect.objectContaining({
       setting: "Losowy",

@@ -79,7 +79,12 @@ public class NpcGeneralQuickGeneratorStrategy implements GeneratorStrategy {
     }
 
     private GeneratorOutputSection section(String title, String content) {
-        return new GeneratorOutputSection("text", title, content, List.of());
+        return new GeneratorOutputSection(
+                "text",
+                GeneratorTextSanitizer.clean(title),
+                GeneratorTextSanitizer.clean(content),
+                List.of()
+        );
     }
 
     private String setting(Map<String, Object> params) {
@@ -203,7 +208,7 @@ public class NpcGeneralQuickGeneratorStrategy implements GeneratorStrategy {
     private String pick(List<?> list) {
         if (list == null || list.isEmpty()) return "";
         Object picked = list.get(random.nextInt(list.size()));
-        return picked == null ? "" : String.valueOf(picked);
+        return GeneratorTextSanitizer.clean(picked);
     }
 
     private List<Object> asList(Object value) {

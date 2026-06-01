@@ -41,7 +41,7 @@ function Icon({ name }) {
 function getRoleBadges(user) {
   const badges = [];
   const role = (user?.role || "PLAYER").toUpperCase();
-  if (role === "PLAYER") badges.push("Gracz");
+  if (role === "PLAYER") badges.push("GRACZ");
   if (role && role !== "PLAYER") badges.push(role);
   if (user?.isMg) badges.push("MG");
   return [...new Set(badges)];
@@ -155,7 +155,7 @@ export default function AccountMenu() {
         aria-haspopup="menu"
       >
         {avatarSrc ? (
-          <img src={avatarSrc} alt="Avatar użytkownika" className="topNav__avatarImg" />
+          <img src={avatarSrc} alt="Avatar użytkownika" className="topNav__avatarImg" onError={() => setAvatarSrc("")} />
         ) : (
           <span className="topNav__avatar">{avatarLabel}</span>
         )}
@@ -174,13 +174,13 @@ export default function AccountMenu() {
         <div className="topNav__menu" role="menu">
           <div className="topNav__menuHeader">
             {avatarSrc ? (
-              <img src={avatarSrc} alt="Avatar użytkownika" className="topNav__menuAvatarImg" />
+              <span className="topNav__menuAvatarWrap"><img src={avatarSrc} alt="Avatar użytkownika" className="topNav__menuAvatarImg" onError={() => setAvatarSrc("")} /><i aria-hidden="true" /></span>
             ) : (
-              <div className="topNav__menuAvatar">{avatarLabel}</div>
+              <span className="topNav__menuAvatarWrap"><span className="topNav__menuAvatar">{avatarLabel}</span><i aria-hidden="true" /></span>
             )}
             <div className="topNav__menuIdentity">
               <div className="topNav__menuName">{displayName}</div>
-              <div className="topNav__menuEmail">{user?.email || "Brak emaila"}</div>
+              {user?.email ? <div className="topNav__menuEmail">{user.email}</div> : null}
               <div className="topNav__menuRoleList">
                 {roleBadges.map((badge) => (
                   <span key={badge} className="topNav__menuRole">{badge}</span>

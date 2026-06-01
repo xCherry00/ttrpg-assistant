@@ -22,17 +22,6 @@ function BellIcon() {
   );
 }
 
-function RefreshIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M21 12a9 9 0 0 1-9 9 8.8 8.8 0 0 1-6.2-2.5" />
-      <path d="M3 12a9 9 0 0 1 15.2-6.5" />
-      <path d="M18 3v5h-5" />
-      <path d="M6 21v-5h5" />
-    </svg>
-  );
-}
-
 function CheckIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -46,6 +35,18 @@ function XIcon() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M18 6 6 18" />
       <path d="m6 6 12 12" />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M5 7h14" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+      <path d="M8 7l1-3h6l1 3" />
+      <path d="M7 7l1 13h8l1-13" />
     </svg>
   );
 }
@@ -193,13 +194,14 @@ export default function NotificationBell() {
   const unreadCount = Number(overview.unreadCount) || 0;
 
   async function handleMarkAllRead() {
-    if (!token || loading) return;
+    if (!token || loading || unreadCount === 0) return;
     setError("");
     try {
       const response = await markAllNotificationsRead(token);
+      const responseItems = Array.isArray(response?.items) ? response.items : overview.items;
       setOverview({
-        unreadCount: response?.unreadCount || 0,
-        items: Array.isArray(response?.items) ? response.items : [],
+        unreadCount: 0,
+        items: responseItems.map((item) => ({ ...item, read: true })),
       });
     } catch (err) {
       setError(err?.message || "Nie udało się oznaczyć powiadomień jako przeczytane.");
@@ -241,7 +243,7 @@ export default function NotificationBell() {
   }
 
   return (
-    <div className="notificationBell" ref={wrapperRef}>
+    <div className={`notificationBell${unreadCount > 0 ? " has-unread" : ""}`} ref={wrapperRef}>
       <button
         type="button"
         className="appShellBell"
@@ -261,17 +263,13 @@ export default function NotificationBell() {
               <strong>Powiadomienia</strong>
               <small>{unreadCount > 0 ? `${formatCount(unreadCount)} nieodczytanych` : "Wszystko przeczytane"}</small>
             </div>
-            <button type="button" onClick={loadNotifications} disabled={loading}>
-              Odśwież
-              <RefreshIcon />
-            </button>
-            <button type="button" onClick={handleMarkAllRead} disabled={loading || overview.items.length === 0}>
-              Oznacz wszystkie
+            <button type="button" onClick={handleMarkAllRead} disabled={loading || unreadCount === 0}>
               <CheckIcon />
+              <span>Oznacz wszystkie jako przeczytane</span>
             </button>
             <button type="button" onClick={handleClearAll} disabled={loading || overview.items.length === 0}>
-              Wyczyść
-              <XIcon />
+              <TrashIcon />
+              <span>Wyczyść</span>
             </button>
           </header>
 
@@ -282,6 +280,7 @@ export default function NotificationBell() {
               <div className="notificationMenu__state">
                 <span className="notificationMenu__stateIcon"><BellIcon /></span>
                 <strong>Brak nowych powiadomień</strong>
+                <p>Nowe zaproszenia, wiadomości i aktualizacje pojawią się tutaj.</p>
               </div>
             )}
             {overview.items.map((item) => {
@@ -292,7 +291,7 @@ export default function NotificationBell() {
                   className={`notificationItem${item.read ? "" : " is-unread"}`}
                 >
                   <button type="button" className="notificationItem__main" onClick={() => goToNotification(item)}>
-                    <span className={`notificationItem__dot notificationItem__dot--${item.source || "system"}`} />
+                    {!item.read && <span className={`notificationItem__dot notificationItem__dot--${item.source || "system"}`} />}
                     <span className={`notificationItem__avatar notificationItem__avatar--${item.source || "system"}`}>
                       {itemIcon(item.source, item.title)}
                     </span>

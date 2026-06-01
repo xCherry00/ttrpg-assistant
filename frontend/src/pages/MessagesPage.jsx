@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { discoverUsers } from "../api/social";
@@ -25,10 +25,56 @@ function formatTime(value) {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+function formatDateLabel(value) {
+  if (!value) return "Dzisiaj";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Dzisiaj";
+  const today = new Date();
+  if (date.toDateString() === today.toDateString()) return "Dzisiaj";
+  return date.toLocaleDateString("pl-PL", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
 function statusLabel(status) {
   if (status === "incoming_request") return "Prosba o kontakt";
   if (status === "outgoing_request") return "Oczekuje na akceptacje";
   return "Aktywna rozmowa";
+}
+
+function formatBytes(value) {
+  const bytes = Number(value || 0);
+  if (!bytes) return "Brak rozmiaru";
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function fileTypeLabel(attachment) {
+  const source = attachment?.contentType || attachment?.mimeType || attachment?.originalName || "plik";
+  const extension = String(source).split(".").pop()?.split("/").pop() || "plik";
+  return extension.toUpperCase();
+}
+
+function conversationName(conversation) {
+  return conversation?.peer?.displayName || conversation?.title || "Rozmowa";
+}
+
+function conversationInitial(conversation) {
+  return conversationName(conversation).slice(0, 1).toUpperCase() || "R";
+}
+
+function peerTag(peer) {
+  if (!peer) return "Brak identyfikatora";
+  if (peer.username && peer.tagCode !== undefined && peer.tagCode !== null) {
+    return `${peer.username}#${String(peer.tagCode).padStart(4, "0")}`;
+  }
+  return peer.username || peer.handle || "Brak identyfikatora";
+}
+
+function hasUnread(conversation) {
+  return Number(conversation?.unreadCount || 0) > 0;
+}
+
+function handleNewConversationFocus() {
+  document.getElementById("messages-discover")?.focus();
 }
 
 export default function MessagesPage() {
@@ -74,7 +120,7 @@ export default function MessagesPage() {
         setActiveConversationId(rows[0].id);
       }
     } catch (err) {
-      setError(err?.message || "Nie udało się pobrac listy rozmów.");
+      setError(err?.message || "Nie udalo sie pobrac listy rozmow.");
     } finally {
       setLoadingConversations(false);
     }
@@ -82,9 +128,7 @@ export default function MessagesPage() {
 
   const loadMessages = useCallback(async (conversationId, { beforeId, appendOlder = false } = {}) => {
     if (!conversationId) return;
-    if (!appendOlder) {
-      setLoadingMessages(true);
-    }
+    if (!appendOlder) setLoadingMessages(true);
     setError("");
     try {
       const rows = await getConversationMessages(token, conversationId, { beforeId, limit: 40 });
@@ -95,11 +139,9 @@ export default function MessagesPage() {
       }
       setHasOlder((rows || []).length >= 40);
     } catch (err) {
-      setError(err?.message || "Nie udało się pobrac wiadomości.");
+      setError(err?.message || "Nie udalo sie pobrac wiadomosci.");
     } finally {
-      if (!appendOlder) {
-        setLoadingMessages(false);
-      }
+      if (!appendOlder) setLoadingMessages(false);
     }
   }, [token]);
 
@@ -132,7 +174,7 @@ export default function MessagesPage() {
         const results = await discoverUsers(token, peopleQuery);
         setPeople(results || []);
       } catch (err) {
-        setError(err?.message || "Nie udało się wyszukac graczy.");
+        setError(err?.message || "Nie udalo sie wyszukac graczy.");
       } finally {
         setLoadingPeople(false);
       }
@@ -157,7 +199,7 @@ export default function MessagesPage() {
       setFiles([]);
       await Promise.all([loadMessages(activeConversationId), loadConversations(filter)]);
     } catch (err) {
-      setError(err?.message || "Nie udało się wyslac wiadomości.");
+      setError(err?.message || "Nie udalo sie wyslac wiadomosci.");
     } finally {
       setSending(false);
     }
@@ -174,7 +216,7 @@ export default function MessagesPage() {
       await loadConversations("all");
       setActiveConversationId(row.id);
     } catch (err) {
-      setError(err?.message || "Nie udało się rozpocząć rozmowy.");
+      setError(err?.message || "Nie udalo sie rozpoczac rozmowy.");
     } finally {
       setBusyAction("");
     }
@@ -188,7 +230,7 @@ export default function MessagesPage() {
       await acceptConversationRequest(token, activeConversationId);
       await Promise.all([loadConversations(filter), loadMessages(activeConversationId)]);
     } catch (err) {
-      setError(err?.message || "Nie udało się zaakceptowac prosby.");
+      setError(err?.message || "Nie udalo sie zaakceptowac prosby.");
     } finally {
       setBusyAction("");
     }
@@ -203,7 +245,7 @@ export default function MessagesPage() {
       await loadConversations(filter);
       setMessages([]);
     } catch (err) {
-      setError(err?.message || "Nie udało się odrzucic prosby.");
+      setError(err?.message || "Nie udalo sie odrzucic prosby.");
     } finally {
       setBusyAction("");
     }
@@ -221,61 +263,44 @@ export default function MessagesPage() {
       anchor.remove();
       URL.revokeObjectURL(url);
     } catch (err) {
-      setError(err?.message || "Nie udało się pobrac zalacznika.");
+      setError(err?.message || "Nie udalo sie pobrac zalacznika.");
     }
   }
 
   return (
     <div className="page messagesPageWrap">
-      <div className="pageHeader">
-        <div>
-          <span className="pageEyebrow">spolecznosc</span>
-          <h1 className="pageTitle">Wiadomości</h1>
-          <p className="pageSubtitle">Proste rozmowy 1:1 i wysyłanie załączników.</p>
-        </div>
-      </div>
       <div className="messagesPage">
         <section className="messagesSidebar panel-soft">
           <header className="messagesSidebar__header">
-            <h2>Wiadomości</h2>
+            <div>
+              <h2>Wiadomosci</h2>
+              <p>{conversations.length} rozmow</p>
+            </div>
             <span>{conversations.length}</span>
           </header>
 
           <div className="messagesSidebar__filters">
             {FILTERS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={`messagesFilter${filter === item.id ? " is-active" : ""}`}
-                onClick={() => setFilter(item.id)}
-              >
+              <button key={item.id} type="button" className={`messagesFilter${filter === item.id ? " is-active" : ""}`} onClick={() => setFilter(item.id)}>
                 {item.label}
               </button>
             ))}
           </div>
 
           <div className="messagesSidebar__discover">
-            <label htmlFor="messages-discover">Nowa rozmowa</label>
-            <input
-              id="messages-discover"
-              value={peopleQuery}
-              onChange={(event) => setPeopleQuery(event.target.value)}
-              placeholder="Wpisz nick lub #tag"
-            />
+            <div className="messagesDiscoverSearch">
+              <span aria-hidden="true">S</span>
+              <input id="messages-discover" value={peopleQuery} onChange={(event) => setPeopleQuery(event.target.value)} placeholder="Szukaj uzytkownika..." />
+              <button type="button" className="messagesNewButton" onClick={handleNewConversationFocus} aria-label="Nowa rozmowa">+</button>
+            </div>
             {loadingPeople && <div className="messagesHint">Szukam uzytkownikow...</div>}
             {!loadingPeople && peopleQuery.trim() && people.length === 0 && <div className="messagesHint">Brak wynikow wyszukiwania.</div>}
             {!loadingPeople && people.length > 0 && (
               <div className="messagesDiscoverList">
                 {people.slice(0, 5).map((user) => (
-                  <button
-                    key={user.id}
-                    type="button"
-                    className="messagesDiscoverItem"
-                    onClick={() => handleStartConversation(user.id)}
-                    disabled={busyAction === `start-${user.id}`}
-                  >
-                    <span>{user.displayName}</span>
-                    <small>{user.username}#{String(user.tagCode).padStart(4, "0")}</small>
+                  <button key={user.id} type="button" className="messagesDiscoverItem" onClick={() => handleStartConversation(user.id)} disabled={busyAction === `start-${user.id}`}>
+                    <span>{user.displayName || "Uzytkownik"}</span>
+                    <small>{peerTag(user)}</small>
                   </button>
                 ))}
               </div>
@@ -283,142 +308,164 @@ export default function MessagesPage() {
           </div>
 
           <div className="messagesConversationList">
-            {loadingConversations && <div className="messagesHint">Ładowanie rozmów...</div>}
-            {!loadingConversations && conversations.length === 0 && (
-              <div className="messagesHint">
-                Brak rozmów. Zacznij nową rozmowę powyżej.
-              </div>
-            )}
-            {!loadingConversations &&
-              conversations.map((conversation) => (
-                <button
-                  key={conversation.id}
-                  type="button"
-                  className={`messagesConversationItem${activeConversationId === conversation.id ? " is-active" : ""}`}
-                  onClick={() => setActiveConversationId(conversation.id)}
-                >
-                  <span className="messagesConversationItem__avatar">
-                    {(conversation?.peer?.displayName || conversation.title || "R").slice(0, 1).toUpperCase()}
+            {loadingConversations && <div className="messagesHint">Ladowanie rozmow...</div>}
+            {!loadingConversations && conversations.length === 0 && <div className="messagesHint">Brak rozmow. Zacznij nowa rozmowe powyzej.</div>}
+            {!loadingConversations && conversations.map((conversation) => (
+              <button key={conversation.id} type="button" className={`messagesConversationItem${activeConversationId === conversation.id ? " is-active" : ""}`} onClick={() => setActiveConversationId(conversation.id)}>
+                <span className="messagesConversationItem__avatar">
+                  {conversationInitial(conversation)}
+                  <i className={`messagesStatusDot${hasUnread(conversation) ? " is-online" : ""}`} aria-hidden="true" />
+                </span>
+                <span className="messagesConversationItem__meta">
+                  <span className="messagesConversationItem__top">
+                    <strong>{conversationName(conversation)}</strong>
+                    <small>{formatTime(conversation.lastMessageAt) || "--:--"}</small>
                   </span>
-                  <span className="messagesConversationItem__meta">
-                    <span className="messagesConversationItem__top">
-                      <strong>{conversation?.peer?.displayName || conversation.title || "Rozmowa"}</strong>
-                      <small>{formatTime(conversation.lastMessageAt)}</small>
-                    </span>
-                    <span className="messagesConversationItem__bottom">
-                      <span>{conversation.lastMessagePreview || statusLabel(conversation.status)}</span>
-                      {conversation.unreadCount > 0 && <span className="messagesUnreadBadge">{conversation.unreadCount}</span>}
-                    </span>
+                  <span className="messagesConversationItem__bottom">
+                    <span>{conversation.lastMessagePreview || statusLabel(conversation.status)}</span>
+                    {conversation.unreadCount > 0 && <span className="messagesUnreadBadge">{conversation.unreadCount}</span>}
                   </span>
-                </button>
-              ))}
+                </span>
+              </button>
+            ))}
           </div>
         </section>
 
         <section className="messagesMain panel-soft">
-          {!activeConversation && <div className="messagesPlaceholder">Wybierz rozmowę.</div>}
+          {!activeConversation && (
+            <div className="messagesPlaceholder">
+              <strong>Wybierz rozmowe z listy</strong>
+              <span>Po wybraniu rozmowy zobaczysz tutaj wiadomosci i pole odpowiedzi.</span>
+            </div>
+          )}
           {activeConversation && (
             <>
               <header className="messagesMain__header">
-                <div>
-                  <h3>{activeConversation?.peer?.displayName || activeConversation.title}</h3>
-                  <p>{statusLabel(activeConversation.status)}</p>
-                </div>
-                {activeConversation.status === "incoming_request" && (
-                  <div className="messagesMain__requestActions">
-                    <button type="button" className="btn btn-primary" disabled={busyAction === "accept"} onClick={handleAcceptRequest}>
-                      Akceptuj
-                    </button>
-                    <button type="button" className="btn btn-ghost" disabled={busyAction === "reject"} onClick={handleRejectRequest}>
-                      Odrzuc
-                    </button>
+                <div className="messagesChatPeer">
+                  <span className="messagesHeaderAvatar">
+                    {conversationInitial(activeConversation)}
+                    <i className="messagesStatusDot is-online" aria-hidden="true" />
+                  </span>
+                  <div>
+                    <h3>{conversationName(activeConversation)}</h3>
+                    <p>{activeConversation?.peer?.activityLabel || statusLabel(activeConversation.status)}</p>
                   </div>
-                )}
+                </div>
+                <div className="messagesMain__tools">
+                  {activeConversation.status === "incoming_request" && (
+                    <div className="messagesMain__requestActions">
+                      <button type="button" className="btn btn-primary" disabled={busyAction === "accept"} onClick={handleAcceptRequest}>Akceptuj</button>
+                      <button type="button" className="btn btn-ghost" disabled={busyAction === "reject"} onClick={handleRejectRequest}>Odrzuc</button>
+                    </div>
+                  )}
+                  <button type="button" aria-label="Szukaj w rozmowie">S</button>
+                  <button type="button" aria-label="Menu rozmowy">...</button>
+                </div>
               </header>
 
               <div className="messagesThread">
-                {hasOlder && (
-                  <button
-                    type="button"
-                    className="messagesOlderBtn"
-                    onClick={() => loadMessages(activeConversation.id, { beforeId: messages[0]?.id, appendOlder: true })}
-                  >
-                    Pokaz starsze wiadomości
-                  </button>
-                )}
-                {loadingMessages && <div className="messagesHint">Ładowanie wiadomości...</div>}
-                {!loadingMessages && messages.length === 0 && <div className="messagesHint">Brak wiadomości w tej rozmówie.</div>}
+                {hasOlder && <button type="button" className="messagesOlderBtn" onClick={() => loadMessages(activeConversation.id, { beforeId: messages[0]?.id, appendOlder: true })}>Pokaz starsze wiadomosci</button>}
+                <div className="messagesDateDivider"><span>{formatDateLabel(messages[0]?.createdAt)}</span></div>
+                {loadingMessages && <div className="messagesHint">Ladowanie wiadomosci...</div>}
+                {!loadingMessages && messages.length === 0 && <div className="messagesHint messagesHint--empty">Brak wiadomosci. Napisz pierwsza wiadomosc.</div>}
 
                 {messages.map((message) => (
-                  <article key={message.id} className={`messageBubble${message.own ? " is-own" : ""}`}>
-                    <div className="messageBubble__meta">
-                      <strong>{message.own ? "Ty" : message.senderDisplayName}</strong>
-                      <span>{formatTime(message.createdAt)}</span>
-                    </div>
-                    {message.content && <p>{message.content}</p>}
-                    {message.attachments?.length > 0 && (
-                      <div className="messageAttachments">
-                        {message.attachments.map((attachment) => (
-                          <button key={attachment.id} type="button" className="messageAttachment" onClick={() => handleDownloadAttachment(attachment)}>
-                            <span>{attachment.originalName}</span>
-                            <small>{Math.max(1, Math.round(attachment.sizeBytes / 1024))} KB</small>
-                          </button>
-                        ))}
+                  <article key={message.id} className={`messageRow${message.own ? " is-own" : ""}`}>
+                    {!message.own && <span className="messageAvatar">{String(message.senderDisplayName || conversationName(activeConversation)).slice(0, 1).toUpperCase()}</span>}
+                    <div className={`messageBubble${message.own ? " is-own" : ""}`}>
+                      <div className="messageBubble__meta">
+                        <strong>{message.own ? "Ty" : message.senderDisplayName || conversationName(activeConversation)}</strong>
+                        <span>{formatTime(message.createdAt)}</span>
                       </div>
-                    )}
+                      {message.content && <p>{message.content}</p>}
+                      {message.attachments?.length > 0 && (
+                        <div className="messageAttachments">
+                          {message.attachments.map((attachment) => (
+                            <button key={attachment.id} type="button" className="messageAttachment" onClick={() => handleDownloadAttachment(attachment)}>
+                              <span className="messageAttachment__icon" aria-hidden="true">F</span>
+                              <span className="messageAttachment__body">
+                                <strong>{attachment.originalName || "Zalacznik"}</strong>
+                                <small>{formatBytes(attachment.sizeBytes)} - {fileTypeLabel(attachment)}</small>
+                              </span>
+                              <span className="messageAttachment__download" aria-hidden="true">v</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {message.own && <span className="messageReadState">wyslano</span>}
+                    </div>
                   </article>
                 ))}
               </div>
 
               <div className="messagesComposer">
-                <textarea
-                  value={draft}
-                  onChange={(event) => setDraft(event.target.value)}
-                  placeholder={
-                    activeConversation.status === "incoming_request"
-                      ? "Najpierw zaakceptuj prosbe o kontakt."
-                      : "Napisz wiadomosc..."
-                  }
-                  disabled={activeConversation.status === "incoming_request" || sending}
-                />
-                <div className="messagesComposer__row">
-                  <label className="messagesFileInput">
-                    <input
-                      type="file"
-                      multiple
-                      onChange={(event) => setFiles(Array.from(event.target.files || []))}
-                      disabled={activeConversation.status === "incoming_request" || sending}
-                    />
-                    <span>Dodaj pliki</span>
+                {files.length > 0 && (
+                  <div className="messagesFilesPreview">
+                    {files.map((file) => <span key={`${file.name}-${file.size}`}>{file.name} - {formatBytes(file.size)}</span>)}
+                  </div>
+                )}
+                <div className="messagesComposer__bar">
+                  <label className="messagesFileInput" aria-label="Dodaj plik">
+                    <input type="file" multiple onChange={(event) => setFiles(Array.from(event.target.files || []))} disabled={activeConversation.status === "incoming_request" || sending} />
+                    <span>+</span>
                   </label>
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    disabled={sending || activeConversation.status === "incoming_request" || (!draft.trim() && files.length === 0)}
-                    onClick={handleSend}
-                  >
-                    Wyślij
-                  </button>
+                  <textarea
+                    value={draft}
+                    onChange={(event) => setDraft(event.target.value)}
+                    placeholder={activeConversation.status === "incoming_request" ? "Najpierw zaakceptuj prosbe o kontakt." : "Napisz wiadomosc..."}
+                    disabled={activeConversation.status === "incoming_request" || sending}
+                  />
+                  <button type="button" className="messagesEmojiButton" aria-label="Emoji">:)</button>
+                  <button type="button" className="btn btn-primary messagesSendButton" disabled={sending || activeConversation.status === "incoming_request" || (!draft.trim() && files.length === 0)} onClick={handleSend}>Wyslij</button>
                 </div>
-                {files.length > 0 && <div className="messagesFilesPreview">{files.map((file) => file.name).join(", ")}</div>}
               </div>
             </>
           )}
         </section>
 
-        {activeConversation?.peer && (
-          <aside className="messagesDetails panel-soft">
+        <aside className="messagesDetails panel-soft">
+          {activeConversation?.peer ? (
             <div className="messagesDetails__content">
-              <div className="messagesDetails__avatar">{activeConversation.peer.displayName.slice(0, 1).toUpperCase()}</div>
-              <h3>{activeConversation.peer.displayName}</h3>
-              <p>{activeConversation.peer.username}#{String(activeConversation.peer.tagCode).padStart(4, "0")}</p>
-              <span>{activeConversation.peer.activityLabel}</span>
-              <Link className="btn btn-ghost" to={`/users/${activeConversation.peer.handle}`}>
-                Otwórz profil
-              </Link>
+              <div className="messagesDetails__top">
+                <span className="messagesDetails__presence" aria-hidden="true" />
+                <div className="messagesDetails__avatar">{activeConversation.peer.displayName.slice(0, 1).toUpperCase()}</div>
+                <h3>{activeConversation.peer.displayName}</h3>
+                <p>{peerTag(activeConversation.peer)}</p>
+                <span>{activeConversation.peer.activityLabel || "Aktywna rozmowa"}</span>
+                <Link className="btn btn-ghost messagesProfileButton" to={`/users/${activeConversation.peer.handle}`}>Otworz profil</Link>
+              </div>
+
+              <div className="messagesInfoBlock">
+                <h4>Rozmowa</h4>
+                <dl>
+                  <div><dt>Rozpoczeta</dt><dd>{formatDateLabel(activeConversation.createdAt || activeConversation.lastMessageAt)}</dd></div>
+                  <div><dt>Wiadomosci</dt><dd>{messages.length}</dd></div>
+                  <div><dt>Status</dt><dd>{statusLabel(activeConversation.status)}</dd></div>
+                </dl>
+              </div>
+
+              {messages.some((message) => message.attachments?.length) && (
+                <div className="messagesInfoBlock">
+                  <h4>Zalaczniki w rozmowie</h4>
+                  <div className="messagesDetailsFiles">
+                    {messages.flatMap((message) => message.attachments || []).slice(0, 3).map((attachment) => (
+                      <button key={attachment.id} type="button" onClick={() => handleDownloadAttachment(attachment)}>
+                        <strong>{attachment.originalName || "Plik"}</strong>
+                        <span>{formatBytes(attachment.sizeBytes)} - {fileTypeLabel(attachment)}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          </aside>
-        )}
+          ) : (
+            <div className="messagesDetails__content messagesDetails__empty">
+              <div className="messagesDetails__avatar" aria-hidden="true">?</div>
+              <h3>Informacje o rozmowcy</h3>
+              <p>Wybierz rozmowe, aby zobaczyc profil i ostatnie zalaczniki.</p>
+            </div>
+          )}
+        </aside>
 
         {error && <div className="messagesGlobalError">{error}</div>}
       </div>

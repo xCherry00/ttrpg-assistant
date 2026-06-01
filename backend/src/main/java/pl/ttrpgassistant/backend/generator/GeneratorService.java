@@ -113,9 +113,9 @@ public class GeneratorService {
                 .sorted((left, right) -> Integer.compare(left.getDisplayOrder(), right.getDisplayOrder()))
                 .map(definition -> new GeneratorDefinitionResponse(
                         definition.getCode(),
-                        definition.getName(),
-                        definition.getDescription(),
-                        definition.getCategory(),
+                        cleanText(definition.getName()),
+                        cleanText(definition.getDescription()),
+                        cleanText(definition.getCategory()),
                         definition.getIcon(),
                         valueOrFallback(definition.getCategoryCode(), definition.getCategory()),
                         definition.getTypeCode(),
@@ -140,7 +140,7 @@ public class GeneratorService {
         List<GeneratorFormFieldResponse> fields = fieldRepository.findByVariant_IdOrderByOrderIndexAsc(variant.getId()).stream()
                 .map(field -> new GeneratorFormFieldResponse(
                         field.getFieldKey(),
-                        field.getLabel(),
+                        cleanText(field.getLabel()),
                         field.getType(),
                         parseOptions(field.getOptionsJson()),
                         parseDefaultValue(field),
@@ -152,8 +152,8 @@ public class GeneratorService {
         return new GeneratorFormResponse(
                 variant.getGeneratorDefinition().getCode(),
                 variant.getVariantCode(),
-                variant.getName(),
-                variant.getDescription(),
+                cleanText(variant.getName()),
+                cleanText(variant.getDescription()),
                 fields
         );
     }
@@ -313,8 +313,8 @@ public class GeneratorService {
                         result.getId(),
                         result.getGeneratorCode(),
                         result.getVariantCode(),
-                        result.getTitle(),
-                        result.getSummary(),
+                        cleanText(result.getTitle()),
+                        cleanText(result.getSummary()),
                         result.getCreatedAt()
                 ))
                 .toList();
@@ -354,12 +354,12 @@ public class GeneratorService {
     private String renderLegacyValue(Object value) {
         if (value == null) return "";
         if (value instanceof List<?> list) {
-            return list.stream().map(String::valueOf).reduce((a, b) -> a + ", " + b).orElse("");
+            return list.stream().map(item -> cleanText(String.valueOf(item))).reduce((a, b) -> a + ", " + b).orElse("");
         }
         if (value instanceof Map<?, ?>) {
             return writeJson(value);
         }
-        return String.valueOf(value);
+        return cleanText(String.valueOf(value));
     }
 
     private String legacySubtitle(String generatorCode, String variantCode, Map<String, Object> params) {
@@ -675,8 +675,8 @@ public class GeneratorService {
                 valueOrFallback(variant.getCategoryCode(), variant.getGeneratorDefinition().getCategoryCode()),
                 variant.getToneScope(),
                 variant.getMode(),
-                variant.getName(),
-                variant.getDescription()
+                cleanText(variant.getName()),
+                cleanText(variant.getDescription())
         );
     }
 
@@ -722,7 +722,8 @@ public class GeneratorService {
             return List.of();
         }
         try {
-            return objectMapper.readValue(optionsJson, new TypeReference<>() {});
+            List<String> options = objectMapper.readValue(optionsJson, new TypeReference<>() {});
+            return options.stream().map(this::cleanText).toList();
         } catch (Exception ex) {
             return List.of();
         }
@@ -740,10 +741,10 @@ public class GeneratorService {
             try {
                 return Integer.parseInt(value);
             } catch (NumberFormatException ignored) {
-                return value;
+                return cleanText(value);
             }
         }
-        return value;
+        return cleanText(value);
     }
 
     private String writeJson(Object value) {
@@ -782,7 +783,45 @@ public class GeneratorService {
     }
 
     private GeneratorResultResponse result(String type, String system, String title, Map<String, Object> payload, String source) {
-        return new GeneratorResultResponse(type, system, title, payload, source, OffsetDateTime.now());
+        return new GeneratorResultResponse(
+                type,
+                system,
+                cleanText(title),
+                sanitizePayload(payload),
+                source,
+                OffsetDateTime.now()
+        );
+    }
+
+    private Map<String, Object> sanitizePayload(Map<String, Object> payload) {
+        Map<String, Object> cleaned = new LinkedHashMap<>();
+        if (payload == null) {
+            return cleaned;
+        }
+        payload.forEach((key, value) -> cleaned.put(cleanText(key), sanitizeValue(value)));
+        return cleaned;
+    }
+
+    private Object sanitizeValue(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof String text) {
+            return cleanText(text);
+        }
+        if (value instanceof Map<?, ?> map) {
+            Map<String, Object> cleaned = new LinkedHashMap<>();
+            map.forEach((key, nestedValue) -> cleaned.put(cleanText(String.valueOf(key)), sanitizeValue(nestedValue)));
+            return cleaned;
+        }
+        if (value instanceof List<?> list) {
+            return list.stream().map(this::sanitizeValue).toList();
+        }
+        return value;
+    }
+
+    private String cleanText(String value) {
+        return value == null ? null : GeneratorTextSanitizer.clean(value);
     }
     private String normalize(String value) {
         return value == null ? "" : value.trim().toLowerCase(Locale.ROOT);

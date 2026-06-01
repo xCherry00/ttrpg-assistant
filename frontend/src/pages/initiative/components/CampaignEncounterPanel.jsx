@@ -87,7 +87,7 @@ export default function CampaignEncounterPanel({
 
       {activeEncounter && (
         <div className="initMeta">
-          Encounter: {activeEncounter.name} â€˘ status: {activeEncounter.status} â€˘ runda: {activeEncounter.roundNumber} â€˘ aktywni: {activeParticipantsCount}
+          Encounter: {activeEncounter.name} - status: {activeEncounter.status} - runda: {activeEncounter.roundNumber} - aktywni: {activeParticipantsCount}
         </div>
       )}
     </>

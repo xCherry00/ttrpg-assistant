@@ -6,7 +6,13 @@ import { getSessionAttendance, listCampaignMembers, listCampaignSessions, listCa
 import { listCharacters } from "../api/characters";
 import "../styles/dashboard.css";
 
-const TILE_PREVIEW_LIMIT = 5;
+const PREVIEW_LIMIT = 4;
+const ACTIVITY_LIMIT = 6;
+const WEEK_DAYS = ["Pn", "Wt", "Śr", "Cz", "Pt", "Sb", "Nd"];
+const ASCII_WEEK_DAYS = ["Pn", "Wt", "Sr", "Cz", "Pt", "Sb", "Nd"];
+const LEGACY_WEEK_DAYS = ["Dzis", "Jutro", "Pojutrze", "Czw", "Pt", "Sob", "Nd"];
+const WEEK_NOTE_PREFIX = "AVAILABILITY_WEEK_V1:";
+const EMPTY_WEEK = Object.fromEntries(WEEK_DAYS.map((day) => [day, "none"]));
 
 function normalizeArray(value) {
   return Array.isArray(value) ? value : [];
@@ -17,14 +23,23 @@ function normalizeStatus(value) {
 }
 
 function toTimestamp(value) {
-  const ts = new Date(value).getTime();
+  const ts = new Date(value || 0).getTime();
   return Number.isFinite(ts) ? ts : Number.MAX_SAFE_INTEGER;
 }
 
 function formatDateTime(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "Brak terminu";
-  return date.toLocaleDateString("pl-PL", { day: "numeric", month: "long" }) + ", " + date.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" });
+  return date.toLocaleDateString("pl-PL", { day: "numeric", month: "short" }) + ", " + date.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" });
+}
+
+function formatCompactDate(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return { day: "--", month: "---" };
+  return {
+    day: date.toLocaleDateString("pl-PL", { day: "2-digit" }),
+    month: date.toLocaleDateString("pl-PL", { month: "short" }).replace(".", ""),
+  };
 }
 
 function pickHeroSession(sessions) {
@@ -37,25 +52,81 @@ function pickHeroSession(sessions) {
     .sort((a, b) => toTimestamp(a.scheduledFor) - toTimestamp(b.scheduledFor));
 
   if (planned.length > 0) return { mode: "planned", session: planned[0] };
-
   return { mode: "empty", session: null };
+}
+
+function pickAvailabilitySession(sessions) {
+  const active = sessions.find((session) => normalizeStatus(session.status) === "IN_PROGRESS");
+  if (active) return active;
+
+  const planned = sessions
+    .filter((session) => normalizeStatus(session.status) === "PLANNED")
+    .slice()
+    .sort((a, b) => toTimestamp(a.scheduledFor) - toTimestamp(b.scheduledFor));
+
+  return planned[0] || null;
+}
+
+function normalizeAvailabilityStatus(status) {
+  const value = String(status || "").toUpperCase();
+  if (value === "AVAILABLE") return "available";
+  if (value === "MAYBE") return "maybe";
+  if (value === "UNAVAILABLE") return "unavailable";
+  return "none";
+}
+
+function parseWeekNote(note, fallbackStatus = "none") {
+  const raw = String(note || "");
+  if (!raw.startsWith(WEEK_NOTE_PREFIX)) {
+    return { ...EMPTY_WEEK, Pn: normalizeAvailabilityStatus(fallbackStatus) };
+  }
+
+  try {
+    const parsed = JSON.parse(raw.slice(WEEK_NOTE_PREFIX.length));
+    const normalized = { ...EMPTY_WEEK };
+    WEEK_DAYS.forEach((day, index) => {
+      normalized[day] = normalizeAvailabilityStatus(parsed?.[day] || parsed?.[ASCII_WEEK_DAYS[index]] || parsed?.[LEGACY_WEEK_DAYS[index]]);
+    });
+    return normalized;
+  } catch {
+    return { ...EMPTY_WEEK };
+  }
+}
+
+function memberDisplayName(item, index) {
+  return item?.displayName || item?.username || item?.name || `Gracz ${index + 1}`;
+}
+
+function buildAvailabilityRows(members, attendance) {
+  const responses = normalizeArray(attendance?.responses);
+  if (responses.length > 0) {
+    return responses.map((response, index) => ({
+      id: response.userId || response.id || index,
+      name: memberDisplayName(response, index),
+      week: parseWeekNote(response.note, response.status),
+    }));
+  }
+
+  return normalizeArray(members).map((member, index) => ({
+    id: member.userId || member.id || index,
+    name: memberDisplayName(member, index),
+    week: { ...EMPTY_WEEK },
+  }));
+}
+
+function availabilityStatusLabel(status) {
+  if (status === "available") return "Dostepny";
+  if (status === "maybe") return "Moze";
+  if (status === "unavailable") return "Niedostepny";
+  return "Brak odp.";
 }
 
 function formatSessionStatus(status) {
   const normalized = normalizeStatus(status);
   if (normalized === "IN_PROGRESS") return "Trwa";
   if (normalized === "PLANNED") return "Zaplanowana";
-  if (normalized === "FINISHED") return "Zakończona";
+  if (normalized === "FINISHED") return "Zakonczona";
   return normalized || "Nieznany";
-}
-
-function countBySystem(rows, fieldName = "systemCode") {
-  const counts = new Map();
-  rows.forEach((item) => {
-    const key = String(item?.[fieldName] || "nieznany").toUpperCase();
-    counts.set(key, (counts.get(key) || 0) + 1);
-  });
-  return [...counts.entries()].map(([system, count]) => ({ system, count })).sort((a, b) => b.count - a.count);
 }
 
 function countRole(campaigns) {
@@ -69,80 +140,140 @@ function countRole(campaigns) {
 }
 
 function getCampaignRoleLabel(campaign) {
-  return campaign?.owner ? "MG" : "Gracz";
-}
-
-function fallbackCharacterSubtitle(character) {
-  if (character?.className && character?.raceName) return `${character.raceName} / ${character.className}`;
-  if (character?.occupationName) return character.occupationName;
-  if (character?.className) return character.className;
-  return "Brak szczegółów";
+  return campaign?.owner ? "GM" : "Gracz";
 }
 
 function pickSessionImage(session) {
-  return session?.imageUrl || session?.coverImageUrl || session?.sceneImageUrl || "";
+  return session?.imageUrl || session?.coverImageUrl || session?.sceneImageUrl || session?.campaignCoverImageUrl || "";
 }
 
-function buildDonutGradient(items) {
-  const total = items.reduce((sum, item) => sum + Math.max(0, Number(item.value || 0)), 0);
-  if (total <= 0) return "conic-gradient(rgba(255,255,255,0.08) 0turn 1turn)";
+function RoleDonutChart({ items, total }) {
+  const [activeIndex, setActiveIndex] = useState(null);
+  const visibleItems = items.filter((item) => Number(item.value || 0) > 0);
+  const positiveTotal = visibleItems.reduce((sum, item) => sum + Math.max(0, Number(item.value || 0)), 0);
+  const activeItem = activeIndex == null ? null : visibleItems[activeIndex];
+  let offset = 25;
 
-  let cursor = 0;
-  const segments = items
-    .filter((item) => Number(item.value) > 0)
-    .map((item) => {
-      const start = cursor;
-      cursor += Number(item.value) / total;
-      return `${item.color} ${start}turn ${cursor}turn`;
-    });
-  return `conic-gradient(${segments.join(", ")})`;
-}
-
-function DonutChart({ items, centerValue, centerLabel, ariaLabel }) {
   return (
-    <div className="dashboardDonutBlock">
-      <div
-        className="dashboardDonut"
-        role="img"
-        aria-label={ariaLabel}
-        style={{ "--dashboard-donut": buildDonutGradient(items) }}
-      >
-        <span>{centerValue}</span>
-        <small>{centerLabel}</small>
-      </div>
-      <div className="dashboardDonutLegend">
-        {items.map((item) => (
-          <div key={item.label} className="dashboardDonutLegend__item">
-            <span className="dashboardDonutLegend__swatch" style={{ background: item.color }} aria-hidden="true" />
-            <span>{item.label}: {item.value}</span>
-          </div>
+    <div className="dashboardRoleChart2026">
+      <svg className="dashboardRoleSvg2026" viewBox="0 0 120 120" role="img" aria-label="Diagram kampanii wedlug roli GM i gracz">
+        <circle className="dashboardRoleTrack2026" cx="60" cy="60" r="42" />
+        {positiveTotal > 0 ? visibleItems.map((item, index) => {
+          const value = Math.max(0, Number(item.value || 0));
+          const dash = (value / positiveTotal) * 263.89;
+          const node = (
+            <circle
+              key={item.label}
+              className={`dashboardRoleSegment2026${activeIndex === index ? " is-active" : ""}`}
+              cx="60"
+              cy="60"
+              r="42"
+              stroke={item.color}
+              strokeDasharray={`${dash} ${263.89 - dash}`}
+              strokeDashoffset={-offset}
+              onMouseEnter={() => setActiveIndex(index)}
+              onMouseLeave={() => setActiveIndex(null)}
+              onFocus={() => setActiveIndex(index)}
+              onBlur={() => setActiveIndex(null)}
+              tabIndex={0}
+            >
+              <title>{`${item.label}: ${item.value}`}</title>
+            </circle>
+          );
+          offset += dash;
+          return node;
+        }) : null}
+      </svg>
+      <div className="dashboardRoleLegend2026">
+        {visibleItems.map((item, index) => (
+          <button
+            key={item.label}
+            type="button"
+            className={`dashboardRoleLegendItem2026${activeIndex === index ? " is-active" : ""}`}
+            onMouseEnter={() => setActiveIndex(index)}
+            onMouseLeave={() => setActiveIndex(null)}
+            onFocus={() => setActiveIndex(index)}
+            onBlur={() => setActiveIndex(null)}
+          >
+            <span style={{ background: item.color }} aria-hidden="true" />
+            <strong>{item.label}</strong>
+            <em>{item.value}</em>
+          </button>
         ))}
+      </div>
+      <div className={`dashboardRoleTooltip2026${activeItem ? " is-visible" : ""}`} role="status" aria-live="polite">
+        {activeItem ? `${activeItem.label}: ${activeItem.value}` : `Lacznie kampanii: ${total}`}
       </div>
     </div>
   );
 }
 
-function ExpandableTile({ title, count, description, expanded, onToggle, children, to }) {
+function AvailabilityDot({ status }) {
+  const normalized = status || "none";
   return (
-    <article className="dashboardPanel">
-      <header className="dashboardPanel__head">
-        <div>
-          <h2>{title}</h2>
-          <small>{description}</small>
-        </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <span className="dashboardTag">{count}</span>
-          <button type="button" className="campaignDetailsGhostBtn" onClick={onToggle}>
-            {expanded ? "Zwiń" : "Rozwiń"}
-          </button>
-        </div>
-      </header>
-      {expanded ? children : null}
-      <footer style={{ marginTop: 10 }}>
-        <Link to={to}>Zobacz wszystkie</Link>
-      </footer>
+    <span
+      className={`dashboardAvailabilityDot is-${normalized}`}
+      title={availabilityStatusLabel(normalized)}
+      aria-label={availabilityStatusLabel(normalized)}
+    />
+  );
+}
+
+function StatCard({ icon, label, value, hint }) {
+  return (
+    <article className="dashboardStatCard">
+      <span className="dashboardStatIcon" aria-hidden="true"><DashboardIcon name={icon} /></span>
+      <span>
+        <strong>{value}</strong>
+        <small>{label}</small>
+        {hint ? <em>{hint}</em> : null}
+      </span>
     </article>
   );
+}
+
+function PanelHeader({ title, subtitle, to }) {
+  return (
+    <header className="dashboardPanel__head dashboardPanelHead2026">
+      <div>
+        <h2>{title}</h2>
+        {subtitle ? <small>{subtitle}</small> : null}
+      </div>
+      {to ? <Link to={to}>Zobacz wszystkie</Link> : null}
+    </header>
+  );
+}
+
+function campaignUpdatedAt(campaign) {
+  return campaign?.updatedAt || campaign?.createdAt || 0;
+}
+
+function buildActivity(campaigns, characters, sessions) {
+  const campaignRows = campaigns.map((campaign) => ({
+    id: `campaign-${campaign.id}`,
+    icon: "briefcase",
+    text: `Kampania ${campaign.title || "bez nazwy"} jest dostepna w twoim workspace.`,
+    time: campaignUpdatedAt(campaign),
+    fallback: "Kampania",
+  }));
+  const characterRows = characters.map((character) => ({
+    id: `character-${character.id}`,
+    icon: "users",
+    text: `Postac ${character.name || "bez nazwy"} jest gotowa do gry.`,
+    time: character.updatedAt || character.createdAt || 0,
+    fallback: "Postac",
+  }));
+  const sessionRows = sessions.map((session) => ({
+    id: `session-${session.id}`,
+    icon: "calendar",
+    text: `${session.title || "Sesja"} - ${formatSessionStatus(session.status)} w kampanii ${session.campaignTitle || "bez nazwy"}.`,
+    time: session.finishedAt || session.scheduledFor || 0,
+    fallback: "Sesja",
+  }));
+
+  return [...campaignRows, ...characterRows, ...sessionRows]
+    .sort((a, b) => toTimestamp(b.time) - toTimestamp(a.time))
+    .slice(0, ACTIVITY_LIMIT);
 }
 
 export default function DashboardPage() {
@@ -152,21 +283,13 @@ export default function DashboardPage() {
   const [campaigns, setCampaigns] = useState([]);
   const [characters, setCharacters] = useState([]);
   const [sessions, setSessions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
+  const [selectedAttendanceCampaignId, setSelectedAttendanceCampaignId] = useState("");
   const [attendance, setAttendance] = useState(null);
-  const [attendanceMembersCount, setAttendanceMembersCount] = useState(0);
+  const [attendanceMembers, setAttendanceMembers] = useState([]);
   const [attendanceLoading, setAttendanceLoading] = useState(false);
   const [attendanceError, setAttendanceError] = useState("");
-
-  const [expandedTiles, setExpandedTiles] = useState({
-    campaigns: true,
-    characters: false,
-    upcoming: false,
-    recent: false,
-  });
-  const [systemsTab, setSystemsTab] = useState("campaigns");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -228,7 +351,7 @@ export default function DashboardPage() {
           navigate("/login", { replace: true });
           return;
         }
-        setError(err?.message || "Nie udało się odświeżyć danych dashboardu.");
+        setError(err?.message || "Nie udalo sie odswiezyc danych dashboardu.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -244,6 +367,79 @@ export default function DashboardPage() {
   }, [token, navigate]);
 
   const hero = useMemo(() => pickHeroSession(sessions), [sessions]);
+
+  const attendanceCampaigns = useMemo(
+    () => campaigns.filter((campaign) => sessions.some((session) => String(session.campaignId) === String(campaign.id))),
+    [campaigns, sessions],
+  );
+
+  useEffect(() => {
+    if (attendanceCampaigns.length === 0) {
+      setSelectedAttendanceCampaignId("");
+      return;
+    }
+
+    const selectedExists = attendanceCampaigns.some((campaign) => String(campaign.id) === String(selectedAttendanceCampaignId));
+    if (!selectedExists) {
+      setSelectedAttendanceCampaignId(String(attendanceCampaigns[0].id));
+    }
+  }, [attendanceCampaigns, selectedAttendanceCampaignId]);
+
+  const selectedAttendanceCampaign = useMemo(
+    () => attendanceCampaigns.find((campaign) => String(campaign.id) === String(selectedAttendanceCampaignId)) || null,
+    [attendanceCampaigns, selectedAttendanceCampaignId],
+  );
+
+  const selectedAttendanceSessions = useMemo(
+    () => sessions.filter((session) => String(session.campaignId) === String(selectedAttendanceCampaignId)),
+    [sessions, selectedAttendanceCampaignId],
+  );
+
+  const attendanceSession = useMemo(
+    () => pickAvailabilitySession(selectedAttendanceSessions),
+    [selectedAttendanceSessions],
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadAttendance() {
+      if (!selectedAttendanceCampaignId || !attendanceSession?.id) {
+        setAttendance(null);
+        setAttendanceMembers([]);
+        setAttendanceError("");
+        setAttendanceLoading(false);
+        return;
+      }
+
+      setAttendanceLoading(true);
+      setAttendanceError("");
+      try {
+        const [attendanceResult, memberResult] = await Promise.allSettled([
+          getSessionAttendance(token, selectedAttendanceCampaignId, attendanceSession.id),
+          listCampaignMembers(token, selectedAttendanceCampaignId),
+        ]);
+        if (cancelled) return;
+        if (attendanceResult.status === "rejected") throw attendanceResult.reason;
+
+        setAttendance(attendanceResult.value);
+        setAttendanceMembers(memberResult.status === "fulfilled" ? normalizeArray(memberResult.value) : []);
+      } catch (err) {
+        if (!cancelled) {
+          setAttendance(null);
+          setAttendanceMembers([]);
+          setAttendanceError(err?.message || "Nie udalo sie pobrac obecnosci graczy.");
+        }
+      } finally {
+        if (!cancelled) setAttendanceLoading(false);
+      }
+    }
+
+    void loadAttendance();
+    return () => {
+      cancelled = true;
+    };
+  }, [token, selectedAttendanceCampaignId, attendanceSession?.id]);
 
   const plannedSessions = useMemo(
     () => sessions
@@ -261,343 +457,205 @@ export default function DashboardPage() {
     [sessions],
   );
 
+  const recentCampaigns = useMemo(
+    () => campaigns.slice().sort((a, b) => toTimestamp(campaignUpdatedAt(b)) - toTimestamp(campaignUpdatedAt(a))).slice(0, PREVIEW_LIMIT),
+    [campaigns],
+  );
+
+  const activityRows = useMemo(() => buildActivity(campaigns, characters, sessions), [campaigns, characters, sessions]);
   const roleStats = useMemo(() => countRole(campaigns), [campaigns]);
-  const campaignSystems = useMemo(() => countBySystem(campaigns, "systemCode"), [campaigns]);
-  const characterSystems = useMemo(() => countBySystem(characters, "systemCode"), [characters]);
+  const availabilityRows = useMemo(() => buildAvailabilityRows(attendanceMembers, attendance), [attendanceMembers, attendance]);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadAttendance() {
-      const nearestPlanned = plannedSessions[0];
-      if (!nearestPlanned?.campaignId || !nearestPlanned?.id) {
-        setAttendance(null);
-        setAttendanceError("");
-        setAttendanceMembersCount(0);
-        return;
-      }
-
-      setAttendanceLoading(true);
-      setAttendanceError("");
-      try {
-        const [attendanceData, members] = await Promise.all([
-          getSessionAttendance(token, nearestPlanned.campaignId, nearestPlanned.id),
-          listCampaignMembers(token, nearestPlanned.campaignId).catch(() => []),
-        ]);
-        if (cancelled) return;
-        setAttendance(attendanceData);
-        setAttendanceMembersCount(Array.isArray(members) ? members.length : 0);
-      } catch (err) {
-        if (cancelled) return;
-        setAttendance(null);
-        setAttendanceError(err?.message || "Brak danych o dostępności dla najbliższej sesji.");
-      } finally {
-        if (!cancelled) setAttendanceLoading(false);
-      }
-    }
-
-    void loadAttendance();
-    return () => {
-      cancelled = true;
-    };
-  }, [token, plannedSessions]);
-
-  const attendanceSummary = useMemo(() => {
-    if (!attendance) return null;
-    const available = Number(attendance.availableCount || 0);
-    const unavailable = Number(attendance.unavailableCount || 0);
-    const noResponse = Number(attendance.noResponseCount || 0);
-    const maybe = Number(attendance.maybeCount || 0);
-
-    const totalMembers = attendanceMembersCount > 0
-      ? attendanceMembersCount
-      : available + unavailable + noResponse + maybe;
-
-    const minimumForSession = Math.ceil(Math.max(0, totalMembers) / 2);
-    const availabilityPct = totalMembers > 0 ? Math.round((available / totalMembers) * 100) : 0;
-
-    let status = "W trakcie głosowania";
-    if (available === 0 && unavailable === 0 && maybe === 0) {
-      status = "Brak odpowiedzi";
-    } else if (available >= minimumForSession && minimumForSession > 0) {
-      status = "Sesja może się odbyć";
-    } else {
-      status = "Sesja zagrozona";
-    }
-
-    return {
-      available,
-      unavailable,
-      noResponse,
-      maybe,
-      totalMembers,
-      minimumForSession,
-      availabilityPct,
-      status,
-    };
-  }, [attendance, attendanceMembersCount]);
-
-  function toggleTile(key) {
-    setExpandedTiles((prev) => ({ ...prev, [key]: !prev[key] }));
-  }
-
-  const heroTitle = hero.mode === "active" ? "Aktywna sesja" : hero.mode === "planned" ? "Najbliższa sesja" : "Brak aktywnej lub zaplanowanej sesji";
+  const heroTitle = hero.mode === "active" ? "Aktywna sesja" : hero.mode === "planned" ? "Najblizsza sesja" : "Centrum dowodzenia";
   const heroSession = hero.session;
-  const heroImage = pickSessionImage(heroSession) || heroSession?.campaignCoverImageUrl || "";
-  const attendanceChartItems = attendanceSummary ? [
-    { label: "Dostępni", value: attendanceSummary.available, color: "#1f765f" },
-    { label: "Może", value: attendanceSummary.maybe, color: "#b88734" },
-    { label: "Niedostępni", value: attendanceSummary.unavailable, color: "#c85c4a" },
-    { label: "Bez odpowiedzi", value: attendanceSummary.noResponse, color: "#64748b" },
-  ] : [];
+  const heroImage = pickSessionImage(heroSession);
   const roleChartItems = [
-    { label: "Jako MG", value: roleStats.asOwner, color: "#1f765f" },
-    { label: "Jako gracz", value: roleStats.asMember, color: "#536fae" },
+    { label: "Prowadzisz jako GM", value: roleStats.asOwner, color: "#1f765f" },
+    { label: "Grasz jako gracz", value: roleStats.asMember, color: "#d18b1f" },
   ];
-  const systemChartPalette = ["#536fae", "#1f765f", "#b88734", "#c85c4a", "#64c3b3", "#718078"];
-  const activeSystemRows = systemsTab === "campaigns" ? campaignSystems : characterSystems;
-  const activeSystemTotal = systemsTab === "campaigns" ? campaigns.length : characters.length;
-  const activeSystemChartItems = activeSystemRows.map((item, index) => ({
-    label: item.system,
-    value: item.count,
-    color: systemChartPalette[index % systemChartPalette.length],
-  }));
-  const activeSystemLabel = systemsTab === "campaigns" ? "kampanii" : "postaci";
-
   return (
-    <div className="page dashboardSaas">
-      <section className="dashboardFeatureGrid">
-        <article className="dashboardHero">
-          <div className="dashboardHero__copy">
-            <span>{heroTitle.toUpperCase()}</span>
-            {heroSession ? (
-              <>
-                <h2>{heroSession.title || "Sesja"}</h2>
-                <div className="dashboardHero__actions">
-                  {hero.mode === "active" ? (
-                    <Link className="dashboardHero__primary" to={`/campaigns/${heroSession.campaignId}/sessions/${heroSession.id}/live`}>
-                      <DashboardIcon name="play" />
-                      Dołącz do sesji
-                    </Link>
-                  ) : (
-                    <Link className="dashboardHero__primary" to={`/campaigns/${heroSession.campaignId}`}>
-                      <DashboardIcon name="calendar" />
-                      Otwórz sesję
-                    </Link>
-                  )}
-                  <Link className="dashboardHero__secondary" to={`/campaigns/${heroSession.campaignId}`}>
-                    <DashboardIcon name="users" />
-                    Otwórz kampanię
+    <div className="page dashboardSaas dashboardWorkbench2026">
+      <article className="dashboardHero dashboardHero2026">
+        <div className="dashboardHero__copy">
+          <span>{heroTitle.toUpperCase()}</span>
+          {heroSession ? (
+            <>
+              <h2>{heroSession.title || "Sesja"}</h2>
+              <p>{heroSession.campaignTitle || "Kampania"} - {formatDateTime(heroSession.scheduledFor)}</p>
+              <div className="dashboardHero__actions">
+                {hero.mode === "active" ? (
+                  <Link className="dashboardHero__primary" to={`/campaigns/${heroSession.campaignId}/sessions/${heroSession.id}/live`}>
+                    <DashboardIcon name="play" />
+                    Dolacz do sesji
                   </Link>
-                </div>
-              </>
-            ) : (
-              <>
-                <h2>Brak aktywnej lub zaplanowanej sesji</h2>
-                <p>Nie masz obecnie zaplanowanej sesji.</p>
-                <div className="dashboardHero__actions">
-                  <Link className="dashboardHero__secondary" to="/campaigns">
-                    <DashboardIcon name="users" />
-                    Przejdź do kampanii
+                ) : (
+                  <Link className="dashboardHero__primary" to={`/campaigns/${heroSession.campaignId}`}>
+                    <DashboardIcon name="calendar" />
+                    Otworz sesje
                   </Link>
-                </div>
-              </>
-            )}
-          </div>
-          {heroImage ? (
-            <img src={heroImage} alt={heroSession?.title || "Sesja"} className="dashboardHero__image" />
+                )}
+                <Link className="dashboardHero__secondary" to={`/campaigns/${heroSession.campaignId}`}>
+                  <DashboardIcon name="users" />
+                  Otworz kampanie
+                </Link>
+              </div>
+            </>
           ) : (
-            <div className="dashboardHero__image" aria-hidden="true" />
+            <>
+              <h2>Brak aktywnej lub zaplanowanej sesji</h2>
+              <p>Dashboard pomoze szybko wrocic do kampanii, postaci i ostatnich dzialan.</p>
+              <div className="dashboardHero__actions">
+                <Link className="dashboardHero__secondary" to="/campaigns">
+                  <DashboardIcon name="briefcase" />
+                  Przejdz do kampanii
+                </Link>
+              </div>
+            </>
           )}
-        </article>
-      </section>
-
-      <section className="dashboardLowerGrid">
-        <div>
-          <ExpandableTile
-            title="Kampanie"
-            count={campaigns.length}
-            description="Twoje kampanie"
-            expanded={expandedTiles.campaigns}
-            onToggle={() => toggleTile("campaigns")}
-            to="/campaigns"
-          >
-            <div className="dashboardMaterialList">
-              {campaigns.length === 0 ? (
-                <div className="dashboardMaterialItem"><span><strong>Brak kampanii</strong></span></div>
-              ) : campaigns.slice(0, TILE_PREVIEW_LIMIT).map((campaign) => (
-                <Link key={campaign.id} to={`/campaigns/${campaign.id}`} className="dashboardMaterialItem">
-                  <span>
-                    <strong>{campaign.title || "Kampania"}</strong>
-                    <small>{getCampaignRoleLabel(campaign)} • {(campaign.systemCode || "-").toUpperCase()}</small>
-                  </span>
-                  <span className="dashboardTag">Otwórz</span>
-                </Link>
-              ))}
-            </div>
-          </ExpandableTile>
-
-          <ExpandableTile
-            title="Postacie"
-            count={characters.length}
-            description="Twoje postacie"
-            expanded={expandedTiles.characters}
-            onToggle={() => toggleTile("characters")}
-            to="/characters"
-          >
-            <div className="dashboardMaterialList">
-              {characters.length === 0 ? (
-                <div className="dashboardMaterialItem"><span><strong>Brak postaci</strong></span></div>
-              ) : characters.slice(0, TILE_PREVIEW_LIMIT).map((character) => (
-                <Link key={character.id} to="/characters" className="dashboardMaterialItem">
-                  <span>
-                    <strong>{character.name || "Postać"}</strong>
-                    <small>{(character.systemCode || "-").toUpperCase()}</small>
-                    <small>{fallbackCharacterSubtitle(character)}</small>
-                    <small>{character.campaignTitle || "Brak kampanii"}</small>
-                  </span>
-                  <span className="dashboardTag">Otwórz</span>
-                </Link>
-              ))}
-            </div>
-          </ExpandableTile>
-
-          <ExpandableTile
-            title="Nadchodzące sesje"
-            count={plannedSessions.length}
-            description="Sesje zaplanowane"
-            expanded={expandedTiles.upcoming}
-            onToggle={() => toggleTile("upcoming")}
-            to="/campaigns"
-          >
-            <div className="dashboardMaterialList">
-              {plannedSessions.length === 0 ? (
-                <div className="dashboardMaterialItem"><span><strong>Brak zaplanowanych sesji.</strong></span></div>
-              ) : plannedSessions.slice(0, TILE_PREVIEW_LIMIT).map((session) => (
-                <Link key={session.id} to={`/campaigns/${session.campaignId}`} className="dashboardMaterialItem">
-                  <span>
-                    <strong>{session.title || "Sesja"}</strong>
-                    <small>{session.campaignTitle || "Kampania"}</small>
-                    <small>{formatDateTime(session.scheduledFor)}</small>
-                  </span>
-                  <span className="dashboardTag">Otwórz</span>
-                </Link>
-              ))}
-            </div>
-          </ExpandableTile>
-
-          <ExpandableTile
-            title="Ostatnie sesje"
-            count={finishedSessions.length}
-            description="Sesje zakończone"
-            expanded={expandedTiles.recent}
-            onToggle={() => toggleTile("recent")}
-            to="/campaigns"
-          >
-            <div className="dashboardMaterialList">
-              {finishedSessions.length === 0 ? (
-                <div className="dashboardMaterialItem"><span><strong>Brak zakończonych sesji.</strong></span></div>
-              ) : finishedSessions.slice(0, TILE_PREVIEW_LIMIT).map((session) => (
-                <Link key={session.id} to={`/campaigns/${session.campaignId}`} className="dashboardMaterialItem">
-                  <span>
-                    <strong>{session.title || "Sesja"}</strong>
-                    <small>{session.campaignTitle || "Kampania"}</small>
-                    <small>{formatDateTime(session.finishedAt || session.scheduledFor)} • {formatSessionStatus(session.status)}</small>
-                  </span>
-                  <span className="dashboardTag">Otwórz</span>
-                </Link>
-              ))}
-            </div>
-          </ExpandableTile>
         </div>
+        {heroImage ? (
+          <img src={heroImage} alt={heroSession?.title || "Sesja"} className="dashboardHero__image" />
+        ) : (
+          <div className="dashboardHero__image" aria-hidden="true" />
+        )}
+      </article>
 
-        <div>
-          <article className="dashboardPanel">
-            <header className="dashboardPanel__head">
-              <h2>Dostępność graczy</h2>
-            </header>
-            {attendanceLoading ? <div className="dashboardMaterialItem"><span><strong>Ładowanie dostępności...</strong></span></div> : null}
-            {!attendanceLoading && attendanceError ? <div className="dashboardMaterialItem"><span><strong>Brak danych o dostępności dla najbliższej sesji.</strong></span></div> : null}
-            {!attendanceLoading && !attendanceError && !attendanceSummary ? <div className="dashboardMaterialItem"><span><strong>Brak danych o dostępności dla najbliższej sesji.</strong></span></div> : null}
-            {!attendanceLoading && !attendanceError && attendanceSummary ? (
-              <div className="dashboardChartPanel">
-                <DonutChart
-                  items={attendanceChartItems}
-                  centerValue={`${attendanceSummary.availabilityPct}%`}
-                  centerLabel="dostępnych"
-                  ariaLabel="Wykres dostępności graczy"
-                />
-                <div className="dashboardChartMeta">
-                  <strong>{plannedSessions[0]?.title || "Najbliższa sesja"}</strong>
-                  <small>{formatDateTime(plannedSessions[0]?.scheduledFor)}</small>
-                  <small>Status: {attendanceSummary.status}</small>
-                  <Link to={`/campaigns/${plannedSessions[0]?.campaignId || ""}`}>Zobacz odpowiedzi</Link>
+      <section className="dashboardWorkspaceGrid2026">
+        <main className="dashboardMainColumn2026">
+          <section className="dashboardStatsGrid2026" aria-label="Statystyki dashboardu">
+            <StatCard icon="briefcase" label="Aktywne kampanie" value={campaigns.length} hint={`${roleStats.asOwner} jako GM`} />
+            <StatCard icon="users" label="Postacie" value={characters.length} hint="Gotowe karty" />
+            <StatCard icon="calendar" label="Nadchodzace sesje" value={plannedSessions.length} hint="Najblizszy termin" />
+            <StatCard icon="archive" label="Odbyte sesje" value={finishedSessions.length} hint="Historia gry" />
+          </section>
+
+          <section className="dashboardMainSplit2026">
+            <article className="dashboardPanel dashboardListPanel2026">
+              <PanelHeader title="Ostatnie kampanie" subtitle="Kampanie, do ktorych najczesciej wracasz" to="/campaigns" />
+              <div className="dashboardList2026 scrollRegion">
+                {recentCampaigns.length === 0 ? (
+                  <div className="dashboardEmpty2026">Brak kampanii. Utworz albo dolacz do kampanii, aby zobaczyc ja tutaj.</div>
+                ) : recentCampaigns.map((campaign) => (
+                  <Link key={campaign.id} to={`/campaigns/${campaign.id}`} className="dashboardCampaignRow2026">
+                    <span className="dashboardRowThumb2026" aria-hidden="true"><DashboardIcon name="briefcase" /></span>
+                    <span>
+                      <strong>{campaign.title || "Kampania"}</strong>
+                      <small>{(campaign.systemCode || "RPG").toUpperCase()} - {getCampaignRoleLabel(campaign)}</small>
+                    </span>
+                    <em>{formatSessionStatus(campaign.status)}</em>
+                  </Link>
+                ))}
+              </div>
+            </article>
+
+            <article className="dashboardPanel dashboardListPanel2026">
+              <PanelHeader title="Nadchodzace sesje" subtitle="Najblizsze terminy w twoich kampaniach" to="/campaigns" />
+              <div className="dashboardList2026 scrollRegion">
+                {plannedSessions.length === 0 ? (
+                  <div className="dashboardEmpty2026">Brak zaplanowanych sesji.</div>
+                ) : plannedSessions.slice(0, PREVIEW_LIMIT).map((session) => {
+                  const date = formatCompactDate(session.scheduledFor);
+                  return (
+                    <Link key={session.id} to={`/campaigns/${session.campaignId}`} className="dashboardSessionRow2026">
+                      <span className="dashboardDateBadge2026"><strong>{date.day}</strong><small>{date.month}</small></span>
+                      <span>
+                        <strong>{session.title || "Sesja"}</strong>
+                        <small>{session.campaignTitle || "Kampania"}</small>
+                      </span>
+                      <em>{formatDateTime(session.scheduledFor).split(", ").pop()}</em>
+                    </Link>
+                  );
+                })}
+              </div>
+            </article>
+          </section>
+
+          <article className="dashboardPanel dashboardActivityPanel2026">
+            <PanelHeader title="Ostatnia aktywnosc" subtitle="Szybki przeglad zmian w twoim workspace" />
+            <div className="dashboardActivityList2026 scrollRegion">
+              {activityRows.length === 0 ? (
+                <div className="dashboardEmpty2026">Brak aktywnosci do pokazania.</div>
+              ) : activityRows.map((item) => (
+                <div key={item.id} className="dashboardActivityRow2026">
+                  <span aria-hidden="true"><DashboardIcon name={item.icon} /></span>
+                  <strong>{item.text}</strong>
+                  <small>{item.time ? formatDateTime(item.time) : item.fallback}</small>
                 </div>
+              ))}
+            </div>
+          </article>
+        </main>
+
+        <aside className="dashboardRightColumn2026">
+          <article className="dashboardPanel dashboardRolePanel2026">
+            <PanelHeader title="Rola w kampaniach" subtitle="Podzial twoich kampanii" />
+            <RoleDonutChart items={roleChartItems} total={roleStats.total} />
+          </article>
+
+          <article className="dashboardPanel dashboardAvailabilityPanel2026">
+            <PanelHeader title="Obecnosc graczy" subtitle={attendanceSession?.title || "Najblizsza sesja"} />
+
+            {attendanceCampaigns.length > 0 ? (
+              <div className="dashboardCampaignTabs2026" role="tablist" aria-label="Kampanie obecnosci">
+                {attendanceCampaigns.map((campaign) => {
+                  const selected = String(campaign.id) === String(selectedAttendanceCampaignId);
+                  return (
+                    <button
+                      key={campaign.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={selected}
+                      className={`dashboardCampaignTab2026${selected ? " is-active" : ""}`}
+                      onClick={() => setSelectedAttendanceCampaignId(String(campaign.id))}
+                    >
+                      {campaign.title || "Kampania"}
+                    </button>
+                  );
+                })}
               </div>
             ) : null}
-          </article>
 
-          <article className="dashboardPanel">
-            <header className="dashboardPanel__head">
-              <h2>Systemy RPG</h2>
-            </header>
-            <div className="dashboardTabs" role="tablist" aria-label="Systemy RPG">
-              <button
-                type="button"
-                role="tab"
-                aria-selected={systemsTab === "campaigns"}
-                className={systemsTab === "campaigns" ? "is-active" : ""}
-                onClick={() => setSystemsTab("campaigns")}
-              >
-                Kampanie
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={systemsTab === "characters"}
-                className={systemsTab === "characters" ? "is-active" : ""}
-                onClick={() => setSystemsTab("characters")}
-              >
-                Postacie
-              </button>
-            </div>
-            {activeSystemRows.length === 0 ? (
-              <div className="dashboardMaterialItem"><span><small>Brak danych systemów.</small></span></div>
-            ) : (
-              <div className="dashboardChartPanel dashboardChartPanel--stacked">
-                <DonutChart
-                  items={activeSystemChartItems}
-                  centerValue={activeSystemTotal}
-                  centerLabel={activeSystemLabel}
-                  ariaLabel={`Wykres systemów RPG dla ${activeSystemLabel}`}
-                />
-              </div>
-            )}
-          </article>
-
-          <article className="dashboardPanel">
-            <header className="dashboardPanel__head">
-              <h2>Twoja rola</h2>
-            </header>
-            <div className="dashboardChartPanel">
-              <DonutChart
-                items={roleChartItems}
-                centerValue={roleStats.total}
-                centerLabel="łącznie"
-                ariaLabel="Wykres roli w kampaniach"
-              />
-              <div className="dashboardChartMeta">
-                <strong>Łącznie: {roleStats.total}</strong>
-              </div>
+            <div className="dashboardAvailabilityTableWrap2026">
+              {attendanceCampaigns.length === 0 ? (
+                <div className="dashboardEmpty2026">Brak kampanii z sesjami do pokazania obecnosci.</div>
+              ) : !attendanceSession ? (
+                <div className="dashboardEmpty2026">Brak aktywnej lub zaplanowanej sesji w kampanii {selectedAttendanceCampaign?.title || ""}.</div>
+              ) : attendanceLoading ? (
+                <div className="dashboardEmpty2026">Ladowanie obecnosci graczy...</div>
+              ) : attendanceError ? (
+                <div className="dashboardEmpty2026">{attendanceError}</div>
+              ) : availabilityRows.length === 0 ? (
+                <div className="dashboardEmpty2026">Brak graczy lub odpowiedzi dla wybranej sesji.</div>
+              ) : (
+                <>
+                  <div className="dashboardAvailabilityTable2026" role="table" aria-label="Obecnosc graczy w tygodniu">
+                    <div className="dashboardAvailabilityHeader2026" role="row">
+                      <span role="columnheader">Gracz</span>
+                      {WEEK_DAYS.map((day) => <span key={day} role="columnheader">{day}</span>)}
+                    </div>
+                    {availabilityRows.map((row) => (
+                      <div key={row.id} className="dashboardAvailabilityRow2026" role="row">
+                        <strong role="rowheader">{row.name}</strong>
+                        {WEEK_DAYS.map((day) => <AvailabilityDot key={`${row.id}-${day}`} status={row.week[day]} />)}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="dashboardAvailabilityLegend2026">
+                    <span><AvailabilityDot status="available" /> Dostepny</span>
+                    <span><AvailabilityDot status="maybe" /> Moze</span>
+                    <span><AvailabilityDot status="unavailable" /> Niedostepny</span>
+                    <span><AvailabilityDot status="none" /> Brak odp.</span>
+                  </div>
+                </>
+              )}
             </div>
           </article>
-
-        </div>
+        </aside>
       </section>
 
       {(loading || error) && (
         <div className={`dashboardStatusMessage${error ? " is-error" : ""}`}>
-          {error || "Odświeżanie danych dashboardu..."}
+          {error || "Odswiezanie danych dashboardu..."}
         </div>
       )}
     </div>
@@ -626,15 +684,6 @@ function DashboardIcon({ name }) {
         <path d="M16 2v4" />
         <path d="M8 2v4" />
         <path d="M3 10h18" />
-      </>
-    ),
-    "chevron-right": <path d="m9 18 6-6-6-6" />,
-    file: (
-      <>
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
-        <path d="M14 2v6h6" />
-        <path d="M8 13h8" />
-        <path d="M8 17h5" />
       </>
     ),
     play: <path d="m8 5 11 7-11 7Z" />,

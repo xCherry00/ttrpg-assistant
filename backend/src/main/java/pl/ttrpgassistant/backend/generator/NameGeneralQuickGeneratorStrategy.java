@@ -43,7 +43,7 @@ public class NameGeneralQuickGeneratorStrategy implements GeneratorStrategy {
         Map<String, Object> selected = asMap(cultures.getOrDefault(culture, cultures.values().stream().findFirst().orElse(Map.of())));
         String requestedGender = stringParam(params, "gender", "Losowa");
         String gender = genderKey(requestedGender);
-        String format = stringParam(params, "nameFormat", "ImiÄ™ + nazwisko");
+        String format = stringParam(params, "nameFormat", "Imię + nazwisko");
         int count = intParam(params, "count", 3, 1, 10);
 
         List<Map<String, Object>> names = new ArrayList<>();
@@ -87,7 +87,7 @@ public class NameGeneralQuickGeneratorStrategy implements GeneratorStrategy {
     }
 
     private GeneratorOutputSection section(String title, String content) {
-        return new GeneratorOutputSection("text", title, content, List.of());
+        return new GeneratorOutputSection("text", GeneratorTextSanitizer.clean(title), GeneratorTextSanitizer.clean(content), List.of());
     }
 
     private Map<String, Object> item(String label, Object value) {
@@ -135,8 +135,8 @@ public class NameGeneralQuickGeneratorStrategy implements GeneratorStrategy {
 
     private String displayGender(String gender) {
         return switch (gender) {
-            case "male" -> "MÄ™ska";
-            case "female" -> "Ĺ»eĹ„ska";
+            case "male" -> "Męska";
+            case "female" -> "Żeńska";
             case "neutral" -> "Neutralna";
             default -> "Losowa";
         };
@@ -152,7 +152,7 @@ public class NameGeneralQuickGeneratorStrategy implements GeneratorStrategy {
 
     private String stringParam(Map<String, Object> params, String key, String fallback) {
         Object value = params.get(key);
-        return value == null || String.valueOf(value).isBlank() ? fallback : String.valueOf(value);
+        return GeneratorTextSanitizer.clean(value == null || String.valueOf(value).isBlank() ? fallback : String.valueOf(value));
     }
 
     private int intParam(Map<String, Object> params, String key, int fallback, int min, int max) {
@@ -192,9 +192,10 @@ public class NameGeneralQuickGeneratorStrategy implements GeneratorStrategy {
     }
 
     private String looseKey(String value) {
-        String normalized = Normalizer.normalize(value == null ? "" : value.replace("Ĺ", "L").replace("Ĺ‚", "l"), Normalizer.Form.NFD)
+        String normalized = Normalizer.normalize(value == null ? "" : GeneratorTextSanitizer.clean(value).replace("Ł", "L").replace("ł", "l"), Normalizer.Form.NFD)
                 .replaceAll("\\p{M}", "");
         return normalized.toLowerCase(Locale.ROOT).trim();
     }
 }
+
 

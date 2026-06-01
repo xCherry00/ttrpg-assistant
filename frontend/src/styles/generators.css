@@ -37,6 +37,12 @@
   margin-bottom: 24px;
 }
 
+.generatorPageActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
 .generatorsCatalogBrand {
   display: flex;
   align-items: center;
@@ -289,7 +295,7 @@
 }
 
 .generatorsFilterSelect::after {
-  content: "âŚ„";
+  content: "v";
   position: absolute;
   top: 50%;
   right: 14px;
@@ -3178,5 +3184,587 @@
 @media (max-width: 860px) {
   .generatorsCatalogLayout {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Minimal generator module refresh */
+.generatorsCatalogPage,
+.generatorWindowPage {
+  --gen-accent: #157a55;
+  --gen-accent-soft: #eef7f2;
+  --gen-border: #dfe7e3;
+  --gen-muted: #65746f;
+  --gen-ink: #16231f;
+  background: #f7faf8;
+}
+
+.generatorsCatalogLayout {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.generatorsSidebar,
+.generatorsContent,
+.generatorSettingsPanel,
+.generatorOutputPanel {
+  border: 1px solid var(--gen-border);
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.generatorsSidebar {
+  padding: 10px;
+  min-height: auto;
+  position: sticky;
+  top: 12px;
+}
+
+.generatorsCategoryList {
+  display: grid;
+  gap: 4px;
+}
+
+.generatorsCategoryItem {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--gen-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.generatorsCategoryItem:hover,
+.generatorsCategoryItem.is-active {
+  background: var(--gen-accent-soft);
+  color: var(--gen-accent);
+}
+
+.generatorsCategoryItem.is-active {
+  box-shadow: inset 3px 0 0 var(--gen-accent);
+}
+
+.generatorsCategoryIcon {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  color: var(--gen-accent);
+  background: #f4f8f6;
+}
+
+.generatorsCategoryIcon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.generatorsCategoryItem strong {
+  min-width: 24px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #f3f7f5;
+  color: var(--gen-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.generatorsContent {
+  padding: 14px;
+}
+
+.generatorsTopbar {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.generatorsSearch,
+.generatorsFavoritesButton,
+.generatorsSort select {
+  min-height: 42px;
+  border: 1px solid var(--gen-border);
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.generatorsSearch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+}
+
+.generatorsSearch input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--gen-ink);
+}
+
+.generatorsSearchIcon {
+  color: var(--gen-muted);
+  font-weight: 700;
+}
+
+.generatorsFavoritesButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 14px;
+  color: var(--gen-ink);
+  font-weight: 700;
+}
+
+.generatorsFavoritesButton.is-active {
+  border-color: rgba(21, 122, 85, 0.35);
+  background: var(--gen-accent-soft);
+  color: var(--gen-accent);
+}
+
+.generatorsSort {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--gen-muted);
+  font-size: 13px;
+}
+
+.generatorsSort select {
+  padding: 0 32px 0 12px;
+  color: var(--gen-ink);
+  font-weight: 700;
+}
+
+.generatorsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.generatorCard {
+  position: relative;
+  min-height: 0;
+  border: 1px solid var(--gen-border);
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.generatorCard.is-active,
+.generatorCard:hover {
+  border-color: rgba(21, 122, 85, 0.28);
+  box-shadow: 0 8px 22px rgba(18, 43, 35, 0.06);
+}
+
+.generatorCardBody {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 14px;
+  width: 100%;
+  min-height: 136px;
+  padding: 18px 44px 16px 18px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.generatorCardMedia {
+  display: none !important;
+}
+
+.generatorCardIcon {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  border-radius: 12px;
+  background: #f3f8f5;
+  color: var(--gen-accent);
+  box-shadow: none;
+}
+
+.generatorCardIcon svg {
+  width: 23px;
+  height: 23px;
+}
+
+.generatorCardContent {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 8px;
+}
+
+.generatorCardTitle {
+  color: var(--gen-ink);
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.generatorCardDescription {
+  color: var(--gen-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.generatorCardBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: auto;
+}
+
+.generatorBadge {
+  border: 0;
+  border-radius: 999px;
+  background: #edf4f1;
+  color: #315247;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.generatorCardFavorite {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #6c7a75;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.generatorCardFavorite.is-favorite {
+  color: var(--gen-accent);
+  background: var(--gen-accent-soft);
+}
+
+.generatorPageActions {
+  margin-bottom: 10px;
+  justify-content: flex-start;
+}
+
+.generatorBackButton {
+  border: 1px solid var(--gen-border);
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--gen-ink);
+  padding: 9px 14px;
+  font-weight: 800;
+}
+
+.generatorWindowWorkspace,
+.generatorWindowShell {
+  display: grid;
+  grid-template-columns: minmax(280px, 420px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.generatorSettingsPanel,
+.generatorOutputPanel {
+  padding: 20px;
+}
+
+.generatorPanelNumber {
+  margin: 0 0 14px;
+  color: var(--gen-accent);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.generatorSettingsIntro {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--gen-border);
+}
+
+.generatorSettingsIntro strong {
+  color: var(--gen-ink);
+  font-size: 18px;
+  text-align: center;
+}
+
+.generatorSettingsIntro span {
+  color: var(--gen-muted);
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.generatorWindowFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.generatorField,
+.generatorCheckField {
+  min-width: 0;
+}
+
+.generatorLabel {
+  color: #52645e;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.generatorInput,
+.generatorWindowFields .generatorInput {
+  border: 1px solid var(--gen-border);
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--gen-ink);
+  min-height: 42px;
+}
+
+.generatorWindowGenerate {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 46px;
+  margin-top: 18px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--gen-accent);
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.generatorOutputTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.generatorResultActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.generatorResultActions button {
+  min-height: 36px;
+  border: 1px solid var(--gen-border);
+  border-radius: 9px;
+  background: #ffffff;
+  color: var(--gen-ink);
+  padding: 0 12px;
+  font-weight: 800;
+}
+
+.generatorResultActions button:last-of-type {
+  border-color: var(--gen-accent);
+  background: var(--gen-accent);
+  color: #ffffff;
+}
+
+.generatorWindowResult,
+.generatorTypedResult {
+  min-height: 0;
+}
+
+.generatorTypedHero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.generatorTypedIcon {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+  background: var(--gen-accent);
+  color: #ffffff;
+}
+
+.generatorTypedIcon svg {
+  width: 30px;
+  height: 30px;
+}
+
+.generatorTypedHero h2 {
+  margin: 0;
+  color: var(--gen-ink);
+  font-size: 25px;
+  line-height: 1.2;
+}
+
+.generatorTypedHero p {
+  margin: 4px 0 0;
+  color: var(--gen-muted);
+  font-size: 13px;
+}
+
+.generatorTypedFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.generatorResultField {
+  border: 1px solid var(--gen-border);
+  border-radius: 12px;
+  background: #fbfdfc;
+  padding: 12px;
+}
+
+.generatorResultField span {
+  display: block;
+  margin-bottom: 6px;
+  color: #52645e;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.generatorResultField p,
+.generatorResultField li {
+  margin: 0;
+  color: var(--gen-ink);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.generatorResultField ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.generatorNameList {
+  display: grid;
+  border: 1px solid var(--gen-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.generatorNameRow {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--gen-border);
+}
+
+.generatorNameRow:last-child {
+  border-bottom: 0;
+}
+
+.generatorNameRow strong {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--gen-accent-soft);
+  color: var(--gen-accent);
+}
+
+.generatorNameRow span {
+  color: var(--gen-ink);
+  font-weight: 800;
+}
+
+.generatorTypedMap {
+  margin-bottom: 14px;
+  border: 1px solid var(--gen-border);
+  border-radius: 12px;
+  background: #fbfdfc;
+  padding: 12px;
+}
+
+.generatorWindowEmpty {
+  min-height: 260px;
+  border: 1px dashed var(--gen-border);
+  border-radius: 14px;
+  background: #fbfdfc;
+  color: var(--gen-muted);
+}
+
+.generatorsLoadMoreWrap,
+.generatorsCatalogHeader,
+.generatorsFilterSection {
+  display: none !important;
+}
+
+@media (max-width: 1120px) {
+  .generatorsCatalogLayout,
+  .generatorWindowWorkspace,
+  .generatorWindowShell {
+    grid-template-columns: 1fr;
+  }
+
+  .generatorsSidebar {
+    position: static;
+  }
+
+  .generatorsCategoryList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .generatorsTopbar {
+    grid-template-columns: 1fr;
+  }
+
+  .generatorsCategoryList,
+  .generatorWindowFields,
+  .generatorTypedFields {
+    grid-template-columns: 1fr;
+  }
+
+  .generatorOutputTop,
+  .generatorTypedHero {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .generatorCardBody {
+    min-height: 120px;
   }
 }

@@ -8,63 +8,283 @@ import {
 } from "../api/compendium";
 
 const DEFAULT_CATEGORIES = [
-  { code: "monsters", label: "Potwory", description: "CR, XP, statystyki i akcje potworów SRD." },
+  { code: "monsters", label: "Potwory", description: "CR, XP, statystyki i akcje potworow SRD." },
   { code: "spells", label: "Zaklecia", description: "Poziom, szkola, komponenty i opis zaklec SRD." },
   { code: "magic-items", label: "Magiczne przedmioty", description: "Magiczne przedmioty dostepne w SRD." },
   { code: "equipment", label: "Ekwipunek", description: "Bronie, pancerze, sprzet i koszt." },
   { code: "conditions", label: "Stany", description: "Stany mechaniczne D&D 5E." },
+  { code: "skills", label: "Umiejetnosci", description: "Umiejetnosci i powiazane cechy." },
+  { code: "damage-types", label: "Typy obrazen", description: "Typy obrazen z opisami SRD." },
 ];
 
-function textValue(value) {
-  if (value === null || value === undefined || value === "") return "-";
-  if (Array.isArray(value)) return value.map(textValue).join(", ");
+const ATTRIBUTE_LABELS = {
+  strength: "STR",
+  dexterity: "DEX",
+  constitution: "CON",
+  intelligence: "INT",
+  wisdom: "WIS",
+  charisma: "CHA",
+};
+
+function isEmptyValue(value) {
+  return value === null || value === undefined || value === "" || (Array.isArray(value) && value.length === 0);
+}
+
+function getPath(source, path) {
+  if (!source || !path) return undefined;
+  return path.split(".").reduce((current, part) => current?.[part], source);
+}
+
+function firstValue(source, paths) {
+  const candidates = Array.isArray(paths) ? paths : [paths];
+  for (const path of candidates) {
+    const value = typeof path === "function" ? path(source) : getPath(source, path);
+    if (!isEmptyValue(value)) return value;
+  }
+  return undefined;
+}
+
+function asArray(value) {
+  if (isEmptyValue(value)) return [];
+  return Array.isArray(value) ? value : [value];
+}
+
+function textValue(value, fallback = "Brak danych") {
+  if (isEmptyValue(value)) return fallback;
+  if (Array.isArray(value)) {
+    const normalized = value.map((item) => textValue(item, "")).filter(Boolean);
+    return normalized.length ? normalized.join(", ") : fallback;
+  }
   if (typeof value === "object") {
     if (value.name) return value.name;
+    if (value.index) return value.index;
     if (value.amount !== undefined && value.unit) return `${value.amount} ${value.unit}`;
     if (value.quantity !== undefined && value.unit) return `${value.quantity} ${value.unit}`;
-    return Object.values(value).map(textValue).filter(Boolean).join(" / ");
+    if (value.desc) return textValue(value.desc, fallback);
+    const normalized = Object.values(value).map((item) => textValue(item, "")).filter(Boolean);
+    return normalized.length ? normalized.join(" / ") : fallback;
   }
   return String(value);
 }
 
-function detailRows(detail) {
-  if (!detail) return [];
-  const priority = [
-    "name",
-    "index",
-    "level",
-    "school",
-    "casting_time",
-    "range",
-    "duration",
-    "components",
-    "challenge_rating",
-    "xp",
-    "type",
-    "size",
-    "alignment",
-    "armor_class",
-    "hit_points",
-    "hit_dice",
-    "speed",
-    "equipment_category",
-    "cost",
-    "weight",
-    "rarity",
-    "desc",
-  ];
-  const hidden = new Set(["url", "updated_at", "image", "source", "systemCode", "category"]);
-  const keys = [
-    ...priority.filter((key) => detail[key] !== undefined),
-    ...Object.keys(detail).filter((key) => !priority.includes(key) && !hidden.has(key)),
-  ];
-  return keys
-    .filter((key) => !hidden.has(key))
-    .map((key) => [key, detail[key]]);
+function shortText(value, limit = 86) {
+  const text = textValue(value, "Brak danych").replace(/\s+/g, " ").trim();
+  return text.length > limit ? `${text.slice(0, limit - 1)}...` : text;
 }
 
-function prettyKey(key) {
-  return key.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+function formatArmorClass(value) {
+  const items = asArray(value);
+  if (!items.length) return "Brak danych";
+  return items.map((item) => {
+    if (typeof item === "object") {
+      const base = item.value ?? item.armor_class;
+      const type = item.type ? ` (${item.type})` : "";
+      return base !== undefined ? `${base}${type}` : textValue(item);
+    }
+    return textValue(item);
+  }).join(", ");
+}
+
+function formatSpeed(value) {
+  if (!value || typeof value !== "object") return textValue(value);
+  return Object.entries(value)
+    .filter(([, speed]) => !isEmptyValue(speed))
+    .map(([mode, speed]) => `${mode}: ${speed}`)
+    .join(", ") || "Brak danych";
+}
+
+function formatCost(value) {
+  if (!value || typeof value !== "object") return textValue(value);
+  if (value.quantity !== undefined && value.unit) return `${value.quantity} ${value.unit}`;
+  return textValue(value);
+}
+
+function formatComponents(item) {
+  const components = textValue(item.components);
+  const material = item.material ? ` (${item.material})` : "";
+  return components === "Brak danych" ? components : `${components}${material}`;
+}
+
+function formatAttributes(item) {
+  const rows = Object.entries(ATTRIBUTE_LABELS)
+    .map(([key, label]) => {
+      const score = item[key];
+      if (score === undefined || score === null) return null;
+      const modKey = `${key.slice(0, 3)}_mod`;
+      const mod = item[modKey];
+      const modText = mod === undefined || mod === null ? "" : ` (${mod >= 0 ? "+" : ""}${mod})`;
+      return `${label} ${score}${modText}`;
+    })
+    .filter(Boolean);
+  return rows.length ? rows.join("  |  ") : "Brak danych";
+}
+
+function formatSource(item) {
+  const source = item?.source;
+  if (!source) return "D&D 5e SRD API";
+  if (typeof source === "string") return source;
+  return source.name || source.url || "D&D 5e SRD API";
+}
+
+function buildField(label, paths, formatter = textValue) {
+  return {
+    label,
+    value: (item) => {
+      const value = firstValue(item, paths);
+      return formatter === textValue ? textValue(value) : formatter(value, item);
+    },
+  };
+}
+
+function buildTextSection(title, paths, fallback = "Brak opisu") {
+  return {
+    title,
+    kind: "text",
+    value: (item) => textValue(firstValue(item, paths), fallback),
+  };
+}
+
+function buildListSection(title, paths) {
+  return {
+    title,
+    kind: "list",
+    value: (item) => asArray(firstValue(item, paths)).map((entry) => textValue(entry, "")).filter(Boolean),
+  };
+}
+
+const CATEGORY_CONFIG = {
+  monsters: {
+    badge: "POTWORY",
+    columns: [
+      buildField("Nazwa", "name"),
+      buildField("Typ", "type"),
+      buildField("Rozmiar", "size"),
+      buildField("AC", "armor_class", formatArmorClass),
+      buildField("HP", "hit_points"),
+      buildField("CR", "challenge_rating"),
+    ],
+    facts: [
+      buildField("Typ", "type"),
+      buildField("Rozmiar", "size"),
+      buildField("Klasa pancerza", "armor_class", formatArmorClass),
+      buildField("Punkty wytrzymalosci", "hit_points"),
+      buildField("Kosci wytrzymalosci", "hit_dice"),
+      buildField("Szybkosc", "speed", formatSpeed),
+      buildField("Atrybuty", (item) => formatAttributes(item)),
+      buildField("Odporności / immunitety", (item) => [
+        ...asArray(item.damage_resistances),
+        ...asArray(item.damage_immunities),
+        ...asArray(item.condition_immunities),
+      ]),
+      buildField("Zrodlo", (item) => formatSource(item)),
+    ],
+    sections: [buildTextSection("Opis", ["desc", "special_abilities", "actions"], "Brak opisu")],
+  },
+  spells: {
+    badge: "ZAKLECIA",
+    columns: [
+      buildField("Nazwa", "name"),
+      buildField("Poziom", "level"),
+      buildField("Szkola", "school"),
+      buildField("Czas rzucania", "casting_time"),
+      buildField("Zasieg", "range"),
+    ],
+    facts: [
+      buildField("Poziom", "level"),
+      buildField("Szkola", "school"),
+      buildField("Czas rzucania", "casting_time"),
+      buildField("Zasieg", "range"),
+      buildField("Komponenty", (item) => formatComponents(item)),
+      buildField("Czas trwania", "duration"),
+      buildField("Zrodlo", (item) => formatSource(item)),
+    ],
+    sections: [
+      buildTextSection("Opis", "desc", "Brak opisu"),
+      buildTextSection("Efekt na wyzszych poziomach", "higher_level", ""),
+    ],
+  },
+  "magic-items": {
+    badge: "MAGICZNE PRZEDMIOTY",
+    columns: [
+      buildField("Nazwa", "name"),
+      buildField("Typ", ["equipment_category", "type"]),
+      buildField("Rzadkosc", "rarity"),
+      buildField("Kategoria", ["category_range", "gear_category", "equipment_category"]),
+    ],
+    facts: [
+      buildField("Typ / kategoria", ["equipment_category", "type", "gear_category"]),
+      buildField("Rzadkosc", "rarity"),
+      buildField("Zrodlo", (item) => formatSource(item)),
+    ],
+    sections: [
+      buildTextSection("Opis", "desc", "Brak opisu"),
+      buildListSection("Warianty", ["variants", "contents"]),
+    ],
+  },
+  equipment: {
+    badge: "EKWIPUNEK",
+    columns: [
+      buildField("Nazwa", "name"),
+      buildField("Kategoria", ["equipment_category", "gear_category", "weapon_category", "armor_category"]),
+      buildField("Koszt", "cost", formatCost),
+      buildField("Waga", "weight"),
+    ],
+    facts: [
+      buildField("Kategoria", ["equipment_category", "gear_category", "weapon_category", "armor_category"]),
+      buildField("Koszt", "cost", formatCost),
+      buildField("Waga", "weight"),
+      buildField("Zrodlo", (item) => formatSource(item)),
+    ],
+    sections: [
+      buildTextSection("Opis", "desc", "Brak opisu"),
+      buildListSection("Specjalne wlasciwosci", ["properties", "special"]),
+    ],
+  },
+  conditions: {
+    badge: "STANY",
+    columns: [
+      buildField("Nazwa", "name"),
+      buildField("Krotki opis", "desc", (value) => shortText(value)),
+    ],
+    facts: [buildField("Zrodlo", (item) => formatSource(item))],
+    sections: [buildTextSection("Opis efektu", "desc", "Brak opisu")],
+  },
+  skills: {
+    badge: "UMIEJETNOSCI",
+    columns: [
+      buildField("Nazwa", "name"),
+      buildField("Atrybut", "ability_score"),
+      buildField("Krotki opis", "desc", (value) => shortText(value)),
+    ],
+    facts: [
+      buildField("Powiazany atrybut", "ability_score"),
+      buildField("Zrodlo", (item) => formatSource(item)),
+    ],
+    sections: [buildTextSection("Opis", "desc", "Brak opisu")],
+  },
+  "damage-types": {
+    badge: "TYPY OBRAZEN",
+    columns: [
+      buildField("Nazwa", "name"),
+      buildField("Krotki opis", "desc", (value) => shortText(value)),
+    ],
+    facts: [buildField("Zrodlo", (item) => formatSource(item))],
+    sections: [buildTextSection("Opis", "desc", "Brak opisu")],
+  },
+};
+
+const FALLBACK_CONFIG = {
+  badge: "KOMPENDIUM",
+  columns: [
+    buildField("Nazwa", "name"),
+    buildField("Opis", "desc", (value) => shortText(value)),
+  ],
+  facts: [buildField("Zrodlo", (item) => formatSource(item))],
+  sections: [buildTextSection("Opis", "desc", "Brak opisu")],
+};
+
+function categoryConfig(categoryCode) {
+  return CATEGORY_CONFIG[categoryCode] || FALLBACK_CONFIG;
 }
 
 function normalizeListData(data, systemCode, category) {
@@ -85,6 +305,32 @@ function normalizeListData(data, systemCode, category) {
   };
 }
 
+function mergeItemWithDetail(item, detailCache) {
+  return detailCache[item.index] ? { ...item, ...detailCache[item.index] } : item;
+}
+
+function renderSection(section, detail) {
+  const value = section.value(detail);
+  if (section.kind === "list") {
+    if (!value.length) return null;
+    return (
+      <section key={section.title} className="compendiumDetailSection">
+        <h3>{section.title}</h3>
+        <ul>
+          {value.map((item) => <li key={item}>{item}</li>)}
+        </ul>
+      </section>
+    );
+  }
+  if (!value) return null;
+  return (
+    <section key={section.title} className="compendiumDetailSection">
+      <h3>{section.title}</h3>
+      <p>{value}</p>
+    </section>
+  );
+}
+
 export default function CompendiumPage() {
   const { token } = useAuth();
   const [systems, setSystems] = useState([]);
@@ -93,6 +339,7 @@ export default function CompendiumPage() {
   const [category, setCategory] = useState("monsters");
   const [listData, setListData] = useState(null);
   const [detail, setDetail] = useState(null);
+  const [detailCache, setDetailCache] = useState({});
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -122,11 +369,29 @@ export default function CompendiumPage() {
 
   useEffect(() => {
     let cancelled = false;
+    async function loadDetail(index, fallbackItem = null) {
+      setDetailLoading(true);
+      try {
+        const data = await getCompendiumDetail(token, systemCode, category, index);
+        if (cancelled) return;
+        const nextDetail = data || fallbackItem;
+        setDetail(nextDetail);
+        if (nextDetail?.index) {
+          setDetailCache((current) => ({ ...current, [nextDetail.index]: nextDetail }));
+        }
+      } catch {
+        if (!cancelled) setDetail(fallbackItem);
+      } finally {
+        if (!cancelled) setDetailLoading(false);
+      }
+    }
+
     async function loadList() {
       setLoading(true);
       setError("");
       setListNotice("");
       setDetail(null);
+      setDetailCache({});
       try {
         const data = await getCompendiumList(token, systemCode, category);
         if (cancelled) return;
@@ -149,43 +414,42 @@ export default function CompendiumPage() {
       }
     }
 
-    async function loadDetail(index, fallbackItem = null) {
-      setDetailLoading(true);
-      try {
-        const data = await getCompendiumDetail(token, systemCode, category, index);
-        if (!cancelled) setDetail(data || fallbackItem);
-      } catch {
-        if (!cancelled) setDetail(fallbackItem);
-      } finally {
-        if (!cancelled) setDetailLoading(false);
-      }
-    }
-
     loadList();
     return () => {
       cancelled = true;
     };
   }, [category, systemCode, token]);
 
+  const activeCategory = categories.find((item) => item.code === category) || categories[0] || DEFAULT_CATEGORIES[0];
+  const config = categoryConfig(category);
+
   const rows = useMemo(() => {
     const items = Array.isArray(listData?.results) ? listData.results : [];
     const needle = query.trim().toLowerCase();
-    if (!needle) return items;
-    return items.filter((item) => String(item.name || item.index || "").toLowerCase().includes(needle));
-  }, [listData, query]);
-
-  const activeCategory = categories.find((item) => item.code === category) || categories[0] || DEFAULT_CATEGORIES[0];
+    return items
+      .map((item) => mergeItemWithDetail(item, detailCache))
+      .filter((item) => {
+        if (!needle) return true;
+        return String(item.name || item.index || "").toLowerCase().includes(needle);
+      });
+  }, [detailCache, listData, query]);
 
   async function selectDetail(item) {
     if (!item?.index) return;
+    if (detailCache[item.index]) {
+      setDetail({ ...item, ...detailCache[item.index] });
+      return;
+    }
     setDetailLoading(true);
     setError("");
     try {
       const data = await getCompendiumDetail(token, systemCode, category, item.index);
-      setDetail(data || item);
+      const nextDetail = data || item;
+      setDetail(nextDetail);
+      setDetailCache((current) => ({ ...current, [item.index]: nextDetail }));
     } catch (e) {
       setDetail(item);
-      setError(e?.message || "Nie udalo sie pobrac szczegółów.");
+      setError(e?.message || "Nie udalo sie pobrac szczegolow.");
     } finally {
       setDetailLoading(false);
     }
@@ -193,15 +457,7 @@ export default function CompendiumPage() {
 
   return (
     <div className="page compendiumPage">
-      <header className="pageHeader compendiumHero">
-        <div>
-          <span className="pageEyebrow">baza wiedzy</span>
-          <h1 className="pageTitle">Kompendium</h1>
-          <p className="pageSubtitle">Baza referencyjna systemow RPG: potwory, zaklecia, przedmioty, stany i zasady z legalnych zrodel SRD.</p>
-        </div>
-      </header>
-
-      <section className="compendiumToolbar">
+      <section className="compendiumToolbar" aria-label="Filtry kompendium">
         <label>
           <span>System</span>
           <select value={systemCode} onChange={(event) => setSystemCode(event.target.value)}>
@@ -212,12 +468,12 @@ export default function CompendiumPage() {
         </label>
         <label>
           <span>Szukaj</span>
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nazwa wpisu..." />
+          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Szukaj wpisow..." />
         </label>
       </section>
 
       <div className="compendiumLayout">
-        <aside className="compendiumCategories">
+        <aside className="compendiumCategories" aria-label="Kategorie kompendium">
           {categories.map((item) => (
             <button key={item.code} type="button" className={item.code === category ? "is-active" : ""} onClick={() => setCategory(item.code)}>
               <strong>{item.label}</strong>
@@ -230,35 +486,32 @@ export default function CompendiumPage() {
           <div className="compendiumPanelHeader">
             <div>
               <h2>{activeCategory?.label}</h2>
-              <p>{listData?.count ?? rows.length} wpisow z D&D 5E SRD API.</p>
+              <p>{listData?.count ?? rows.length} wpisow</p>
             </div>
-            <a href="https://www.dnd5eapi.co/" target="_blank" rel="noreferrer">Zrodlo</a>
           </div>
 
           {error && <div className="compendiumError">{error}</div>}
           {loading ? (
-            <div className="compendiumEmpty">Ładowanie danych...</div>
+            <div className="compendiumEmpty">Ladowanie danych...</div>
           ) : (
             <div className="compendiumTableWrap">
               <table className="compendiumTable">
                 <thead>
                   <tr>
-                    <th>Nazwa</th>
-                    <th>Index</th>
-                    <th>API</th>
+                    {config.columns.map((column) => <th key={column.label}>{column.label}</th>)}
                   </tr>
                 </thead>
                 <tbody>
                   {rows.length === 0 ? (
                     <tr>
-                      <td colSpan={3}>{listNotice || "Brak danych dla tej kategorii."}</td>
+                      <td colSpan={config.columns.length}>{listNotice || "Brak danych dla tej kategorii."}</td>
                     </tr>
                   ) : null}
                   {rows.map((item) => (
-                    <tr key={item.index} className={detail?.index === item.index ? "is-active" : ""} onClick={() => selectDetail(item)}>
-                      <td>{item.name}</td>
-                      <td>{item.index}</td>
-                      <td>{item.url}</td>
+                    <tr key={item.index || item.name} className={detail?.index === item.index ? "is-active" : ""} onClick={() => selectDetail(item)}>
+                      {config.columns.map((column) => (
+                        <td key={column.label}>{column.value(item)}</td>
+                      ))}
                     </tr>
                   ))}
                 </tbody>
@@ -269,20 +522,26 @@ export default function CompendiumPage() {
 
         <aside className="compendiumDetailPanel">
           {detailLoading ? (
-            <div className="compendiumEmpty">Ładowanie szczegółów...</div>
+            <div className="compendiumEmpty">Ladowanie szczegolow...</div>
           ) : detail ? (
             <>
               <div className="compendiumDetailTitle">
-                <span>{activeCategory?.label}</span>
-                <h2>{detail.name}</h2>
+                <span>{config.badge}</span>
+                <h2>{detail.name || "Bez nazwy"}</h2>
               </div>
-              <div className="compendiumDetailRows">
-                {detailRows(detail).map(([key, value]) => (
-                  <div key={key} className={key === "desc" ? "is-wide" : ""}>
-                    <strong>{prettyKey(key)}</strong>
-                    <span>{textValue(value)}</span>
-                  </div>
-                ))}
+              <div className="compendiumDetailContent">
+                <div className="compendiumDetailFacts">
+                  {config.facts
+                    .map((field) => ({ label: field.label, value: field.value(detail) }))
+                    .filter((field) => !isEmptyValue(field.value) && field.value !== "Brak danych")
+                    .map((field) => (
+                      <div key={field.label}>
+                        <strong>{field.label}</strong>
+                        <span>{textValue(field.value)}</span>
+                      </div>
+                    ))}
+                </div>
+                {config.sections.map((section) => renderSection(section, detail))}
               </div>
             </>
           ) : (
@@ -291,16 +550,5 @@ export default function CompendiumPage() {
         </aside>
       </div>
     </div>
-  );
-}
-
-function CompendiumIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M4 19a3 3 0 0 1 3-3h13" />
-      <path d="M7 16V5a2 2 0 0 1 2-2h11v16H9a2 2 0 0 1-2-2Z" />
-      <path d="M10 7h6" />
-      <path d="M10 11h5" />
-    </svg>
   );
 }

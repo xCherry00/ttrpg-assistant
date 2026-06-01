@@ -48,8 +48,8 @@ describe("MessagesPage", () => {
   it("renders empty conversations state and selected-conversation placeholder", async () => {
     messagesApi.getConversations.mockResolvedValue([]);
     renderPage();
-    expect(await screen.findByText(/Brak rozmów\./i)).toBeInTheDocument();
-    expect(screen.getByText(/^Wybierz rozmowę\.$/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Brak rozmow\./i)).toBeInTheDocument();
+    expect(screen.getByText(/^Wybierz rozmowe z listy$/i)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Prosby/i })).not.toBeInTheDocument();
     expect(screen.queryByText(/Szczegoly rozmowy/i)).not.toBeInTheDocument();
   });
@@ -71,7 +71,7 @@ describe("MessagesPage", () => {
 
     expect((await screen.findAllByText("Jan")).length).toBeGreaterThan(0);
     expect(await screen.findByPlaceholderText("Napisz wiadomosc...")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Wyślij" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Wyslij" })).toBeDisabled();
   });
 
   it("handles incoming conversation request actions", async () => {

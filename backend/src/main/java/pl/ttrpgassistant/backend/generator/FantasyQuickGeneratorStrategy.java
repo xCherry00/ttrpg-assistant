@@ -193,7 +193,12 @@ public class FantasyQuickGeneratorStrategy implements GeneratorStrategy {
     }
 
     private GeneratorOutputSection section(String title, String content) {
-        return new GeneratorOutputSection("text", title, content, List.of());
+        return new GeneratorOutputSection(
+                "text",
+                GeneratorTextSanitizer.clean(title),
+                GeneratorTextSanitizer.clean(content),
+                List.of()
+        );
     }
 
     private List<GeneratorOutputSection> cleanLootSections(Map<String, Object> params) {
@@ -428,7 +433,7 @@ public class FantasyQuickGeneratorStrategy implements GeneratorStrategy {
     }
 
     private String pick(String... values) {
-        return values[random.nextInt(values.length)];
+        return GeneratorTextSanitizer.clean(values[random.nextInt(values.length)]);
     }
 
     private int roll(int count, int sides) {
@@ -441,7 +446,7 @@ public class FantasyQuickGeneratorStrategy implements GeneratorStrategy {
 
     private String stringParam(Map<String, Object> params, String key, String fallback) {
         Object value = params.get(key);
-        return value == null || String.valueOf(value).isBlank() ? fallback : String.valueOf(value);
+        return GeneratorTextSanitizer.clean(value == null || String.valueOf(value).isBlank() ? fallback : String.valueOf(value));
     }
 
     private boolean booleanParam(Map<String, Object> params, String key, boolean fallback) {
