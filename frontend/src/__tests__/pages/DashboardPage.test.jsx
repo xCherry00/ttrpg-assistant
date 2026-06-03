@@ -68,7 +68,7 @@ describe("DashboardPage workspace", () => {
     renderPage();
 
     expect((await screen.findAllByText("Sesja Najblizsza")).length).toBeGreaterThan(0);
-    expect(screen.getByText(/Najblizsza sesja/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Najblizsza sesja/i).length).toBeGreaterThan(0);
   });
 
   it("shows empty hero state when there is no active or planned session", async () => {
@@ -80,8 +80,9 @@ describe("DashboardPage workspace", () => {
 
     renderPage();
 
-    expect(await screen.findByText("Brak aktywnej lub zaplanowanej sesji")).toBeInTheDocument();
-    expect(screen.getByText(/Dashboard pomoze szybko wrocic/i)).toBeInTheDocument();
+    expect(await screen.findByText("Nie masz jeszcze zaplanowanej sesji")).toBeInTheDocument();
+    expect(screen.getByText(/Przydaloby sie to zmienic/i)).toBeInTheDocument();
+    expect(screen.getByAltText("Placeholder banera sesji")).toHaveAttribute("src", "/assets/placeholder/Baner.png");
   });
 
   it("renders practical dashboard sections", async () => {
@@ -147,6 +148,25 @@ describe("DashboardPage workspace", () => {
     expect(screen.getByRole("columnheader", { name: "Nd" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("tab", { name: "B" }));
+    await waitFor(() => expect(campaignsApi.getSessionAttendance).toHaveBeenCalledWith("test-token", "2", 89));
+    expect(screen.getByRole("tab", { name: "B" })).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("starts availability panel from the campaign with the nearest planned session", async () => {
+    campaignsApi.listCampaigns.mockResolvedValue([
+      { id: 1, title: "A", owner: true, systemCode: "dnd5e" },
+      { id: 2, title: "B", owner: false, systemCode: "coc7e" },
+    ]);
+    campaignsApi.listCampaignSessions
+      .mockResolvedValueOnce([{ id: 88, title: "Pozniejsza A", status: "PLANNED", scheduledFor: "2030-06-20T18:00:00Z" }])
+      .mockResolvedValueOnce([{ id: 89, title: "Najblizsza B", status: "PLANNED", scheduledFor: "2030-06-19T18:00:00Z" }]);
+    campaignsApi.getSessionAttendance.mockResolvedValue({ responses: [] });
+    campaignsApi.listCampaignMembers.mockResolvedValue([]);
+    charactersApi.listCharacters.mockResolvedValue([]);
+
+    renderPage();
+
+    expect(await screen.findByRole("heading", { name: "Obecnosc graczy" })).toBeInTheDocument();
     await waitFor(() => expect(campaignsApi.getSessionAttendance).toHaveBeenCalledWith("test-token", "2", 89));
     expect(screen.getByRole("tab", { name: "B" })).toHaveAttribute("aria-selected", "true");
   });

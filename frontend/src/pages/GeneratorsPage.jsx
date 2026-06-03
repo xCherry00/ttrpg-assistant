@@ -377,6 +377,26 @@ const CANONICAL_GENERATOR_TYPES = [
   "name",
 ];
 
+const HIDDEN_GENERATOR_TYPES = new Set([
+  "story",
+  "story_hook_quick",
+  "five_room_dungeon",
+  "fabula",
+  "fabuła",
+  "clue",
+  "document_quick",
+  "event_quick",
+  "shop_quick",
+  "complication_quick",
+  "encounter_quick",
+  "wskazowka",
+  "wskazówka",
+  "wydarzenie",
+  "sklep",
+  "komplikacja",
+  "dokument",
+  "spotkanie",
+]);
 
 const TONE_OPTIONS_BY_CATEGORY = {
   FANTASY: [
@@ -503,22 +523,56 @@ const CLUE_TYPE_OPTIONS_BY_SETTING = {
   Realistyczny: ["Losowy", "Dokument", "Monitoring", "Zeznanie", "Rzecz osobista", "Niepasujący detal", "Paragon", "Telefon", "Klucz", "Notatka"],
 };
 
+const GENERATOR_FIELD_LIMITS = {
+  dungeon_advanced: {
+    roomCount: { min: 5, max: 11 },
+    floors: { min: 1, max: 5 },
+  },
+};
+
+function fieldLimits(generatorCode, fieldKey) {
+  return GENERATOR_FIELD_LIMITS[generatorCode]?.[fieldKey] || null;
+}
+
+function withFieldLimits(param, generatorCode) {
+  const limits = fieldLimits(generatorCode, param.key);
+  return limits ? { ...param, ...limits } : param;
+}
+
+function clampNumberValue(value, min, max) {
+  if (value === "" || value === null || value === undefined) return value;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return value;
+  return Math.max(min, Math.min(max, Math.trunc(parsed)));
+}
+
+function applyGeneratorFieldLimits(generatorCode, values = {}) {
+  const limits = GENERATOR_FIELD_LIMITS[generatorCode];
+  if (!limits) return values;
+  return Object.entries(limits).reduce((next, [key, range]) => {
+    if (Object.prototype.hasOwnProperty.call(next, key)) {
+      next[key] = clampNumberValue(next[key], range.min, range.max);
+    }
+    return next;
+  }, { ...values });
+}
+
 function scopedParams(params = [], values = {}, generatorCode = "") {
   const setting = values.setting || "Losowy";
   return visibleParams(params).map((param) => {
     if (generatorCode === "npc" && param.key === "role") {
-      return { ...param, options: NPC_ROLE_OPTIONS_BY_SETTING[setting] || ["Losowa"] };
+      return withFieldLimits({ ...param, options: NPC_ROLE_OPTIONS_BY_SETTING[setting] || ["Losowa"] }, generatorCode);
     }
     if (generatorCode === "location" && param.key === "locationType") {
-      return { ...param, options: LOCATION_TYPE_OPTIONS_BY_SETTING[setting] || ["Losowy"] };
+      return withFieldLimits({ ...param, options: LOCATION_TYPE_OPTIONS_BY_SETTING[setting] || ["Losowy"] }, generatorCode);
     }
     if (generatorCode === "faction" && param.key === "factionType") {
-      return { ...param, options: FACTION_TYPE_OPTIONS_BY_SETTING[setting] || ["Losowy"] };
+      return withFieldLimits({ ...param, options: FACTION_TYPE_OPTIONS_BY_SETTING[setting] || ["Losowy"] }, generatorCode);
     }
     if (generatorCode === "clue" && param.key === "clueType") {
-      return { ...param, options: CLUE_TYPE_OPTIONS_BY_SETTING[setting] || ["Losowy"] };
+      return withFieldLimits({ ...param, options: CLUE_TYPE_OPTIONS_BY_SETTING[setting] || ["Losowy"] }, generatorCode);
     }
-    return param;
+    return withFieldLimits(param, generatorCode);
   });
 }
 
@@ -559,6 +613,11 @@ function variantRank(item) {
 
 function decorateCatalog(items) {
   const decorated = items
+    .filter((item) => {
+      const probes = [item.type, item.generatorCode, item.typeCode, item.catalogTypeCode, item.categoryCode, item.label, item.name]
+        .map((value) => String(value || "").trim().toLowerCase());
+      return !probes.some((value) => HIDDEN_GENERATOR_TYPES.has(value));
+    })
     .map((item) => {
     const meta = CARD_META[item.type] || DEFAULT_META;
     const catalogTypeCode = GENERATOR_TYPE_OVERRIDES[item.type] || item.typeCode || item.type;
@@ -753,6 +812,8 @@ function GeneratorIcon({ name }) {
 
 function Field({ param, value, onChange }) {
   const inputType = normalizedInputType(param);
+  const min = param.min ?? undefined;
+  const max = param.max ?? undefined;
 
   if (inputType === "select") {
     return (
@@ -782,10 +843,15 @@ function Field({ param, value, onChange }) {
       <input
         className="generatorInput"
         type={inputType || "text"}
-        min={param.min ?? undefined}
-        max={param.max ?? undefined}
+        min={min}
+        max={max}
         value={value ?? ""}
-        onChange={(event) => onChange(param.key, event.target.value)}
+        onChange={(event) => {
+          const nextValue = inputType === "number" && min !== undefined && max !== undefined
+            ? clampNumberValue(event.target.value, min, max)
+            : event.target.value;
+          onChange(param.key, nextValue);
+        }}
       />
     </div>
   );
@@ -862,7 +928,7 @@ function dungeonTileTitle(tile) {
 function renderDungeonMap(section) {
   const rows = dungeonMapRows(section.content);
   if (!rows.length) return null;
-  const legend = Array.isArray(section.items) ? section.items : [];
+  const legend = Array.isArray(section.items) ? section.items.filter((item) => isMeaningfulResultValue(item.value)) : [];
   return (
     <div className="dungeonMapBlock">
       <div className="dungeonMapViewport" style={{ "--dungeon-cols": rows[0]?.length || 1 }}>
@@ -913,10 +979,11 @@ function dungeonFloorsFromSections(sections) {
 }
 
 function renderSectionItems(section) {
-  if (!section || !Array.isArray(section.items) || !section.items.length) return null;
+  const items = Array.isArray(section?.items) ? section.items.filter((item) => isMeaningfulResultValue(item.value)) : [];
+  if (!items.length) return null;
   return (
     <div className="generatorWindowStats">
-      {section.items.map((item) => (
+      {items.map((item) => (
         <span key={item.label}>
           <small>{item.label}</small>
           <strong>{renderValue(item.value)}</strong>
@@ -927,11 +994,12 @@ function renderSectionItems(section) {
 }
 
 function renderGenericSection(section) {
-  const hasItems = Array.isArray(section.items) && section.items.length > 0;
+  const items = Array.isArray(section.items) ? section.items.filter((item) => isMeaningfulResultValue(item.value)) : [];
+  const hasItems = items.length > 0;
   if (section.type === "table" && hasItems) {
     return (
       <div className="generatorSectionTable">
-        {section.items.map((item) => (
+        {items.map((item) => (
           <div key={item.label} className="generatorSectionTableRow">
             <span>{item.label}</span>
             <strong>{renderValue(item.value)}</strong>
@@ -943,7 +1011,7 @@ function renderGenericSection(section) {
   if (section.type === "list" && hasItems) {
     return (
       <ul className="generatorSectionList">
-        {section.items.map((item) => (
+        {items.map((item) => (
           <li key={item.label}>
             <strong>{item.label}</strong>
             {item.value !== undefined && item.value !== null ? <span>{renderValue(item.value)}</span> : null}
@@ -954,7 +1022,7 @@ function renderGenericSection(section) {
   }
   return (
     <>
-      {section.content && <p>{section.content}</p>}
+      {isMeaningfulResultValue(section.content) && <p>{section.content}</p>}
       {hasItems && renderSectionItems(section)}
     </>
   );
@@ -964,6 +1032,7 @@ function DungeonFloorTabs({ floors, activeIndex, onChange }) {
   if (!floors.length) return null;
   const safeIndex = Math.min(activeIndex, floors.length - 1);
   const activeFloor = floors[safeIndex] || floors[0];
+  const activeRoomItems = renderSectionItems(activeFloor.roomSection);
   return (
     <article className="is-dungeon-floors">
       <div className="dungeonFloorTabs">
@@ -981,10 +1050,10 @@ function DungeonFloorTabs({ floors, activeIndex, onChange }) {
       <div className="dungeonFloorPanel">
         <h3>{activeFloor.mapSection.title}</h3>
         {renderDungeonMap(activeFloor.mapSection)}
-        {activeFloor.roomSection && (
+        {activeRoomItems && (
           <div className="dungeonFloorRooms">
             <h3>{activeFloor.roomSection.title}</h3>
-            {renderSectionItems(activeFloor.roomSection)}
+            {activeRoomItems}
           </div>
         )}
       </div>
@@ -1048,6 +1117,20 @@ function safeResultValue(value, fallback = "Brak danych") {
   return text || fallback;
 }
 
+function isMeaningfulResultValue(value) {
+  if (value === undefined || value === null) return false;
+  if (Array.isArray(value)) return value.some((item) => isMeaningfulResultValue(item));
+  if (typeof value === "object") {
+    if ("value" in value) return isMeaningfulResultValue(value.value);
+    if ("label" in value) return isMeaningfulResultValue(value.label);
+    return Object.values(value).some((entry) => isMeaningfulResultValue(entry));
+  }
+  const text = String(value).trim();
+  if (!text) return false;
+  const normalized = normalizeText(text).replace(/\s+/g, " ").trim();
+  return !["brak danych", "brak danych.", "-", "—", "n/a", "null", "undefined"].includes(normalized);
+}
+
 function findSectionLoose(sections, labels) {
   const normalizedLabels = labels.map(normalizeText);
   return sections.find((section) => {
@@ -1083,7 +1166,10 @@ function itemValueLoose(sections, labels) {
 }
 
 function resultValueFor(sections, labels) {
-  return itemValueLoose(sections, labels) || sectionValueLoose(sections, labels);
+  const itemValue = itemValueLoose(sections, labels);
+  if (isMeaningfulResultValue(itemValue)) return itemValue;
+  const sectionValue = sectionValueLoose(sections, labels);
+  return isMeaningfulResultValue(sectionValue) ? sectionValue : "";
 }
 
 function resultLines(value) {
@@ -1255,6 +1341,7 @@ function generatorResultKind(code) {
 }
 
 function GeneratorResultField({ label, value }) {
+  if (!isMeaningfulResultValue(value)) return null;
   const lines = resultLines(value);
   return (
     <article className="generatorResultField">
@@ -1302,6 +1389,15 @@ function TypedGeneratorResult({ result, generatorCode, activeValues, icon, displ
 
   const fields = GENERATOR_RESULT_FIELDS[kind];
   const mapSection = sections.find((section) => section.type === "dungeon_map" || section.type === "map");
+  const fieldEntries = fields
+    ? fields
+      .map(([label, labels]) => ({ label, value: resultValueFor(sections, labels) }))
+      .filter((entry) => isMeaningfulResultValue(entry.value))
+    : [];
+  const visibleSections = sections.filter((section) => (
+    isMeaningfulResultValue(section.content)
+    || (Array.isArray(section.items) && section.items.some((item) => isMeaningfulResultValue(item.value)))
+  ));
 
   return (
     <section className={`generatorTypedResult generatorTypedResult--${kind}`}>
@@ -1327,13 +1423,13 @@ function TypedGeneratorResult({ result, generatorCode, activeValues, icon, displ
 
       {fields ? (
         <div className="generatorTypedFields">
-          {fields.map(([label, labels]) => (
-            <GeneratorResultField key={label} label={label} value={resultValueFor(sections, labels)} />
+          {fieldEntries.map(({ label, value }) => (
+            <GeneratorResultField key={label} label={label} value={value} />
           ))}
         </div>
       ) : (
         <div className="generatorWindowSections generatorWindowSections--minimal">
-          {sections.length ? sections.map((section, index) => (
+          {visibleSections.length ? visibleSections.map((section, index) => (
             <article key={`${section.title}-${index}`}>
               <h3>{section.title || "Sekcja"}</h3>
               {renderGenericSection(section)}
@@ -1609,7 +1705,12 @@ export default function GeneratorsPage() {
     setResult(null);
 
     try {
-      const values = forms[key] || buildInitialParams(target);
+      const rawValues = forms[key] || buildInitialParams(target);
+      const generatorCode = target.kind === "variant" ? target.generatorCode : target.type;
+      const values = applyGeneratorFieldLimits(generatorCode, rawValues);
+      if (JSON.stringify(values) !== JSON.stringify(rawValues)) {
+        setForms((previous) => ({ ...previous, [key]: values }));
+      }
       const generated = target.kind === "variant"
         ? await generateVariantContent(token, target.generatorCode, target.variantCode, values)
         : await generateContent(token, target.system, target.type, values);
@@ -1628,7 +1729,7 @@ export default function GeneratorsPage() {
   if (generatorCode) {
     const sections = resultSections(result);
     const dungeonFloors = dungeonFloorsFromSections(sections);
-    const showDungeonFloorTabs = activeGeneratorCode() === "dungeon_advanced" && dungeonFloors.length > 1;
+    const showDungeonFloorTabs = activeGeneratorCode() === "dungeon_advanced" && dungeonFloors.length > 0;
     const displayedSections = showDungeonFloorTabs
       ? sections.filter((section) => section.type !== "dungeon_map" && section.type !== "dungeon_rooms")
       : sections;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../../auth/AuthContext";
 import { getCocOccupations } from "../../../api/characters";
-import ImageUpload from "../../common/ImageUpload";
+import ImageLibraryPicker from "../../common/ImageLibraryPicker";
 
 export default function CocCharacterCreator({ onCreate, creating, onBack }) {
   const { token } = useAuth();
@@ -53,13 +53,14 @@ export default function CocCharacterCreator({ onCreate, creating, onBack }) {
             <label className="charactersField"><span>Age</span><input type="number" min="15" max="95" value={form.age} onChange={(e) => setForm((p) => ({ ...p, age: e.target.value }))} /></label>
             <label className="charactersField"><span>Sex</span><input value={form.sex} onChange={(e) => setForm((p) => ({ ...p, sex: e.target.value }))} /></label>
             <label className="charactersField"><span>Occupation</span><select value={form.occupationIndex} onChange={(e) => setForm((p) => ({ ...p, occupationIndex: e.target.value }))}>{occupations.map((item) => <option key={item.index} value={item.index}>{item.name}</option>)}</select></label>
-            <label className="charactersField"><span>Portrait URL</span><input value={form.portraitUrl} onChange={(e) => setForm((p) => ({ ...p, portraitUrl: e.target.value }))} placeholder="Optional" /></label>
-            <ImageUpload
-              label="Wgraj portret"
+            <ImageLibraryPicker
+              type="characterAvatars"
+              label="Avatar postaci"
               value={form.portraitUrl}
-              onChange={(url) => setForm((p) => ({ ...p, portraitUrl: url }))}
+              onChange={(src) => setForm((p) => ({ ...p, portraitUrl: src }))}
               onRemove={() => setForm((p) => ({ ...p, portraitUrl: "" }))}
               previewAlt="Portret badacza"
+              helpText="Wybierz gotowy avatar postaci z biblioteki."
             />
           </div>
           <div className="charactersActionsFooter">

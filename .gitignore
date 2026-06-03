@@ -11,6 +11,7 @@ backups/
 
 # Local project notes
 docs/
+AGENTS.md
 
 # Local test payloads with credentials
 login.json

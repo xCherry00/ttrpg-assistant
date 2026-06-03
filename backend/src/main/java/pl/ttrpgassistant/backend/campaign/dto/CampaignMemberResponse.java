@@ -8,6 +8,7 @@ public record CampaignMemberResponse(
         String username,
         Integer tagCode,
         String handle,
+        String avatarUrl,
         String role,
         boolean owner,
         boolean mg,

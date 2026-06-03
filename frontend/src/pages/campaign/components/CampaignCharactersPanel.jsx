@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { imagePlaceholder } from "../../../data/imageLibrary";
 
 export default function CampaignCharactersPanel({
   campaignCharacters,
@@ -65,7 +66,7 @@ export default function CampaignCharactersPanel({
                 <span>Klasa: {character.className || "-"}</span>
                 <span>Poziom: {character.level ?? "-"}</span>
               </div>
-              {character.portraitUrl ? <img src={character.portraitUrl} alt={`Portret postaci ${character.characterName || ""}`} style={{ width: 64, height: 64, borderRadius: 12, objectFit: "cover" }} /> : null}
+              <img src={character.portraitUrl || imagePlaceholder("characterAvatars")} alt={`Portret postaci ${character.characterName || ""}`} style={{ width: 64, height: 64, borderRadius: 12, objectFit: "cover" }} />
               <div className="campaignMaterialMeta">
                 <span>Gracz: {membersById.get(Number(character.userId))?.displayName || membersById.get(Number(character.userId))?.username || "-"}</span>
                 <span>Przypisano: {character.assignedAt ? new Date(character.assignedAt).toLocaleString("pl-PL") : "-"}</span>

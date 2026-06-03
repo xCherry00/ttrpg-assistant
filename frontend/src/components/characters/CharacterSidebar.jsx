@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { imagePlaceholder } from "../../data/imageLibrary";
 
 function searchableText(item) {
   return [item?.name, item?.systemCode, item?.raceName, item?.className].filter(Boolean).join(" ").toLowerCase();
@@ -53,7 +54,7 @@ export default function CharacterSidebar({
               onClick={() => onSelect(item.id)}
             >
               <div className="charactersCardPortrait">
-                {item.portraitUrl ? <img src={item.portraitUrl} alt={`Portret ${item.name || "postaci"}`} /> : <span>{(item.name || "?").trim().charAt(0).toUpperCase() || "?"}</span>}
+                <img src={item.portraitUrl || imagePlaceholder("characterAvatars")} alt={`Portret ${item.name || "postaci"}`} />
               </div>
               <strong>{item.name || "Bez nazwy"}</strong>
               <div>{item.systemCode?.toUpperCase() || "SYSTEM"}</div>

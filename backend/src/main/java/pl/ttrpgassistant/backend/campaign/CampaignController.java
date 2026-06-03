@@ -145,9 +145,9 @@ public class CampaignController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(NO_CONTENT)
-    public void softDelete(Authentication auth, @PathVariable Long id) {
+    public void delete(Authentication auth, @PathVariable Long id) {
         Long userId = (Long) auth.getPrincipal();
-        campaignWorkspaceService.softDeleteCampaign(userId, id);
+        campaignWorkspaceService.deleteCampaign(userId, id);
     }
 
     @PostMapping("/join")

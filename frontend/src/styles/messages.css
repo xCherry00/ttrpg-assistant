@@ -503,6 +503,48 @@
   box-shadow: 0 8px 18px rgba(239, 68, 68, 0.26);
 }
 
+.messagesSearchIcon svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.messagesConversationItem__avatar,
+.messagesHeaderAvatar,
+.messagesDetails__avatar,
+.messageAvatar {
+  overflow: hidden;
+}
+
+.messagesConversationItem__avatar img,
+.messagesHeaderAvatar img,
+.messagesDetails__avatar img,
+.messageAvatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
+.messagesConversationItem__avatar.has-image,
+.messagesHeaderAvatar.has-image,
+.messagesDetails__avatar.has-image,
+.messageAvatar.has-image {
+  background: #e7f3ee;
+  color: transparent;
+}
+
+.messagesDetailsFiles {
+  max-height: 230px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
 .messageLauncher__panel {
   position: absolute;
   right: 72px;
@@ -1541,6 +1583,46 @@
 
 .messagesDetailsFiles span {
   font-size: 12px;
+}
+
+.messagesPage .messagesSidebar:hover,
+.messagesPage .messagesMain:hover,
+.messagesPage .messagesDetails:hover,
+.messagesPage .messagesConversationItem:hover,
+.messagesPage .messagesFilter:hover,
+.messagesPage .messagesDiscoverItem:hover,
+.messagesPage .messagesDetailsFiles button:hover,
+.messagesPage .messageAttachment:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.messagesPage .messagesConversationItem:hover {
+  background: transparent !important;
+  border-left-color: transparent !important;
+}
+
+.messagesPage .messagesConversationItem.is-active:hover {
+  background: #f6fbf8 !important;
+  border-left-color: var(--msg-accent) !important;
+}
+
+.messagesPage .messagesFilter:hover:not(.is-active) {
+  border-color: var(--msg-border) !important;
+  background: #ffffff !important;
+  color: var(--msg-ink) !important;
+}
+
+.messagesPage .messagesDetailsFiles {
+  max-height: 228px;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-gutter: stable;
+}
+
+.messagesPage .messagesDetailsFiles button {
+  min-height: 64px;
+  flex: 0 0 auto;
 }
 
 @media (max-width: 1180px) {

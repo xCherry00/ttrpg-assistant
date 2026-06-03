@@ -47,6 +47,9 @@ public class CampaignEntity {
     @Column(name = "cover_image_url")
     private String coverImageUrl;
 
+    @Column(name = "banner_image_url")
+    private String bannerImageUrl;
+
     @Column(name = "status", nullable = false, length = 20)
     @Builder.Default
     private String status = "active";

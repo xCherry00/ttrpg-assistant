@@ -543,6 +543,8 @@ public class MessageService {
                 user.getUsername(),
                 user.getTagCode(),
                 displayNameFor(user),
+                user.getAvatarUrl(),
+                user.getProfileBannerUrl(),
                 formatActivityLabel(user)
         );
     }

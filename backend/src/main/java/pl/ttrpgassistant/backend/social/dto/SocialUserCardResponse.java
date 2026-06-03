@@ -6,6 +6,8 @@ public record SocialUserCardResponse(
         String username,
         Integer tagCode,
         String displayName,
+        String avatarUrl,
+        String profileBannerUrl,
         String bio,
         String favoriteSystem,
         String role,

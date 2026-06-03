@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { logout as logoutApi } from "../api/auth";
 import { getMyProfile } from "../api/settings";
+import { imagePlaceholder } from "../data/imageLibrary";
 
 const INITIATIVE_CACHE_KEY = "ttrpg_initiative_rows_v1";
 const SHELL_PANEL_EVENT = "ttrpg-shell-panel-open";
@@ -59,6 +60,7 @@ export default function AccountMenu() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [avatarSrc, setAvatarSrc] = useState("");
+  const [bannerSrc, setBannerSrc] = useState("");
   const [loadingUser, setLoadingUser] = useState(true);
   const [userError, setUserError] = useState("");
 
@@ -68,10 +70,12 @@ export default function AccountMenu() {
     try {
       const me = await getMyProfile(token);
       setUser(me);
-      setAvatarSrc(localStorage.getItem(getAvatarStorageKey(me?.email)) || "");
+      setAvatarSrc(me?.avatarUrl || localStorage.getItem(getAvatarStorageKey(me?.email)) || "");
+      setBannerSrc(me?.profileBannerUrl || imagePlaceholder("campaignBanners"));
     } catch {
       setUser(null);
       setAvatarSrc("");
+      setBannerSrc(imagePlaceholder("campaignBanners"));
       setUserError("Nie udalo sie pobrac danych konta.");
     } finally {
       setLoadingUser(false);
@@ -172,7 +176,7 @@ export default function AccountMenu() {
 
       {menuOpen && (
         <div className="topNav__menu" role="menu">
-          <div className="topNav__menuHeader">
+          <div className="topNav__menuHeader" style={bannerSrc ? { "--account-banner": `url(${bannerSrc})` } : undefined}>
             {avatarSrc ? (
               <span className="topNav__menuAvatarWrap"><img src={avatarSrc} alt="Avatar użytkownika" className="topNav__menuAvatarImg" onError={() => setAvatarSrc("")} /><i aria-hidden="true" /></span>
             ) : (

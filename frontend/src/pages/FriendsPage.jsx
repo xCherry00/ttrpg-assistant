@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import { imagePlaceholder } from "../data/imageLibrary";
 import {
   acceptFriendRequest,
   blockUser,
@@ -46,6 +47,14 @@ function userInitial(user) {
   return userName(user).slice(0, 1).toUpperCase() || "U";
 }
 
+function userBanner(user) {
+  return user?.bannerUrl || user?.profileBannerUrl || user?.bannerImageUrl || user?.coverImageUrl || imagePlaceholder("campaignBanners");
+}
+
+function userAvatar(user) {
+  return user?.avatarUrl || user?.profileAvatarUrl || user?.avatarImageUrl || user?.portraitUrl || imagePlaceholder("avatars");
+}
+
 function profilePath(user) {
   return user?.handle ? `/users/${user.handle}` : "/friends";
 }
@@ -82,9 +91,10 @@ function Icon({ name }) {
 }
 
 function Avatar({ user, size = "md" }) {
+  const avatarSrc = userAvatar(user);
   return (
     <span className={`friendsAvatar friendsAvatar--${size}`}>
-      {user?.avatarUrl ? <img src={user.avatarUrl} alt={`Avatar ${userName(user)}`} /> : userInitial(user)}
+      {avatarSrc ? <img src={avatarSrc} alt={`Avatar ${userName(user)}`} /> : userInitial(user)}
       <i className={statusText(user) === "Online" ? "is-online" : ""} aria-hidden="true" />
     </span>
   );
@@ -181,6 +191,9 @@ function DetailsPanel({ user, busyKey, runAction, token }) {
   return (
     <aside className="friendsDetailsPanel">
       <div className="friendsDetailsHero">
+        <div className="friendsDetailsHero__banner" aria-hidden="true">
+          <img src={userBanner(user)} alt="" />
+        </div>
         <Avatar user={user} size="lg" />
         <h2>{userName(user)}</h2>
         <p>{userTag(user)}</p>
@@ -203,26 +216,6 @@ function DetailsPanel({ user, busyKey, runAction, token }) {
         </dl>
       </section>
 
-      <section className="friendsInfoCard">
-        <h3>Wspólne kampanie</h3>
-        {sharedCampaigns.length > 0 ? (
-          <div className="friendsCampaignList">
-            {sharedCampaigns.map((campaign) => (
-              <article key={campaign.id || campaign.name}>
-                <Icon name="cube" />
-                <span><strong>{safeText(campaign.name || campaign.title, "Kampania")}</strong><small>{safeText(campaign.role, "Gracz")}</small></span>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <div className="friendsSoftEmpty"><Icon name="cube" /><span><strong>Brak wspólnych kampanii</strong><small>Jeszcze nie macie wspólnych kampanii.</small></span></div>
-        )}
-      </section>
-
-      <section className="friendsInfoCard">
-        <h3>Notatka</h3>
-        <div className="friendsSoftEmpty"><Icon name="note" /><span><strong>{user.note ? "Notatka" : "Brak notatki"}</strong><small>{user.note || "Dodaj notatkę o tym znajomym, aby łatwiej o nim pamiętać."}</small></span></div>
-      </section>
 
       <div className="friendsDangerRow">
         <button type="button" className="friendsMiniBtn" disabled={busyKey === `remove-${user.id}`} onClick={() => runAction(`remove-${user.id}`, () => removeFriend(token, user.id))}>Usuń</button>

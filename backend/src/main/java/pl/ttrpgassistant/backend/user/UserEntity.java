@@ -44,6 +44,14 @@ public class UserEntity {
     @Builder.Default
     private String chatNickColor = "";
 
+    @Column(name = "avatar_url")
+    @Builder.Default
+    private String avatarUrl = "";
+
+    @Column(name = "profile_banner_url")
+    @Builder.Default
+    private String profileBannerUrl = "";
+
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 

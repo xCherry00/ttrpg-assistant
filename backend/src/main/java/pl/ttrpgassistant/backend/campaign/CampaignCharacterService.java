@@ -25,6 +25,9 @@ public class CampaignCharacterService {
     @Transactional
     public CampaignCharacterResponse assignCharacter(Long userId, Long campaignId, AssignCharacterToCampaignRequest request) {
         CampaignEntity campaign = requireMemberAccess(userId, campaignId);
+        if (campaign.getOwnerUserId().equals(userId)) {
+            throw new IllegalArgumentException("Game master cannot assign their own character to the campaign.");
+        }
 
         PlayerCharacterEntity character = playerCharacterRepository.findByIdAndOwnerUserId(request.characterId(), userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Character not found"));
@@ -56,8 +59,11 @@ public class CampaignCharacterService {
 
     @Transactional(readOnly = true)
     public List<CampaignCharacterResponse> listCampaignCharacters(Long userId, Long campaignId) {
-        requireMemberAccess(userId, campaignId);
-        return campaignCharacterRepository.findByIdCampaignIdAndActiveTrueOrderByAssignedAtAsc(campaignId).stream()
+        CampaignEntity campaign = requireMemberAccess(userId, campaignId);
+        List<CampaignCharacterEntity> assignments =
+                campaignCharacterRepository.findByIdCampaignIdAndUserIdNotOrderByAssignedAtAsc(campaignId, campaign.getOwnerUserId());
+
+        return assignments.stream()
                 .map(assignment -> {
                     PlayerCharacterEntity character = assignment.getCharacter();
                     return toResponse(assignment, character);

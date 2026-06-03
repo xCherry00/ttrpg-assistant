@@ -3,6 +3,1811 @@
   gap: 18px;
 }
 
+.appContentInner:has(.campaignDetailsAdminPage) {
+  max-width: none !important;
+}
+
+.appContentInner:has(.campaignDetailsAdminPage) .appPageHeader {
+  margin-bottom: 18px !important;
+}
+
+.appPageHeaderBack {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #101a17;
+  text-decoration: none;
+  font-weight: 900;
+}
+
+.appPageHeaderBack:hover {
+  color: #0f7356;
+}
+
+.appContent:has(.campaignDetailsAdminPage) {
+  background:
+    linear-gradient(90deg, rgba(16, 28, 24, 0.052) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(16, 28, 24, 0.052) 1px, transparent 1px),
+    radial-gradient(circle at 12% 0%, rgba(23, 138, 99, 0.08), transparent 30%),
+    #f8fcfa !important;
+  background-size: 28px 28px, 28px 28px, auto, auto !important;
+}
+
+.campaignDetailsAdminPage {
+  --cd-ink: #101a17;
+  --cd-muted: #62716b;
+  --cd-soft: #7b8b84;
+  --cd-line: #dfe9e4;
+  --cd-line-strong: #c8dbd2;
+  --cd-surface: #ffffff;
+  --cd-panel: #f8fbf9;
+  --cd-primary: #178a63;
+  --cd-primary-dark: #0f7356;
+  --cd-primary-soft: #e6f5ef;
+  --cd-red: #dc2626;
+  --cd-orange: #f59e0b;
+  --cd-blue: #2563eb;
+  --cd-violet: #7c3aed;
+  --cd-shadow: 0 18px 46px rgba(20, 33, 28, 0.08);
+  width: min(100%, 1480px);
+  margin: 0 auto;
+  display: grid;
+  gap: 18px;
+  color: var(--cd-ink);
+}
+
+.campaignDetailsAdminPage svg {
+  width: 18px;
+  height: 18px;
+}
+
+.campaignDetailsAdminPage button,
+.campaignDetailsAdminPage input,
+.campaignDetailsAdminPage textarea,
+.campaignDetailsAdminPage select {
+  font: inherit;
+}
+
+.cdAdminState,
+.cdAdminNotice,
+.cdAdminError {
+  border: 1px solid var(--cd-line);
+  border-radius: 16px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.9);
+  box-shadow: var(--cd-shadow);
+}
+
+.cdAdminNotice {
+  border-color: rgba(23, 138, 99, 0.25);
+  color: #0f7356;
+  background: #edf9f4;
+}
+
+.cdAdminError {
+  border-color: rgba(220, 38, 38, 0.25);
+  color: #a11d1d;
+  background: #fff1f1;
+}
+
+.cdAdminHero {
+  display: grid;
+  gap: 18px;
+}
+
+.cdAdminBack {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #0f7356;
+  text-decoration: none;
+  font-weight: 900;
+}
+
+.cdAdminHero__main {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 22px;
+  border: 1px solid var(--cd-line);
+  border-radius: 20px;
+  padding: 18px;
+  background: rgba(255,255,255,0.88);
+  box-shadow: var(--cd-shadow);
+  background-size: cover;
+  background-position: center;
+}
+
+.cdAdminHero__main.has-banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 44%, rgba(255,255,255,0.72) 100%),
+    linear-gradient(180deg, rgba(255,255,255,0.42), rgba(255,255,255,0.72));
+  backdrop-filter: blur(1px);
+}
+
+.cdAdminHero__main > * {
+  position: relative;
+  z-index: 1;
+}
+
+.cdAdminCover {
+  width: 132px;
+  height: 132px;
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 62% 18%, rgba(255,255,255,0.62), transparent 16%),
+    linear-gradient(145deg, #6f8f86, #27433d 52%, #101c18);
+  background-size: cover;
+  background-position: center;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.38), 0 18px 34px rgba(20,33,28,0.14);
+}
+
+.cdAdminHero__copy {
+  min-width: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.cdAdminTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cdAdminTitleRow h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3.4vw, 2.9rem);
+  line-height: 1.04;
+  letter-spacing: -0.055em;
+}
+
+.cdAdminHero__copy p,
+.cdAdminLead {
+  margin: 0;
+  color: var(--cd-muted);
+  line-height: 1.6;
+}
+
+.cdAdminMetaLine {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  color: #42524c;
+  font-weight: 750;
+}
+
+.cdAdminMetaLine > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cdAdminBadge,
+.cdCountPill,
+.cdAdminSoftBadge,
+.cdRoleBadge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(23, 138, 99, 0.22);
+  border-radius: 9px;
+  padding: 3px 10px;
+  color: #0f7356;
+  background: #e8f7f0;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.cdAdminStatus i,
+.cdOnline i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--cd-primary);
+}
+
+.cdAdminInviteMini button,
+.cdAdminIconBtn {
+  width: 36px;
+  height: 36px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--cd-line);
+  border-radius: 10px;
+  color: #34423d;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.cdAdminHeroActions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.cdAdminPrimaryBtn,
+.cdAdminSecondaryBtn,
+.cdAdminLiveBtn,
+.cdAdminOutlineFull {
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 12px;
+  padding: 0 20px;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.cdAdminPrimaryBtn {
+  border: 1px solid rgba(23, 138, 99, 0.35);
+  color: #ffffff;
+  background: linear-gradient(180deg, #1c926d, #0f7356);
+  box-shadow: 0 16px 34px rgba(19, 122, 91, 0.2);
+}
+
+.cdAdminSecondaryBtn,
+.cdAdminLiveBtn,
+.cdAdminOutlineFull {
+  border: 1px solid var(--cd-line);
+  color: var(--cd-ink);
+  background: #ffffff;
+  box-shadow: 0 10px 22px rgba(20,33,28,0.05);
+}
+
+.cdAdminLiveBtn.is-active {
+  border-color: rgba(23, 138, 99, 0.42);
+  color: #ffffff;
+  background: linear-gradient(180deg, #22a074, #0f7356);
+  box-shadow: 0 16px 34px rgba(19, 122, 91, 0.2);
+}
+
+.cdAdminLiveBtn:disabled {
+  opacity: 0.64;
+  cursor: not-allowed;
+}
+
+.cdAdminPrimaryBtn:hover:not(:disabled),
+.cdAdminSecondaryBtn:hover:not(:disabled),
+.cdAdminLiveBtn:hover:not(:disabled),
+.cdAdminOutlineFull:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: var(--cd-line-strong);
+}
+
+.cdAdminFullBtn,
+.cdAdminOutlineFull {
+  width: 100%;
+}
+
+.cdAdminTabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  min-height: 58px !important;
+  align-items: stretch;
+  border: 1px solid var(--cd-line);
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.9);
+  box-shadow: var(--cd-shadow);
+  position: relative;
+  z-index: 3;
+}
+
+.cdAdminTab {
+  position: relative;
+  min-width: 0;
+  min-height: 58px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 0;
+  color: #53615c;
+  background: transparent;
+  font-weight: 900;
+  cursor: pointer;
+  transition: color 0.18s ease, background 0.18s ease;
+}
+
+.cdAdminTab:hover {
+  color: #0f7356;
+  background: rgba(23, 138, 99, 0.055);
+}
+
+.cdAdminTab.is-active {
+  color: #0f7356;
+}
+
+.cdAdminTab.is-active::after {
+  content: "";
+  position: absolute;
+  left: 14%;
+  right: 14%;
+  bottom: 0;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--cd-primary);
+}
+
+.cdAdminCard {
+  border: 1px solid var(--cd-line);
+  border-radius: 18px;
+  padding: 22px;
+  background: rgba(255,255,255,0.92);
+  box-shadow: var(--cd-shadow);
+}
+
+.cdAdminCard h2,
+.cdAdminCard h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+}
+
+.cdAdminCard h2 {
+  font-size: 1.25rem;
+}
+
+.cdAdminCard h3 {
+  font-size: 0.95rem;
+}
+
+.cdAdminSessionGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 0.96fr;
+  gap: 18px;
+  align-items: start;
+  position: relative;
+  z-index: 1;
+}
+
+.cdSessionNext__body {
+  display: grid;
+  grid-template-columns: 185px minmax(0, 1fr);
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.cdSessionArt {
+  min-height: 176px;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 62% 15%, rgba(255,255,255,0.6), transparent 16%),
+    linear-gradient(145deg, #8aa59b, #324d45 52%, #12201b);
+  background-size: cover;
+  background-position: center;
+}
+
+.cdSessionNext__body--empty .cdSessionArt {
+  position: relative;
+  overflow: hidden;
+  filter: saturate(0.82) contrast(0.96);
+}
+
+.cdSessionNext__body--empty .cdSessionArt::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(16, 28, 24, 0.18));
+}
+
+.cdSessionNext__body--empty .cdSessionInfo p {
+  color: #52675f;
+}
+
+.cdSessionInfo,
+.cdAdminForm,
+.cdAdminStack,
+.cdAdminSideStack,
+.cdNoteRows,
+.cdSessionList,
+.cdCharacterRows {
+  display: grid;
+  gap: 14px;
+}
+
+.cdSessionInfo h3,
+.cdSessionInfo p {
+  margin: 0;
+}
+
+.cdSessionFacts,
+.cdAdminChips,
+.cdAvailabilityLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: var(--cd-muted);
+}
+
+.cdSessionFacts span,
+.cdAdminChips span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--cd-line);
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: var(--cd-panel);
+  font-weight: 750;
+}
+
+.cdAvatarStack {
+  display: flex;
+}
+
+.cdAvatarStack span,
+.cdAvatarStack em,
+.cdPlayerIdentity > span {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  margin-right: -8px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  color: #0f7356;
+  background: #dff4ec;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.cdAdminForm label {
+  display: grid;
+  gap: 8px;
+  color: var(--cd-ink);
+  font-weight: 850;
+}
+
+.cdAdminForm input,
+.cdAdminForm textarea,
+.cdAdminForm select,
+.cdAssignCharacter select,
+.cdNotesHead input,
+.cdNotesHead select {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid var(--cd-line);
+  border-radius: 11px;
+  padding: 0 14px;
+  color: var(--cd-ink);
+  background: #ffffff;
+  outline: 0;
+}
+
+.cdAdminForm textarea {
+  padding-block: 12px;
+  resize: vertical;
+}
+
+.cdAdminForm input:focus,
+.cdAdminForm textarea:focus,
+.cdAdminForm select:focus,
+.cdAssignCharacter select:focus,
+.cdNotesHead input:focus {
+  border-color: var(--cd-primary);
+  box-shadow: 0 0 0 4px rgba(23,138,99,0.11);
+}
+
+.cdAdminTwoCols,
+.cdAdminSplit,
+.cdAdminNotesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.cdAdminSplit {
+  grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.75fr);
+}
+
+.cdAdminSplit--wide {
+  grid-template-columns: minmax(0, 1.75fr) minmax(320px, 0.7fr);
+}
+
+.cdAdminRowBetween,
+.cdNotesHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.cdAdminSegmented {
+  display: flex;
+  gap: 6px;
+  margin: 18px 0;
+}
+
+.cdAdminSegmented button {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 9px 14px;
+  background: var(--cd-panel);
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.cdAdminSegmented button.is-active {
+  color: #0f7356;
+  background: var(--cd-primary-soft);
+  border-color: rgba(23,138,99,0.2);
+}
+
+.cdSessionListItem,
+.cdCharacterRow,
+.cdPlayerRow,
+.cdNoteRow {
+  display: grid;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid var(--cd-line);
+  border-radius: 13px;
+  padding: 14px;
+  background: rgba(255,255,255,0.82);
+}
+
+.cdSessionListItem {
+  grid-template-columns: 10px minmax(0, 1fr) auto auto 32px;
+}
+
+.cdSessionListItem i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--cd-violet);
+}
+
+.cdSessionListItem span,
+.cdSessionListItem em,
+.cdCharacterRow span,
+.cdCharacterRow em,
+.cdPlayerRow span,
+.cdPlayerRow small,
+.cdNoteRow p,
+.cdNoteRow em,
+.cdNoteRow time {
+  color: var(--cd-muted);
+  font-style: normal;
+}
+
+.cdAdminSwitch {
+  display: flex !important;
+  grid-template-columns: none !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: var(--cd-panel);
+}
+
+.cdAdminSwitch input {
+  width: 44px;
+  min-width: 44px;
+  max-width: 44px;
+  height: 24px;
+  min-height: 24px;
+  padding: 0;
+  border: 1px solid var(--cd-line-strong);
+  border-radius: 999px;
+  appearance: none;
+  background: #dfe9e4;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.cdAdminSwitch input::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(20, 33, 28, 0.18);
+  transition: transform 0.18s ease;
+}
+
+.cdAdminSwitch input:checked {
+  border-color: rgba(23,138,99,0.36);
+  background: var(--cd-primary);
+}
+
+.cdAdminSwitch input:checked::before {
+  transform: translateX(20px);
+}
+
+.cdEditOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background: transparent;
+  backdrop-filter: blur(8px);
+}
+
+.cdEditModal {
+  position: relative;
+  width: min(94vw, 1120px);
+  max-height: calc(100vh - 44px);
+  overflow: auto;
+  border: 1px solid rgba(214, 227, 221, 0.95);
+  border-radius: 22px;
+  padding: 24px 28px 22px;
+  color: var(--cd-ink);
+  background:
+    linear-gradient(90deg, rgba(16, 28, 24, 0.04) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(16, 28, 24, 0.04) 1px, transparent 1px),
+    radial-gradient(circle at 20% 0%, rgba(23, 138, 99, 0.08), transparent 32%),
+    rgba(255, 255, 255, 0.98);
+  background-size: 28px 28px, 28px 28px, auto, auto;
+  box-shadow: 0 28px 84px rgba(12, 20, 18, 0.28);
+}
+
+.cdEditModal h2 {
+  margin: 0 52px 18px 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 2.5vw, 2.12rem);
+  letter-spacing: -0.045em;
+}
+
+.cdEditModal h3,
+.cdEditVisibility legend,
+.cdEditTextFields label > span,
+.cdEditExtra label > span {
+  margin: 0;
+  color: var(--cd-ink);
+  font-size: 1rem;
+  font-weight: 950;
+}
+
+.cdEditModal p,
+.cdEditTextFields small,
+.cdEditExtra small,
+.cdEditVisibility p {
+  margin: 4px 0 0;
+  color: var(--cd-muted);
+  line-height: 1.45;
+}
+
+.cdEditClose {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--cd-line);
+  border-radius: 50%;
+  color: #1f2c28;
+  background: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+}
+
+.cdEditForm {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 42px;
+  align-items: start;
+  align-content: start;
+}
+
+.cdEditMedia,
+.cdEditBanner,
+.cdEditTextFields,
+.cdEditExtra {
+  display: grid;
+  gap: 14px;
+}
+
+.cdEditMedia {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.cdEditBanner {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.cdEditTextFields {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 42px;
+  align-content: start;
+  border-top: 1px solid rgba(214, 227, 221, 0.92);
+  padding-top: 16px;
+}
+
+.cdEditVisibility {
+  grid-column: 1;
+  grid-row: 3;
+  border-top: 1px solid rgba(214, 227, 221, 0.92);
+  padding-top: 16px;
+}
+
+.cdEditExtra {
+  grid-column: 2;
+  grid-row: 3;
+  border-top: 1px solid rgba(214, 227, 221, 0.92);
+  padding-top: 16px;
+}
+
+.cdEditTextFields label,
+.cdEditExtra label {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.cdEditTextFields input,
+.cdEditTextFields textarea,
+.cdEditExtra input {
+  width: 100%;
+  border: 1px solid var(--cd-line-strong);
+  border-radius: 13px;
+  color: var(--cd-ink);
+  background: #ffffff;
+  outline: 0;
+}
+
+.cdEditTextFields input,
+.cdEditExtra input {
+  height: 48px;
+  min-height: 48px;
+  padding: 0 16px;
+}
+
+.cdEditTextFields textarea {
+  min-height: 112px;
+  max-height: 138px;
+  padding: 12px 16px;
+  resize: vertical;
+}
+
+.cdEditTextFields input:focus,
+.cdEditTextFields textarea:focus,
+.cdEditExtra input:focus {
+  border-color: var(--cd-primary);
+  box-shadow: 0 0 0 4px rgba(23, 138, 99, 0.12);
+}
+
+.cdEditTextFields em {
+  color: var(--cd-muted);
+  font-size: 0.82rem;
+  font-style: normal;
+}
+
+.cdEditImageGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.cdEditCoverPreview {
+  display: none;
+  min-height: 144px;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 67% 16%, rgba(255, 255, 255, 0.62), transparent 16%),
+    linear-gradient(145deg, #71988d, #31544b 52%, #12231e);
+  background-size: cover;
+  background-position: center;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.36);
+}
+
+.cdEditBannerPreview {
+  display: none;
+  min-height: 82px;
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 72% 18%, rgba(255, 255, 255, 0.58), transparent 14%),
+    linear-gradient(135deg, #8daaa1, #405e55 54%, #16231f);
+  background-size: cover;
+  background-position: center;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.38);
+}
+
+.cdEditModal .imageUploadField {
+  display: grid;
+  gap: 8px;
+}
+
+.cdEditModal .campaignField > span,
+.cdEditModal .imageUploadPreview {
+  display: none;
+}
+
+.cdEditModal .imageUploadDropzone {
+  min-height: 162px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  border: 1px dashed var(--cd-line-strong);
+  border-radius: 18px;
+  padding: 16px;
+  color: #3f4f49;
+  background: rgba(255, 255, 255, 0.72);
+  text-align: center;
+  cursor: pointer;
+}
+
+.cdEditBanner .imageUploadDropzone {
+  min-height: 162px;
+}
+
+.cdEditModal .imageUploadDropzone input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cdEditModal .imageUploadDropzone__icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--cd-primary);
+  background: var(--cd-primary-soft);
+}
+
+.cdEditModal .imageUploadDropzone__icon svg {
+  width: 21px;
+  height: 21px;
+}
+
+.cdEditModal .imageUploadDropzone strong {
+  max-width: 190px;
+  line-height: 1.18;
+  font-weight: 900;
+}
+
+.cdEditModal .imageUploadDropzone small,
+.cdEditModal .imageUploadField > small {
+  color: var(--cd-muted);
+  font-size: 0.82rem;
+}
+
+.cdEditModal .imageUploadActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cdEditModal .imageUploadActions button {
+  min-height: 36px;
+  border-radius: 11px;
+  padding: 0 14px;
+  font-weight: 900;
+}
+
+.cdEditVisibility {
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.cdEditVisibilityGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.cdEditVisibilityCard {
+  position: relative;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  min-height: 132px;
+  gap: 7px;
+  border: 1px solid var(--cd-line);
+  border-radius: 16px;
+  padding: 14px;
+  background: rgba(255,255,255,0.78);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.cdEditVisibilityCard input {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  width: 20px;
+  height: 20px;
+  accent-color: var(--cd-primary);
+}
+
+.cdEditVisibilityCard > span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--cd-primary);
+  background: var(--cd-primary-soft);
+}
+
+.cdEditVisibilityCard strong {
+  font-size: 1rem;
+}
+
+.cdEditVisibilityCard small {
+  color: var(--cd-muted);
+  font-size: 0.8rem;
+  line-height: 1.32;
+}
+
+.cdEditVisibilityCard.is-selected {
+  border-color: rgba(23, 138, 99, 0.55);
+  background: linear-gradient(135deg, rgba(231,245,239,0.82), rgba(255,255,255,0.95));
+  box-shadow: 0 0 0 3px rgba(23, 138, 99, 0.08);
+}
+
+.cdEditExtra {
+  align-content: start;
+  gap: 12px;
+}
+
+.cdEditExtra label {
+  max-width: 240px;
+}
+
+.cdEditActions {
+  grid-column: 1 / -1;
+  grid-row: 4;
+  display: flex;
+  justify-content: flex-end;
+  align-self: end;
+  gap: 12px;
+  border-top: 0;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.cdAvailabilitySession,
+.cdInviteBox,
+.cdInfoBox,
+.cdAdminBottomNotice {
+  border: 1px solid rgba(23,138,99,0.17);
+  border-radius: 14px;
+  padding: 14px;
+  background: linear-gradient(135deg, rgba(231,245,239,0.82), rgba(255,255,255,0.9));
+}
+
+.cdAvailabilitySession {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.cdAvailabilityEditor {
+  display: grid;
+  gap: 14px;
+  margin: 0 0 18px;
+  border: 1px solid rgba(23,138,99,0.17);
+  border-radius: 14px;
+  padding: 14px;
+  background: rgba(248, 251, 249, 0.88);
+}
+
+.cdAvailabilityEditor > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--cd-muted);
+}
+
+.cdAvailabilityEditor strong {
+  color: var(--cd-ink);
+}
+
+.cdAvailabilityWeekEditor {
+  display: grid;
+  gap: 10px;
+}
+
+.cdAvailabilityDayEditor {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.cdAvailabilityDayEditor > span {
+  color: var(--cd-muted);
+  font-weight: 900;
+}
+
+.cdAvailabilityDayEditor > div {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.cdAvailabilityChoice {
+  min-height: 34px;
+  border: 1px solid var(--cd-line);
+  border-radius: 9px;
+  color: var(--cd-muted);
+  background: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.cdAvailabilityChoice.is-active {
+  border-color: rgba(23,138,99,0.34);
+  color: #0f7356;
+  background: var(--cd-primary-soft);
+}
+
+.cdAvailabilitySession span,
+.cdInviteBox span,
+.cdInfoLine span {
+  color: var(--cd-muted);
+}
+
+.cdAvailabilitySession b {
+  border-radius: 9px;
+  padding: 6px 10px;
+  color: var(--cd-violet);
+  background: #f0e7ff;
+}
+
+.cdAvailabilityTable {
+  overflow-x: auto;
+  border: 1px solid var(--cd-line);
+  border-radius: 14px;
+}
+
+.cdAvailabilityHead,
+.cdAvailabilityRow {
+  min-width: 860px;
+  display: grid;
+  grid-template-columns: 180px repeat(7, 80px) 132px;
+  align-items: center;
+  border-bottom: 1px solid var(--cd-line);
+  padding: 12px 16px;
+}
+
+.cdAvailabilityHead {
+  color: var(--cd-muted);
+  background: var(--cd-panel);
+  font-weight: 900;
+}
+
+.cdAvailabilityRow:last-child {
+  border-bottom: 0;
+}
+
+.cdAvailMark {
+  width: 18px;
+  height: 18px;
+  display: inline-grid;
+  place-items: center;
+  border: 2px solid #b9c5c0;
+  border-radius: 50%;
+}
+
+.cdAvailMark.is-yes {
+  border: 0;
+  color: var(--cd-primary);
+}
+
+.cdAvailMark.is-maybe {
+  border-color: var(--cd-orange);
+}
+
+.cdAvailMark.is-no {
+  border: 0;
+  color: #b42318;
+  background: #fff1f1;
+}
+
+.cdAvailabilityLegend {
+  align-items: center;
+  margin-top: 12px;
+}
+
+.cdAvailabilityLegend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cdAvailabilityLegend button {
+  margin-left: auto;
+}
+
+.cdInviteBox {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px;
+  gap: 4px 12px;
+  margin-top: 14px;
+}
+
+.cdInviteBox strong {
+  word-break: break-all;
+}
+
+.cdInviteBox button {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.cdAdminDivider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  color: var(--cd-muted);
+  text-transform: uppercase;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.cdAdminDivider::before,
+.cdAdminDivider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--cd-line);
+}
+
+.cdProgress {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e6eeea;
+}
+
+.cdProgress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--cd-primary);
+}
+
+.cdInfoBox,
+.cdAdminBottomNotice,
+.cdAdminMuted,
+.cdAdminFooterNote {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #46645a;
+  line-height: 1.5;
+}
+
+.cdAdminBottomNotice {
+  margin-top: 8px;
+}
+
+.cdAssignCharacter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.45fr);
+  gap: 14px;
+  border: 1px solid var(--cd-line);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.cdAssignCharacter label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cdCharacterRow {
+  grid-template-columns: 78px minmax(0, 1fr) minmax(160px, 0.5fr) auto 34px;
+}
+
+.cdCharacterPortrait {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: #0f7356;
+  background:
+    radial-gradient(circle at 62% 18%, rgba(255,255,255,0.6), transparent 16%),
+    linear-gradient(145deg, #cbded6, #6b877d);
+  background-size: cover;
+  background-position: center;
+  font-weight: 950;
+}
+
+.cdCharacterOverviewCard {
+  min-height: 0 !important;
+}
+
+.cdCharacterOverviewTable {
+  display: grid;
+  gap: 0;
+  margin-top: 18px;
+  border: 1px solid var(--cd-line);
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.82);
+}
+
+.cdCharacterOverviewHead,
+.cdCharacterOverviewRow {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.85fr) minmax(260px, 1.2fr) minmax(190px, 0.8fr);
+  gap: 16px;
+  align-items: center;
+}
+
+.cdCharacterOverviewHead {
+  padding: 12px 16px;
+  color: var(--cd-muted);
+  background: var(--cd-panel);
+  font-weight: 950;
+}
+
+.cdCharacterOverviewRow {
+  min-height: 82px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--cd-line);
+}
+
+.cdCharacterPlayerCell,
+.cdCharacterNameCell,
+.cdCharacterProfessionCell {
+  min-width: 0;
+}
+
+.cdCharacterPlayerCell,
+.cdCharacterNameCell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cdCharacterPlayerCell > span {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid rgba(23, 138, 99, 0.22);
+  border-radius: 50%;
+  color: #0f7356;
+  background: #e8f7f0;
+  font-weight: 950;
+}
+
+.cdCharacterNameCell .cdCharacterPortrait {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+}
+
+.cdCharacterNameCell > div:last-child,
+.cdCharacterProfessionCell {
+  display: grid;
+  gap: 4px;
+}
+
+.cdCharacterOverviewRow strong,
+.cdCharacterOverviewRow span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cdCharacterOverviewRow span {
+  color: var(--cd-muted);
+}
+
+.cdPlayersTable {
+  display: grid;
+  gap: 0;
+  margin-top: 18px;
+}
+
+.cdPlayersHead,
+.cdPlayerRow {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.2fr) 140px 170px 170px 34px;
+  gap: 14px;
+  align-items: center;
+}
+
+.cdPlayersHead {
+  padding: 0 20px 12px;
+  color: var(--cd-muted);
+  font-weight: 900;
+}
+
+.cdPlayerRow {
+  border-radius: 12px;
+}
+
+.cdPlayerIdentity {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 2px 12px;
+  align-items: center;
+}
+
+.cdPlayerIdentity > span {
+  grid-row: 1 / span 2;
+  margin: 0;
+}
+
+.cdPlayerIdentity em {
+  margin-left: 8px;
+  border-radius: 999px;
+  padding: 2px 8px;
+  color: #0f7356;
+  background: var(--cd-primary-soft);
+  font-size: 0.72rem;
+  font-style: normal;
+}
+
+.cdRoleBadge {
+  width: fit-content;
+  color: var(--cd-violet);
+  background: #f0e7ff;
+  border-color: rgba(124,58,237,0.2);
+}
+
+.cdRoleBadge.is-gm {
+  color: #9a5a12;
+  background: #fff5e6;
+  border-color: rgba(245,158,11,0.28);
+}
+
+.cdOnline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cdInviteLimit {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  font-size: 1.3rem;
+}
+
+.cdInviteCodeBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px dashed var(--cd-line-strong);
+  border-radius: 13px;
+  padding: 16px;
+  margin: 10px 0 14px;
+  background: #fff;
+}
+
+.cdInviteCodeBox span {
+  font-weight: 950;
+  letter-spacing: 0.35em;
+}
+
+.cdInviteCodeBox button {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.cdAdminNotesGrid {
+  grid-template-columns: minmax(320px, 0.5fr) minmax(0, 1fr);
+}
+
+.cdNotesHead {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(240px, 0.7fr) minmax(180px, 0.45fr) minmax(150px, 0.35fr);
+  align-items: center;
+}
+
+.cdNotesHead label {
+  position: relative;
+}
+
+.cdNotesHead label svg {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  color: var(--cd-muted);
+}
+
+.cdNoteRow {
+  grid-template-columns: 72px minmax(0, 1fr) 110px 34px;
+}
+
+.cdNoteIcon {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: #0f7356;
+  background: var(--cd-primary-soft);
+}
+
+.cdNoteIcon.is-1 { color: #c05621; background: #fff1e8; }
+.cdNoteIcon.is-2 { color: #6d28d9; background: #f0e7ff; }
+.cdNoteIcon.is-3 { color: #b45309; background: #fff7da; }
+
+.cdNoteRow strong,
+.cdNoteRow p,
+.cdNoteRow em {
+  display: block;
+  margin: 0;
+}
+
+.cdNotesFooter {
+  margin-top: 18px;
+}
+
+.cdMaterialsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.cdMaterialTile {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--cd-line);
+  border-radius: 14px;
+  padding: 18px;
+  background: rgba(255,255,255,0.84);
+}
+
+.cdMaterialTile > span {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  color: var(--cd-primary);
+  background: var(--cd-primary-soft);
+}
+
+.cdMaterialTile p {
+  margin: 0;
+  color: var(--cd-muted);
+  line-height: 1.5;
+}
+
+.cdMaterialTile a,
+.cdMaterialTile button {
+  width: fit-content;
+  border: 1px solid var(--cd-line);
+  border-radius: 10px;
+  padding: 9px 12px;
+  color: #0f7356;
+  background: #ffffff;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.cdInfoLine {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 12px;
+  padding: 9px 0;
+}
+
+.cdDangerZone h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cd-red);
+}
+
+.cdAdminSettingsWorkspace .cdAdminSideStack > .cdAdminCard:first-child:not(.cdDangerZone) {
+  display: none;
+}
+
+.cdDangerAction {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  border-top: 1px solid var(--cd-line);
+  padding: 16px 0 0;
+  margin-top: 16px;
+}
+
+.cdDangerAction span {
+  display: block;
+  margin-top: 4px;
+  color: var(--cd-muted);
+}
+
+.cdDangerAction button {
+  min-height: 38px;
+  border: 1px solid rgba(220,38,38,0.25);
+  border-radius: 10px;
+  padding: 0 16px;
+  color: #b91c1c;
+  background: #fff7f7;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.cdDangerAction button.is-danger {
+  color: #fff;
+  background: linear-gradient(180deg, #ef4444, #dc2626);
+}
+
+.cdDangerAction button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cdEditOverlay.cdConfirmOverlay {
+  z-index: 90;
+  place-items: center !important;
+  align-items: center !important;
+  padding: 20px !important;
+  background: rgba(10, 18, 15, 0.16);
+  overflow: auto !important;
+}
+
+.cdConfirmModal {
+  position: relative;
+  width: min(92vw, 460px);
+  display: grid;
+  gap: 14px;
+  border: 1px solid rgba(214, 227, 221, 0.95);
+  border-radius: 18px;
+  padding: 24px;
+  color: var(--cd-ink);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 24px 70px rgba(12, 20, 18, 0.24);
+}
+
+.cdConfirmModal h2 {
+  margin: 0 48px 0 0;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  letter-spacing: -0.03em;
+}
+
+.cdConfirmModal p {
+  margin: 0;
+  color: var(--cd-muted);
+  line-height: 1.55;
+}
+
+.cdConfirmIcon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #b45309;
+  background: #fff7ed;
+}
+
+.cdConfirmIcon.is-danger {
+  color: #dc2626;
+  background: #fff1f1;
+}
+
+.cdConfirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.cdConfirmPrimary {
+  min-height: 46px;
+  border: 1px solid rgba(180, 83, 9, 0.25);
+  border-radius: 12px;
+  padding: 0 18px;
+  color: #ffffff;
+  background: linear-gradient(180deg, #d97706, #b45309);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.cdConfirmPrimary.is-danger {
+  border-color: rgba(220, 38, 38, 0.25);
+  background: linear-gradient(180deg, #ef4444, #dc2626);
+}
+
+.cdConfirmPrimary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cdEmptyState {
+  min-height: 210px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  text-align: center;
+  color: var(--cd-muted);
+}
+
+.cdEmptyState > span {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--cd-primary);
+  background: var(--cd-primary-soft);
+}
+
+.cdEmptyState strong {
+  color: var(--cd-ink);
+  font-size: 1.08rem;
+}
+
+.cdEmptyState p {
+  max-width: 360px;
+  margin: 0;
+}
+
+.cdSettingsActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+@media (max-width: 1180px) {
+  .cdAdminHero__main,
+  .cdAdminSessionGrid,
+  .cdAdminSplit,
+  .cdAdminSplit--wide,
+  .cdAdminNotesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .cdAdminHeroActions {
+    justify-content: flex-start;
+  }
+
+  .cdNotesHead,
+  .cdPlayersHead,
+  .cdPlayerRow,
+  .cdCharacterRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .campaignDetailsAdminPage {
+    gap: 14px;
+  }
+
+  .cdAdminHero__main {
+    grid-template-columns: 1fr;
+  }
+
+  .cdAdminCover {
+    width: 100%;
+    height: 210px;
+  }
+
+  .cdEditOverlay {
+    padding: 14px;
+    align-items: start;
+  }
+
+  .cdEditModal {
+    max-height: calc(100vh - 28px);
+    overflow: auto;
+    padding: 24px 18px 18px;
+    border-radius: 18px;
+  }
+
+  .cdEditForm,
+  .cdEditImageGrid,
+  .cdEditTextFields,
+  .cdEditVisibilityGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .cdEditMedia,
+  .cdEditBanner,
+  .cdEditTextFields,
+  .cdEditVisibility,
+  .cdEditExtra {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .cdEditCoverPreview,
+  .cdEditModal .imageUploadDropzone {
+    min-height: 180px;
+  }
+
+  .cdEditBannerPreview,
+  .cdEditBanner .imageUploadDropzone {
+    min-height: 132px;
+  }
+
+  .cdEditExtra label {
+    max-width: none;
+  }
+
+  .cdEditActions {
+    grid-column: 1;
+    flex-direction: column-reverse;
+    margin-top: 0;
+  }
+
+  .cdAdminTabs {
+    display: flex;
+    overflow-x: auto;
+  }
+
+  .cdAdminTab {
+    flex: 0 0 160px;
+  }
+
+  .cdAdminTwoCols,
+  .cdSessionNext__body,
+  .cdAssignCharacter {
+    grid-template-columns: 1fr;
+  }
+
+  .cdAdminCard {
+    padding: 16px;
+  }
+
+  .cdAdminHeroActions,
+  .cdSettingsActions {
+    flex-direction: column;
+  }
+}
+
 /* ═══════════════════════════════════════════
    NEW DESIGN CLASSES  (prefix: cd)
 ═══════════════════════════════════════════ */
@@ -2280,4 +4085,1646 @@
   .cdHero {
     grid-template-columns: 1fr !important;
   }
+}
+
+/* Campaign detail dashboard pass: keep page chrome fixed and move overflow into panels. */
+.appContentInner:has(.campaignDetailsAdminPage) {
+  grid-template-rows: minmax(0, 1fr) !important;
+}
+
+.campaignDetailsAdminPage {
+  height: 100% !important;
+  min-height: 0 !important;
+  max-width: 1480px !important;
+  display: grid !important;
+  grid-template-rows: auto auto minmax(0, 1fr) !important;
+  gap: 10px !important;
+  overflow: hidden !important;
+}
+
+.campaignDetailsAdminPage > .cdAdminHero,
+.campaignDetailsAdminPage > .cdAdminTabs {
+  min-height: 0 !important;
+}
+
+.cdAdminHero__main {
+  grid-template-columns: 92px minmax(0, 1fr) auto !important;
+  gap: 14px !important;
+  padding: 12px 14px !important;
+  border-radius: 14px !important;
+}
+
+.cdAdminCover {
+  width: 92px !important;
+  height: 92px !important;
+  border-radius: 12px !important;
+}
+
+.cdAdminHero__copy {
+  gap: 7px !important;
+}
+
+.cdAdminTitleRow h1 {
+  font-size: clamp(1.45rem, 2.2vw, 2.05rem) !important;
+  line-height: 1.06 !important;
+  letter-spacing: 0 !important;
+}
+
+.cdAdminHero__copy p,
+.cdAdminLead {
+  line-height: 1.35 !important;
+}
+
+.cdAdminHero__copy > p {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cdAdminMetaLine {
+  gap: 8px 12px !important;
+  font-size: 0.88rem !important;
+}
+
+.cdAdminBadge,
+.cdCountPill,
+.cdAdminSoftBadge,
+.cdRoleBadge {
+  padding: 2px 8px !important;
+}
+
+.cdAdminHeroActions {
+  flex-wrap: nowrap !important;
+  gap: 8px !important;
+}
+
+.cdAdminPrimaryBtn,
+.cdAdminSecondaryBtn,
+.cdAdminLiveBtn,
+.cdAdminOutlineFull {
+  min-height: 38px !important;
+  border-radius: 9px !important;
+  padding: 0 12px !important;
+  gap: 7px !important;
+  white-space: nowrap;
+}
+
+.cdAdminTabs {
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  min-height: 44px !important;
+  border-radius: 12px !important;
+}
+
+.cdAdminTab {
+  min-height: 44px !important;
+  gap: 7px !important;
+  font-size: 0.9rem !important;
+}
+
+.cdAdminWorkspace {
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.cdAdminCard {
+  min-height: 0 !important;
+  padding: 14px !important;
+  border-radius: 12px !important;
+}
+
+.cdAdminCard h2 {
+  font-size: 1.05rem !important;
+}
+
+.cdAdminCard h3 {
+  font-size: 0.9rem !important;
+}
+
+.cdAdminForm,
+.cdAdminStack,
+.cdAdminSideStack,
+.cdNoteRows,
+.cdSessionList,
+.cdCharacterRows {
+  gap: 10px !important;
+  min-height: 0 !important;
+}
+
+.cdAdminForm input,
+.cdAdminForm textarea,
+.cdAdminForm select,
+.cdAssignCharacter select,
+.cdNotesHead input,
+.cdNotesHead select {
+  min-height: 38px !important;
+  border-radius: 9px !important;
+  padding-inline: 10px !important;
+}
+
+.cdAdminForm textarea {
+  min-height: 66px !important;
+  max-height: 92px !important;
+  resize: vertical;
+}
+
+.cdAdminTwoCols {
+  gap: 10px !important;
+}
+
+.cdAdminSessionGrid {
+  grid-template-columns: minmax(260px, 0.9fr) minmax(320px, 1fr) minmax(300px, 0.95fr) !important;
+  align-items: stretch !important;
+  gap: 10px !important;
+}
+
+.cdAdminSessionGrid > .cdAdminCard,
+.cdAdminSplit > .cdAdminCard,
+.cdAdminSplit > .cdAdminSideStack,
+.cdAdminNotesGrid > .cdAdminCard,
+.cdAdminCharacterWorkspace > .cdAdminCard {
+  height: 100% !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.cdSessionNext__body {
+  grid-template-columns: 120px minmax(0, 1fr) !important;
+  gap: 12px !important;
+  margin-top: 10px !important;
+  min-height: 0 !important;
+}
+
+.cdSessionArt {
+  min-height: 104px !important;
+}
+
+.cdSessionInfo {
+  gap: 9px !important;
+}
+
+.cdSessionInfo p,
+.cdNoteRow p {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cdAdminChips {
+  max-height: 70px;
+  overflow: auto;
+}
+
+.cdAdminSwitch {
+  padding: 8px 10px !important;
+}
+
+.cdSessionList,
+.cdPlayersTable,
+.cdCharacterRows,
+.cdNoteRows,
+.cdMaterialsGrid,
+.cdAvailabilityTable,
+.cdAdminSideStack {
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  scrollbar-gutter: stable;
+}
+
+.cdSessionList {
+  flex: 1 1 auto;
+  padding-right: 3px;
+}
+
+.cdSessionListItem,
+.cdCharacterRow,
+.cdPlayerRow,
+.cdNoteRow {
+  gap: 10px !important;
+  padding: 10px !important;
+  border-radius: 10px !important;
+}
+
+.cdSessionListItem {
+  grid-template-columns: 8px minmax(0, 1fr) auto auto 30px !important;
+}
+
+.cdAdminSegmented {
+  margin: 10px 0 !important;
+}
+
+.cdAdminSegmented button {
+  padding: 7px 10px !important;
+}
+
+.cdAdminSplit,
+.cdAdminSplit--wide,
+.cdAdminNotesGrid {
+  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.7fr) !important;
+  align-items: stretch !important;
+  gap: 10px !important;
+}
+
+.cdAdminAvailabilityWorkspace {
+  grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.7fr) !important;
+}
+
+.cdAdminAvailabilityWorkspace .cdAdminBottomNotice {
+  display: none !important;
+}
+
+.cdAvailabilitySession,
+.cdInviteBox,
+.cdInfoBox,
+.cdAdminBottomNotice {
+  padding: 10px !important;
+  border-radius: 10px !important;
+}
+
+.cdAvailabilityEditor {
+  padding: 10px !important;
+  gap: 10px !important;
+}
+
+.cdAvailabilityWeekEditor {
+  gap: 8px !important;
+}
+
+.cdAvailabilityDayEditor {
+  gap: 8px !important;
+}
+
+.cdAvailabilityChoice {
+  min-height: 32px !important;
+  padding: 0 8px !important;
+}
+
+.cdAvailabilityTable {
+  flex: 1 1 auto;
+  margin-top: 10px !important;
+}
+
+.cdAvailabilityHead,
+.cdAvailabilityRow {
+  grid-template-columns: minmax(120px, 1.1fr) repeat(7, minmax(34px, 0.38fr)) minmax(92px, 0.7fr) !important;
+  min-width: 620px;
+  padding: 9px 10px !important;
+}
+
+.cdAvailabilityLegend {
+  gap: 8px !important;
+}
+
+.cdAdminCharacterWorkspace {
+  grid-template-rows: auto minmax(0, 1fr) !important;
+}
+
+.cdAssignCharacter {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 10px !important;
+}
+
+.cdCharacterRow {
+  grid-template-columns: 50px minmax(0, 1fr) minmax(120px, 0.32fr) auto 36px !important;
+}
+
+.cdCharacterPortrait {
+  width: 50px !important;
+  height: 50px !important;
+}
+
+.cdPlayersTable {
+  flex: 1 1 auto;
+}
+
+.cdPlayersHead,
+.cdPlayerRow {
+  grid-template-columns: minmax(190px, 1.2fr) 82px 110px minmax(130px, 0.8fr) 116px !important;
+  min-width: 760px;
+}
+
+.cdPlayersHead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.cdInviteLimit {
+  margin: 6px 0 !important;
+}
+
+.cdInviteCodeBox {
+  min-height: 48px !important;
+  margin: 8px 0 !important;
+}
+
+.cdAdminNotesGrid {
+  grid-template-columns: minmax(280px, 0.5fr) minmax(0, 1fr) !important;
+}
+
+.cdAdminNotesGrid > .cdAdminCard:first-child {
+  max-height: 100% !important;
+}
+
+.cdAdminNotesGrid > .cdAdminCard:first-child .cdAdminForm {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding-right: 3px;
+}
+
+.cdAdminNotesGrid > .cdAdminCard:last-child {
+  min-width: 0;
+}
+
+.cdNotesHead {
+  display: grid !important;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 0.8fr) 150px 130px !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.cdNotesHead h2 {
+  min-width: 0;
+}
+
+.cdNoteRows {
+  flex: 1 1 auto;
+  padding-right: 3px;
+}
+
+.cdNoteRow {
+  grid-template-columns: 42px minmax(0, 1fr) 100px 34px !important;
+}
+
+.cdNotesFooter {
+  margin-top: 10px !important;
+}
+
+.cdAdminSettingsWorkspace > .cdAdminCard:first-child .cdAdminForm,
+.cdDangerZone {
+  min-height: 0 !important;
+  overflow-y: auto !important;
+}
+
+.cdAdminSettingsWorkspace > .cdAdminCard:first-child {
+  max-height: calc(100vh - 260px);
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: grid !important;
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
+
+.cdAdminSettingsWorkspace > .cdAdminCard:first-child .cdAdminForm {
+  padding-right: 6px;
+}
+
+.cdSettingsMediaBlock {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--cd-line);
+  border-radius: 14px;
+  padding: 14px;
+  background: var(--cd-panel);
+}
+
+.cdSettingsCoverEditor {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+.cdSettingsCoverPreview {
+  width: 110px !important;
+  height: 110px !important;
+  border-radius: 14px !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.42);
+}
+
+.cdSettingsActions {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  padding-top: 10px !important;
+  background: linear-gradient(180deg, rgba(255,255,255,0), #ffffff 26%);
+}
+
+.cdDangerAction {
+  padding: 10px !important;
+}
+
+.cdEditOverlay {
+  align-items: flex-start !important;
+  place-items: start center !important;
+  padding: 44px 24px 20px !important;
+  overflow: hidden !important;
+}
+
+.cdEditModal {
+  width: min(94vw, 1120px) !important;
+  max-height: calc(100vh - 96px) !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+}
+
+.cdEditModal h2 {
+  margin: 0 !important;
+  padding: 18px 58px 12px 22px !important;
+  font-size: clamp(1.35rem, 2vw, 1.75rem) !important;
+  border-bottom: 1px solid var(--cd-line);
+}
+
+.cdEditClose {
+  top: 12px !important;
+  right: 14px !important;
+  width: 36px !important;
+  height: 36px !important;
+}
+
+.cdEditForm {
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  padding: 16px 22px 0 !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px 18px !important;
+}
+
+.cdEditMedia,
+.cdEditBanner {
+  gap: 8px !important;
+}
+
+.cdEditTextFields {
+  gap: 12px 18px !important;
+  padding-top: 12px !important;
+}
+
+.cdEditModal .imageUploadDropzone,
+.cdEditBanner .imageUploadDropzone {
+  min-height: 112px !important;
+  padding: 12px !important;
+}
+
+.cdEditVisibilityGrid {
+  gap: 8px !important;
+}
+
+.cdEditVisibilityCard {
+  min-height: 96px !important;
+  padding: 10px !important;
+}
+
+.cdEditVisibilityCard > span {
+  width: 34px !important;
+  height: 34px !important;
+}
+
+.cdEditExtra label {
+  max-width: none !important;
+}
+
+.cdEditActions {
+  position: sticky !important;
+  bottom: 0 !important;
+  z-index: 2 !important;
+  margin: 0 -22px !important;
+  padding: 12px 22px !important;
+  border-top: 1px solid var(--cd-line) !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+}
+
+@media (max-height: 820px) {
+  .campaignDetailsAdminPage {
+    gap: 8px !important;
+  }
+
+  .cdAdminHero__main {
+    grid-template-columns: 78px minmax(0, 1fr) auto !important;
+    padding: 10px 12px !important;
+  }
+
+  .cdAdminCover {
+    width: 78px !important;
+    height: 78px !important;
+  }
+
+  .cdAdminTitleRow h1 {
+    font-size: clamp(1.28rem, 1.8vw, 1.72rem) !important;
+  }
+
+  .cdAdminHero__copy > p {
+    -webkit-line-clamp: 1;
+  }
+
+  .cdAdminCard {
+    padding: 12px !important;
+  }
+}
+
+@media (max-width: 1180px) {
+  .campaignDetailsAdminPage {
+    overflow: auto !important;
+    height: auto !important;
+  }
+
+  .cdAdminHero__main,
+  .cdAdminSessionGrid,
+  .cdAdminSplit,
+  .cdAdminSplit--wide,
+  .cdAdminNotesGrid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .cdAdminHeroActions {
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
+  }
+
+  .cdAdminTabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .cdAdminWorkspace,
+  .cdAdminSessionGrid > .cdAdminCard,
+  .cdAdminSplit > .cdAdminCard,
+  .cdAdminSplit > .cdAdminSideStack,
+  .cdAdminNotesGrid > .cdAdminCard,
+  .cdAdminCharacterWorkspace > .cdAdminCard {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+}
+
+/* Compact session admin panels. */
+.cdAdminSessionGrid > .cdSessionNext {
+  align-self: start !important;
+  height: auto !important;
+}
+
+.cdSessionNext .cdSessionNext__body {
+  grid-template-columns: 96px minmax(0, 1fr) !important;
+}
+
+.cdSessionNext .cdSessionArt {
+  min-height: 84px !important;
+}
+
+.cdSessionNext .cdSessionInfo {
+  gap: 7px !important;
+}
+
+.cdSessionNext .cdSessionInfo p {
+  -webkit-line-clamp: 1;
+}
+
+.cdSessionNext .cdAdminPrimaryBtn {
+  width: fit-content;
+}
+
+.cdSessionList--table {
+  display: grid;
+  gap: 0 !important;
+  border: 1px solid var(--cd-line);
+  border-radius: 12px;
+  overflow: hidden !important;
+}
+
+.cdSessionList--table .cdSessionListItem {
+  grid-template-columns: minmax(0, 1.2fr) minmax(135px, 0.8fr) minmax(112px, auto) !important;
+  gap: 12px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 12px 14px !important;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.cdSessionList--table .cdSessionListItem + .cdSessionListItem {
+  border-top: 1px solid var(--cd-line) !important;
+}
+
+.cdSessionList--table .cdSessionListItem > span:not(.cdSessionWeekDate),
+.cdSessionList--table .cdSessionListItem > button {
+  display: none !important;
+}
+
+.cdSessionList--table .cdSessionListItem strong,
+.cdSessionList--table .cdSessionListItem span,
+.cdSessionList--table .cdSessionListItem em {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cdSessionList--table .cdSessionListItem em {
+  justify-self: end;
+  border: 1px solid rgba(23, 138, 99, 0.2);
+  border-radius: 999px;
+  padding: 5px 9px;
+  color: #0f7356;
+  background: var(--cd-primary-soft);
+  font-weight: 850;
+}
+
+.appContent:has(.campaignDetailsAdminPage--owner) {
+  padding-top: clamp(12px, 1vw, 18px) !important;
+}
+
+.appContentInner:has(.campaignDetailsAdminPage--owner) {
+  display: block !important;
+  max-width: none !important;
+  align-content: start !important;
+}
+
+.appContentInner:has(.campaignDetailsAdminPage--owner) .appPageHeader {
+  min-height: 0 !important;
+  margin: 0 auto 12px !important;
+  padding: 0 32px 8px !important;
+  width: min(100%, 1480px);
+  border-bottom: 0 !important;
+}
+
+.campaignDetailsAdminPage--owner {
+  width: min(100%, 1480px) !important;
+  max-width: 1480px !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 auto !important;
+  padding: 0 32px 24px !important;
+  display: grid !important;
+  grid-template-rows: auto auto auto !important;
+  gap: 12px !important;
+  overflow: visible !important;
+}
+
+.cdAdminTabContent {
+  display: grid;
+  gap: 12px;
+  min-height: 0;
+}
+
+.campaignDetailsAdminPage--owner .cdAdminHero {
+  gap: 0 !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAdminHero__main {
+  grid-template-columns: 88px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 14px !important;
+  min-height: 0 !important;
+  padding: 12px 14px !important;
+  border-radius: 12px !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAdminCover {
+  width: 88px !important;
+  height: 88px !important;
+  border-radius: 10px !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAdminHero__copy {
+  gap: 6px !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAdminTitleRow h1 {
+  font-size: clamp(1.34rem, 2vw, 1.82rem) !important;
+  line-height: 1.08 !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAdminHero__copy p {
+  display: -webkit-box !important;
+  overflow: hidden !important;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  max-width: 92ch;
+  line-height: 1.35 !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAdminHeroActions {
+  align-items: center !important;
+  justify-content: flex-end !important;
+  flex-wrap: wrap !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAdminTabs {
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  min-height: 42px !important;
+  margin: 0 !important;
+  border-radius: 12px !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAdminTab {
+  min-height: 42px !important;
+  gap: 7px !important;
+  font-size: 0.9rem !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAdminWorkspace {
+  height: auto !important;
+  min-height: 0 !important;
+  align-items: start !important;
+  overflow: visible !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAdminCard,
+.campaignDetailsAdminPage--owner .cdAdminSessionGrid > .cdAdminCard,
+.campaignDetailsAdminPage--owner .cdAdminSplit > .cdAdminCard,
+.campaignDetailsAdminPage--owner .cdAdminSplit > .cdAdminSideStack,
+.campaignDetailsAdminPage--owner .cdAdminNotesGrid > .cdAdminCard,
+.campaignDetailsAdminPage--owner .cdAdminCharacterWorkspace > .cdAdminCard {
+  height: auto !important;
+  min-height: 0 !important;
+  align-self: start !important;
+  display: grid !important;
+  gap: 12px !important;
+  overflow: visible !important;
+  padding: 16px !important;
+  border-radius: 12px !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAdminSessionGrid {
+  grid-template-columns: minmax(300px, 0.9fr) minmax(320px, 0.95fr) minmax(360px, 1.08fr) !important;
+  gap: 14px !important;
+  align-items: start !important;
+}
+
+.campaignDetailsAdminPage--owner .cdSessionNext__body {
+  grid-template-columns: 108px minmax(0, 1fr) !important;
+  gap: 12px !important;
+  margin-top: 0 !important;
+}
+
+.campaignDetailsAdminPage--owner .cdSessionArt {
+  min-height: 92px !important;
+}
+
+.campaignDetailsAdminPage--owner .cdSessionList,
+.campaignDetailsAdminPage--owner .cdPlayersTable,
+.campaignDetailsAdminPage--owner .cdCharacterRows,
+.campaignDetailsAdminPage--owner .cdAvailabilityTable,
+.campaignDetailsAdminPage--owner .cdAdminSideStack {
+  flex: initial !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+  padding-right: 0 !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAdminSplit,
+.campaignDetailsAdminPage--owner .cdAdminSplit--wide {
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.72fr) !important;
+  gap: 14px !important;
+  align-items: start !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAdminCharacterWorkspace {
+  grid-template-rows: auto auto !important;
+  gap: 12px !important;
+}
+
+.campaignDetailsAdminPage--owner .cdCharacterRow {
+  grid-template-columns: 54px minmax(220px, 1fr) minmax(150px, 0.42fr) auto 36px !important;
+  min-height: 72px !important;
+  align-items: center !important;
+}
+
+.campaignDetailsAdminPage--owner .cdCharacterPortrait {
+  width: 54px !important;
+  height: 54px !important;
+}
+
+.campaignDetailsAdminPage--owner .cdPlayersTable {
+  display: grid;
+  gap: 0;
+  border: 1px solid var(--cd-line);
+  border-radius: 12px;
+  overflow-x: auto !important;
+}
+
+.campaignDetailsAdminPage--owner .cdPlayersHead,
+.campaignDetailsAdminPage--owner .cdPlayerRow {
+  grid-template-columns: minmax(220px, 1.2fr) 86px 118px minmax(150px, 0.78fr) 126px !important;
+  min-width: 760px !important;
+}
+
+.campaignDetailsAdminPage--owner .cdPlayersHead {
+  position: static !important;
+  padding: 10px 12px !important;
+  background: var(--cd-panel);
+}
+
+.campaignDetailsAdminPage--owner .cdPlayerRow {
+  min-height: 62px !important;
+  border: 0 !important;
+  border-top: 1px solid var(--cd-line) !important;
+  border-radius: 0 !important;
+  padding: 10px 12px !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAdminAvailabilityWorkspace {
+  grid-template-columns: minmax(0, 1180px) !important;
+  justify-content: center !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAdminAvailabilityWorkspace .cdAdminCard {
+  width: min(100%, 1180px);
+  margin-inline: auto;
+}
+
+.campaignDetailsAdminPage--owner .cdAvailabilitySession {
+  grid-template-columns: minmax(0, 1fr) auto auto !important;
+  gap: 12px 16px !important;
+  margin: 4px 0 0 !important;
+  padding: 12px 14px !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAvailabilitySession > span {
+  grid-column: 1 / -1;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.campaignDetailsAdminPage--owner .cdAvailabilitySessionTitle {
+  min-width: 0;
+}
+
+.campaignDetailsAdminPage--owner .cdAvailabilitySessionTitle strong {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--cd-ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.campaignDetailsAdminPage--owner .cdAvailabilityEditor {
+  gap: 14px !important;
+  margin: 0 !important;
+  padding: 14px !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAvailabilityWeekEditor {
+  grid-template-columns: repeat(auto-fit, minmax(136px, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAvailabilityDayEditor {
+  grid-template-columns: 1fr !important;
+  align-items: stretch !important;
+  gap: 10px !important;
+  min-width: 0;
+  border: 1px solid var(--cd-line);
+  border-radius: 12px;
+  padding: 10px;
+  background: #ffffff;
+}
+
+.campaignDetailsAdminPage--owner .cdAvailabilityDayEditor > span {
+  color: var(--cd-ink);
+  font-size: 0.95rem;
+}
+
+.campaignDetailsAdminPage--owner .cdAvailabilityDayEditor > div {
+  grid-template-columns: 1fr !important;
+  gap: 7px !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAvailabilityChoice {
+  min-height: 38px !important;
+  justify-content: center;
+  border-radius: 9px !important;
+  padding: 0 10px !important;
+  font-size: 0.84rem !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAvailabilityChoice.is-available.is-active {
+  border-color: rgba(23, 138, 99, 0.45);
+  color: #0f7356;
+  background: #e6f5ef;
+}
+
+.campaignDetailsAdminPage--owner .cdAvailabilityChoice.is-maybe.is-active {
+  border-color: rgba(245, 158, 11, 0.46);
+  color: #9a5d00;
+  background: #fff5dd;
+}
+
+.campaignDetailsAdminPage--owner .cdAvailabilityChoice.is-unavailable.is-active {
+  border-color: rgba(220, 38, 38, 0.32);
+  color: #b42318;
+  background: #fff1f1;
+}
+
+.campaignDetailsAdminPage--owner .cdAvailabilityChoice.is-none.is-active {
+  border-color: var(--cd-line-strong);
+  color: var(--cd-muted);
+  background: var(--cd-panel);
+}
+
+.campaignDetailsAdminPage--owner .cdAvailabilityTable {
+  border-radius: 12px !important;
+  overflow-x: auto !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAvailabilityHead,
+.campaignDetailsAdminPage--owner .cdAvailabilityRow {
+  grid-template-columns: minmax(160px, 1.1fr) repeat(7, minmax(54px, 0.42fr)) minmax(118px, 0.72fr) !important;
+  min-width: 760px !important;
+  padding: 11px 14px !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAvailabilityHead span:not(:first-child),
+.campaignDetailsAdminPage--owner .cdAvailabilityRow > :not(:first-child) {
+  justify-self: center;
+}
+
+.campaignDetailsAdminPage--owner .cdAvailabilityLegend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px !important;
+  margin-top: 0 !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAvailabilityLegendItems {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.campaignDetailsAdminPage--owner .cdAvailabilityLegendItems span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.campaignDetailsAdminPage--owner .cdAvailabilityLegend .cdAdminPrimaryBtn {
+  margin-left: auto;
+}
+
+.campaignDetailsAdminPage--owner .cdAdminSettingsWorkspace {
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr) !important;
+}
+
+.appContent:has(.campaignDetailsAdminPage--player) {
+  padding-top: clamp(12px, 1vw, 18px) !important;
+}
+
+.appContentInner:has(.campaignDetailsAdminPage--player) {
+  display: block !important;
+  max-width: none !important;
+  align-content: start !important;
+}
+
+.appContentInner:has(.campaignDetailsAdminPage--player) .appPageHeader {
+  min-height: 0 !important;
+  margin: 0 auto 12px !important;
+  padding: 0 32px 8px !important;
+  width: min(100%, 1480px);
+  border-bottom: 0 !important;
+}
+
+.campaignDetailsAdminPage--player {
+  width: min(100%, 1480px) !important;
+  max-width: 1480px !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 auto !important;
+  padding: 0 32px 24px !important;
+  display: grid !important;
+  grid-template-rows: auto auto auto !important;
+  gap: 12px !important;
+  overflow: visible !important;
+}
+
+.campaignPlayerTabContent {
+  display: grid;
+  gap: 12px;
+  min-height: 0;
+}
+
+.campaignDetailsAdminPage--player .cdAdminHero {
+  gap: 0 !important;
+}
+
+.campaignDetailsAdminPage--player .cdAdminHero__main {
+  grid-template-columns: 88px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 14px !important;
+  min-height: 0 !important;
+  padding: 12px 14px !important;
+  border-radius: 12px !important;
+}
+
+.campaignDetailsAdminPage--player .cdAdminCover {
+  width: 88px !important;
+  height: 88px !important;
+  border-radius: 10px !important;
+}
+
+.campaignDetailsAdminPage--player .cdAdminHero__copy {
+  gap: 6px !important;
+}
+
+.campaignDetailsAdminPage--player .cdAdminTitleRow h1 {
+  font-size: clamp(1.34rem, 2vw, 1.82rem) !important;
+  line-height: 1.08 !important;
+}
+
+.campaignDetailsAdminPage--player .cdAdminMetaLine {
+  gap: 6px 10px !important;
+  font-size: 0.84rem !important;
+}
+
+.campaignDetailsAdminPage--player .cdAdminHero__copy p {
+  display: -webkit-box !important;
+  overflow: hidden !important;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  max-width: 92ch;
+  line-height: 1.35 !important;
+}
+
+.campaignDetailsAdminPage--player .cdAdminHeroActions {
+  align-items: center !important;
+  justify-content: flex-end !important;
+  flex-wrap: nowrap !important;
+}
+
+.campaignDetailsAdminPage--player .cdAdminLiveBtn {
+  min-width: 150px;
+}
+
+.campaignDetailsAdminPage--player .cdAdminTabs {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  min-height: 42px !important;
+  margin: 0 !important;
+  border-radius: 12px !important;
+}
+
+.campaignDetailsAdminPage--player .cdAdminTab {
+  min-height: 42px !important;
+  gap: 7px !important;
+  font-size: 0.9rem !important;
+}
+
+.campaignDetailsAdminPage--player .cdAdminWorkspace {
+  height: auto !important;
+  min-height: 0 !important;
+  align-items: start !important;
+  overflow: visible !important;
+}
+
+.campaignDetailsAdminPage--player .cdAdminCard,
+.campaignDetailsAdminPage--player .cdAdminSessionGrid > .cdAdminCard,
+.campaignDetailsAdminPage--player .cdAdminSplit > .cdAdminCard,
+.campaignDetailsAdminPage--player .cdAdminCharacterWorkspace > .cdAdminCard {
+  height: auto !important;
+  min-height: 0 !important;
+  align-self: start !important;
+  display: grid !important;
+  gap: 12px !important;
+  overflow: visible !important;
+  padding: 16px !important;
+  border-radius: 12px !important;
+}
+
+.campaignDetailsAdminPage--player .cdAdminCard h2 {
+  font-size: 1.08rem !important;
+}
+
+.campaignDetailsAdminPage--player .cdAdminRowBetween {
+  align-items: center !important;
+}
+
+.campaignDetailsAdminPage--player .cdAdminSessionGrid {
+  grid-template-columns: minmax(340px, 0.92fr) minmax(440px, 1.08fr) !important;
+  gap: 14px !important;
+  align-items: start !important;
+}
+
+.campaignDetailsAdminPage--player .cdSessionNext__body {
+  grid-template-columns: 108px minmax(0, 1fr) !important;
+  gap: 12px !important;
+  margin-top: 0 !important;
+}
+
+.campaignDetailsAdminPage--player .cdSessionArt {
+  min-height: 92px !important;
+}
+
+.campaignDetailsAdminPage--player .cdSessionInfo {
+  gap: 8px !important;
+}
+
+.campaignDetailsAdminPage--player .cdSessionFacts {
+  gap: 8px !important;
+}
+
+.campaignDetailsAdminPage--player .cdSessionList,
+.campaignDetailsAdminPage--player .cdPlayersTable,
+.campaignDetailsAdminPage--player .cdCharacterRows,
+.campaignDetailsAdminPage--player .cdAvailabilityTable {
+  flex: initial !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+  padding-right: 0 !important;
+}
+
+.campaignDetailsAdminPage--player .cdSessionList--table {
+  overflow: hidden !important;
+}
+
+.campaignDetailsAdminPage--player .cdSessionList--table .cdSessionListItem {
+  grid-template-columns: minmax(0, 1.2fr) minmax(132px, 0.72fr) minmax(112px, auto) !important;
+  min-height: 46px;
+  padding: 11px 13px !important;
+}
+
+.campaignDetailsAdminPage--player .cdAdminAvailabilityWorkspace {
+  grid-template-columns: minmax(0, 1180px) !important;
+  justify-content: center;
+}
+
+.campaignDetailsAdminPage--player .cdAdminAvailabilityWorkspace .cdAdminCard {
+  width: min(100%, 1180px);
+  margin-inline: auto;
+}
+
+.campaignDetailsAdminPage--player .cdAvailabilitySession {
+  grid-template-columns: minmax(0, 1fr) auto auto !important;
+  gap: 12px 16px !important;
+  margin: 4px 0 0 !important;
+  padding: 12px 14px !important;
+}
+
+.campaignDetailsAdminPage--player .cdAvailabilitySession > span {
+  grid-column: 1 / -1;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.campaignDetailsAdminPage--player .cdAvailabilitySessionTitle {
+  min-width: 0;
+}
+
+.campaignDetailsAdminPage--player .cdAvailabilitySessionTitle strong {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--cd-ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.campaignDetailsAdminPage--player .cdAvailabilityEditor {
+  gap: 14px !important;
+  margin: 0 !important;
+  padding: 14px !important;
+}
+
+.campaignDetailsAdminPage--player .cdAvailabilityWeekEditor {
+  grid-template-columns: repeat(auto-fit, minmax(136px, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.campaignDetailsAdminPage--player .cdAvailabilityDayEditor {
+  grid-template-columns: 1fr !important;
+  align-items: stretch !important;
+  gap: 10px !important;
+  min-width: 0;
+  border: 1px solid var(--cd-line);
+  border-radius: 12px;
+  padding: 10px;
+  background: #ffffff;
+}
+
+.campaignDetailsAdminPage--player .cdAvailabilityDayEditor > span {
+  color: var(--cd-ink);
+  font-size: 0.95rem;
+}
+
+.campaignDetailsAdminPage--player .cdAvailabilityDayEditor > div {
+  grid-template-columns: 1fr !important;
+  gap: 7px !important;
+}
+
+.campaignDetailsAdminPage--player .cdAvailabilityChoice {
+  min-height: 38px !important;
+  justify-content: center;
+  border-radius: 9px !important;
+  padding: 0 10px !important;
+  font-size: 0.84rem !important;
+}
+
+.campaignDetailsAdminPage--player .cdAvailabilityChoice.is-available.is-active {
+  border-color: rgba(23, 138, 99, 0.45);
+  color: #0f7356;
+  background: #e6f5ef;
+}
+
+.campaignDetailsAdminPage--player .cdAvailabilityChoice.is-maybe.is-active {
+  border-color: rgba(245, 158, 11, 0.46);
+  color: #9a5d00;
+  background: #fff5dd;
+}
+
+.campaignDetailsAdminPage--player .cdAvailabilityChoice.is-unavailable.is-active {
+  border-color: rgba(220, 38, 38, 0.32);
+  color: #b42318;
+  background: #fff1f1;
+}
+
+.campaignDetailsAdminPage--player .cdAvailabilityChoice.is-none.is-active {
+  border-color: var(--cd-line-strong);
+  color: var(--cd-muted);
+  background: var(--cd-panel);
+}
+
+.campaignDetailsAdminPage--player .cdAvailabilityTable {
+  border-radius: 12px !important;
+  overflow-x: auto !important;
+}
+
+.campaignDetailsAdminPage--player .cdAvailabilityHead,
+.campaignDetailsAdminPage--player .cdAvailabilityRow {
+  grid-template-columns: minmax(160px, 1.1fr) repeat(7, minmax(54px, 0.42fr)) minmax(118px, 0.72fr) !important;
+  min-width: 760px !important;
+  padding: 11px 14px !important;
+}
+
+.campaignDetailsAdminPage--player .cdAvailabilityHead span:not(:first-child),
+.campaignDetailsAdminPage--player .cdAvailabilityRow > :not(:first-child) {
+  justify-self: center;
+}
+
+.campaignDetailsAdminPage--player .cdAvailabilityLegend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px !important;
+  margin-top: 0 !important;
+}
+
+.campaignDetailsAdminPage--player .cdAvailabilityLegendItems {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.campaignDetailsAdminPage--player .cdAvailabilityLegendItems span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.campaignDetailsAdminPage--player .cdAvailabilityLegend .cdAdminPrimaryBtn {
+  margin-left: auto;
+}
+
+.campaignDetailsAdminPage--player .cdAdminCharacterWorkspace {
+  grid-template-rows: auto !important;
+  gap: 12px !important;
+}
+
+.campaignDetailsAdminPage--player .cdCharacterRows {
+  display: grid !important;
+  gap: 10px !important;
+}
+
+.campaignDetailsAdminPage--player .cdCharacterRow {
+  grid-template-columns: 54px minmax(220px, 1fr) minmax(150px, 0.42fr) auto !important;
+  min-height: 72px !important;
+  gap: 12px !important;
+  align-items: center !important;
+  padding: 10px 12px !important;
+}
+
+.campaignDetailsAdminPage--player .cdCharacterPortrait {
+  width: 54px !important;
+  height: 54px !important;
+}
+
+.campaignDetailsAdminPage--player .cdCharacterRow > div:nth-child(2),
+.campaignDetailsAdminPage--player .cdCharacterRow > div:nth-child(3) {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.campaignDetailsAdminPage--player .cdCharacterRow strong,
+.campaignDetailsAdminPage--player .cdCharacterRow span,
+.campaignDetailsAdminPage--player .cdCharacterRow em {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.campaignDetailsAdminPage--player .cdAdminPlayersWorkspace {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.campaignDetailsAdminPage--player .cdPlayersTable {
+  display: grid;
+  gap: 0;
+  border: 1px solid var(--cd-line);
+  border-radius: 12px;
+  overflow: hidden !important;
+}
+
+.campaignDetailsAdminPage--player .cdPlayersHead,
+.campaignDetailsAdminPage--player .cdPlayerRow {
+  grid-template-columns: minmax(220px, 1.2fr) 86px 118px minmax(150px, 0.78fr) 126px !important;
+  min-width: 0 !important;
+}
+
+.campaignDetailsAdminPage--player .cdPlayersHead {
+  position: static !important;
+  padding: 10px 12px !important;
+  background: var(--cd-panel);
+}
+
+.campaignDetailsAdminPage--player .cdPlayerRow {
+  min-height: 62px !important;
+  border: 0 !important;
+  border-top: 1px solid var(--cd-line) !important;
+  border-radius: 0 !important;
+  padding: 10px 12px !important;
+}
+
+.campaignDetailsAdminPage--player .cdPlayerIdentity {
+  min-width: 0;
+}
+
+.campaignDetailsAdminPage--player .cdPlayerIdentity strong,
+.campaignDetailsAdminPage--player .cdPlayerIdentity small,
+.campaignDetailsAdminPage--player .cdPlayerRow > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 1180px) {
+  .campaignDetailsAdminPage--owner {
+    padding-inline: 20px !important;
+  }
+
+  .appContentInner:has(.campaignDetailsAdminPage--owner) .appPageHeader {
+    padding-inline: 20px !important;
+  }
+
+  .campaignDetailsAdminPage--owner .cdAdminHero__main,
+  .campaignDetailsAdminPage--owner .cdAdminSessionGrid,
+  .campaignDetailsAdminPage--owner .cdAdminSplit,
+  .campaignDetailsAdminPage--owner .cdAdminSplit--wide,
+  .campaignDetailsAdminPage--owner .cdAdminSettingsWorkspace,
+  .campaignDetailsAdminPage--owner .cdAdminAvailabilityWorkspace {
+    grid-template-columns: 1fr !important;
+  }
+
+  .campaignDetailsAdminPage--owner .cdAdminHeroActions {
+    justify-content: flex-start !important;
+  }
+
+  .campaignDetailsAdminPage--owner .cdAdminTabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .campaignDetailsAdminPage--player {
+    padding-inline: 20px !important;
+  }
+
+  .appContentInner:has(.campaignDetailsAdminPage--player) .appPageHeader {
+    padding-inline: 20px !important;
+  }
+
+  .campaignDetailsAdminPage--player .cdAdminHero__main,
+  .campaignDetailsAdminPage--player .cdAdminSessionGrid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .campaignDetailsAdminPage--player .cdAdminHeroActions {
+    justify-content: flex-start !important;
+  }
+
+  .campaignDetailsAdminPage--player .cdAvailabilityTable,
+  .campaignDetailsAdminPage--player .cdPlayersTable {
+    overflow-x: auto !important;
+  }
+
+  .campaignDetailsAdminPage--player .cdPlayersHead,
+  .campaignDetailsAdminPage--player .cdPlayerRow {
+    min-width: 760px !important;
+  }
+
+  .cdCharacterOverviewTable {
+    overflow-x: auto;
+  }
+
+  .cdCharacterOverviewHead,
+  .cdCharacterOverviewRow {
+    min-width: 720px;
+  }
+}
+
+@media (max-width: 780px) {
+  .campaignDetailsAdminPage--owner {
+    padding-inline: 14px !important;
+  }
+
+  .appContentInner:has(.campaignDetailsAdminPage--owner) .appPageHeader {
+    padding-inline: 14px !important;
+  }
+
+  .campaignDetailsAdminPage--owner .cdAdminHero__main {
+    grid-template-columns: 72px minmax(0, 1fr) !important;
+  }
+
+  .campaignDetailsAdminPage--owner .cdAdminCover {
+    width: 72px !important;
+    height: 72px !important;
+  }
+
+  .campaignDetailsAdminPage--owner .cdAdminHeroActions {
+    grid-column: 1 / -1;
+  }
+
+  .campaignDetailsAdminPage--owner .cdAdminTabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .campaignDetailsAdminPage--owner .cdSessionNext__body,
+  .campaignDetailsAdminPage--owner .cdCharacterRow {
+    grid-template-columns: 1fr !important;
+  }
+
+  .campaignDetailsAdminPage--player {
+    padding-inline: 14px !important;
+  }
+
+  .appContentInner:has(.campaignDetailsAdminPage--player) .appPageHeader {
+    padding-inline: 14px !important;
+  }
+
+  .campaignDetailsAdminPage--player .cdAdminHero__main {
+    grid-template-columns: 72px minmax(0, 1fr) !important;
+  }
+
+  .campaignDetailsAdminPage--player .cdAdminCover {
+    width: 72px !important;
+    height: 72px !important;
+  }
+
+  .campaignDetailsAdminPage--player .cdAdminHeroActions {
+    grid-column: 1 / -1;
+  }
+
+  .campaignDetailsAdminPage--player .cdAdminTabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .campaignDetailsAdminPage--player .cdSessionNext__body,
+  .campaignDetailsAdminPage--player .cdCharacterRow {
+    grid-template-columns: 1fr !important;
+  }
+
+  .campaignDetailsAdminPage--player .cdAvailabilityWeekEditor {
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+  }
+
+  .campaignDetailsAdminPage--player .cdAvailabilityLegend .cdAdminPrimaryBtn {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .cdSettingsCoverEditor {
+    grid-template-columns: 1fr;
+  }
+
+  .cdSettingsCoverPreview {
+    width: 96px !important;
+    height: 96px !important;
+  }
+}
+
+.cdMemberAvatar,
+.cdCharacterPlayerAvatar {
+  width: 42px !important;
+  height: 42px !important;
+  display: grid !important;
+  place-items: center !important;
+  flex: 0 0 auto !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(23, 138, 99, 0.22) !important;
+  border-radius: 999px !important;
+  color: #0f7356 !important;
+  background: #e8f7f0 !important;
+  font-weight: 950 !important;
+}
+
+.cdMemberAvatar img,
+.cdCharacterPlayerAvatar img,
+.cdCharacterPortrait img {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  object-fit: cover !important;
+  border-radius: inherit !important;
+}
+
+.cdCharacterPortrait {
+  overflow: hidden !important;
+}
+
+.cdCharacterPortrait.has-image {
+  background: #e8f7f0 !important;
+}
+
+.cdAdminCoverButton {
+  cursor: pointer !important;
+  border: 5px solid #ffffff !important;
+  background-color: #eef7f2 !important;
+}
+
+.cdAdminCoverButton:hover,
+.cdAdminCoverButton:focus-visible {
+  outline: 3px solid rgba(31, 122, 98, 0.28) !important;
+  outline-offset: 3px !important;
+}
+
+.cdAdminBannerButton {
+  position: absolute !important;
+  right: 18px !important;
+  bottom: 14px !important;
+  min-height: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  border: 1px solid rgba(31, 122, 98, 0.26) !important;
+  border-radius: 10px !important;
+  padding: 0 12px !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+  color: #17634f !important;
+  font-weight: 900 !important;
+  box-shadow: 0 12px 28px rgba(18, 43, 35, 0.12) !important;
+}
+
+.cdMediaModal {
+  max-width: 760px !important;
+}
+
+.cdConfirmOverlay {
+  background: rgba(244, 249, 246, 0.72) !important;
+  backdrop-filter: none !important;
+}
+
+.cdAdminHero__main.has-banner::before {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.52) 44%, rgba(255,255,255,0.2) 100%),
+    linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.36)) !important;
+  backdrop-filter: none !important;
+}
+
+.cdAdminHero__main > .cdAdminBannerButton:not(.cdAdminBannerButton--inline) {
+  display: none !important;
+}
+
+.cdAdminHeroActions .cdAdminBannerButton {
+  position: static !important;
+  width: 100% !important;
+  min-height: 34px !important;
+  justify-content: center !important;
+  margin-top: -4px !important;
+  box-shadow: none !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAdminHeroActions {
+  display: grid !important;
+  grid-template-columns: repeat(3, max-content) !important;
+  align-items: center !important;
+  justify-content: end !important;
+  gap: 8px !important;
+}
+
+.campaignDetailsAdminPage--owner .cdAdminHeroActions .cdAdminBannerButton {
+  grid-column: 3 !important;
+  grid-row: 2 !important;
+}
+
+.cdAdminSettingsWorkspace .cdSettingsMediaBlock {
+  display: none !important;
 }

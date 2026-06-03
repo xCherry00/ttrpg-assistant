@@ -401,6 +401,14 @@ export default function InitiativePage() {
     return Math.max(0, Math.min(100, Math.round((hp / maxHp) * 100)));
   }
 
+  function hpTone(percent) {
+    if (percent <= 0) return "empty";
+    if (percent <= 10) return "critical";
+    if (percent <= 25) return "low";
+    if (percent <= 50) return "medium";
+    return "healthy";
+  }
+
   const combatSummary = useMemo(() => {
     const total = orderedParticipants.length;
     const npc = orderedParticipants.filter((item) => item.type !== "PLAYER").length;
@@ -524,7 +532,7 @@ export default function InitiativePage() {
                             />
                             <span className="initiativeHpInlineMax">/ {participant.maxHp ?? "-"}</span>
                           </label>
-                          {hpBar !== null ? <span className="initiativeHpBar"><i style={{ width: `${hpBar}%` }} /></span> : null}
+                          {hpBar !== null ? <span className={`initiativeHpBar is-${hpTone(hpBar)}`}><i style={{ width: `${hpBar}%` }} /></span> : null}
                         </div>
                       </td>
                       <td>

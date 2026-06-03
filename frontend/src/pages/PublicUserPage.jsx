@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { blockUser, getPublicProfile, removeFriend, sendFriendRequest } from "../api/social";
 import { startDirectConversation } from "../api/messages";
+import { imagePlaceholder } from "../data/imageLibrary";
 import "../styles/profile.css";
 
 const ICONS = {
@@ -52,6 +53,10 @@ function safeText(value, fallback = "Brak") {
 function formatTag(user) {
   const tag = user?.tagCode === null || user?.tagCode === undefined ? "0000" : String(user.tagCode).padStart(4, "0");
   return `@${safeText(user?.username, "uzytkownik")}#${tag}`;
+}
+
+function profileBannerFor(user) {
+  return user?.bannerUrl || user?.profileBannerUrl || user?.bannerImageUrl || user?.coverImageUrl || imagePlaceholder("campaignBanners");
 }
 
 function formatDate(value, fallback = "Brak danych") {
@@ -141,6 +146,7 @@ export default function PublicUserPage() {
   const displayName = safeText(user?.displayName || user?.username, "Uzytkownik");
   const initial = useMemo(() => displayName.slice(0, 1).toUpperCase(), [displayName]);
   const sharedCampaignsCount = Number(user?.sharedCampaignsCount || profile?.sharedCampaignsCount || 0);
+  const mutualFriendsCount = Number(user?.mutualFriendsCount || profile?.mutualFriendsCount || 0);
 
   const achievements = useMemo(() => [
     { id: "first-campaign", title: "Pierwsza kampania", desc: "Uczestniczy w kampanii", unlocked: (profile?.campaignsCount ?? 0) >= 1 },
@@ -155,21 +161,15 @@ export default function PublicUserPage() {
 
   return (
     <div className="page profileDesk publicProfileDesk">
-      <header className="profilePageHeader">
-        <div>
-          <h1>Profil gracza</h1>
-          <p>Publiczne informacje, relacja i wspolne kampanie.</p>
-        </div>
-        <Link to="/friends" className="profileSecondaryAction">Wroc do znajomych</Link>
-      </header>
-
       {loading && <div className="profileState profileStateLight">Ladowanie profilu...</div>}
       {error && <div className="profileState profileStateLight is-error">{error}</div>}
 
       {!loading && user && (
         <div className="profileShell">
           <aside className="profileCardPanel">
-            <div className="profileBanner profileBanner--night" />
+            <div className="profileBanner profileBannerUpload" aria-label="Baner profilu">
+              <img src={profileBannerFor(user)} alt="" />
+            </div>
             <div className="profileAvatarRow">
               <div className="profileAvatarLarge" aria-label={`Avatar ${displayName}`}>
                 {user.avatarUrl ? <img src={user.avatarUrl} alt="Avatar uzytkownika" /> : initial}
@@ -178,6 +178,11 @@ export default function PublicUserPage() {
             </div>
 
             <div className="profileCardBody">
+              <div className="profilePublicIntro">
+                <h1>Profil gracza</h1>
+                <p>Publiczne informacje, relacja i wspolne kampanie.</p>
+                <Link to="/friends" className="profileSecondaryAction">Wroc do znajomych</Link>
+              </div>
               <h2>{displayName}</h2>
               <p className="profileHandle">{formatTag(user)}</p>
               <p className="profileQuote">{safeText(user.bio, "Ten uzytkownik nie dodal jeszcze opisu.")}</p>
@@ -241,6 +246,19 @@ export default function PublicUserPage() {
                     {relation === "NONE" && <button type="button" className="profileSecondaryAction" disabled={busy} onClick={() => runAction(() => sendFriendRequest(token, user.id))}><Icon name="friends" /> Dodaj znajomego</button>}
                     {relation === "FRIENDS" && <button type="button" className="profileSecondaryAction" disabled={busy} onClick={() => runAction(() => removeFriend(token, user.id))}><Icon name="friends" /> Usun znajomego</button>}
                     {(relation === "NONE" || relation === "OUTGOING_REQUEST" || relation === "INCOMING_REQUEST" || relation === "FRIENDS") && <button type="button" className="profileSecondaryAction is-danger" disabled={busy} onClick={() => runAction(() => blockUser(token, user.id))}><Icon name="block" /> Zablokuj</button>}
+                  </div>
+                </article>
+                <article className="profileContentPanel">
+                  <header className="profileSectionHeader"><h2>Relacje</h2></header>
+                  <div className="profileRelationStats">
+                    <div>
+                      <span>Wspolne kampanie</span>
+                      <strong>{sharedCampaignsCount}</strong>
+                    </div>
+                    <div>
+                      <span>Wspolni znajomi</span>
+                      <strong>{mutualFriendsCount}</strong>
+                    </div>
                   </div>
                 </article>
                 <article className="profileContentPanel">

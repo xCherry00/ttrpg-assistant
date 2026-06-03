@@ -151,7 +151,7 @@ public class SocialService {
         }
 
         return new PublicProfileResponse(
-                buildUserCard(viewer, target),
+                withSuggestion(buildUserCard(viewer, target), null, viewerUserId.equals(target.getId()) ? 0 : countMutualFriends(viewerUserId, target.getId())),
                 friendshipRepository.countByIdUserId(target.getId()),
                 campaignRepository.countVisibleForUser(target.getId()),
                 campaignRepository.countByOwnerUserIdAndDeletedAtIsNull(target.getId())
@@ -276,6 +276,8 @@ public class SocialService {
                 target.getUsername(),
                 target.getTagCode(),
                 displayNameFor(target),
+                target.getAvatarUrl(),
+                target.getProfileBannerUrl(),
                 target.getBio(),
                 target.getFavoriteSystem(),
                 target.getRole().name(),
@@ -295,6 +297,8 @@ public class SocialService {
                 base.username(),
                 base.tagCode(),
                 base.displayName(),
+                base.avatarUrl(),
+                base.profileBannerUrl(),
                 base.bio(),
                 base.favoriteSystem(),
                 base.role(),

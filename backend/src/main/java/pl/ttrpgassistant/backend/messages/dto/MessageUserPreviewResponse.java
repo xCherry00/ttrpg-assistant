@@ -6,6 +6,8 @@ public record MessageUserPreviewResponse(
         String username,
         int tagCode,
         String displayName,
+        String avatarUrl,
+        String profileBannerUrl,
         String activityLabel
 ) {
 }

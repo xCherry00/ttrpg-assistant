@@ -26,9 +26,5 @@ export async function getCompendiumList(token, systemCode, category) {
 }
 
 export async function getCompendiumDetail(token, systemCode, category, index) {
-  if (systemCode === "dnd5e" && category === "conditions") {
-    const listPayload = await getCompendiumList(token, systemCode, category);
-    return listPayload.results.find((item) => item.index === index) || null;
-  }
-  return http(`/api/compendium/${encodeURIComponent(systemCode)}/${encodeURIComponent(category)}/${encodeURIComponent(index)}`, { token });
+  return http(`/api/compendium/${encodeURIComponent(systemCode)}/${encodeURIComponent(category)}/${encodeURIComponent(index)}/detail`, { token });
 }

@@ -1,7 +1,7 @@
 import Sidebar from "./Sidebar";
 import AccountMenu from "./AccountMenu";
 import NotificationBell from "./NotificationBell";
-import { Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 
 const PAGE_META = [
   { match: (path) => path === "/dashboard", title: "Dashboard", description: "Panel główny aplikacji TTRPG Assistant." },
@@ -28,6 +28,8 @@ export default function AppShell() {
   const location = useLocation();
   const isDashboard = location.pathname === "/dashboard";
   const pageMeta = resolvePageMeta(location.pathname);
+  const isCampaignDetails = /^\/campaigns\/[^/]+$/.test(location.pathname);
+  const isLiveSession = /^\/campaigns\/[^/]+\/sessions\/[^/]+\/live$/.test(location.pathname);
 
   return (
     <div className={`appLayout${isDashboard ? " appLayout--dashboard" : ""}`}>
@@ -44,8 +46,16 @@ export default function AppShell() {
             <div className="appContentInner">
               {pageMeta ? (
                 <header className="appPageHeader" aria-label="Nagłówek strony">
-                  <h1 className="appPageHeader__title">{pageMeta.title}</h1>
-                  <p className="appPageHeader__subtitle">{pageMeta.description}</p>
+                  {isLiveSession ? (
+                    <div id="live-session-header-slot" className="appPageHeaderLiveSlot" />
+                  ) : isCampaignDetails ? (
+                    <Link className="appPageHeaderBack" to="/campaigns">← Powrót do kampanii</Link>
+                  ) : (
+                    <>
+                      <h1 className="appPageHeader__title">{pageMeta.title}</h1>
+                      <p className="appPageHeader__subtitle">{pageMeta.description}</p>
+                    </>
+                  )}
                 </header>
               ) : null}
               <Outlet />

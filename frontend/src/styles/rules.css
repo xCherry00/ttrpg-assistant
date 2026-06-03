@@ -334,3 +334,57 @@
     padding: 22px;
   }
 }
+
+.rulesReaderPanel .rulesAccordion {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  overflow: visible !important;
+}
+
+.rulesReaderPanel .rulesAccordionItem {
+  border-top: 1px solid rgba(25, 83, 68, 0.1);
+}
+
+.rulesReaderPanel .rulesAccordionItem:first-child {
+  border-top: 0;
+}
+
+.rulesReaderPanel .rulesAccordionItem + .rulesAccordionItem {
+  border-top: 1px solid rgba(25, 83, 68, 0.1);
+}
+
+.rulesReaderPanel .rulesAccordionBody {
+  background: transparent !important;
+}
+
+.appContentInner > .rulesPage.rulesPage,
+.rulesPage.rulesPage {
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
+
+.rulesPage .rulesContainer {
+  height: 100% !important;
+  min-height: 0 !important;
+  align-items: stretch !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
+
+.rulesPage .rulesSystemFilter,
+.rulesPage .rulesReaderPanel {
+  height: 100% !important;
+  max-height: none !important;
+}
+
+.rulesPage .rulesSystemFilter {
+  overflow: hidden !important;
+}
+
+.rulesPage .rulesReaderPanel {
+  overflow: auto !important;
+}

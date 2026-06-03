@@ -10,6 +10,7 @@ public class SafeImageOrHttpUrlValidator implements ConstraintValidator<SafeImag
 
     private static final Pattern HTTP_URL = Pattern.compile("^https?://.+", Pattern.CASE_INSENSITIVE);
     private static final Pattern DATA_IMAGE = Pattern.compile("^data:image/(png|jpeg|jpg|webp|svg\\+xml)(;base64)?,.+", Pattern.CASE_INSENSITIVE);
+    private static final Pattern APP_ASSET = Pattern.compile("^/assets/[a-z0-9_./-]+\\.(png|jpe?g|webp|svg)$", Pattern.CASE_INSENSITIVE);
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
@@ -20,6 +21,6 @@ public class SafeImageOrHttpUrlValidator implements ConstraintValidator<SafeImag
         String normalized = trimmed.toLowerCase(Locale.ROOT);
         if (normalized.startsWith("javascript:")) return false;
 
-        return HTTP_URL.matcher(trimmed).matches() || DATA_IMAGE.matcher(trimmed).matches();
+        return HTTP_URL.matcher(trimmed).matches() || DATA_IMAGE.matcher(trimmed).matches() || APP_ASSET.matcher(trimmed).matches();
     }
 }

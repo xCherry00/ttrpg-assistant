@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { apiFetch } from "../lib/api";
+import { http } from "../api/http";
 import "../styles/glossary.css";
 
 function categoryLabel(value) {
@@ -39,7 +39,7 @@ export default function GlossaryPage() {
       setLoading(true);
       setError("");
       try {
-        const data = await apiFetch("/api/glossary");
+        const data = await http("/api/glossary");
         const arr = Array.isArray(data) ? data : [];
         if (!cancelled) {
           setTerms(arr);

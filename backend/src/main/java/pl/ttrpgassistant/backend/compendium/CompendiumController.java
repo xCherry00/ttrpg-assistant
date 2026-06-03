@@ -36,4 +36,9 @@ public class CompendiumController {
     public Map<String, Object> detail(@PathVariable String systemCode, @PathVariable String category, @PathVariable String index) {
         return compendiumService.detail(systemCode, category, index);
     }
+
+    @GetMapping("/{systemCode}/{category}/{index}/detail")
+    public Map<String, Object> explicitDetail(@PathVariable String systemCode, @PathVariable String category, @PathVariable String index) {
+        return compendiumService.detail(systemCode, category, index);
+    }
 }

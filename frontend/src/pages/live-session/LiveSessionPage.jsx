@@ -1,15 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 import {
-  cancelRequestedRoll,
-  createRequestedRoll,
   finishCampaignSession,
-  fulfillRequestedRoll,
   getCampaignById,
   getCampaignCharacters,
-  getCampaignDiceRolls,
-  getRequestedRolls,
   getSessionAttendance,
   getSessionLiveState,
   listCampaignMembers,
@@ -18,6 +14,7 @@ import {
   updateSessionLiveState,
 } from "../../api/campaigns";
 import ImageUpload from "../../components/common/ImageUpload";
+import { imagePlaceholder } from "../../data/imageLibrary";
 import "../../styles/live-session.css";
 
 const SCENE_LIBRARY_VERSION = 1;
@@ -92,6 +89,14 @@ function sceneStorageKey(campaignId, sessionId) {
   return `ttrpg.liveScenes.v${SCENE_LIBRARY_VERSION}.${campaignId}.${sessionId}`;
 }
 
+function selectedCharacterStorageKey(campaignId, sessionId) {
+  return `ttrpg.liveSessionCharacter.${campaignId}.${sessionId}`;
+}
+
+function characterIdValue(character) {
+  return String(firstDefined(character?.characterId, character?.id, ""));
+}
+
 function readSceneLibrary(campaignId, sessionId) {
   if (typeof window === "undefined") return [];
   try {
@@ -153,6 +158,15 @@ function scenePayload(scene) {
   };
 }
 
+function emptyScenePayload() {
+  return {
+    sceneTitle: "",
+    sceneImageUrl: "",
+    sceneDescription: "",
+    activeEncounterId: null,
+  };
+}
+
 function mergeLiveSceneIntoLibrary(campaignId, sessionId, scenes, liveState) {
   const liveScene = sceneFromLiveState(liveState);
   if (!liveScene) return { scenes, activeSceneId: "" };
@@ -193,10 +207,11 @@ function attendanceKind(status) {
   return "unknown";
 }
 
-function Avatar({ name, src, size = "md" }) {
+function Avatar({ name, src, size = "md", fallbackSrc = "" }) {
   const initial = String(name || "?").trim().charAt(0).toUpperCase() || "?";
-  return src ? (
-    <img className={`liveSessionAvatar liveSessionAvatar--${size}`} src={src} alt={name || "Avatar"} onError={(event) => { event.currentTarget.style.display = "none"; }} />
+  const imageSrc = src || fallbackSrc;
+  return imageSrc ? (
+    <img className={`liveSessionAvatar liveSessionAvatar--${size}`} src={imageSrc} alt={name || "Avatar"} onError={(event) => { event.currentTarget.style.display = "none"; }} />
   ) : (
     <span className={`liveSessionAvatar liveSessionAvatar--${size}`} aria-hidden="true">{initial}</span>
   );
@@ -219,7 +234,7 @@ function Icon({ name }) {
   return null;
 }
 
-function LiveSessionHeader({ campaign, session, isGmView, isPlanned, isInProgress, isFinished, duration, campaignId, busy, onStart, onFinish }) {
+function LiveSessionHeader({ campaign, session, activeScene, isGmView, isPlanned, isInProgress, isFinished, duration, campaignId, busy, onStart, onFinish }) {
   const campaignTitle = firstDefined(campaign?.title, campaign?.name, "Kampania");
   const sessionTitle = firstDefined(session?.title, session?.name, session?.number != null ? `Sesja ${session.number}` : "", session?.id ? `Sesja ${session.id}` : "", "Sesja aktywna");
   const gmName = firstDefined(campaign?.ownerDisplayName, campaign?.ownerUsername, campaign?.gmName, "MG");
@@ -247,22 +262,15 @@ function LiveSessionHeader({ campaign, session, isGmView, isPlanned, isInProgres
   );
 }
 
-function ScenePanel({ isGmView, isFinished, activeScene, playerCanSeeScene, onOpenEdit, onOpenChange, onOpenAdd, onPublish, publishing }) {
+function ScenePanel({ isGmView, isFinished, activeScene, playerCanSeeScene, onOpenChange, onOpenAdd }) {
   const visibleScene = isGmView || playerCanSeeScene ? activeScene : null;
   const hasScene = sceneHasContent(visibleScene);
   const sceneTitle = firstDefined(visibleScene?.title, isGmView ? "Brak aktywnej sceny" : "Scena niedostępna");
-  const sceneDescription = firstDefined(
-    visibleScene?.description,
-    isGmView ? "Dodaj opis sceny, aby gracze mieli kontekst aktualnej lokacji." : "MG nie udostępnił jeszcze aktywnej sceny."
-  );
   const imageUrl = safeImageUrl(visibleScene?.imageUrl);
-  const canPublish = isGmView && !isFinished && sceneHasContent(activeScene) && !activeScene?.visibleToPlayers;
-
   return (
     <section className="liveSessionPanel liveSessionScenePanel" aria-labelledby="scene-panel-title">
       <div className="liveSessionPanelHeader">
         <h2 id="scene-panel-title">Panel sceny</h2>
-        {hasScene ? <span className="liveSessionSoftBadge">Aktywna scena</span> : <span className="liveSessionSoftBadge is-muted">Brak sceny</span>}
       </div>
 
       <div className="liveSessionSceneMedia">
@@ -270,78 +278,90 @@ function ScenePanel({ isGmView, isFinished, activeScene, playerCanSeeScene, onOp
           <img src={imageUrl} alt={sceneTitle} onError={(event) => { event.currentTarget.style.display = "none"; }} />
         ) : (
           <div className="liveSessionScenePlaceholder">
-            <strong>{isGmView ? "Dodaj scenę" : "Scena nie została udostępniona"}</strong>
-            <span>{isGmView ? "Dodaj obraz sceny, mapę albo ilustrację lokacji." : "MG nie udostępnił jeszcze aktywnej sceny."}</span>
+            <strong>{hasScene ? "Brak obrazu sceny" : isGmView ? "Brak aktywnej sceny" : "Scena niedostępna"}</strong>
+            <span>{hasScene ? "Ta scena nie ma jeszcze przypisanego obrazu." : isGmView ? "Dodaj scenę, aby pokazać graczom obraz albo mapę." : "MG nie udostępnił jeszcze aktywnej sceny."}</span>
           </div>
         )}
-        {imageUrl ? <button className="liveSessionIconButton" type="button" aria-label="Powiększ scenę"><Icon name="expand" /></button> : null}
-      </div>
-
-      <div className="liveSessionSceneBody">
-        <div className="liveSessionSceneCopy">
-          <div className="liveSessionSceneTitleLine">
-            <h3>{sceneTitle}</h3>
-            {hasScene ? <span className="liveSessionActiveBadge">Aktywna scena</span> : null}
-            {activeScene?.visibleToPlayers ? <span className="liveSessionVisibleBadge">Widoczna dla graczy</span> : null}
-          </div>
-          <p>{sceneDescription}</p>
-        </div>
-        {(visibleScene?.location || visibleScene?.mood) ? (
-          <div className="liveSessionSceneMeta" aria-label="Kontekst sceny">
-            {visibleScene.location ? <div><Icon name="pin" /><span>Lokalizacja</span><strong>{visibleScene.location}</strong></div> : null}
-            {visibleScene.mood ? <div><Icon name="mood" /><span>Nastrój</span><strong>{visibleScene.mood}</strong></div> : null}
-          </div>
-        ) : null}
       </div>
 
       {isGmView ? (
         <div className="liveSessionSceneActions">
-          <button className="campaignDetailsPrimaryBtn" type="button" onClick={onOpenEdit} disabled={isFinished || !sceneHasContent(activeScene)}><Icon name="edit" /> Edytuj scenę</button>
           <button className="campaignDetailsGhostBtn" type="button" onClick={onOpenChange} disabled={isFinished}><Icon name="swap" /> Zmień scenę</button>
-          <button className="campaignDetailsGhostBtn" type="button" onClick={onOpenAdd} disabled={isFinished}><Icon name="plus" /> Dodaj scenę</button>
-          <button className="campaignDetailsGhostBtn" type="button" onClick={onPublish} disabled={!canPublish || publishing}><Icon name="eye" /> {activeScene?.visibleToPlayers ? "Widoczna dla graczy" : "Pokaż graczom"}</button>
+          <button className="campaignDetailsPrimaryBtn" type="button" onClick={onOpenAdd} disabled={isFinished}><Icon name="plus" /> Dodaj scenę</button>
         </div>
       ) : null}
     </section>
   );
 }
 
-function PlayerStrip({ characters, members, attendance }) {
-  const memberById = useMemo(() => new Map(members.map((member) => [Number(member.id), member])), [members]);
+function PlayerStrip({ characters, members, attendance, selectedCharacterId, currentUserId }) {
+  const characterByUserId = useMemo(() => {
+    const map = new Map();
+    characters.forEach((character) => {
+      const userId = Number(character?.userId);
+      if (Number.isFinite(userId) && !map.has(userId)) map.set(userId, character);
+    });
+    return map;
+  }, [characters]);
   const attendanceByUserId = useMemo(() => new Map(attendance.map((item) => [Number(item.userId), item])), [attendance]);
-  const visible = characters.slice(0, 8);
-  const knownStatuses = visible.map((character) => attendanceKind(attendanceByUserId.get(Number(character?.userId))?.status));
+  const participants = useMemo(() => {
+    if (members.length) {
+      return members.map((member) => {
+        const userId = Number(member?.userId ?? member?.id);
+        const selectedCharacter = String(userId) === String(currentUserId)
+          ? characters.find((character) => characterIdValue(character) === String(selectedCharacterId)) || null
+          : null;
+        return {
+          id: `member-${userId || memberDisplayName(member)}`,
+          member,
+          character: selectedCharacter || characterByUserId.get(userId) || null,
+          userId,
+        };
+      });
+    }
+    return characters.map((character) => {
+      const userId = Number(character?.userId);
+      return {
+        id: `character-${character?.characterId || displayNameFromCharacter(character)}`,
+        member: null,
+        character,
+        userId,
+      };
+    });
+  }, [members, characters, characterByUserId, selectedCharacterId, currentUserId]);
+  const knownStatuses = participants.map((item) => attendanceKind(attendanceByUserId.get(Number(item.userId))?.status));
   const onlineCount = knownStatuses.filter((status) => status === "online").length;
   const knownCount = knownStatuses.filter((status) => status !== "unknown").length;
 
   return (
     <section className="liveSessionPanel liveSessionPlayersPanel" aria-labelledby="players-title">
       <div className="liveSessionPanelHeader">
-        <h2 id="players-title">Gracze / Postacie</h2>
-        {visible.length ? (
-          knownCount ? <span className="liveSessionOnlineCount"><span />{onlineCount} z {visible.length} online</span> : <span className="liveSessionOnlineCount is-muted"><span />Obecność nieznana</span>
+        <h2 id="players-title">Aktywni gracze / postacie</h2>
+        {participants.length ? (
+          knownCount ? <span className="liveSessionOnlineCount"><span />{onlineCount} z {participants.length} obecnych</span> : <span className="liveSessionOnlineCount is-muted"><span />Obecność nieznana</span>
         ) : null}
       </div>
-      {visible.length ? (
+      {participants.length ? (
         <div className="liveSessionPlayerStrip">
-          {visible.map((character) => {
-            const name = displayNameFromCharacter(character);
-            const member = memberById.get(Number(character?.userId));
-            const status = attendanceKind(attendanceByUserId.get(Number(character?.userId))?.status);
+          {participants.map(({ id, member, character, userId }) => {
+            const isCurrentUser = String(userId) === String(currentUserId);
+            const name = character ? displayNameFromCharacter(character) : isCurrentUser ? "Nie wybrano postaci" : "Brak przypisanej postaci";
+            const playerName = memberDisplayName(member);
+            const status = attendanceKind(attendanceByUserId.get(Number(userId))?.status);
             return (
-              <article className="liveSessionPlayerCard" key={character.characterId || name}>
-                <div className="liveSessionAvatarWrap"><Avatar name={name} src={character.portraitUrl} /><span className={`liveSessionOnlineDot liveSessionOnlineDot--${status}`} /></div>
+              <article className="liveSessionPlayerCard" key={id}>
+                <div className="liveSessionAvatarWrap"><Avatar name={name || playerName} src={character?.portraitUrl || member?.avatarUrl} fallbackSrc={character ? imagePlaceholder("characterAvatars") : ""} /><span className={`liveSessionOnlineDot liveSessionOnlineDot--${status}`} /></div>
                 <div>
-                  <span>{memberDisplayName(member)}</span>
+                  <span>{playerName}</span>
                   <strong>{name}</strong>
-                  <small>{archetypeFromCharacter(character)}</small>
+                  <small>{character ? archetypeFromCharacter(character) : "Nie wybrano postaci"}</small>
                 </div>
               </article>
             );
           })}
         </div>
       ) : (
-        <p className="liveSessionPlaceholder">Brak przypisanych postaci w kampanii.</p>
+        <p className="liveSessionPlaceholder">Brak aktywnych graczy w tej sesji.</p>
       )}
     </section>
   );
@@ -517,35 +537,21 @@ function SceneFormFields({ draft, setDraft }) {
         <input value={draft.imageUrl} onChange={(event) => setDraft((prev) => ({ ...prev, imageUrl: event.target.value }))} />
       </label>
       <ImageUpload
-        label="Wgraj obraz sceny"
+        label="Obraz sceny"
         value={draft.imageUrl}
+        recommendedSize="Najlepiej: 1920 x 1080 px, szeroki kadr 16:9."
         onChange={(url) => setDraft((prev) => ({ ...prev, imageUrl: url }))}
         onRemove={() => setDraft((prev) => ({ ...prev, imageUrl: "" }))}
         previewAlt="Obraz sceny"
+        autoUpload
       />
-      <label className="campaignField liveSessionSceneWideField">
-        <span>Opis sceny</span>
-        <textarea value={draft.description} onChange={(event) => setDraft((prev) => ({ ...prev, description: event.target.value }))} rows={4} maxLength={5000} />
-      </label>
-      <label className="campaignField">
-        <span>Lokalizacja</span>
-        <input value={draft.location} onChange={(event) => setDraft((prev) => ({ ...prev, location: event.target.value }))} maxLength={160} />
-      </label>
-      <label className="campaignField">
-        <span>Nastrój</span>
-        <input value={draft.mood} onChange={(event) => setDraft((prev) => ({ ...prev, mood: event.target.value }))} maxLength={120} />
-      </label>
-      <label className="liveSessionSceneVisibility liveSessionSceneWideField">
-        <input type="checkbox" checked={draft.visibleToPlayers} onChange={(event) => setDraft((prev) => ({ ...prev, visibleToPlayers: event.target.checked }))} />
-        <span>Widoczna dla graczy po zapisaniu aktywnej sceny</span>
-      </label>
     </div>
   );
 }
 
-function SceneModal({ mode, draft, setDraft, scenes, activeSceneId, saving, onClose, onSave, onSelect, onAddFromEmpty }) {
+function SceneModal({ mode, draft, setDraft, scenes, activeSceneId, saving, onClose, onSave, onSelect, onDelete, onAddFromEmpty }) {
   if (!mode) return null;
-  const title = mode === "edit" ? "Edytuj scenę" : mode === "add" ? "Dodaj scenę" : "Zmień scenę";
+  const title = mode === "add" ? "Dodaj scenę" : "Zmień scenę";
 
   return (
     <div className="liveSessionModalOverlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
@@ -563,16 +569,22 @@ function SceneModal({ mode, draft, setDraft, scenes, activeSceneId, saving, onCl
                   {scene.imageUrl ? <img src={scene.imageUrl} alt="" onError={(event) => { event.currentTarget.style.display = "none"; }} /> : <span className="liveSessionSceneThumbEmpty">Brak obrazu</span>}
                   <div>
                     <strong>{firstDefined(scene.title, "Bez nazwy")}</strong>
-                    <p>{firstDefined(scene.description, "Brak opisu sceny.")}</p>
                     <small>{scene.id === activeSceneId ? "Aktualna scena" : scene.visibleToPlayers ? "Widoczna dla graczy" : "Ukryta"}</small>
                   </div>
-                  <button className="campaignDetailsPrimaryBtn" type="button" onClick={() => onSelect(scene)} disabled={saving || scene.id === activeSceneId}>Ustaw jako aktywną</button>
+                  <div className="liveSessionSceneOptionActions">
+                    {scene.id === activeSceneId ? (
+                      <span className="liveSessionSceneActiveStatus">Aktywna</span>
+                    ) : (
+                      <button className="campaignDetailsPrimaryBtn" type="button" onClick={() => onSelect(scene)} disabled={saving}>Ustaw jako aktywną</button>
+                    )}
+                    <button className="campaignDetailsGhostBtn liveSessionSceneDeleteBtn" type="button" onClick={() => onDelete(scene)} disabled={saving}>Usuń</button>
+                  </div>
                 </article>
               ))}
             </div>
           ) : (
             <div className="liveSessionModalEmpty">
-              <p>Brak przygotowanych scen kampanii.</p>
+              <p>Brak przygotowanych scen.</p>
               <button className="campaignDetailsPrimaryBtn" type="button" onClick={onAddFromEmpty}>Dodaj scenę</button>
             </div>
           )
@@ -581,10 +593,35 @@ function SceneModal({ mode, draft, setDraft, scenes, activeSceneId, saving, onCl
             <SceneFormFields draft={draft} setDraft={setDraft} />
             <div className="liveSessionModalActions">
               <button className="campaignDetailsGhostBtn" type="button" onClick={onClose}>Anuluj</button>
-              <button className="campaignDetailsPrimaryBtn" type="submit" disabled={saving}>{mode === "edit" ? "Zapisz scenę" : "Dodaj scenę"}</button>
+              <button className="campaignDetailsPrimaryBtn" type="submit" disabled={saving}>Zapisz scenę</button>
             </div>
           </form>
         )}
+      </section>
+    </div>
+  );
+}
+
+function CharacterChoiceModal({ characters, onSelect }) {
+  if (!characters.length) return null;
+  return (
+    <div className="liveSessionModalOverlay liveSessionCharacterChoiceOverlay" role="presentation">
+      <section className="liveSessionModal liveSessionCharacterChoiceModal" role="dialog" aria-modal="true" aria-labelledby="character-choice-title">
+        <div className="liveSessionModalHeader">
+          <h2 id="character-choice-title">Wybierz postać</h2>
+        </div>
+        <div className="liveSessionCharacterChoiceList">
+          {characters.map((character) => {
+            const id = characterIdValue(character);
+            return (
+              <button className="liveSessionCharacterChoiceCard" type="button" key={id} onClick={() => onSelect(id)}>
+                <Avatar name={displayNameFromCharacter(character)} src={character?.portraitUrl} fallbackSrc={imagePlaceholder("characterAvatars")} />
+                <span>{displayNameFromCharacter(character)}</span>
+                <small>{archetypeFromCharacter(character)}</small>
+              </button>
+            );
+          })}
+        </div>
       </section>
     </div>
   );
@@ -601,71 +638,41 @@ export default function LiveSessionPage() {
   const [campaignCharacters, setCampaignCharacters] = useState([]);
   const [members, setMembers] = useState([]);
   const [attendance, setAttendance] = useState([]);
-  const [, setRecentRolls] = useState([]);
   const [liveState, setLiveState] = useState(null);
   const [sceneLibrary, setSceneLibrary] = useState([]);
   const [activeSceneId, setActiveSceneId] = useState("");
+  const [activeScene, setActiveScene] = useState(null);
   const [sceneModal, setSceneModal] = useState(null);
   const [sceneDraft, setSceneDraft] = useState(EMPTY_SCENE_DRAFT);
   const [savingScene, setSavingScene] = useState(false);
+  const [selectedSessionCharacterId, setSelectedSessionCharacterId] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return window.localStorage.getItem(selectedCharacterStorageKey(campaignId, sessionId)) || "";
+  });
   const [notice, setNotice] = useState("");
   const [sessionActionBusy, setSessionActionBusy] = useState(false);
-  const [requestedRolls, setRequestedRolls] = useState([]);
   const [requestedActionBusy, setRequestedActionBusy] = useState(false);
   const [showAdvancedRequested, setShowAdvancedRequested] = useState(false);
-  const [showQuickRollPanel, setShowQuickRollPanel] = useState(false);
   const [targetMode, setTargetMode] = useState("ALL");
   const [selectedCharacterIds, setSelectedCharacterIds] = useState([]);
   const [selectedUserIds, setSelectedUserIds] = useState([]);
   const [now, setNow] = useState(Date.now());
+  const [headerTarget, setHeaderTarget] = useState(null);
 
   const isGmView = Boolean(campaign?.owner);
-  const myMember = members.find((member) => member?.self) || null;
-  const myUserId = myMember?.id ?? null;
-
-  const myCharacters = useMemo(() => {
-    if (myUserId == null) return [];
-    return campaignCharacters.filter((character) => Number(character?.userId) === Number(myUserId));
-  }, [campaignCharacters, myUserId]);
-
-  const myCharacterIds = useMemo(() => new Set(myCharacters.map((character) => Number(character.characterId))), [myCharacters]);
-  const myCharacterNameSet = useMemo(() => new Set(myCharacters.map((character) => normalizeText(character.characterName))), [myCharacters]);
-
   const isPlanned = session?.status === "PLANNED";
   const isInProgress = session?.status === "IN_PROGRESS";
   const isFinished = session?.status === "FINISHED";
+  const currentMember = useMemo(() => members.find((member) => member?.self || member?.currentUser || member?.me) || null, [members]);
+  const currentUserId = currentMember ? Number(currentMember.userId ?? currentMember.id) : null;
+  const availableSessionCharacters = useMemo(() => {
+    if (!currentUserId) return [];
+    return campaignCharacters.filter((character) => Number(character?.userId) === Number(currentUserId));
+  }, [campaignCharacters, currentUserId]);
+  const selectedCharacterStillAvailable = availableSessionCharacters.some((character) => characterIdValue(character) === String(selectedSessionCharacterId));
+  const shouldShowCharacterChoice = !isGmView && !isPlanned && !loading && !error && availableSessionCharacters.length > 0 && !selectedCharacterStillAvailable;
 
-  const activeScene = useMemo(() => {
-    return sceneLibrary.find((scene) => scene.id === activeSceneId) || sceneFromLiveState(liveState);
-  }, [sceneLibrary, activeSceneId, liveState]);
-
-  const playerCanSeeScene = Boolean(sceneHasContent(liveState) || activeScene?.visibleToPlayers);
-
-  const myRequestedRolls = useMemo(() => {
-    if (isGmView) return requestedRolls;
-    return requestedRolls.filter((roll) => {
-      const targetUserId = Number(roll?.targetUserId);
-      const targetCharacterId = Number(roll?.targetCharacterId);
-      if (Number.isFinite(targetUserId) && myUserId != null && targetUserId === Number(myUserId)) return true;
-      if (Number.isFinite(targetCharacterId) && myCharacterIds.has(targetCharacterId)) return true;
-      return myCharacterNameSet.has(normalizeText(roll?.characterName));
-    });
-  }, [isGmView, requestedRolls, myUserId, myCharacterIds, myCharacterNameSet]);
-
-  const fulfilledRequestedRolls = useMemo(() => requestedRolls.filter(requestedRollResolved), [requestedRolls]);
-
-  const rollStats = useMemo(() => {
-    const totals = fulfilledRequestedRolls.map(requestedRollResult).filter((value) => value != null);
-    return {
-      count: totals.length,
-      average: totals.length ? Math.round((totals.reduce((sum, n) => sum + n, 0) / totals.length) * 10) / 10 : null,
-      highest: totals.length ? Math.max(...totals) : null,
-      lowest: totals.length ? Math.min(...totals) : null,
-      success: fulfilledRequestedRolls.filter((roll) => roll.success === true && requestedRollResult(roll) != null).length,
-      failed: fulfilledRequestedRolls.filter((roll) => roll.success === false && requestedRollResult(roll) != null).length,
-      unknown: fulfilledRequestedRolls.filter((roll) => roll.success == null && requestedRollResult(roll) != null).length,
-    };
-  }, [fulfilledRequestedRolls]);
+  const playerCanSeeScene = Boolean(activeScene?.visibleToPlayers);
 
   const sessionDuration = useMemo(() => {
     if (!session || isPlanned) return "00:00:00";
@@ -679,19 +686,21 @@ export default function LiveSessionPage() {
   }, []);
 
   useEffect(() => {
+    setHeaderTarget(document.getElementById("live-session-header-slot"));
+  }, []);
+
+  useEffect(() => {
     async function load() {
       setLoading(true);
       setError("");
       try {
-        const [campaignData, sessionsData, campaignCharactersData, membersData, attendanceData, rollsData, liveStateData, requestedRollsData] = await Promise.all([
+        const [campaignData, sessionsData, campaignCharactersData, membersData, attendanceData, liveStateData] = await Promise.all([
           getCampaignById(token, campaignId),
           listCampaignSessions(token, campaignId),
           getCampaignCharacters(token, campaignId),
           listCampaignMembers(token, campaignId).catch(() => []),
           getSessionAttendance(token, campaignId, sessionId).catch(() => []),
-          getCampaignDiceRolls(token, campaignId, { sessionId, limit: 200 }).catch(() => []),
           getSessionLiveState(token, campaignId, sessionId).catch(() => null),
-          getRequestedRolls(token, campaignId, sessionId).catch(() => []),
         ]);
         const resolvedSession = Array.isArray(sessionsData)
           ? sessionsData.find((item) => String(item.id) === String(sessionId)) || null
@@ -703,11 +712,10 @@ export default function LiveSessionPage() {
         setCampaignCharacters(Array.isArray(campaignCharactersData) ? campaignCharactersData : []);
         setMembers(Array.isArray(membersData) ? membersData : []);
         setAttendance(Array.isArray(attendanceData?.responses) ? attendanceData.responses : Array.isArray(attendanceData) ? attendanceData : []);
-        setRecentRolls(Array.isArray(rollsData) ? rollsData : []);
         setLiveState(liveStateData);
         setSceneLibrary(merged.scenes);
         setActiveSceneId(merged.activeSceneId);
-        setRequestedRolls(Array.isArray(requestedRollsData) ? requestedRollsData : []);
+        setActiveScene(merged.scenes.find((scene) => scene.id === merged.activeSceneId) || sceneFromLiveState(liveStateData) || null);
       } catch (err) {
         setError(err?.message || "Nie udało się załadować sesji live.");
       } finally {
@@ -719,10 +727,8 @@ export default function LiveSessionPage() {
   }, [token, campaignId, sessionId]);
 
   async function reloadSessionData() {
-    const [sessionsData, requested, rollsData, liveStateData, attendanceData] = await Promise.all([
+    const [sessionsData, liveStateData, attendanceData] = await Promise.all([
       listCampaignSessions(token, campaignId),
-      getRequestedRolls(token, campaignId, sessionId).catch(() => []),
-      getCampaignDiceRolls(token, campaignId, { sessionId, limit: 200 }).catch(() => []),
       getSessionLiveState(token, campaignId, sessionId).catch(() => null),
       getSessionAttendance(token, campaignId, sessionId).catch(() => []),
     ]);
@@ -731,9 +737,8 @@ export default function LiveSessionPage() {
       ? sessionsData.find((item) => String(item.id) === String(sessionId)) || null
       : null;
     setSession(resolvedSession);
-    setRequestedRolls(Array.isArray(requested) ? requested : []);
-    setRecentRolls(Array.isArray(rollsData) ? rollsData : []);
     setLiveState(liveStateData || null);
+    setActiveScene((current) => current || sceneFromLiveState(liveStateData));
     setAttendance(Array.isArray(attendanceData?.responses) ? attendanceData.responses : Array.isArray(attendanceData) ? attendanceData : []);
   }
 
@@ -742,11 +747,14 @@ export default function LiveSessionPage() {
     writeSceneLibrary(campaignId, sessionId, nextScenes);
   }
 
-  async function syncActiveScene(scene, markVisible = scene?.visibleToPlayers) {
+  async function syncActiveScene(scene, markVisible = true) {
     const nextScene = { ...scene, visibleToPlayers: Boolean(markVisible), updatedAt: new Date().toISOString() };
-    const nextScenes = sceneLibrary.map((item) => item.id === nextScene.id ? nextScene : item);
+    const nextScenes = sceneLibrary.some((item) => item.id === nextScene.id)
+      ? sceneLibrary.map((item) => item.id === nextScene.id ? nextScene : item)
+      : [nextScene, ...sceneLibrary];
     persistScenes(nextScenes);
     setActiveSceneId(nextScene.id);
+    setActiveScene(nextScene);
     const updated = await updateSessionLiveState(token, campaignId, sessionId, scenePayload(nextScene));
     setLiveState(updated);
     return nextScene;
@@ -797,6 +805,13 @@ export default function LiveSessionPage() {
     setSceneModal("add");
   }
 
+  function handleSelectSessionCharacter(characterId) {
+    setSelectedSessionCharacterId(characterId);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(selectedCharacterStorageKey(campaignId, sessionId), characterId);
+    }
+  }
+
   async function handleSaveScene(event) {
     event.preventDefault();
     const scene = normalizeSceneDraft(sceneDraft);
@@ -805,17 +820,23 @@ export default function LiveSessionPage() {
     setError("");
     try {
       if (sceneModal === "add") {
-        const nextScenes = [scene, ...sceneLibrary];
+        const visibleScene = { ...scene, visibleToPlayers: true };
+        const nextScenes = [visibleScene, ...sceneLibrary];
         persistScenes(nextScenes);
-        setNotice("Scena dodana do listy.");
+        setActiveSceneId(visibleScene.id);
+        setActiveScene(visibleScene);
+        const updated = await updateSessionLiveState(token, campaignId, sessionId, scenePayload(visibleScene));
+        setLiveState(updated);
       } else {
         const sceneExists = sceneLibrary.some((item) => item.id === scene.id);
         const nextScenes = sceneExists ? sceneLibrary.map((item) => item.id === scene.id ? scene : item) : [scene, ...sceneLibrary];
         persistScenes(nextScenes);
         if (scene.id === activeSceneId || activeScene?.fromLiveState) {
+          const activeVersion = { ...scene, visibleToPlayers: true };
           const updated = await updateSessionLiveState(token, campaignId, sessionId, scenePayload(scene));
           setLiveState(updated);
           setActiveSceneId(scene.id);
+          setActiveScene(activeVersion);
         }
         setNotice("Scena zapisana.");
       }
@@ -832,11 +853,33 @@ export default function LiveSessionPage() {
     setNotice("");
     setError("");
     try {
-      await syncActiveScene(scene, scene.visibleToPlayers);
+      await syncActiveScene(scene, true);
       setSceneModal(null);
-      setNotice("Aktywna scena została zmieniona.");
     } catch (err) {
       setError(err?.message || "Nie udało się zmienić sceny.");
+    } finally {
+      setSavingScene(false);
+    }
+  }
+
+  async function handleDeleteScene(scene) {
+    if (!scene) return;
+    const sceneName = firstDefined(scene.title, "tę scenę");
+    if (typeof window !== "undefined" && !window.confirm(`Usunąć scenę „${sceneName}”?`)) return;
+    setSavingScene(true);
+    setNotice("");
+    setError("");
+    try {
+      const nextScenes = sceneLibrary.filter((item) => item.id !== scene.id);
+      persistScenes(nextScenes);
+      if (scene.id === activeSceneId) {
+        setActiveSceneId("");
+        setActiveScene(null);
+        const updated = await updateSessionLiveState(token, campaignId, sessionId, emptyScenePayload());
+        setLiveState(updated);
+      }
+    } catch (err) {
+      setError(err?.message || "Nie udało się usunąć sceny.");
     } finally {
       setSavingScene(false);
     }
@@ -988,27 +1031,41 @@ export default function LiveSessionPage() {
     </form>
   );
 
-  return (
-    <div className="page liveSessionPage">
-      <LiveSessionHeader
+  const sessionHeader = (
+    <LiveSessionHeader
         campaign={campaign}
         session={session}
         isGmView={isGmView}
         isPlanned={isPlanned}
         isInProgress={isInProgress}
         isFinished={isFinished}
+        activeScene={activeScene}
         duration={sessionDuration}
         campaignId={campaignId}
         busy={sessionActionBusy}
         onStart={handleStartSession}
         onFinish={handleFinishSession}
       />
+  );
+  const playerWaitingForStart = !isGmView && isPlanned;
+
+  return (
+    <div className="page liveSessionPage">
+      {headerTarget ? createPortal(sessionHeader, headerTarget) : null}
 
       {loading && <div className="liveSessionState">Ładowanie sesji live...</div>}
       {error && <div className="campaignDetailsError">{error}</div>}
       {notice && <div className="campaignDetailsNotice">{notice}</div>}
 
-      {!loading && !error && (
+      {!loading && !error && playerWaitingForStart && (
+        <section className="liveSessionState">
+          <h2>Sesja nie została jeszcze uruchomiona</h2>
+          <p>Gracze mogą wejść do live session dopiero po rozpoczęciu sesji przez MG.</p>
+          <Link className="campaignDetailsPrimaryBtn" to={`/campaigns/${campaignId}`}>Wróć do kampanii</Link>
+        </section>
+      )}
+
+      {!loading && !error && !playerWaitingForStart && (
         <div className="liveSessionDashboard">
           <div className="liveSessionMainGrid">
             <ScenePanel
@@ -1016,36 +1073,18 @@ export default function LiveSessionPage() {
               isFinished={isFinished}
               activeScene={activeScene}
               playerCanSeeScene={playerCanSeeScene}
-              onOpenEdit={openEditScene}
               onOpenChange={() => setSceneModal("change")}
               onOpenAdd={openAddScene}
-              onPublish={handlePublishScene}
-              publishing={savingScene}
             />
             <aside className="liveSessionSideColumn">
-              <PlayerStrip characters={campaignCharacters} members={members} attendance={attendance} />
-              <div className="liveSessionSideSplit">
-                <RollHistoryPanel rolls={fulfilledRequestedRolls} />
-                <RollAnalysisPanel stats={rollStats} />
-              </div>
+              <PlayerStrip
+                characters={campaignCharacters}
+                members={members}
+                attendance={attendance}
+                selectedCharacterId={selectedSessionCharacterId}
+                currentUserId={currentUserId}
+              />
             </aside>
-          </div>
-
-          <div className="liveSessionBottomGrid">
-            <RequiredRollsPanel
-              isGmView={isGmView}
-              isInProgress={isInProgress}
-              isPlanned={isPlanned}
-              isFinished={isFinished}
-              rolls={myRequestedRolls}
-              busy={requestedActionBusy}
-              onFulfill={handleFulfillRequestedRoll}
-              onCancel={handleCancelRequestedRoll}
-              showQuickRollPanel={showQuickRollPanel}
-              setShowQuickRollPanel={setShowQuickRollPanel}
-              form={quickRollForm}
-            />
-            <QuickActionsPanel isGmView={isGmView} isInProgress={isInProgress} onQuickRoll={() => setShowQuickRollPanel(true)} />
           </div>
 
           {!isGmView && isFinished && (
@@ -1068,8 +1107,12 @@ export default function LiveSessionPage() {
         onClose={() => setSceneModal(null)}
         onSave={handleSaveScene}
         onSelect={handleSelectScene}
+        onDelete={handleDeleteScene}
         onAddFromEmpty={openAddScene}
       />
+      {shouldShowCharacterChoice ? (
+        <CharacterChoiceModal characters={availableSessionCharacters} onSelect={handleSelectSessionCharacter} />
+      ) : null}
     </div>
   );
 }

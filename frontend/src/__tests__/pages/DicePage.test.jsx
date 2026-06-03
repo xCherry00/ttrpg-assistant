@@ -13,15 +13,22 @@ describe("DicePage", () => {
   it("switches roll modes without losing the workspace", () => {
     render(<DicePage />);
 
-    const modeSelect = screen.getByRole("combobox", { name: /tryb/i });
-    fireEvent.change(modeSelect, { target: { value: "fate" } });
+    fireEvent.click(screen.getByRole("tab", { name: "Fate / Fudge" }));
 
     expect(screen.getByText(/Liczba ko.ci Fate/i)).toBeInTheDocument();
 
-    fireEvent.change(modeSelect, { target: { value: "genesys" } });
+    fireEvent.click(screen.getByRole("tab", { name: "Genesys / Narrative" }));
 
-    expect(screen.getAllByText("Ability").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Difficulty").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Zdolność").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Trudność").length).toBeGreaterThan(0);
+  });
+
+  it("does not show Genesys symbol legend in the result panel", () => {
+    const { container } = render(<DicePage />);
+
+    fireEvent.click(screen.getByRole("tab", { name: "Genesys / Narrative" }));
+
+    expect(container.querySelector(".diceGenesysLegend")).not.toBeInTheDocument();
   });
 
   it("roll mechanic still works after layout refresh", () => {

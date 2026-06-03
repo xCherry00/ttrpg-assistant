@@ -9,6 +9,10 @@ import pl.ttrpgassistant.backend.common.validation.SafeImageOrHttpUrl;
 public record UpdateCharacterSheetRequest(
         @Size(max = 160) String name,
         @Size(max = 2500000) @SafeImageOrHttpUrl String portraitUrl,
+        @Size(max = 120) String raceName,
+        @Size(max = 120) String className,
+        @Min(0) @Max(999) Integer level,
+        @Size(max = 160) String campaignName,
         @Min(0) @Max(999) Integer currentHp,
         @Min(0) @Max(999) Integer tempHp,
         @Size(max = 12000) String privateNotes,

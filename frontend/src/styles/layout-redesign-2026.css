@@ -2809,8 +2809,14 @@ body,
 .dashboardHero2026 h2 {
   margin: 12px 0 8px !important;
   color: var(--pro-ink) !important;
-  font-size: clamp(2rem, 3.1vw, 3.8rem) !important;
+  font-size: clamp(2rem, 3vw, 3.35rem) !important;
   line-height: 0.95 !important;
+}
+
+@media (min-width: 980px) {
+  .dashboardHero2026 h2 {
+    white-space: nowrap !important;
+  }
 }
 
 .dashboardHero2026 p {
@@ -4843,21 +4849,158 @@ body,
   min-width: 520px !important;
 }
 
+.notificationBell {
+  transform: translateY(3px) !important;
+}
+
+.topNav__menuHeader {
+  position: relative !important;
+  overflow: hidden !important;
+  background-color: #ffffff !important;
+  background-image: var(--account-banner) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.topNav__menuHeader::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: linear-gradient(90deg, rgba(255,255,255,0.9), rgba(255,255,255,0.78)) !important;
+}
+
+.topNav__menuHeader > * {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
 .generatorWindowResult,
 .generatorWindowEmpty {
   width: 100% !important;
 }
 
+.generatorsCatalogPage {
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.generatorsCatalogPage .generatorsCatalogLayout {
+  height: calc(100vh - 176px) !important;
+  max-height: calc(100vh - 176px) !important;
+  min-height: 0 !important;
+}
+
+.generatorsCatalogPage .generatorsContent {
+  max-height: 100% !important;
+  min-height: 0 !important;
+}
+
+.generatorsCatalogPage .generatorsGrid {
+  max-height: 100% !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  padding-bottom: 140px !important;
+  scrollbar-gutter: stable !important;
+}
+
+.generatorsCatalogPage .generatorsSearchIcon {
+  display: none !important;
+}
+
+.generatorsCatalogPage .generatorsSearch input {
+  padding-left: 14px !important;
+}
+
+.generatorOutputPanel {
+  min-height: 0 !important;
+}
+
+.generatorWindowResult {
+  max-height: 100% !important;
+  overflow: auto !important;
+  scrollbar-gutter: stable !important;
+}
+
+.generatorTypedResult--dungeonAdvanced,
+.generatorTypedResult--dungeon,
+.generatorTypedMap,
+.is-dungeon-floors,
+.dungeonFloorPanel {
+  min-height: 0 !important;
+}
+
+.generatorTypedResult--dungeonAdvanced .generatorTypedMap {
+  max-height: calc(100vh - 330px) !important;
+  overflow: auto !important;
+  padding-bottom: 28px !important;
+  scrollbar-gutter: stable !important;
+}
+
+.dungeonMapViewport {
+  max-width: 100% !important;
+  max-height: min(54vh, 560px) !important;
+  overflow: auto !important;
+}
+
+.dungeonFloorTabs button {
+  border-color: var(--gen-border) !important;
+  background: #ffffff !important;
+  color: var(--gen-ink) !important;
+}
+
+.dungeonFloorTabs button:hover {
+  border-color: var(--gen-accent) !important;
+  background: var(--gen-accent-soft) !important;
+  color: var(--gen-accent) !important;
+}
+
+.dungeonFloorTabs button.is-active {
+  border-color: var(--gen-accent) !important;
+  background: var(--gen-accent) !important;
+  color: #ffffff !important;
+}
+
+.generatorTypedMap .generatorWindowStats span,
+.generatorTypedMap .dungeonMapLegend span,
+.generatorWindowSections--minimal .generatorWindowStats span {
+  border-color: rgba(25, 83, 68, 0.12) !important;
+  background: #ffffff !important;
+}
+
+.generatorTypedMap .generatorWindowStats small,
+.generatorTypedMap .dungeonMapLegend small,
+.generatorWindowSections--minimal .generatorWindowStats small {
+  color: #60736c !important;
+}
+
+.generatorTypedMap .generatorWindowStats strong,
+.generatorTypedMap .dungeonMapLegend strong,
+.generatorWindowSections--minimal .generatorWindowStats strong {
+  color: #17221e !important;
+  font-weight: 800 !important;
+}
+
+.generatorTypedMap h3,
+.generatorWindowSections--minimal h3 {
+  color: #17221e !important;
+}
+
 .initiativePage {
-  gap: 10px !important;
+  grid-template-rows: auto auto !important;
+  align-content: start !important;
+  gap: 8px !important;
 }
 
 .initiativeControlsCard {
   margin-bottom: 0 !important;
+  order: 1 !important;
 }
 
 .initiativeParticipantsCard {
   margin-top: 0 !important;
+  order: 2 !important;
+  align-self: start !important;
 }
 
 @media (max-width: 980px) {
@@ -4870,4 +5013,155 @@ body,
     flex-basis: auto !important;
     min-width: 0 !important;
   }
+}
+
+/* Generator dungeon result scroll repair. Keep the page fixed and scroll the result panel. */
+.appContentInner > .generatorWindowPage,
+.generatorWindowPage {
+  height: 100% !important;
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  align-content: stretch !important;
+  overflow: hidden !important;
+}
+
+.generatorWindowWorkspace {
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+.generatorWindowShell {
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+.generatorSettingsPanel,
+.generatorOutputPanel {
+  min-height: 0 !important;
+  max-height: 100% !important;
+}
+
+.generatorOutputPanel {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  overflow: hidden !important;
+}
+
+.generatorWindowResult {
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding-bottom: 72px !important;
+  scrollbar-gutter: stable !important;
+}
+
+.generatorTypedResult--dungeonAdvanced {
+  min-height: 0 !important;
+}
+
+.generatorTypedResult--dungeonAdvanced .generatorTypedMap,
+.generatorTypedResult--dungeonAdvanced .is-dungeon-floors,
+.generatorTypedResult--dungeonAdvanced .dungeonFloorPanel {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.generatorTypedResult--dungeonAdvanced .dungeonMapViewport {
+  max-height: min(52vh, 520px) !important;
+  overflow: auto !important;
+}
+
+.friendsDesk .friendsDetailsPanel {
+  align-self: start !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.friendsDesk .friendsDetailsHero {
+  margin: -16px -16px 0 !important;
+  padding: 76px 16px 16px !important;
+  overflow: visible !important;
+}
+
+.friendsDesk .friendsDetailsHero__banner {
+  height: 118px !important;
+}
+
+.friendsDesk .friendsDetailsHero .friendsAvatar--lg {
+  width: 96px !important;
+  height: 96px !important;
+}
+
+.friendsDesk .friendsDangerRow {
+  margin-top: 2px !important;
+}
+
+.appContentInner > .rulesPage.rulesPage,
+.rulesPage.rulesPage {
+  height: 100% !important;
+  min-height: 0 !important;
+  align-self: start !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
+
+.rulesPage .rulesContainer {
+  height: 100% !important;
+  min-height: 0 !important;
+  align-items: stretch !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
+
+.rulesPage .rulesSystemFilter,
+.rulesPage .rulesReaderPanel {
+  height: 100% !important;
+  max-height: none !important;
+}
+
+.rulesPage .rulesSystemFilter {
+  overflow: hidden !important;
+}
+
+.rulesPage .rulesReaderPanel {
+  overflow: auto !important;
+}
+
+.initiativeTableWrap {
+  scrollbar-gutter: auto !important;
+}
+
+.initiativeTable thead,
+.initiativeTable thead tr,
+.initiativeTable th {
+  background: #f5faf7 !important;
+}
+
+.initiativeTable th {
+  text-align: center !important;
+}
+
+.initiativeTable td:nth-child(1),
+.initiativeTable td:nth-child(2),
+.initiativeTable td:nth-child(4),
+.initiativeTable td:nth-child(5),
+.initiativeTable td:nth-child(6),
+.initiativeTable td:nth-child(7) {
+  text-align: center !important;
+}
+
+.initiativeHpCell {
+  justify-items: center !important;
+}
+
+.initiativeRowActions {
+  justify-content: center !important;
 }

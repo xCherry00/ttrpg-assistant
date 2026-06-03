@@ -12,6 +12,7 @@ import pl.ttrpgassistant.backend.user.dto.DeleteAccountRequest;
 import pl.ttrpgassistant.backend.user.dto.MeResponse;
 import pl.ttrpgassistant.backend.user.dto.UpdateChatNickColorRequest;
 import pl.ttrpgassistant.backend.user.dto.UpdateEmailRequest;
+import pl.ttrpgassistant.backend.user.dto.UpdateProfileImagesRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -83,6 +84,15 @@ public class UserSettingsService {
     }
 
     @Transactional
+    public MeResponse updateProfileImages(Long userId, UpdateProfileImagesRequest req) {
+        UserEntity user = getUser(userId);
+        user.setAvatarUrl(normalizeNullable(req.avatarUrl()));
+        user.setProfileBannerUrl(normalizeNullable(req.profileBannerUrl()));
+        user = userRepository.save(user);
+        return toMeResponse(user);
+    }
+
+    @Transactional
     public void deleteAccount(Long userId, DeleteAccountRequest req) {
         UserEntity user = getUser(userId);
 
@@ -98,6 +108,10 @@ public class UserSettingsService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
+    private String normalizeNullable(String value) {
+        return value == null ? "" : value.trim();
+    }
+
     private MeResponse toMeResponse(UserEntity user) {
         return new MeResponse(
                 user.getId(),
@@ -109,6 +123,8 @@ public class UserSettingsService {
                 user.getBio(),
                 user.getFavoriteSystem(),
                 user.getChatNickColor(),
+                user.getAvatarUrl(),
+                user.getProfileBannerUrl(),
                 user.getRole().name(),
                 user.isMg()
         );

@@ -26,6 +26,15 @@ const ATTRIBUTE_LABELS = {
   charisma: "CHA",
 };
 
+const ATTRIBUTE_PATHS = {
+  strength: ["strength", "str", "abilities.str", "abilityScores.str"],
+  dexterity: ["dexterity", "dex", "abilities.dex", "abilityScores.dex"],
+  constitution: ["constitution", "con", "abilities.con", "abilityScores.con"],
+  intelligence: ["intelligence", "int", "abilities.int", "abilityScores.int"],
+  wisdom: ["wisdom", "wis", "abilities.wis", "abilityScores.wis"],
+  charisma: ["charisma", "cha", "abilities.cha", "abilityScores.cha"],
+};
+
 function isEmptyValue(value) {
   return value === null || value === undefined || value === "" || (Array.isArray(value) && value.length === 0);
 }
@@ -108,10 +117,11 @@ function formatComponents(item) {
 function formatAttributes(item) {
   const rows = Object.entries(ATTRIBUTE_LABELS)
     .map(([key, label]) => {
-      const score = item[key];
+      const score = firstValue(item, ATTRIBUTE_PATHS[key] || key);
       if (score === undefined || score === null) return null;
       const modKey = `${key.slice(0, 3)}_mod`;
-      const mod = item[modKey];
+      const shortKey = label.toLowerCase();
+      const mod = firstValue(item, [modKey, `${shortKey}_mod`, `modifiers.${shortKey}`, `abilityModifiers.${shortKey}`]);
       const modText = mod === undefined || mod === null ? "" : ` (${mod >= 0 ? "+" : ""}${mod})`;
       return `${label} ${score}${modText}`;
     })
@@ -176,7 +186,6 @@ const CATEGORY_CONFIG = {
         ...asArray(item.damage_immunities),
         ...asArray(item.condition_immunities),
       ]),
-      buildField("Zrodlo", (item) => formatSource(item)),
     ],
     sections: [buildTextSection("Opis", ["desc", "special_abilities", "actions"], "Brak opisu")],
   },

@@ -1,4 +1,5 @@
-import ImageUpload from "../../common/ImageUpload";
+import ImageLibraryPicker from "../../common/ImageLibraryPicker";
+import { imagePlaceholder } from "../../../data/imageLibrary";
 
 export default function CharacterHeader({
   detail,
@@ -9,7 +10,7 @@ export default function CharacterHeader({
   onPortraitUrlChange,
   readOnly = false,
 }) {
-  const portrait = portraitUrl || identity?.portraitUrl || "";
+  const portrait = portraitUrl || identity?.portraitUrl || imagePlaceholder("characterAvatars");
   const fallbackInitial = (name || detail?.name || "?").trim().charAt(0).toUpperCase() || "?";
 
   return (
@@ -23,18 +24,16 @@ export default function CharacterHeader({
             <span>Nazwa</span>
             <input value={name} readOnly={readOnly} onChange={(e) => onNameChange(e.target.value)} />
           </label>
-          <label className="sheetField">
-            <span>Portret</span>
-            <input value={portraitUrl} readOnly={readOnly} onChange={(e) => onPortraitUrlChange(e.target.value)} placeholder="URL lub data:image/..." />
-          </label>
           {!readOnly && (
             <div className="sheetField" style={{ gridColumn: "1 / -1" }}>
-              <ImageUpload
-                label="Wgraj portret"
+              <ImageLibraryPicker
+                type="characterAvatars"
+                label="Avatar postaci"
                 value={portrait}
                 onChange={onPortraitUrlChange}
                 onRemove={() => onPortraitUrlChange("")}
                 previewAlt="Portret postaci"
+                helpText="Wybierz gotowy avatar postaci z biblioteki."
               />
             </div>
           )}

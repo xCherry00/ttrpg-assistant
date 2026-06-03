@@ -839,6 +839,128 @@ select option { color: #000; background: #fff; }
 
 .fadeIn { animation: fadeIn 0.3s var(--ease) both; }
 
+.imageUploadRecommendedSize {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border: 1px solid rgba(23, 138, 99, 0.2);
+  border-radius: 999px;
+  padding: 4px 9px;
+  color: #0f7356;
+  background: rgba(230, 245, 239, 0.88);
+  font-weight: 800;
+}
+
+.imageLibraryPicker {
+  display: grid;
+  gap: 12px;
+}
+
+.imageLibraryPicker__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.imageLibraryPicker__head span {
+  display: block;
+  color: var(--text, #101a17);
+  font-weight: 900;
+}
+
+.imageLibraryPicker__head small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted, #62716b);
+  line-height: 1.4;
+}
+
+.imageLibraryPicker__head button {
+  min-height: 34px;
+  border: 1px solid rgba(220, 38, 38, 0.22);
+  border-radius: 10px;
+  padding: 0 12px;
+  color: #b91c1c;
+  background: #fff7f7;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.imageLibraryPicker__preview {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(214, 227, 221, 0.95);
+  border-radius: 14px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.imageLibraryPicker__preview img {
+  width: 72px;
+  height: 54px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: #edf4f1;
+}
+
+.imageLibraryPicker__preview strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.imageLibraryPicker__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+  gap: 10px;
+}
+
+.imageLibraryPicker__grid button {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+  border: 1px solid rgba(214, 227, 221, 0.95);
+  border-radius: 12px;
+  padding: 8px;
+  color: var(--text, #101a17);
+  background: rgba(255, 255, 255, 0.82);
+  font-weight: 850;
+  cursor: pointer;
+  text-align: left;
+}
+
+.imageLibraryPicker__grid button.is-selected {
+  border-color: rgba(23, 138, 99, 0.55);
+  box-shadow: 0 0 0 3px rgba(23, 138, 99, 0.1);
+}
+
+.imageLibraryPicker__grid button:disabled,
+.imageLibraryPicker__head button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.imageLibraryPicker__grid img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 9px;
+  object-fit: cover;
+  background: #edf4f1;
+}
+
+.imageLibraryPicker__grid span {
+  min-width: 0;
+  overflow: hidden;
+  color: inherit;
+  font-size: 0.82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

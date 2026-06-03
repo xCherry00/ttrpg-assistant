@@ -15,6 +15,7 @@ import pl.ttrpgassistant.backend.campaign.dto.CreateCampaignSessionRequest;
 import pl.ttrpgassistant.backend.campaign.dto.UpdateCampaignRequest;
 import pl.ttrpgassistant.backend.campaign.dto.UpsertCampaignSessionNoteRequest;
 import pl.ttrpgassistant.backend.common.error.ResourceNotFoundException;
+import pl.ttrpgassistant.backend.generator.GeneratorResultRepository;
 import pl.ttrpgassistant.backend.user.UserEntity;
 import pl.ttrpgassistant.backend.user.UserRepository;
 
@@ -47,6 +48,7 @@ public class CampaignWorkspaceService {
     private final CampaignNotificationRepository campaignNotificationRepository;
     private final CampaignMaterialRepository campaignMaterialRepository;
     private final CampaignFavoriteRepository campaignFavoriteRepository;
+    private final GeneratorResultRepository generatorResultRepository;
     private final UserRepository userRepository;
 
     @Transactional
@@ -54,7 +56,9 @@ public class CampaignWorkspaceService {
         CampaignEntity campaign = requireOwnerAccess(userId, campaignId);
         campaign.setTitle(request.title().trim());
         campaign.setDescriptionMd(normalizeText(request.description()));
+        campaign.setStatus(normalizeCampaignStatus(request.status(), campaign.getStatus()));
         campaign.setCoverImageUrl(normalizeNullable(request.coverImageUrl()));
+        campaign.setBannerImageUrl(normalizeNullable(request.bannerImageUrl()));
         campaign.setVisibility(normalizeVisibility(request.visibility(), campaign.getVisibility()));
         campaign.setPlayerLimit(normalizePlayerLimit(request.playerLimit(), campaign.getPlayerLimit()));
         CampaignEntity saved = campaignRepository.save(campaign);
@@ -66,6 +70,7 @@ public class CampaignWorkspaceService {
                 saved.getSystemCode(),
                 saved.getDescriptionMd(),
                 saved.getCoverImageUrl(),
+                saved.getBannerImageUrl(),
                 saved.getStatus(),
                 saved.getJoinCode(),
                 "/campaigns/join?code=" + saved.getJoinCode(),
@@ -323,12 +328,10 @@ public class CampaignWorkspaceService {
     }
 
     @Transactional
-    public void softDeleteCampaign(Long userId, Long campaignId) {
+    public void deleteCampaign(Long userId, Long campaignId) {
         CampaignEntity campaign = requireOwnerAccess(userId, campaignId);
-        if (campaign.getDeletedAt() == null) {
-            campaign.setDeletedAt(Instant.now());
-            campaignRepository.save(campaign);
-        }
+        generatorResultRepository.detachCampaign(campaignId);
+        campaignRepository.delete(campaign);
     }
 
     private CampaignSessionSummaryResponse toSessionSummary(
@@ -494,6 +497,14 @@ public class CampaignWorkspaceService {
     private String normalizeNullable(String value) {
         String normalized = normalizeText(value);
         return normalized.isBlank() ? null : normalized;
+    }
+
+    private String normalizeCampaignStatus(String status, String fallback) {
+        String value = status == null ? "" : status.trim().toLowerCase(Locale.ROOT);
+        if (value.equals("active") || value.equals("finished") || value.equals("archived")) {
+            return value;
+        }
+        return fallback == null || fallback.isBlank() ? "active" : fallback;
     }
 
     private String normalizeVisibility(String rawValue, String fallback) {

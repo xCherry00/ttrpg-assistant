@@ -42,6 +42,9 @@ public class SecurityConfig {
 
                 // public
                 .requestMatchers("/api/health").permitAll()
+                .requestMatchers("/v3/api-docs/**").permitAll()
+                .requestMatchers("/swagger-ui/**").permitAll()
+                .requestMatchers("/swagger-ui.html").permitAll()
                 .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/generators/**").permitAll()

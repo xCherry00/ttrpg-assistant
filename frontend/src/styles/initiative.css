@@ -236,6 +236,7 @@
   min-height: 0 !important;
   height: auto !important;
   overflow: auto !important;
+  scrollbar-gutter: auto !important;
   border: 1px solid var(--initiative-line) !important;
   border-radius: 16px !important;
   background: #fff !important;
@@ -245,6 +246,7 @@
 .initiativeTable {
   width: 100%;
   min-width: 860px;
+  table-layout: fixed;
   border-collapse: separate !important;
   border-spacing: 0 !important;
 }
@@ -271,6 +273,59 @@
   font-weight: 950;
   letter-spacing: 0.08em !important;
   text-transform: uppercase !important;
+  text-align: center !important;
+}
+
+.initiativeTable thead tr {
+  background: #f5faf7 !important;
+}
+
+.initiativeTable thead {
+  background: #f5faf7 !important;
+}
+
+.initiativeTable th:first-child {
+  border-top-left-radius: 14px;
+}
+
+.initiativeTable th:last-child {
+  border-top-right-radius: 14px;
+}
+
+.initiativeTable th:nth-child(1),
+.initiativeTable td:nth-child(1) {
+  width: 70px;
+}
+
+.initiativeTable th:nth-child(2),
+.initiativeTable td:nth-child(2) {
+  width: 150px;
+  text-align: center !important;
+}
+
+.initiativeTable th:nth-child(3),
+.initiativeTable td:nth-child(3) {
+  width: min(32vw, 380px);
+}
+
+.initiativeTable th:nth-child(4),
+.initiativeTable td:nth-child(4),
+.initiativeTable th:nth-child(5),
+.initiativeTable td:nth-child(5) {
+  width: 120px;
+  text-align: center !important;
+}
+
+.initiativeTable th:nth-child(6),
+.initiativeTable td:nth-child(6) {
+  width: 180px;
+  text-align: center !important;
+}
+
+.initiativeTable th:nth-child(7),
+.initiativeTable td:nth-child(7) {
+  width: 110px;
+  text-align: center !important;
 }
 
 .initiativeTable tr.is-active {
@@ -346,6 +401,7 @@
 
 .initiativeHpCell {
   display: grid;
+  justify-items: center;
   gap: 7px;
   min-width: 130px;
 }
@@ -383,8 +439,29 @@
   background: var(--initiative-green);
 }
 
+.initiativeHpBar.is-healthy i {
+  background: var(--initiative-green);
+}
+
+.initiativeHpBar.is-medium i {
+  background: #d6a326;
+}
+
+.initiativeHpBar.is-low i {
+  background: #e07724;
+}
+
+.initiativeHpBar.is-critical i {
+  background: #d93f3f;
+}
+
+.initiativeHpBar.is-empty i {
+  background: #9aa7a0;
+}
+
 .initiativeRowActions {
   display: flex;
+  justify-content: center;
   gap: 8px;
   flex-wrap: nowrap;
 }
@@ -423,6 +500,8 @@
 
 .initiativeCombatSummary div {
   display: grid;
+  justify-items: center;
+  text-align: center;
   gap: 6px;
   padding: 13px 16px;
   border-right: 1px solid var(--initiative-line);

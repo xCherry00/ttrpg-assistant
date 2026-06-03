@@ -11,6 +11,8 @@ public interface CampaignCharacterRepository extends JpaRepository<CampaignChara
 
     List<CampaignCharacterEntity> findByIdCampaignIdAndActiveTrueOrderByAssignedAtAsc(Long campaignId);
 
+    List<CampaignCharacterEntity> findByIdCampaignIdAndUserIdNotOrderByAssignedAtAsc(Long campaignId, Long userId);
+
     Optional<CampaignCharacterEntity> findByIdCampaignIdAndIdCharacterId(Long campaignId, Long characterId);
 
     boolean existsByIdCampaignIdAndIdCharacterIdAndActiveTrue(Long campaignId, Long characterId);

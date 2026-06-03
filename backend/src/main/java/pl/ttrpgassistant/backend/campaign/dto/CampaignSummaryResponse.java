@@ -9,6 +9,7 @@ public record CampaignSummaryResponse(
         String systemCode,
         String description,
         String coverImageUrl,
+        String bannerImageUrl,
         String status,
         String inviteCode,
         String inviteLink,

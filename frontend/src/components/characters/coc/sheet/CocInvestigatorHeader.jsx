@@ -1,8 +1,9 @@
-import ImageUpload from "../../../common/ImageUpload";
+import ImageLibraryPicker from "../../../common/ImageLibraryPicker";
+import { imagePlaceholder } from "../../../../data/imageLibrary";
 
 export default function CocInvestigatorHeader({ identity, name, onNameChange, portraitUrl, onPortraitUrlChange, readOnly = false }) {
   const fullName = name || identity?.name || "Badacz";
-  const portrait = portraitUrl || identity?.portraitUrl || "";
+  const portrait = portraitUrl || identity?.portraitUrl || imagePlaceholder("characterAvatars");
   return (
     <section className="sheetSection">
       <div className="sheetHeader">
@@ -11,15 +12,16 @@ export default function CocInvestigatorHeader({ identity, name, onNameChange, po
         </div>
         <div className="sheetIdentityGrid">
           <label className="sheetField"><span>Nazwa</span><input value={name} readOnly={readOnly} onChange={(e) => onNameChange(e.target.value)} /></label>
-          <label className="sheetField"><span>Portret</span><input value={portraitUrl} readOnly={readOnly} onChange={(e) => onPortraitUrlChange(e.target.value)} /></label>
           {!readOnly && (
             <div className="sheetField" style={{ gridColumn: "1 / -1" }}>
-              <ImageUpload
-                label="Wgraj portret"
+              <ImageLibraryPicker
+                type="characterAvatars"
+                label="Avatar postaci"
                 value={portrait}
                 onChange={onPortraitUrlChange}
                 onRemove={() => onPortraitUrlChange("")}
                 previewAlt="Portret badacza"
+                helpText="Wybierz gotowy avatar postaci z biblioteki."
               />
             </div>
           )}

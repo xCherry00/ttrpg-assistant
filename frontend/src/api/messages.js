@@ -1,4 +1,4 @@
-import { API_URL, http, unwrapPage } from "./http";
+import { http, httpRequest, unwrapPage } from "./http";
 
 export async function getConversations(token, filter = "all") {
   return unwrapPage(await http(`/api/messages/conversations?filter=${encodeURIComponent(filter)}`, { method: "GET", token }));
@@ -54,13 +54,11 @@ export async function getUnreadMessagesCount(token) {
 }
 
 export async function downloadAttachment(token, attachmentId) {
-  const response = await fetch(`${API_URL}/api/messages/attachments/${attachmentId}`, {
+  const response = await httpRequest(`/api/messages/attachments/${attachmentId}`, {
     method: "GET",
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    token,
+    responseType: "response",
   });
-  if (!response.ok) {
-    throw new Error(`Nie udało się pobrać pliku (HTTP ${response.status})`);
-  }
   const blob = await response.blob();
   const disposition = response.headers.get("content-disposition") || "";
   const match = disposition.match(/filename="([^"]+)"/i);

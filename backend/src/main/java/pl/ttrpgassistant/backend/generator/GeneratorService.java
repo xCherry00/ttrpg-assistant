@@ -213,7 +213,7 @@ public class GeneratorService {
                 .toList();
         int textLimit = switch (generated.generatorCode()) {
             case "five_room_dungeon" -> 6;
-            case "dungeon_advanced" -> 8;
+            case "dungeon_advanced" -> 10;
             default -> stats.isEmpty() ? 6 : 5;
         };
         List<GeneratorOutputSection> text = generated.sections().stream()

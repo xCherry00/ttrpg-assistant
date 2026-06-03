@@ -413,6 +413,10 @@
   overflow: auto;
 }
 
+.diceConfigPanel > .diceSideHeader + .diceField {
+  display: none;
+}
+
 .diceField,
 .diceStepper {
   display: grid;

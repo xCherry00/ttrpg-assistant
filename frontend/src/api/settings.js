@@ -39,6 +39,14 @@ export async function updateChatNickColor(token, chatNickColor) {
   });
 }
 
+export async function updateProfileImages(token, avatarUrl, profileBannerUrl) {
+  return http("/api/user/profile-images", {
+    method: "PATCH",
+    token,
+    body: { avatarUrl, profileBannerUrl },
+  });
+}
+
 export async function deleteAccount(token, currentPassword) {
   return http("/api/user", {
     method: "DELETE",

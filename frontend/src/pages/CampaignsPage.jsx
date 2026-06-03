@@ -2,16 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { createCampaign, joinCampaign, listCampaigns, listPublicCampaigns, toggleCampaignFavorite } from "../api/campaigns";
-import ImageUpload from "../components/common/ImageUpload";
+import ImageLibraryPicker from "../components/common/ImageLibraryPicker";
+import { imagePlaceholder } from "../data/imageLibrary";
 import "../styles/campaigns.css";
 
 const SYSTEM_OPTIONS = [
   { value: "dnd5e", label: "D&D 5E" },
-  { value: "pf2e", label: "Pathfinder 2E" },
   { value: "coc7e", label: "Call of Cthulhu 7E" },
-  { value: "wh4e", label: "Warhammer 4E" },
-  { value: "morkborg", label: "Mork Borg" },
-  { value: "other", label: "Inny" },
 ];
 
 function normalizeCode(value) {
@@ -42,24 +39,30 @@ function campaignRole(campaign) {
   return campaign.owner || String(campaign.myRole || "").toUpperCase() === "GM" ? "MG" : "Gracz";
 }
 
+function compareSavedFirst(a, b) {
+  return Number(Boolean(b.saved)) - Number(Boolean(a.saved));
+}
+
 function sortMyCampaigns(campaigns, sortBy) {
   const list = [...campaigns];
-  if (sortBy === "saved") return list.sort((a, b) => Number(Boolean(b.saved)) - Number(Boolean(a.saved)) || toTime(b.updatedAt || b.createdAt) - toTime(a.updatedAt || a.createdAt));
-  if (sortBy === "name") return list.sort((a, b) => String(a.title || "").localeCompare(String(b.title || ""), "pl"));
-  if (sortBy === "created") return list.sort((a, b) => toTime(b.createdAt) - toTime(a.createdAt));
-  return list.sort((a, b) => toTime(b.updatedAt || b.createdAt) - toTime(a.updatedAt || a.createdAt));
+  if (sortBy === "name") return list.sort((a, b) => compareSavedFirst(a, b) || String(a.title || "").localeCompare(String(b.title || ""), "pl"));
+  if (sortBy === "created") return list.sort((a, b) => compareSavedFirst(a, b) || toTime(b.createdAt) - toTime(a.createdAt));
+  return list.sort((a, b) => compareSavedFirst(a, b) || toTime(b.updatedAt || b.createdAt) - toTime(a.updatedAt || a.createdAt));
 }
 
 function sortPublicCampaigns(campaigns, sortBy) {
   const list = [...campaigns];
-  if (sortBy === "saved") return list.sort((a, b) => Number(Boolean(b.saved)) - Number(Boolean(a.saved)) || toTime(b.createdAt) - toTime(a.createdAt));
-  if (sortBy === "players") return list.sort((a, b) => safeCount(b.players ?? b.playerCount) - safeCount(a.players ?? a.playerCount));
-  if (sortBy === "name") return list.sort((a, b) => String(a.title || "").localeCompare(String(b.title || ""), "pl"));
-  return list.sort((a, b) => toTime(b.createdAt) - toTime(a.createdAt));
+  if (sortBy === "players") return list.sort((a, b) => compareSavedFirst(a, b) || safeCount(b.players ?? b.playerCount) - safeCount(a.players ?? a.playerCount));
+  if (sortBy === "name") return list.sort((a, b) => compareSavedFirst(a, b) || String(a.title || "").localeCompare(String(b.title || ""), "pl"));
+  return list.sort((a, b) => compareSavedFirst(a, b) || toTime(b.createdAt) - toTime(a.createdAt));
 }
 
 function memberInitial(member) {
   return String(member?.displayName || member?.username || "U").slice(0, 1).toUpperCase();
+}
+
+function memberAvatar(member) {
+  return member?.avatarUrl || member?.profileAvatarUrl || imagePlaceholder("avatars");
 }
 
 function memberRank(member) {
@@ -102,11 +105,12 @@ export default function CampaignsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState("");
-  const [createForm, setCreateForm] = useState({ title: "", systemCode: "dnd5e", description: "", coverImageUrl: "" });
+  const [createForm, setCreateForm] = useState({ title: "", systemCode: "dnd5e", description: "", coverImageUrl: "", bannerImageUrl: "", visibility: "PRIVATE" });
 
   const [joinCode, setJoinCode] = useState("");
   const [joinLoading, setJoinLoading] = useState(false);
   const [joinError, setJoinError] = useState("");
+  const [showJoinModal, setShowJoinModal] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -196,10 +200,20 @@ export default function CampaignsPage() {
   function closeCreate() {
     setShowCreate(false);
     setCreateError("");
-    setCreateForm({ title: "", systemCode: "dnd5e", description: "", coverImageUrl: "" });
+    setCreateForm({ title: "", systemCode: "dnd5e", description: "", coverImageUrl: "", bannerImageUrl: "", visibility: "PRIVATE" });
   }
 
-  
+  function openJoinModal() {
+    setJoinError("");
+    setShowJoinModal(true);
+  }
+
+  function closeJoinModal() {
+    if (joinLoading) return;
+    setShowJoinModal(false);
+    setJoinError("");
+  }
+
 
   async function handleCreate(event) {
     event.preventDefault();
@@ -217,6 +231,8 @@ export default function CampaignsPage() {
         systemCode: createForm.systemCode,
         description: createForm.description.trim(),
         coverImageUrl: createForm.coverImageUrl || null,
+        bannerImageUrl: createForm.bannerImageUrl || null,
+        visibility: createForm.visibility,
       });
       setCampaigns((prev) => [created, ...prev.filter((campaign) => campaign.id !== created.id)]);
       setNotice("Kampania utworzona.");
@@ -245,6 +261,7 @@ export default function CampaignsPage() {
       if (joined) setCampaigns((prev) => [joined, ...prev.filter((campaign) => campaign.id !== joined.id)]);
       setNotice(response?.message || "Dołączono do kampanii.");
       setJoinCode("");
+      setShowJoinModal(false);
       setTab("my");
     } catch (err) {
       setJoinError(err?.message || "Nie udało się dołączyć do kampanii.");
@@ -299,6 +316,22 @@ export default function CampaignsPage() {
         </button>
       </nav>
 
+      <section className="campaignQuickActions" aria-label="Szybkie akcje kampanii">
+        <button type="button" className="campaignQuickAction campaignQuickAction--primary" onClick={openCreate}>
+          <CampaignIcon name="plus" />
+          Utwórz kampanię
+        </button>
+        <button
+          type="button"
+          className="campaignQuickAction campaignQuickAction--secondary"
+          onClick={openJoinModal}
+          disabled={joinLoading}
+        >
+          <CampaignIcon name="link" />
+          Dołącz kodem
+        </button>
+      </section>
+
       <section className="campaignToolbar">
         <label className="campaignSearch">
           <CampaignIcon name="search" />
@@ -345,10 +378,7 @@ export default function CampaignsPage() {
         <button
           type="button"
           className="campaignJoinCodeButton"
-          onClick={(event) => {
-            const code = normalizeCode(window.prompt("Podaj kod zaproszenia do kampanii") || "");
-            if (code) handleJoin(event, code);
-          }}
+          onClick={openJoinModal}
           disabled={joinLoading}
         >
           <CampaignIcon name="link" />
@@ -401,21 +431,24 @@ export default function CampaignsPage() {
 
             <form className="campaignCreateForm" onSubmit={handleCreate}>
               <div className="campaignCoverInput">
-                <ImageUpload
-                  label="Okładka kampanii"
+                <ImageLibraryPicker
+                  type="campaignIcons"
+                  label="Ikona kampanii"
                   value={createForm.coverImageUrl}
                   onChange={(url) => setCreateForm((prev) => ({ ...prev, coverImageUrl: url }))}
                   onRemove={() => setCreateForm((prev) => ({ ...prev, coverImageUrl: "" }))}
-                  previewAlt="Podglad okladki"
+                  previewAlt="Podglad ikony kampanii"
+                  helpText="Wybierz gotowa ikone kampanii z biblioteki."
                 />
-                <label>
-                  <span>URL obrazu (opcjonalnie)</span>
-                  <input
-                    value={createForm.coverImageUrl}
-                    onChange={(event) => setCreateForm((prev) => ({ ...prev, coverImageUrl: event.target.value }))}
-                    placeholder="https://..."
-                  />
-                </label>
+                <ImageLibraryPicker
+                  type="campaignBanners"
+                  label="Baner kampanii"
+                  value={createForm.bannerImageUrl}
+                  onChange={(url) => setCreateForm((prev) => ({ ...prev, bannerImageUrl: url }))}
+                  onRemove={() => setCreateForm((prev) => ({ ...prev, bannerImageUrl: "" }))}
+                  previewAlt="Podgląd banera"
+                  helpText="Wybierz gotowy baner kampanii z biblioteki."
+                />
               </div>
 
               <div className="campaignCreateFields">
@@ -433,6 +466,17 @@ export default function CampaignsPage() {
                   <span>Opis</span>
                   <textarea value={createForm.description} onChange={(event) => setCreateForm((prev) => ({ ...prev, description: event.target.value }))} rows={5} maxLength={2000} placeholder="Krótki opis klimatu kampanii." />
                 </label>
+                <label className="campaignVisibilityOption">
+                  <input
+                    type="checkbox"
+                    checked={createForm.visibility === "PUBLIC"}
+                    onChange={(event) => setCreateForm((prev) => ({ ...prev, visibility: event.target.checked ? "PUBLIC" : "PRIVATE" }))}
+                  />
+                  <span>
+                    <strong>Kampania publiczna</strong>
+                    <small>Publiczna będzie widoczna dla wszystkich. Prywatna wymaga zaproszenia albo kodu dołączenia.</small>
+                  </span>
+                </label>
                 {createError && <div className="campaignError">{createError}</div>}
                 <div className="campaignModal__actions">
                   <button type="button" onClick={closeCreate}>Anuluj</button>
@@ -443,6 +487,84 @@ export default function CampaignsPage() {
           </section>
         </div>
       )}
+
+      {showJoinModal && (
+        <JoinCampaignModal
+          code={joinCode}
+          error={joinError}
+          loading={joinLoading}
+          onChange={setJoinCode}
+          onClose={closeJoinModal}
+          onSubmit={handleJoin}
+        />
+      )}
+    </div>
+  );
+}
+
+function JoinCampaignModal({ code, error, loading, onChange, onClose, onSubmit }) {
+  const hasError = Boolean(error);
+
+  return (
+    <div className="campaignModalBack campaignJoinModalBack" role="presentation" onMouseDown={onClose}>
+      <section
+        className="campaignModal campaignJoinModal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="joinCampaignTitle"
+        aria-describedby="joinCampaignDescription"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <button type="button" className="campaignJoinModal__close" onClick={onClose} aria-label="Zamknij okno dołączania">
+          <CampaignIcon name="x" />
+        </button>
+
+        <div className="campaignJoinModal__badge" aria-hidden="true">
+          <CampaignIcon name="link" />
+        </div>
+
+        <header className="campaignJoinModal__head">
+          <h2 id="joinCampaignTitle">Dołącz do kampanii</h2>
+          <p id="joinCampaignDescription">Wpisz kod zaproszenia, aby dołączyć do kampanii.</p>
+        </header>
+
+        <form className="campaignJoinForm" onSubmit={onSubmit} noValidate>
+          <label className="campaignJoinField">
+            <span>Kod zaproszenia</span>
+            <input
+              value={code}
+              onChange={(event) => onChange(normalizeCode(event.target.value))}
+              placeholder="Np. ABCD-1234"
+              autoFocus
+              autoComplete="off"
+              inputMode="text"
+              aria-invalid={hasError}
+              aria-describedby="joinCampaignHelp joinCampaignFeedback"
+            />
+          </label>
+
+          <p id="joinCampaignHelp" className="campaignJoinHelp">
+            Kod powinien składać się z liter i cyfr. Otrzymasz go od Mistrza Gry.
+          </p>
+
+          <div
+            id="joinCampaignFeedback"
+            className={`campaignJoinFeedback${hasError ? " is-error" : ""}`}
+            role={hasError ? "alert" : "status"}
+          >
+            <CampaignIcon name={hasError ? "x" : "info"} />
+            {hasError ? error : "Po dołączeniu kampania pojawi się na liście Twoich kampanii."}
+          </div>
+
+          <div className="campaignJoinModal__actions">
+            <button type="button" className="campaignJoinModal__cancel" onClick={onClose} disabled={loading}>Anuluj</button>
+            <button type="submit" className="campaignJoinModal__submit" disabled={loading}>
+              <CampaignIcon name="link" />
+              {loading ? "Dołączanie..." : "Dołącz do kampanii"}
+            </button>
+          </div>
+        </form>
+      </section>
     </div>
   );
 }
@@ -464,7 +586,7 @@ function MyCampaignGrid({ campaigns, navigate, openCreate, onToggleFavorite }) {
         const role = campaignRole(campaign);
         return (
           <article key={campaign.id} className={`campaignCard campaignCard--${["sage", "blue", "amber", "green", "slate"][index % 5]}`} onClick={() => navigate(`/campaigns/${campaign.id}`)} role="button" tabIndex={0}>
-            <div className="campaignCard__visual" style={campaign.coverImageUrl ? { backgroundImage: `url(${campaign.coverImageUrl})` } : undefined}>
+            <div className="campaignCard__visual" style={{ backgroundImage: `url(${campaign.bannerImageUrl || campaign.coverImageUrl || imagePlaceholder("campaignBanners")})` }}>
               <span className={`campaignRoleBadge ${role === "MG" ? "is-gm" : "is-player"}`}>{role}</span>
               <button
                 type="button"
@@ -475,6 +597,7 @@ function MyCampaignGrid({ campaigns, navigate, openCreate, onToggleFavorite }) {
               >
                 <CampaignIcon name="bookmark" />
               </button>
+              <span className="campaignCard__logo" style={{ backgroundImage: `url(${campaign.coverImageUrl || imagePlaceholder("campaignIcons")})` }} aria-hidden="true" />
             </div>
             <div className="campaignCard__body">
               <h2>{campaign.title}</h2>
@@ -519,7 +642,7 @@ function PublicCampaignGrid({ campaigns, onJoin, joinLoading, onToggleFavorite }
         const members = Array.isArray(campaign.members) ? campaign.members : [];
         return (
           <article key={campaign.id} className={`campaignCard campaignCard--public campaignCard--${campaign.tone || ["sage", "blue", "amber", "green"][index % 4]}`}>
-            <div className="campaignCard__visual" style={campaign.coverImageUrl ? { backgroundImage: `url(${campaign.coverImageUrl})` } : undefined}>
+            <div className="campaignCard__visual" style={{ backgroundImage: `url(${campaign.bannerImageUrl || campaign.coverImageUrl || imagePlaceholder("campaignBanners")})` }}>
               <span className={`campaignStatusBadge is-${String(campaign.statusBadge || "AKTYWNA").toLowerCase()}`}>{campaign.statusBadge || "AKTYWNA"}</span>
               <button
                 type="button"
@@ -530,6 +653,7 @@ function PublicCampaignGrid({ campaigns, onJoin, joinLoading, onToggleFavorite }
               >
                 <CampaignIcon name="bookmark" />
               </button>
+              <span className="campaignCard__logo" style={{ backgroundImage: `url(${campaign.coverImageUrl || imagePlaceholder("campaignIcons")})` }} aria-hidden="true" />
             </div>
             <div className="campaignCard__body">
               <h2>{campaign.title}</h2>
@@ -567,15 +691,15 @@ function CampaignMemberAvatars({ members, gmName }) {
       {items.map((member, avatarIndex) => (
         <span
           key={`${member.id || member.username}-${avatarIndex}`}
-          className="campaignAvatar"
+          className={`campaignAvatar${memberAvatar(member) ? " has-image" : ""}`}
           style={{ "--avatar-index": avatarIndex }}
           tabIndex={0}
         >
-          {memberInitial(member)}
+          <CampaignMemberAvatarImage member={member} />
           <span className="campaignAvatarProfile" role="tooltip">
             <span className="campaignAvatarProfile__cover" />
             <span className="campaignAvatarProfile__body">
-              <span className="campaignAvatarProfile__avatar">{memberInitial(member)}</span>
+              <span className={`campaignAvatarProfile__avatar${memberAvatar(member) ? " has-image" : ""}`}><CampaignMemberAvatarImage member={member} label={false} /></span>
               <span className="campaignAvatarProfile__copy">
                 <strong>{member.displayName || member.username || "Użytkownik"}</strong>
                 <small>{member.handle || member.username || "bez tagu"}</small>
@@ -588,6 +712,13 @@ function CampaignMemberAvatars({ members, gmName }) {
       {hiddenCount > 0 && <em>+{hiddenCount}</em>}
     </div>
   );
+}
+
+function CampaignMemberAvatarImage({ member, label = true }) {
+  const avatar = memberAvatar(member);
+  const name = member?.displayName || member?.username || "Uzytkownik";
+  if (!avatar) return memberInitial(member);
+  return <img src={avatar} alt={label ? `Avatar ${name}` : ""} />;
 }
 
 function MyCampaignPanel({ invites, stats }) {
@@ -714,6 +845,7 @@ function CampaignIcon({ name }) {
     "chevron-down": <path d="m6 9 6 6 6-6" />,
     dragon: <><path d="M4 16c4-8 9-10 16-9-2 2-3 4-3 7" /><path d="M7 15c3 4 8 5 12 2" /><path d="M13 8 8 4l1 6" /></>,
     globe: <><circle cx="12" cy="12" r="10" /><path d="M2 12h20" /><path d="M12 2a15 15 0 0 1 0 20" /><path d="M12 2a15 15 0 0 0 0 20" /></>,
+    info: <><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></>,
     link: <><path d="M10 13a5 5 0 0 0 7.07 0l2-2a5 5 0 0 0-7.07-7.07l-1.15 1.15" /><path d="M14 11a5 5 0 0 0-7.07 0l-2 2A5 5 0 0 0 12 20.07l1.15-1.15" /></>,
     mail: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></>,
     plus: <><path d="M12 5v14" /><path d="M5 12h14" /></>,

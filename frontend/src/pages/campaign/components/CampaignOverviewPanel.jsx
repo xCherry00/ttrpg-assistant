@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import ImageUpload from "../../../components/common/ImageUpload";
+import ImageLibraryPicker from "../../../components/common/ImageLibraryPicker";
 
 export default function CampaignOverviewPanel({ campaign, isOwner, busy, onUpdate, onDelete }) {
   const [form, setForm] = useState({
@@ -83,17 +83,15 @@ export default function CampaignOverviewPanel({ campaign, isOwner, busy, onUpdat
               required
             />
           </label>
-          <ImageUpload
-            label="Okładka kampanii"
+          <ImageLibraryPicker
+            type="campaignIcons"
+            label="Ikona kampanii"
             value={form.coverImageUrl}
             onChange={(url) => setForm((prev) => ({ ...prev, coverImageUrl: url }))}
             onRemove={() => setForm((prev) => ({ ...prev, coverImageUrl: "" }))}
-            previewAlt="Okładka kampanii"
+            previewAlt="Ikona kampanii"
+            helpText="Wybierz gotowa ikone kampanii z biblioteki."
           />
-          <label className="campaignField">
-            <span>URL okładki (opcjonalnie)</span>
-            <input value={form.coverImageUrl} onChange={(e) => setForm((prev) => ({ ...prev, coverImageUrl: e.target.value }))} />
-          </label>
           <div style={{ display: "flex", gap: 8 }}>
             <button className="campaignDetailsPrimaryBtn" type="submit" disabled={busy || !dirty}>Zapisz</button>
             <button className="campaignDetailsDangerBtn" type="button" disabled={busy} onClick={onDelete}>Usuń (soft-delete)</button>

@@ -1022,9 +1022,13 @@
 .friendsContactList {
   display: grid;
   gap: 12px;
+  align-content: start;
+  grid-auto-rows: max-content;
 }
 
 .friendsContactCard {
+  min-height: 84px;
+  height: 84px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
@@ -1044,6 +1048,7 @@
 }
 
 .friendsContactSelect {
+  height: 100%;
   min-width: 0;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) minmax(130px, 0.7fr);
@@ -1177,6 +1182,46 @@
   display: grid;
   justify-items: center;
   text-align: center;
+}
+
+.friendsDetailsHero {
+  position: relative;
+  overflow: hidden;
+  margin: -22px -22px 0;
+  padding: 92px 22px 18px;
+  border-bottom: 1px solid var(--friends-line);
+}
+
+.friendsDetailsHero__banner {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 138px;
+  background: var(--friends-panel);
+  z-index: 0;
+}
+
+.friendsDetailsHero__banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.92));
+}
+
+.friendsDetailsHero__banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.friendsDetailsHero > :not(.friendsDetailsHero__banner) {
+  position: relative;
+  z-index: 1;
+}
+
+.friendsDetailsHero .friendsAvatar--lg {
+  border: 4px solid #ffffff;
+  box-shadow: 0 12px 26px rgba(31, 39, 34, 0.16);
 }
 
 .friendsDetailsHero h2 {
@@ -1371,4 +1416,20 @@
   .friendsListHeader select {
     width: 100%;
   }
+}
+
+.friendsDesk .friendsContactList {
+  align-content: start !important;
+  align-items: start !important;
+  grid-auto-rows: max-content !important;
+}
+
+.friendsDesk .friendsContactCard {
+  min-height: 84px !important;
+  height: 84px !important;
+  align-self: start !important;
+}
+
+.friendsDesk .friendsContactSelect {
+  height: 100% !important;
 }

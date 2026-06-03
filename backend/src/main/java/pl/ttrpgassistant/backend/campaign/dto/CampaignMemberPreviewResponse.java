@@ -5,6 +5,7 @@ public record CampaignMemberPreviewResponse(
         String displayName,
         String username,
         String handle,
+        String avatarUrl,
         String role,
         boolean owner,
         boolean mg

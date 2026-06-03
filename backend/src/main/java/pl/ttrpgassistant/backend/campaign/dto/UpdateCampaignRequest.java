@@ -9,7 +9,9 @@ import pl.ttrpgassistant.backend.common.validation.SafeImageOrHttpUrl;
 public record UpdateCampaignRequest(
         @NotBlank @Size(max = 200) String title,
         @Size(max = 5000) String description,
+        @Size(max = 20) String status,
         @Size(max = 2000) @SafeImageOrHttpUrl String coverImageUrl,
+        @Size(max = 2000) @SafeImageOrHttpUrl String bannerImageUrl,
         @Size(max = 20) String visibility,
         @Min(1) @Max(20) Integer playerLimit
 ) {}

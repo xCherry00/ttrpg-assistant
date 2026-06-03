@@ -61,6 +61,20 @@ function conversationInitial(conversation) {
   return conversationName(conversation).slice(0, 1).toUpperCase() || "R";
 }
 
+function conversationAvatar(conversation) {
+  return conversation?.peer?.avatarUrl || "";
+}
+
+function PeerAvatar({ conversation, className }) {
+  const avatar = conversationAvatar(conversation);
+  return (
+    <span className={`${className}${avatar ? " has-image" : ""}`}>
+      {avatar ? <img src={avatar} alt={`Avatar ${conversationName(conversation)}`} /> : conversationInitial(conversation)}
+      <i className={`messagesStatusDot${hasUnread(conversation) ? " is-online" : ""}`} aria-hidden="true" />
+    </span>
+  );
+}
+
 function peerTag(peer) {
   if (!peer) return "Brak identyfikatora";
   if (peer.username && peer.tagCode !== undefined && peer.tagCode !== null) {
@@ -289,7 +303,9 @@ export default function MessagesPage() {
 
           <div className="messagesSidebar__discover">
             <div className="messagesDiscoverSearch">
-              <span aria-hidden="true">S</span>
+              <span aria-hidden="true" className="messagesSearchIcon">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
+              </span>
               <input id="messages-discover" value={peopleQuery} onChange={(event) => setPeopleQuery(event.target.value)} placeholder="Szukaj uzytkownika..." />
               <button type="button" className="messagesNewButton" onClick={handleNewConversationFocus} aria-label="Nowa rozmowa">+</button>
             </div>
@@ -312,10 +328,7 @@ export default function MessagesPage() {
             {!loadingConversations && conversations.length === 0 && <div className="messagesHint">Brak rozmow. Zacznij nowa rozmowe powyzej.</div>}
             {!loadingConversations && conversations.map((conversation) => (
               <button key={conversation.id} type="button" className={`messagesConversationItem${activeConversationId === conversation.id ? " is-active" : ""}`} onClick={() => setActiveConversationId(conversation.id)}>
-                <span className="messagesConversationItem__avatar">
-                  {conversationInitial(conversation)}
-                  <i className={`messagesStatusDot${hasUnread(conversation) ? " is-online" : ""}`} aria-hidden="true" />
-                </span>
+                <PeerAvatar conversation={conversation} className="messagesConversationItem__avatar" />
                 <span className="messagesConversationItem__meta">
                   <span className="messagesConversationItem__top">
                     <strong>{conversationName(conversation)}</strong>
@@ -342,10 +355,7 @@ export default function MessagesPage() {
             <>
               <header className="messagesMain__header">
                 <div className="messagesChatPeer">
-                  <span className="messagesHeaderAvatar">
-                    {conversationInitial(activeConversation)}
-                    <i className="messagesStatusDot is-online" aria-hidden="true" />
-                  </span>
+                  <PeerAvatar conversation={activeConversation} className="messagesHeaderAvatar" />
                   <div>
                     <h3>{conversationName(activeConversation)}</h3>
                     <p>{activeConversation?.peer?.activityLabel || statusLabel(activeConversation.status)}</p>
@@ -358,7 +368,6 @@ export default function MessagesPage() {
                       <button type="button" className="btn btn-ghost" disabled={busyAction === "reject"} onClick={handleRejectRequest}>Odrzuc</button>
                     </div>
                   )}
-                  <button type="button" aria-label="Szukaj w rozmowie">S</button>
                   <button type="button" aria-label="Menu rozmowy">...</button>
                 </div>
               </header>
@@ -371,7 +380,11 @@ export default function MessagesPage() {
 
                 {messages.map((message) => (
                   <article key={message.id} className={`messageRow${message.own ? " is-own" : ""}`}>
-                    {!message.own && <span className="messageAvatar">{String(message.senderDisplayName || conversationName(activeConversation)).slice(0, 1).toUpperCase()}</span>}
+                    {!message.own && (
+                      <span className={`messageAvatar${activeConversation.peer?.avatarUrl ? " has-image" : ""}`}>
+                        {activeConversation.peer?.avatarUrl ? <img src={activeConversation.peer.avatarUrl} alt={`Avatar ${conversationName(activeConversation)}`} /> : String(message.senderDisplayName || conversationName(activeConversation)).slice(0, 1).toUpperCase()}
+                      </span>
+                    )}
                     <div className={`messageBubble${message.own ? " is-own" : ""}`}>
                       <div className="messageBubble__meta">
                         <strong>{message.own ? "Ty" : message.senderDisplayName || conversationName(activeConversation)}</strong>
@@ -428,7 +441,9 @@ export default function MessagesPage() {
             <div className="messagesDetails__content">
               <div className="messagesDetails__top">
                 <span className="messagesDetails__presence" aria-hidden="true" />
-                <div className="messagesDetails__avatar">{activeConversation.peer.displayName.slice(0, 1).toUpperCase()}</div>
+                <div className={`messagesDetails__avatar${activeConversation.peer.avatarUrl ? " has-image" : ""}`}>
+                  {activeConversation.peer.avatarUrl ? <img src={activeConversation.peer.avatarUrl} alt={`Avatar ${activeConversation.peer.displayName}`} /> : activeConversation.peer.displayName.slice(0, 1).toUpperCase()}
+                </div>
                 <h3>{activeConversation.peer.displayName}</h3>
                 <p>{peerTag(activeConversation.peer)}</p>
                 <span>{activeConversation.peer.activityLabel || "Aktywna rozmowa"}</span>
@@ -448,7 +463,7 @@ export default function MessagesPage() {
                 <div className="messagesInfoBlock">
                   <h4>Zalaczniki w rozmowie</h4>
                   <div className="messagesDetailsFiles">
-                    {messages.flatMap((message) => message.attachments || []).slice(0, 3).map((attachment) => (
+                    {messages.flatMap((message) => message.attachments || []).map((attachment) => (
                       <button key={attachment.id} type="button" onClick={() => handleDownloadAttachment(attachment)}>
                         <strong>{attachment.originalName || "Plik"}</strong>
                         <span>{formatBytes(attachment.sizeBytes)} - {fileTypeLabel(attachment)}</span>

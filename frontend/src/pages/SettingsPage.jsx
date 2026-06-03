@@ -5,7 +5,6 @@ import {
   changePassword,
   deleteAccount,
   getMyProfile,
-  updateChatNickColor,
   updateEmail,
 } from "../api/settings";
 import { logout as logoutApi } from "../api/auth";
@@ -14,13 +13,11 @@ import "../styles/settings.css";
 const THEME_STORAGE_KEY = "ttrpg_theme";
 const INITIATIVE_CACHE_KEY = "ttrpg_initiative_rows_v2";
 const INITIATIVE_SYSTEM_KEY = "ttrpg_initiative_system_v1";
-const CHAT_NICK_PRESETS = ["#1f765f", "#536fae", "#c85c4a", "#20835f", "#b88734", "#64c3b3", "#718078", "#b42318"];
 
 const NAV_SECTIONS = [
   { id: "account", label: "Konto", icon: "user" },
   { id: "security", label: "Bezpieczeństwo", icon: "lock" },
   { id: "appearance", label: "Wygląd", icon: "palette" },
-  { id: "chat", label: "Chat sesji", icon: "message" },
   { id: "local", label: "Dane lokalne", icon: "database" },
   { id: "danger", label: "Strefa ryzyka", icon: "trash" },
 ];
@@ -169,8 +166,6 @@ export default function SettingsPage() {
   const [passwordSuccess, setPasswordSuccess] = useState("");
   const [deleteError, setDeleteError] = useState("");
   const [miscSuccess, setMiscSuccess] = useState("");
-  const [chatColorSuccess, setChatColorSuccess] = useState("");
-  const [chatColorError, setChatColorError] = useState("");
 
   const [email, setEmail] = useState("");
   const [newEmail, setNewEmail] = useState("");
@@ -179,7 +174,6 @@ export default function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [emailPassword, setEmailPassword] = useState("");
   const [deletePassword, setDeletePassword] = useState("");
-  const [chatNickColor, setChatNickColor] = useState("");
   const [activeSection, setActiveSection] = useState("account");
   const [theme, setTheme] = useState(() => localStorage.getItem(THEME_STORAGE_KEY) || "dark");
 
@@ -196,7 +190,6 @@ export default function SettingsPage() {
         if (cancelled) return;
         setEmail(me.email || "");
         setNewEmail(me.email || "");
-        setChatNickColor(me.chatNickColor || "");
       } catch {
         if (!cancelled) setEmailError("Nie udało się pobrać danych konta.");
       } finally {
@@ -209,8 +202,6 @@ export default function SettingsPage() {
     };
   }, [token]);
 
-  const profileName = email ? email.split("@")[0] : "test";
-  const displayColor = chatNickColor || "#dbe7fa";
 
   async function handleChangeEmail(e) {
     e.preventDefault();
@@ -267,22 +258,6 @@ export default function SettingsPage() {
     }
   }
 
-  async function handleChatColorSave(color = chatNickColor) {
-    setChatColorError("");
-    setChatColorSuccess("");
-    try {
-      const updated = await updateChatNickColor(token, color || "");
-      setChatNickColor(updated.chatNickColor || "");
-      setChatColorSuccess("Kolor nicku zapisany.");
-      window.dispatchEvent(
-        new CustomEvent("ttrpg-chat-color-updated", {
-          detail: { chatNickColor: updated.chatNickColor || "" },
-        }),
-      );
-    } catch (err) {
-      setChatColorError(err.message || "Nie udało się zapisać koloru.");
-    }
-  }
 
   function clearInitiativeCache() {
     const confirmed = window.confirm(
@@ -460,50 +435,6 @@ export default function SettingsPage() {
               </div>
           </section>
 
-          <section id="settings-chat" className={`settingsPanel${activeSection === "chat" ? " is-active" : ""}`}>
-              <div className="settingsPanelHead">
-                <span className="settingsPanelIcon">
-                  <Icon name="sparkles" />
-                </span>
-                <div>
-                  <h2>Chat sesji</h2>
-                  <p>Ustaw kolor nicku dla wiadomości na czacie sesji.</p>
-                </div>
-              </div>
-              <Message type="error">{chatColorError}</Message>
-              <Message type="success">{chatColorSuccess}</Message>
-              <div className="settingsChatPreview">
-                <span>Podgląd</span>
-                <p>
-                  <strong style={{ color: displayColor }}>{profileName}</strong> Przykładowa wiadomość na czacie sesji.
-                </p>
-              </div>
-              <div className="chatColorGrid">
-                {CHAT_NICK_PRESETS.map((preset) => (
-                  <button
-                    key={preset}
-                    type="button"
-                    className={`chatColorSwatch${chatNickColor === preset ? " is-active" : ""}`}
-                    style={{ "--swatch": preset }}
-                    onClick={() => setChatNickColor(preset)}
-                    aria-label={`Ustaw kolor ${preset}`}
-                    title={preset}
-                  />
-                ))}
-              </div>
-              <div className="chatColorCustomRow">
-                <input
-                  className="settingsInput"
-                  type="text"
-                  value={chatNickColor}
-                  onChange={(e) => setChatNickColor(e.target.value)}
-                  placeholder="#AABBCC"
-                />
-                <button type="button" className="settingsBtn settingsBtnGhost" onClick={() => handleChatColorSave()}>
-                  Zapisz
-                </button>
-              </div>
-          </section>
 
           <section id="settings-local" className={`settingsPanel${activeSection === "local" ? " is-active" : ""}`}>
               <div className="settingsPanelHead">

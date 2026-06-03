@@ -188,6 +188,26 @@ public class PlayerCharacterService {
             entity.setPortraitUrl(portrait);
             map(sheet, "identity").put("portraitUrl", portrait == null ? "" : portrait);
         }
+        if (request.raceName() != null) {
+            String race = nullToEmpty(request.raceName());
+            entity.setRaceName(race);
+            map(sheet, "identity").put("race", race);
+            map(sheet, "snapshots").put("race", Map.of("name", race));
+        }
+        if (request.className() != null) {
+            String className = nullToEmpty(request.className());
+            entity.setClassName(className);
+            map(sheet, "identity").put("className", className);
+            map(sheet, "identity").put("class", className);
+            map(sheet, "snapshots").put("class", Map.of("name", className));
+        }
+        if (request.level() != null) {
+            entity.setLevel(request.level());
+            map(sheet, "identity").put("level", request.level());
+        }
+        if (request.campaignName() != null) {
+            map(sheet, "identity").put("campaignName", nullToEmpty(request.campaignName()));
+        }
         if (request.currentHp() != null) {
             entity.setCurrentHp(request.currentHp());
             map(sheet, "combat").put("currentHp", request.currentHp());

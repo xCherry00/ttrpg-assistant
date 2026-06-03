@@ -17,6 +17,7 @@ import pl.ttrpgassistant.backend.user.dto.MeResponse;
 import pl.ttrpgassistant.backend.user.dto.UpdateChatNickColorRequest;
 import pl.ttrpgassistant.backend.user.dto.UpdateDisplayNameRequest;
 import pl.ttrpgassistant.backend.user.dto.UpdateEmailRequest;
+import pl.ttrpgassistant.backend.user.dto.UpdateProfileImagesRequest;
 
 @RestController
 @RequestMapping("/api/user")
@@ -66,6 +67,15 @@ public class UserSettingsController {
     ) {
         Long userId = (Long) auth.getPrincipal();
         return userSettingsService.updateChatNickColor(userId, req);
+    }
+
+    @PatchMapping("/profile-images")
+    public MeResponse updateProfileImages(
+            Authentication auth,
+            @Valid @RequestBody UpdateProfileImagesRequest req
+    ) {
+        Long userId = (Long) auth.getPrincipal();
+        return userSettingsService.updateProfileImages(userId, req);
     }
 
     @DeleteMapping

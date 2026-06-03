@@ -11,6 +11,7 @@ public record CreateCampaignRequest(
         @NotBlank @Size(max = 32) String systemCode,
         @Size(max = 2000) String description,
         @Size(max = 2_000_000) @SafeImageOrHttpUrl String coverImageUrl,
+        @Size(max = 2_000_000) @SafeImageOrHttpUrl String bannerImageUrl,
         @Size(max = 20) String visibility,
         @Min(1) @Max(20) Integer playerLimit
 ) {}

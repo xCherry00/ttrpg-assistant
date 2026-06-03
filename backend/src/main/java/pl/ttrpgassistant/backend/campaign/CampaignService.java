@@ -121,6 +121,7 @@ public class CampaignService {
                 .systemCode(normalizeSystemCode(req.systemCode()))
                 .descriptionMd(Optional.ofNullable(req.description()).orElse("").trim())
                 .coverImageUrl(normalizeCoverImageUrl(req.coverImageUrl()))
+                .bannerImageUrl(normalizeCoverImageUrl(req.bannerImageUrl()))
                 .status("active")
                 .joinCode(generateUniqueCode())
                 .visibility(normalizeVisibility(req.visibility(), "PRIVATE"))
@@ -259,6 +260,7 @@ public class CampaignService {
                 campaign.getSystemCode(),
                 campaign.getDescriptionMd(),
                 campaign.getCoverImageUrl(),
+                campaign.getBannerImageUrl(),
                 campaign.getStatus(),
                 campaign.getJoinCode(),
                 "/campaigns/join?code=" + campaign.getJoinCode(),
@@ -294,6 +296,7 @@ public class CampaignService {
                 user.getUsername(),
                 user.getTagCode(),
                 user.getUsername() + "-" + String.format("%04d", user.getTagCode()),
+                user.getAvatarUrl(),
                 owner ? "GM" : member.getRole().toUpperCase(Locale.ROOT),
                 owner,
                 user.isMg(),
@@ -426,6 +429,7 @@ public class CampaignService {
                             displayNameFor(user),
                             user.getUsername(),
                             user.getUsername() + "-" + String.format("%04d", user.getTagCode()),
+                            user.getAvatarUrl(),
                             role,
                             owner,
                             user.isMg()

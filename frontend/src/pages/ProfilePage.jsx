@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
-import { getMyProfile, updateDisplayName } from "../api/settings";
+import { getMyProfile, updateDisplayName, updateProfileImages } from "../api/settings";
 import { listCampaigns, listCampaignSessions } from "../api/campaigns";
 import { getSocialOverview } from "../api/social";
-import { uploadImage } from "../api/uploads";
+import ImageLibraryPicker from "../components/common/ImageLibraryPicker";
+import { imagePlaceholder } from "../data/imageLibrary";
 import { BASIC_RULES } from "../data/basicRules";
 import "../styles/profile.css";
 
@@ -32,6 +33,7 @@ const ICONS = {
   edit: "M4 20h4l10-10-4-4L4 16z M13 7l4 4",
   upload: "M12 16V4 M8 8l4-4 4 4 M5 20h14",
   trash: "M5 7h14 M10 11v6 M14 11v6 M8 7l1-3h6l1 3 M7 7l1 13h8l1-13",
+  close: "M6 6l12 12 M18 6L6 18",
   activity: "M5 12h4l2-6 4 12 2-6h2",
   tools: "M14 4l6 6-4 4-6-6z M4 14l6 6 4-4-6-6z",
   trophy: "M8 5h8v3a4 4 0 0 1-8 0z M8 6H5a3 3 0 0 0 3 3 M16 6h3a3 3 0 0 1-3 3 M12 12v5 M9 20h6",
@@ -62,8 +64,8 @@ function getProfileDraftStorageKey(email) {
 function readProfileDraft(email, profile = {}) {
   const fallback = {
     bio: profile?.bio || "",
-    favoriteSystem: profile?.favoriteSystem || BASIC_RULES[0]?.name || "D&D 5e",
-    timezone: profile?.timezone || "Europe/Warsaw",
+    favoriteSystem: profile?.favoriteSystem || "",
+    timezone: profile?.timezone || "",
   };
   if (typeof window === "undefined") return fallback;
   try {
@@ -105,8 +107,11 @@ function readRecentGenerations(userId) {
 }
 
 function safeDate(value) {
-  const d = new Date(value || 0);
-  return Number.isNaN(d.getTime()) ? null : d;
+  if (!value) return null;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+  if (d.getFullYear() <= 1971) return null;
+  return d;
 }
 
 function formatDate(value, fallback = "Brak danych") {
@@ -168,8 +173,6 @@ function EmptyState({ title, text }) {
 
 export default function ProfilePage() {
   const { token } = useAuth();
-  const avatarInputRef = useRef(null);
-  const bannerInputRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -184,9 +187,12 @@ export default function ProfilePage() {
   const [nameSuccess, setNameSuccess] = useState("");
   const [avatarSrc, setAvatarSrc] = useState("");
   const [bannerSrc, setBannerSrc] = useState("");
-  const [avatarBusy, setAvatarBusy] = useState(false);
   const [avatarError, setAvatarError] = useState("");
   const [profileDraft, setProfileDraft] = useState(() => readProfileDraft());
+  const [modalDraft, setModalDraft] = useState(() => readProfileDraft());
+  const [modalAvatar, setModalAvatar] = useState({ file: null, preview: "", remove: false });
+  const [modalBanner, setModalBanner] = useState({ file: null, preview: "", remove: false });
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [activeProfilePanel, setActiveProfilePanel] = useState("activity");
 
   useEffect(() => {
@@ -199,11 +205,19 @@ export default function ProfilePage() {
         const me = await getMyProfile(token);
         if (cancelled) return;
 
-        setProfile(me);
+        const storedAvatar = localStorage.getItem(getAvatarStorageKey(me?.email)) || "";
+        const storedBanner = localStorage.getItem(getBannerStorageKey(me?.email)) || "";
+        let currentProfile = me;
+        if ((!me?.avatarUrl && storedAvatar) || (!me?.profileBannerUrl && storedBanner)) {
+          currentProfile = await updateProfileImages(token, me?.avatarUrl || storedAvatar, me?.profileBannerUrl || storedBanner);
+          if (cancelled) return;
+        }
+
+        setProfile(currentProfile);
         setDisplayNameInput(me?.displayName || (me?.email ? me.email.split("@")[0] : ""));
-        setAvatarSrc(localStorage.getItem(getAvatarStorageKey(me?.email)) || "");
-        setBannerSrc(localStorage.getItem(getBannerStorageKey(me?.email)) || "");
-        setProfileDraft(readProfileDraft(me?.email, me));
+        setAvatarSrc(currentProfile?.avatarUrl || storedAvatar);
+        setBannerSrc(currentProfile?.profileBannerUrl || storedBanner);
+        setProfileDraft(readProfileDraft(me?.email, currentProfile));
         setRecentGenerations(readRecentGenerations(me?.id));
 
         const [campaignsRes, socialRes] = await Promise.allSettled([
@@ -253,6 +267,24 @@ export default function ProfilePage() {
       cancelled = true;
     };
   }, [token]);
+
+  useEffect(() => {
+    if (!isEditModalOpen) return undefined;
+
+    function handleKeyDown(event) {
+      if (event.key === "Escape") closeEditModal();
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isEditModalOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (modalAvatar.preview?.startsWith("blob:")) URL.revokeObjectURL(modalAvatar.preview);
+      if (modalBanner.preview?.startsWith("blob:")) URL.revokeObjectURL(modalBanner.preview);
+    };
+  }, [modalAvatar.preview, modalBanner.preview]);
 
   const displayName = useMemo(() => {
     if (profile?.displayName?.trim()) return profile.displayName.trim();
@@ -323,41 +355,109 @@ export default function ProfilePage() {
   const recentCampaigns = useMemo(() => {
     return [...campaigns]
       .sort((a, b) => new Date(b.updatedAt || b.createdAt || 0).getTime() - new Date(a.updatedAt || a.createdAt || 0).getTime())
-      .slice(0, 4)
       .map((campaign) => ({
         id: campaign.id,
         title: campaign.title || "Kampania",
         role: campaign.owner ? "Mistrz Gry" : "Gracz",
-        system: campaign.system || campaign.rpgSystem || "System RPG",
+        status: campaign.status || campaign.state || "Brak statusu",
+        system: campaign.system || campaign.rpgSystem || "Brak",
+        updatedAt: campaign.updatedAt || campaign.lastActivityAt || campaign.createdAt,
       }));
   }, [campaigns]);
 
-  const achievements = useMemo(() => [
-    { id: "first-session", title: "Pierwsza sesja", desc: "Przeprowadz lub rozegraj pierwsza sesje", unlocked: stats.sessionTotal >= 1 },
-    { id: "world-builder", title: "Tworca swiatow", desc: "Utworz 10 wygenerowanych materialow", unlocked: stats.generatedTotal >= 10 },
-    { id: "chronicle", title: "Kronikarz", desc: "Zgromadz 50 materialow do sesji", unlocked: stats.generatedTotal >= 50 },
-    { id: "social-table", title: "Stol druzyny", desc: "Dodaj pierwszego znajomego", unlocked: stats.friendsCount >= 1 },
-  ], [stats.friendsCount, stats.generatedTotal, stats.sessionTotal]);
+  const gmCampaigns = useMemo(() => recentCampaigns.filter((campaign) => campaign.role === "Mistrz Gry"), [recentCampaigns]);
+  const playerCampaigns = useMemo(() => recentCampaigns.filter((campaign) => campaign.role !== "Mistrz Gry"), [recentCampaigns]);
 
-  async function handleSaveName(event) {
+  function openEditModal() {
+    setNameError("");
+    setNameSuccess("");
+    setAvatarError("");
+    setDisplayNameInput(displayName);
+    setModalDraft(profileDraft);
+    setModalAvatar({ file: null, preview: "", remove: false });
+    setModalBanner({ file: null, preview: "", remove: false });
+    setIsEditModalOpen(true);
+  }
+
+  function closeEditModal(force = false) {
+    if (nameSaving && !force) return;
+    setIsEditModalOpen(false);
+    setNameError("");
+    setAvatarError("");
+    setModalAvatar((current) => {
+      if (current.preview?.startsWith("blob:")) URL.revokeObjectURL(current.preview);
+      return { file: null, preview: "", remove: false };
+    });
+    setModalBanner((current) => {
+      if (current.preview?.startsWith("blob:")) URL.revokeObjectURL(current.preview);
+      return { file: null, preview: "", remove: false };
+    });
+  }
+
+  function handleLibraryImageSelected(kind, src) {
+    const setter = kind === "banner" ? setModalBanner : setModalAvatar;
+    setter((current) => {
+      if (current.preview?.startsWith("blob:")) URL.revokeObjectURL(current.preview);
+      return { file: null, preview: src, remove: false };
+    });
+    setAvatarError("");
+  }
+
+  async function handleSaveProfile(event) {
     event.preventDefault();
     setNameError("");
     setNameSuccess("");
+    setAvatarError("");
 
     const trimmed = displayNameInput.trim();
-    if (trimmed.length < 2) {
-      setNameError("Nazwa uzytkownika musi miec co najmniej 2 znaki.");
+    const trimmedBio = (modalDraft.bio || "").trim();
+    if (!trimmed) {
+      setNameError("Nazwa publiczna nie moze byc pusta.");
+      return;
+    }
+    if (trimmed.length > 120) {
+      setNameError("Nazwa publiczna moze miec maksymalnie 120 znakow.");
+      return;
+    }
+    if (trimmedBio.length > 300) {
+      setNameError("Opis moze miec maksymalnie 300 znakow.");
       return;
     }
 
     setNameSaving(true);
     try {
-      const updated = await updateDisplayName(token, trimmed);
-      writeProfileDraft(profile?.email, profileDraft);
-      setProfile((prev) => ({ ...(prev || {}), ...updated, displayName: updated.displayName || trimmed, ...profileDraft }));
+      let updated = trimmed === displayName ? { displayName: trimmed } : await updateDisplayName(token, trimmed);
+      const nextDraft = { ...modalDraft, bio: trimmedBio };
+      let nextAvatarSrc = avatarSrc;
+      let nextBannerSrc = bannerSrc;
+
+      if (modalAvatar.remove) {
+        localStorage.removeItem(getAvatarStorageKey(profile?.email));
+        nextAvatarSrc = "";
+      }
+      if (modalBanner.remove) {
+        localStorage.removeItem(getBannerStorageKey(profile?.email));
+        nextBannerSrc = "";
+      }
+      if (modalAvatar.preview) {
+        nextAvatarSrc = modalAvatar.preview;
+        localStorage.setItem(getAvatarStorageKey(profile?.email), nextAvatarSrc);
+      }
+      if (modalBanner.preview) {
+        nextBannerSrc = modalBanner.preview;
+        localStorage.setItem(getBannerStorageKey(profile?.email), nextBannerSrc);
+      }
+
+      updated = await updateProfileImages(token, nextAvatarSrc, nextBannerSrc);
+      writeProfileDraft(profile?.email, nextDraft);
+      setProfile((prev) => ({ ...(prev || {}), ...updated, displayName: updated.displayName || trimmed, ...nextDraft }));
       setDisplayNameInput(updated.displayName || trimmed);
+      setProfileDraft(nextDraft);
+      setAvatarSrc(nextAvatarSrc);
+      setBannerSrc(nextBannerSrc);
       setNameSuccess("Zapisano zmiany profilu.");
       window.dispatchEvent(new Event("ttrpg-profile-updated"));
+      closeEditModal(true);
     } catch (err) {
       setNameError(err?.message || "Nie udalo sie zapisac.");
     } finally {
@@ -365,104 +465,52 @@ export default function ProfilePage() {
     }
   }
 
-  async function handleProfileImageSelected(event, kind) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    setAvatarBusy(true);
-    setAvatarError("");
-    try {
-      const uploaded = await uploadImage(token, file);
-      const url = uploaded.url || "";
-      if (kind === "banner") {
-        localStorage.setItem(getBannerStorageKey(profile?.email), url);
-        setBannerSrc(url);
-      } else {
-        localStorage.setItem(getAvatarStorageKey(profile?.email), url);
-        setAvatarSrc(url);
-      }
-      event.target.value = "";
-      window.dispatchEvent(new Event("ttrpg-profile-updated"));
-    } catch (err) {
-      setAvatarError(err?.message || "Nie udalo sie wgrac obrazu.");
-    } finally {
-      setAvatarBusy(false);
-    }
-  }
-
   const tabs = [
     ["activity", "Aktywnosc"],
     ["campaigns", "Kampanie"],
     ["achievements", "Osiagniecia"],
-    ["edit", "Edycja profilu"],
   ];
+
+  const modalAvatarSrc = modalAvatar.remove ? "" : (modalAvatar.preview || avatarSrc);
+  const modalBannerSrc = modalBanner.remove ? "" : (modalBanner.preview || bannerSrc);
+  const previewName = displayNameInput.trim() || displayName;
+  const previewBio = (modalDraft.bio || "").trim() || "Ten uzytkownik nie dodal jeszcze opisu.";
+  const profileBio = profileDraft.bio?.trim() || "Ten uzytkownik nie dodal jeszcze opisu.";
+  const profileFavoriteSystem = safeText(profileDraft.favoriteSystem, "Brak");
+  const profileTimezone = safeText(profileDraft.timezone, "Brak");
 
   return (
     <div className="page profileDesk">
-      <header className="profilePageHeader">
-        <div>
-          <h1>Moj profil</h1>
-          <p>Zarzadzaj swoim profilem, aktywnoscia i skrotami do narzedzi.</p>
-        </div>
-      </header>
-
       {loading && <div className="profileState profileStateLight">Ladowanie profilu...</div>}
       {error && <div className="profileState profileStateLight is-error">{error}</div>}
 
       {!loading && !error && (
         <div className="profileShell">
           <aside className="profileCardPanel">
-            <button
-              type="button"
-              className="profileBanner profileBanner--forest profileUploadHover profileBannerUpload"
-              onClick={() => bannerInputRef.current?.click()}
-              disabled={avatarBusy}
-              aria-label="Zmien baner profilu"
-            >
-              {bannerSrc && <img src={bannerSrc} alt="Baner profilu" />}
-              <span>Zmien baner</span>
-            </button>
+            <div className="profileBanner profileBanner--forest profileBannerUpload" aria-label="Baner profilu">
+              <img src={bannerSrc || imagePlaceholder("campaignBanners")} alt="Baner profilu" onError={() => setBannerSrc("")} />
+            </div>
             <div className="profileAvatarRow">
-              <button
-                type="button"
-                className="profileAvatarLarge profileUploadHover profileAvatarUpload"
-                onClick={() => avatarInputRef.current?.click()}
-                disabled={avatarBusy}
-                aria-label={`Zmien avatar ${displayName}`}
-              >
-                {avatarSrc ? <img src={avatarSrc} alt="Avatar uzytkownika" /> : avatarLabel}
+              <div className="profileAvatarLarge" aria-label={`Avatar ${displayName}`}>
+                <img src={avatarSrc || imagePlaceholder("avatars")} alt="Avatar uzytkownika" onError={() => setAvatarSrc("")} />
                 <i aria-hidden="true" />
-                <span>Zmien avatar</span>
-              </button>
-              <input
-                ref={avatarInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={(event) => handleProfileImageSelected(event, "avatar")}
-                hidden
-              />
-              <input
-                ref={bannerInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={(event) => handleProfileImageSelected(event, "banner")}
-                hidden
-              />
+              </div>
             </div>
 
             <div className="profileCardBody">
               <h2>{displayName}</h2>
               <p className="profileHandle">{profile?.handle ? `@${profile.handle}` : profile?.email || "Brak email"}</p>
-              <p className="profileQuote">{profileDraft.bio ? `"${profileDraft.bio}"` : "\"Wyobraznia to poczatek tworzenia.\""}</p>
+              <p className="profileQuote">{profileBio}</p>
 
               <div className="profileMetaList">
                 <InfoRow label="Rola" value={getRoleLabel(profile)} />
-                <InfoRow label="Ulubiony system" value={safeText(profileDraft.favoriteSystem, "D&D 5e")} />
-                <InfoRow label="Strefa czasowa" value={safeText(profileDraft.timezone, "Europe/Warsaw")} />
+                <InfoRow label="Ulubiony system" value={profileFavoriteSystem} />
+                <InfoRow label="Strefa czasowa" value={profileTimezone} />
                 <InfoRow label="Dolaczyl" value={formatDate(profile?.createdAt || profile?.joinedAt)} />
               </div>
 
               <div className="profileCardActions">
-                <button type="button" className="profilePrimaryAction" onClick={() => setActiveProfilePanel("edit")}>
+                <button type="button" className="profilePrimaryAction" onClick={openEditModal}>
                   <Icon name="edit" /> Edytuj profil
                 </button>
               </div>
@@ -545,18 +593,50 @@ export default function ProfilePage() {
                   <Link to="/campaigns">Zobacz kampanie</Link>
                 </header>
                 {recentCampaigns.length === 0 ? (
-                  <EmptyState title="Brak kampanii" text="Twoje kampanie pojawia sie tutaj po utworzeniu albo dolaczeniu." />
+                  <div className="profileEmptyState">
+                    <span><Icon name="campaign" /></span>
+                    <strong>Brak kampanii</strong>
+                    <p>Twoje kampanie pojawia sie tutaj po utworzeniu albo dolaczeniu.</p>
+                    <Link className="profilePrimaryAction" to="/campaigns">Przejdz do kampanii</Link>
+                  </div>
                 ) : (
-                  <div className="profileCampaignListV3">
-                    {recentCampaigns.map((campaign) => (
-                      <Link key={campaign.id} to={`/campaigns/${campaign.id}`}>
-                        <span><Icon name="campaign" /></span>
-                        <div>
-                          <strong>{campaign.title}</strong>
-                          <small>{campaign.role} · {campaign.system}</small>
+                  <div className="profileCampaignSections">
+                    <section>
+                      <h3>Prowadzone jako MG</h3>
+                      {gmCampaigns.length === 0 ? (
+                        <p className="profileSubtleText">Brak kampanii prowadzonych jako MG.</p>
+                      ) : (
+                        <div className="profileCampaignListV3">
+                          {gmCampaigns.map((campaign) => (
+                            <Link key={campaign.id} to={`/campaigns/${campaign.id}`}>
+                              <span><Icon name="campaign" /></span>
+                              <div>
+                                <strong>{campaign.title}</strong>
+                                <small>{campaign.status} ? {campaign.system} ? ostatnio {formatDate(campaign.updatedAt)}</small>
+                              </div>
+                            </Link>
+                          ))}
                         </div>
-                      </Link>
-                    ))}
+                      )}
+                    </section>
+                    <section>
+                      <h3>Jako gracz</h3>
+                      {playerCampaigns.length === 0 ? (
+                        <p className="profileSubtleText">Brak kampanii, w ktorych grasz jako uczestnik.</p>
+                      ) : (
+                        <div className="profileCampaignListV3">
+                          {playerCampaigns.map((campaign) => (
+                            <Link key={campaign.id} to={`/campaigns/${campaign.id}`}>
+                              <span><Icon name="campaign" /></span>
+                              <div>
+                                <strong>{campaign.title}</strong>
+                                <small>{campaign.status} ? {campaign.system} ? ostatnio {formatDate(campaign.updatedAt)}</small>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </section>
                   </div>
                 )}
               </section>
@@ -567,63 +647,128 @@ export default function ProfilePage() {
                 <header className="profileSectionHeader">
                   <h2>Osiagniecia</h2>
                 </header>
-                <div className="profileAchievementGridV3">
-                  {achievements.map((item) => (
-                    <article key={item.id} className={item.unlocked ? "is-unlocked" : ""}>
-                      <span><Icon name="trophy" /></span>
-                      <strong>{item.title}</strong>
-                      <p>{item.desc}</p>
-                      <small>{item.unlocked ? "Odblokowane" : "W trakcie"}</small>
-                    </article>
-                  ))}
-                </div>
+                <EmptyState title="Brak osiagniec" text="Osiagniecia pojawia sie tutaj po zdobyciu pierwszych odznak." />
               </section>
             )}
 
-            {activeProfilePanel === "edit" && (
-              <section className="profileContentPanel">
-                <header className="profileSectionHeader">
-                  <h2>Edycja profilu</h2>
-                </header>
-                <form className="profileEditForm" onSubmit={handleSaveName}>
-                  <label>
-                    <span>Nazwa publiczna</span>
-                    <input value={displayNameInput} onChange={(event) => setDisplayNameInput(event.target.value)} maxLength={120} placeholder="Nazwa wyswietlana" />
-                  </label>
-                  <label>
-                    <span>Opis</span>
-                    <textarea
-                      value={profileDraft.bio}
-                      onChange={(event) => setProfileDraft((draft) => ({ ...draft, bio: event.target.value }))}
-                      placeholder="Napisz kilka zdan o swoim stylu gry, postaciach albo kampaniach."
-                    />
-                  </label>
-                  <label>
-                    <span>Ulubiony system</span>
-                    <select
-                      value={profileDraft.favoriteSystem}
-                      onChange={(event) => setProfileDraft((draft) => ({ ...draft, favoriteSystem: event.target.value }))}
-                    >
-                      {BASIC_RULES.map((system) => (
-                        <option key={system.rulesApiCode || system.name} value={system.name}>{system.name}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    <span>Strefa czasowa</span>
-                    <input
-                      value={profileDraft.timezone}
-                      onChange={(event) => setProfileDraft((draft) => ({ ...draft, timezone: event.target.value }))}
-                      placeholder="Europe/Warsaw"
-                    />
-                  </label>
-                  <div className="profileFormActions">
-                    <button type="submit" className="profilePrimaryAction" disabled={nameSaving}>{nameSaving ? "Zapisywanie..." : "Zapisz zmiany"}</button>
-                  </div>
-                </form>
-              </section>
-            )}
           </main>
+        </div>
+      )}
+
+      {isEditModalOpen && (
+        <div className="profileModalBackdrop" onMouseDown={(event) => event.target === event.currentTarget && closeEditModal()}>
+          <section className="profileEditModal" role="dialog" aria-modal="true" aria-labelledby="profile-edit-title">
+            <header className="profileEditModal__header">
+              <div>
+                <h2 id="profile-edit-title">Edytuj profil</h2>
+                <p>Zmien podstawowe informacje widoczne na Twoim profilu.</p>
+              </div>
+              <button type="button" className="profileModalClose" onClick={() => closeEditModal()} aria-label="Zamknij modal" disabled={nameSaving}>
+                <Icon name="close" />
+              </button>
+            </header>
+
+            <form className="profileEditModal__body" onSubmit={handleSaveProfile}>
+              <div className="profileEditModal__form">
+                <section className="profileModalSection">
+                  <h3>Avatar profilu</h3>
+                  <ImageLibraryPicker
+                    type="avatars"
+                    label="Avatar"
+                    helpText="Wybierz gotowy avatar z biblioteki."
+                    value={modalAvatarSrc}
+                    onChange={(src) => handleLibraryImageSelected("avatar", src)}
+                    onRemove={() => setModalAvatar((current) => {
+                      if (current.preview?.startsWith("blob:")) URL.revokeObjectURL(current.preview);
+                      return { file: null, preview: "", remove: true };
+                    })}
+                    previewAlt="Avatar profilu"
+                    disabled={nameSaving}
+                  />
+                </section>
+
+                <section className="profileModalSection">
+                  <h3>Baner profilu</h3>
+                  <ImageLibraryPicker
+                    type="campaignBanners"
+                    label="Baner"
+                    helpText="Wybierz gotowy baner profilu z biblioteki."
+                    value={modalBannerSrc}
+                    onChange={(src) => handleLibraryImageSelected("banner", src)}
+                    onRemove={() => setModalBanner((current) => {
+                      if (current.preview?.startsWith("blob:")) URL.revokeObjectURL(current.preview);
+                      return { file: null, preview: "", remove: true };
+                    })}
+                    previewAlt="Baner profilu"
+                    disabled={nameSaving}
+                  />
+                </section>
+
+                <section className="profileModalSection">
+                  <h3>Dane publiczne</h3>
+                  <div className="profileEditForm">
+                    <label>
+                      <span>Nazwa publiczna</span>
+                      <input value={displayNameInput} onChange={(event) => setDisplayNameInput(event.target.value)} maxLength={120} placeholder="Nazwa wyswietlana" />
+                    </label>
+                    <label>
+                      <span>Opis / bio</span>
+                      <textarea
+                        value={modalDraft.bio}
+                        onChange={(event) => setModalDraft((draft) => ({ ...draft, bio: event.target.value.slice(0, 300) }))}
+                        maxLength={300}
+                        placeholder="Napisz kilka zdan o swoim stylu gry, postaciach albo kampaniach."
+                      />
+                      <small>{(modalDraft.bio || "").length}/300</small>
+                    </label>
+                    <label>
+                      <span>Ulubiony system</span>
+                      <select
+                        value={modalDraft.favoriteSystem}
+                        onChange={(event) => setModalDraft((draft) => ({ ...draft, favoriteSystem: event.target.value }))}
+                      >
+                        <option value="">Brak</option>
+                        {BASIC_RULES.map((system) => (
+                          <option key={system.rulesApiCode || system.name} value={system.name}>{system.name}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      <span>Strefa czasowa</span>
+                      <input
+                        value={modalDraft.timezone}
+                        onChange={(event) => setModalDraft((draft) => ({ ...draft, timezone: event.target.value }))}
+                        placeholder="Europe/Warsaw"
+                      />
+                    </label>
+                  </div>
+                </section>
+              </div>
+
+              <aside className="profilePreviewCard" aria-label="Podglad zmian profilu">
+                <div className="profilePreviewCard__banner profileBanner--forest">
+                  <img src={modalBannerSrc || imagePlaceholder("campaignBanners")} alt="Podglad banera" />
+                </div>
+                <div className="profilePreviewCard__avatar">
+                  <img src={modalAvatarSrc || imagePlaceholder("avatars")} alt="Podglad avatara" />
+                </div>
+                <strong>{previewName}</strong>
+                <span>{profile?.handle ? `@${profile.handle}` : profile?.email || "Brak email"}</span>
+                <p>{previewBio}</p>
+                <div className="profilePreviewMeta">
+                  <InfoRow label="Ulubiony system" value={safeText(modalDraft.favoriteSystem, "Brak")} />
+                  <InfoRow label="Strefa czasowa" value={safeText(modalDraft.timezone, "Brak")} />
+                </div>
+              </aside>
+
+              {(nameError || avatarError) && <div className="profileInlineMsg is-error">{nameError || avatarError}</div>}
+
+              <footer className="profileEditModal__footer">
+                <button type="button" className="profileSecondaryAction" onClick={() => closeEditModal()} disabled={nameSaving}>Anuluj</button>
+                <button type="submit" className="profilePrimaryAction" disabled={nameSaving}>{nameSaving ? "Zapisywanie..." : "Zapisz zmiany"}</button>
+              </footer>
+            </form>
+          </section>
         </div>
       )}
     </div>

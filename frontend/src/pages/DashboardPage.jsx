@@ -4,6 +4,7 @@ import { useAuth } from "../auth/AuthContext";
 import { getMe } from "../api/me";
 import { getSessionAttendance, listCampaignMembers, listCampaignSessions, listCampaigns } from "../api/campaigns";
 import { listCharacters } from "../api/characters";
+import { imagePlaceholder } from "../data/imageLibrary";
 import "../styles/dashboard.css";
 
 const PREVIEW_LIMIT = 4;
@@ -56,15 +57,14 @@ function pickHeroSession(sessions) {
 }
 
 function pickAvailabilitySession(sessions) {
-  const active = sessions.find((session) => normalizeStatus(session.status) === "IN_PROGRESS");
-  if (active) return active;
-
   const planned = sessions
     .filter((session) => normalizeStatus(session.status) === "PLANNED")
     .slice()
     .sort((a, b) => toTimestamp(a.scheduledFor) - toTimestamp(b.scheduledFor));
 
-  return planned[0] || null;
+  if (planned.length > 0) return planned[0];
+
+  return sessions.find((session) => normalizeStatus(session.status) === "IN_PROGRESS") || null;
 }
 
 function normalizeAvailabilityStatus(status) {
@@ -144,7 +144,7 @@ function getCampaignRoleLabel(campaign) {
 }
 
 function pickSessionImage(session) {
-  return session?.imageUrl || session?.coverImageUrl || session?.sceneImageUrl || session?.campaignCoverImageUrl || "";
+  return session?.imageUrl || session?.bannerImageUrl || session?.campaignBannerImageUrl || session?.sceneImageUrl || session?.coverImageUrl || session?.campaignCoverImageUrl || "";
 }
 
 function RoleDonutChart({ items, total }) {
@@ -338,6 +338,7 @@ export default function DashboardPage() {
               campaignSystemCode: campaign?.systemCode,
               campaignOwner: Boolean(campaign?.owner),
               campaignCoverImageUrl: campaign?.coverImageUrl || "",
+              campaignBannerImageUrl: campaign?.bannerImageUrl || "",
             }));
           });
           setSessions(sessionRows);
@@ -369,7 +370,14 @@ export default function DashboardPage() {
   const hero = useMemo(() => pickHeroSession(sessions), [sessions]);
 
   const attendanceCampaigns = useMemo(
-    () => campaigns.filter((campaign) => sessions.some((session) => String(session.campaignId) === String(campaign.id))),
+    () => campaigns
+      .map((campaign) => {
+        const campaignSessions = sessions.filter((session) => String(session.campaignId) === String(campaign.id));
+        return { campaign, session: pickAvailabilitySession(campaignSessions) };
+      })
+      .filter((item) => item.session)
+      .sort((a, b) => toTimestamp(a.session.scheduledFor) - toTimestamp(b.session.scheduledFor))
+      .map((item) => item.campaign),
     [campaigns, sessions],
   );
 
@@ -466,9 +474,9 @@ export default function DashboardPage() {
   const roleStats = useMemo(() => countRole(campaigns), [campaigns]);
   const availabilityRows = useMemo(() => buildAvailabilityRows(attendanceMembers, attendance), [attendanceMembers, attendance]);
 
-  const heroTitle = hero.mode === "active" ? "Aktywna sesja" : hero.mode === "planned" ? "Najblizsza sesja" : "Centrum dowodzenia";
+  const heroTitle = hero.mode === "active" ? "Aktywna sesja" : hero.mode === "planned" ? "Najblizsza sesja" : "Brak najblizszej sesji";
   const heroSession = hero.session;
-  const heroImage = pickSessionImage(heroSession);
+  const heroImage = pickSessionImage(heroSession) || imagePlaceholder("campaignBanners");
   const roleChartItems = [
     { label: "Prowadzisz jako GM", value: roleStats.asOwner, color: "#1f765f" },
     { label: "Grasz jako gracz", value: roleStats.asMember, color: "#d18b1f" },
@@ -502,8 +510,8 @@ export default function DashboardPage() {
             </>
           ) : (
             <>
-              <h2>Brak aktywnej lub zaplanowanej sesji</h2>
-              <p>Dashboard pomoze szybko wrocic do kampanii, postaci i ostatnich dzialan.</p>
+              <h2>Nie masz jeszcze zaplanowanej sesji</h2>
+              <p>Przydaloby sie to zmienic: zaplanuj termin w kampanii, a ten panel pokaze najblizsze spotkanie druzyny.</p>
               <div className="dashboardHero__actions">
                 <Link className="dashboardHero__secondary" to="/campaigns">
                   <DashboardIcon name="briefcase" />
@@ -513,11 +521,7 @@ export default function DashboardPage() {
             </>
           )}
         </div>
-        {heroImage ? (
-          <img src={heroImage} alt={heroSession?.title || "Sesja"} className="dashboardHero__image" />
-        ) : (
-          <div className="dashboardHero__image" aria-hidden="true" />
-        )}
+        <img src={heroImage} alt={heroSession?.title || "Placeholder banera sesji"} className="dashboardHero__image" />
       </article>
 
       <section className="dashboardWorkspaceGrid2026">

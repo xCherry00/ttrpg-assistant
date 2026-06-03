@@ -209,7 +209,7 @@ export default function DicePage() {
   const [history, setHistory] = useState([]);
   const [standard, setStandard] = useState({ qty: 1, die: 20, modifier: 0, rollType: "normal" });
   const [fate, setFate] = useState({ qty: 4, modifier: 0 });
-  const [genesysPool, setGenesysPool] = useState({ ability: 1, proficiency: 0, boost: 0, difficulty: 1, challenge: 0, setback: 0 });
+  const [genesysPool, setGenesysPool] = useState({ ability: 0, proficiency: 0, boost: 0, difficulty: 0, challenge: 0, setback: 0 });
 
   const currentFormula = useMemo(() => {
     if (mode === "fate") return fateFormula(fate.qty, fate.modifier);
@@ -429,7 +429,6 @@ function GenesysRollView({ pool, roll }) {
           )) : <div className="diceEmptyStage">Brak symboli.</div>}
         </div>
       </div>
-      <GenesysSymbolLegend />
       <SummaryGrid items={[
         ["Zdolność", pool.ability],
         ["Biegłość", pool.proficiency],

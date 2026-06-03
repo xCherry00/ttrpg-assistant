@@ -1,5 +1,6 @@
 // Backend API base URL. Vite injects VITE_API_URL from .env; localhost remains the dev fallback.
 import { clearToken } from "../auth/authstorage";
+import { getToken } from "../auth/authstorage";
 
 export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
@@ -45,16 +46,24 @@ function mapErrorMessage(status, rawMessage) {
  * @throws {Error} HTTP errors with descriptive messages
  */
 export async function http(path, { method = "GET", body, token } = {}) {
+  return httpRequest(path, { method, body, token, responseType: "auto" });
+}
+
+export async function httpRequest(
+  path,
+  { method = "GET", body, token, headers: extraHeaders = {}, responseType = "auto" } = {},
+) {
   const url = `${API_URL}${path}`;
-  const headers = {};
+  const headers = { ...extraHeaders };
   const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
 
-  if (body && !isFormData) {
+  if (body != null && !isFormData && !headers["Content-Type"]) {
     headers["Content-Type"] = "application/json";
   }
 
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
+  const resolvedToken = token || getToken();
+  if (resolvedToken && !headers.Authorization) {
+    headers.Authorization = `Bearer ${resolvedToken}`;
   }
 
   try {
@@ -64,17 +73,21 @@ export async function http(path, { method = "GET", body, token } = {}) {
       body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
     });
 
+    let data = null;
     const contentType = res.headers.get("content-type") || "";
     const isJson = contentType.includes("application/json");
-
-    let data;
     try {
-      data = isJson
-        ? await res.json()
-        : await res.text();
+      if (responseType === "blob") {
+        data = await res.blob();
+      } else if (responseType === "text") {
+        data = await res.text();
+      } else if (responseType === "response") {
+        data = res;
+      } else if (res.status !== 204) {
+        data = isJson ? await res.json() : await res.text();
+      }
     } catch (parseError) {
       console.error("Error parsing response:", parseError);
-      data = null;
     }
 
     if (!res.ok) {
@@ -94,6 +107,9 @@ export async function http(path, { method = "GET", body, token } = {}) {
       throw err;
     }
 
+    if (responseType === "response") {
+      return res;
+    }
     return data;
   } catch (err) {
     // Re-throw with additional context
