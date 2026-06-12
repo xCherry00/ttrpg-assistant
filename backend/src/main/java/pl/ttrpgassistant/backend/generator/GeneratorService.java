@@ -3,6 +3,9 @@ package pl.ttrpgassistant.backend.generator;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
+import pl.ttrpgassistant.backend.campaign.CampaignMemberId;
+import pl.ttrpgassistant.backend.campaign.CampaignMemberRepository;
+import pl.ttrpgassistant.backend.campaign.CampaignRepository;
 import pl.ttrpgassistant.backend.common.error.ResourceNotFoundException;
 import pl.ttrpgassistant.backend.generator.dto.GeneratorDefinitionResponse;
 import pl.ttrpgassistant.backend.generator.dto.GeneratorFormFieldResponse;
@@ -79,6 +82,8 @@ public class GeneratorService {
     private final GeneratorVariantRepository variantRepository;
     private final GeneratorFieldDefinitionRepository fieldRepository;
     private final GeneratorResultRepository resultRepository;
+    private final CampaignRepository campaignRepository;
+    private final CampaignMemberRepository campaignMemberRepository;
     private final List<GeneratorStrategy> strategies;
     private final ObjectMapper objectMapper;
     private final Random random = new Random();
@@ -89,6 +94,8 @@ public class GeneratorService {
             GeneratorVariantRepository variantRepository,
             GeneratorFieldDefinitionRepository fieldRepository,
             GeneratorResultRepository resultRepository,
+            CampaignRepository campaignRepository,
+            CampaignMemberRepository campaignMemberRepository,
             List<GeneratorStrategy> strategies,
             ObjectMapper objectMapper
     ) {
@@ -97,6 +104,8 @@ public class GeneratorService {
         this.variantRepository = variantRepository;
         this.fieldRepository = fieldRepository;
         this.resultRepository = resultRepository;
+        this.campaignRepository = campaignRepository;
+        this.campaignMemberRepository = campaignMemberRepository;
         this.strategies = strategies;
         this.objectMapper = objectMapper;
     }
@@ -162,7 +171,7 @@ public class GeneratorService {
         return variantRepository.existsByGeneratorDefinition_CodeAndVariantCodeAndActiveTrue(normalize(generatorCode), normalizeVariant(variantCode));
     }
 
-    public GeneratorStructuredResultResponse generateVariant(String generatorCode, String variantCode, GeneratorRequest request) {
+    public GeneratorStructuredResultResponse generateVariant(String generatorCode, String variantCode, GeneratorRequest request, Long userId) {
         String normalizedGenerator = normalize(generatorCode);
         String normalizedVariant = normalizeVariant(variantCode);
         findVariant(normalizedGenerator, normalizedVariant);
@@ -177,8 +186,18 @@ public class GeneratorService {
                 : strategy.generate(normalizedGenerator, normalizedVariant, request);
         generated = compactForMvp(generated);
 
+        if (userId == null) {
+            return generated;
+        }
+
+        Long campaignId = request == null ? null : request.campaignId();
+        if (campaignId != null) {
+            requireCampaignAccess(userId, campaignId);
+        }
+
         GeneratorResultEntity saved = new GeneratorResultEntity();
-        saved.setCampaignId(request == null ? null : request.campaignId());
+        saved.setUserId(userId);
+        saved.setCampaignId(campaignId);
         saved.setGeneratorCode(normalizedGenerator);
         saved.setVariantCode(normalizedVariant);
         saved.setInputJson(writeJson(request == null || request.params() == null ? Map.of() : request.params()));
@@ -198,6 +217,15 @@ public class GeneratorService {
                 generated.source(),
                 generated.generatedAt()
         );
+    }
+
+    private void requireCampaignAccess(Long userId, Long campaignId) {
+        var campaign = campaignRepository.findByIdAndDeletedAtIsNull(campaignId)
+                .orElseThrow(() -> new ResourceNotFoundException("Campaign not found"));
+        if (!campaign.getOwnerUserId().equals(userId)
+                && !campaignMemberRepository.existsById(new CampaignMemberId(campaignId, userId))) {
+            throw new ResourceNotFoundException("Campaign not found");
+        }
     }
 
     private GeneratorStructuredResultResponse compactForMvp(GeneratorStructuredResultResponse generated) {

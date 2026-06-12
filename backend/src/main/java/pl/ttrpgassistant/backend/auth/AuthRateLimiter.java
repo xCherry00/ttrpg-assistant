@@ -23,6 +23,14 @@ public class AuthRateLimiter {
         check("register:" + clientKey, 5, Duration.ofMinutes(5), "Za dużo prób rejestracji. Spróbuj ponownie za kilka minut.");
     }
 
+    public void checkPasswordResetRequest(String clientKey) {
+        check("password-reset-request:" + clientKey, 3, Duration.ofMinutes(10), "Za dużo prób resetowania hasła. Spróbuj ponownie za kilka minut.");
+    }
+
+    public void checkPasswordResetConfirm(String clientKey) {
+        check("password-reset-confirm:" + clientKey, 10, Duration.ofMinutes(10), "Za dużo prób ustawienia nowego hasła. Spróbuj ponownie za kilka minut.");
+    }
+
     private void check(String key, int maxAttempts, Duration window, String message) {
         Instant now = Instant.now();
         Instant cutoff = now.minus(window);

@@ -23,8 +23,6 @@ import pl.ttrpgassistant.backend.campaign.dto.CampaignSessionNoteResponse;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignSessionSummaryResponse;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignSummaryResponse;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignPlayerNoteResponse;
-import pl.ttrpgassistant.backend.campaign.dto.CreateRequestedRollRequest;
-import pl.ttrpgassistant.backend.campaign.dto.FulfillRequestedRollRequest;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignFriendCandidateResponse;
 import pl.ttrpgassistant.backend.campaign.dto.AssignCharacterToCampaignRequest;
 import pl.ttrpgassistant.backend.campaign.dto.CampaignCharacterResponse;
@@ -50,7 +48,6 @@ import pl.ttrpgassistant.backend.campaign.dto.DiceRollResponse;
 import pl.ttrpgassistant.backend.campaign.dto.UpdateSessionLiveStateRequest;
 import pl.ttrpgassistant.backend.campaign.dto.UpdateSessionAttendanceRequest;
 import pl.ttrpgassistant.backend.campaign.dto.SessionAttendanceSummaryResponse;
-import pl.ttrpgassistant.backend.campaign.dto.RequestedRollResponse;
 import pl.ttrpgassistant.backend.campaign.dto.SessionPlayerNoteResponse;
 import pl.ttrpgassistant.backend.campaign.dto.UpsertCampaignSessionNoteRequest;
 import pl.ttrpgassistant.backend.campaign.dto.UpsertSessionPlayerNoteRequest;
@@ -71,7 +68,6 @@ public class CampaignController {
     private final CampaignSessionAttendanceService campaignSessionAttendanceService;
     private final CampaignPlayerNoteService campaignPlayerNoteService;
     private final SessionPlayerNoteService sessionPlayerNoteService;
-    private final RequestedRollService requestedRollService;
     private final CampaignCharacterService campaignCharacterService;
     private final CombatEncounterService combatEncounterService;
     private final DiceRollService diceRollService;
@@ -242,50 +238,6 @@ public class CampaignController {
         return campaignSessionAttendanceService.upsertMyAttendance(userId, id, sessionId, request);
     }
 
-    @PostMapping("/{id}/sessions/{sessionId}/requested-rolls")
-    public List<RequestedRollResponse> createRequestedRolls(
-            Authentication auth,
-            @PathVariable Long id,
-            @PathVariable Long sessionId,
-            @Valid @RequestBody CreateRequestedRollRequest request
-    ) {
-        Long userId = (Long) auth.getPrincipal();
-        return requestedRollService.create(userId, id, sessionId, request);
-    }
-
-    @GetMapping("/{id}/sessions/{sessionId}/requested-rolls")
-    public List<RequestedRollResponse> listRequestedRolls(
-            Authentication auth,
-            @PathVariable Long id,
-            @PathVariable Long sessionId
-    ) {
-        Long userId = (Long) auth.getPrincipal();
-        return requestedRollService.list(userId, id, sessionId);
-    }
-
-    @PostMapping("/{id}/sessions/{sessionId}/requested-rolls/{requestId}/fulfill")
-    public RequestedRollResponse fulfillRequestedRoll(
-            Authentication auth,
-            @PathVariable Long id,
-            @PathVariable Long sessionId,
-            @PathVariable Long requestId,
-            @Valid @RequestBody FulfillRequestedRollRequest request
-    ) {
-        Long userId = (Long) auth.getPrincipal();
-        return requestedRollService.fulfill(userId, id, sessionId, requestId, request);
-    }
-
-    @PostMapping("/{id}/sessions/{sessionId}/requested-rolls/{requestId}/cancel")
-    public RequestedRollResponse cancelRequestedRoll(
-            Authentication auth,
-            @PathVariable Long id,
-            @PathVariable Long sessionId,
-            @PathVariable Long requestId
-    ) {
-        Long userId = (Long) auth.getPrincipal();
-        return requestedRollService.cancel(userId, id, sessionId, requestId);
-    }
-
     @GetMapping("/{id}/sessions/{sessionId}/messages")
     public List<CampaignSessionMessageResponse> listMessages(Authentication auth, @PathVariable Long id, @PathVariable Long sessionId) {
         Long userId = (Long) auth.getPrincipal();
@@ -331,7 +283,7 @@ public class CampaignController {
             Authentication auth,
             @PathVariable Long id,
             @PathVariable Long sessionId,
-            @RequestBody UpsertCampaignSessionNoteRequest request
+            @Valid @RequestBody UpsertCampaignSessionNoteRequest request
     ) {
         Long userId = (Long) auth.getPrincipal();
         return campaignWorkspaceService.upsertNote(userId, id, sessionId, request);

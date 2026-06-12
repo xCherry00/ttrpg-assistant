@@ -15,6 +15,8 @@ public interface CampaignCharacterRepository extends JpaRepository<CampaignChara
 
     Optional<CampaignCharacterEntity> findByIdCampaignIdAndIdCharacterId(Long campaignId, Long characterId);
 
+    List<CampaignCharacterEntity> findByIdCharacterIdAndActiveTrue(Long characterId);
+
     boolean existsByIdCampaignIdAndIdCharacterIdAndActiveTrue(Long campaignId, Long characterId);
 
     @Query("select count(c) > 0 from CampaignCharacterEntity c where c.id.characterId = :characterId and c.active = true")

@@ -27,6 +27,22 @@ function pickSessionForPlayer(sessions) {
   return planned[0] || null;
 }
 
+function sessionStatusLabel(status) {
+  const value = String(status || "").toUpperCase();
+  if (value === "IN_PROGRESS") return "Trwa";
+  if (value === "FINISHED") return "Zakończona";
+  if (value === "PLANNED") return "Zaplanowana";
+  return "Nieznany";
+}
+
+function attendanceStatusLabel(status) {
+  const value = String(status || "").toUpperCase();
+  if (value === "AVAILABLE") return "Będę";
+  if (value === "MAYBE") return "Może";
+  if (value === "UNAVAILABLE") return "Nie będę";
+  return "Brak odpowiedzi";
+}
+
 export default function UpcomingSessionPanel({
   campaignId,
   sessions,
@@ -65,7 +81,7 @@ export default function UpcomingSessionPanel({
         const self = data?.responses?.find((item) => item.self);
         setNote(self?.note || "");
       } catch (err) {
-        setAttendanceError(err?.message || "Nie udało się pobrac frekwencji.");
+        setAttendanceError(err?.message || "Nie udało się pobrać frekwencji.");
       } finally {
         setAttendanceLoading(false);
       }
@@ -89,14 +105,14 @@ export default function UpcomingSessionPanel({
 
   return (
     <section className="campaignDetailsCard panel-soft">
-      <h2 className="campaignDetailsCardTitle">Nadchodzaca sesja</h2>
+      <h2 className="campaignDetailsCardTitle">Nadchodząca sesja</h2>
       {!session ? (
         <div className="campaignDetailsEmpty">Brak zaplanowanej ani aktywnej sesji.</div>
       ) : (
         <>
           <div className="campaignMaterialCard__top">
             <strong>{session.title}</strong>
-            <span className="campaignMemberBadge">{session.status}</span>
+            <span className="campaignMemberBadge">{sessionStatusLabel(session.status)}</span>
           </div>
           <p>{session.description || "Brak opisu sesji."}</p>
           <div className="campaignMaterialMeta">
@@ -111,7 +127,7 @@ export default function UpcomingSessionPanel({
                 disabled={busy}
                 onClick={() => onStart?.(session.id)}
               >
-                Rozpocznij sesje
+                Rozpocznij sesję
               </button>
             )}
             {session.status === "PLANNED" && !isOwner && (
@@ -131,7 +147,7 @@ export default function UpcomingSessionPanel({
                 disabled={busy}
                 onClick={() => onFinish?.(session.id)}
               >
-                Zakończ sesje
+                Zakończ sesję
               </button>
             )}
           </div>
@@ -141,24 +157,24 @@ export default function UpcomingSessionPanel({
             {attendanceLoading ? (
               <p>Ładowanie frekwencji...</p>
             ) : !attendance ? (
-              <p>Brak sesji do glosowania.</p>
+              <p>Brak sesji do głosowania.</p>
             ) : (
               <>
-                <p>Twoj status: {myResponse?.status || "NO_RESPONSE"}</p>
+                <p>Twój status: {attendanceStatusLabel(myResponse?.status)}</p>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
-                  <button className="campaignDetailsPrimaryBtn" type="button" disabled={Boolean(savingStatus)} onClick={() => vote("AVAILABLE")}>Bede</button>
-                  <button className="campaignDetailsGhostBtn" type="button" disabled={Boolean(savingStatus)} onClick={() => vote("MAYBE")}>Moze</button>
-                  <button className="campaignDetailsDangerBtn" type="button" disabled={Boolean(savingStatus)} onClick={() => vote("UNAVAILABLE")}>Nie bede</button>
+                  <button className="campaignDetailsPrimaryBtn" type="button" disabled={Boolean(savingStatus)} onClick={() => vote("AVAILABLE")}>Będę</button>
+                  <button className="campaignDetailsGhostBtn" type="button" disabled={Boolean(savingStatus)} onClick={() => vote("MAYBE")}>Może</button>
+                  <button className="campaignDetailsDangerBtn" type="button" disabled={Boolean(savingStatus)} onClick={() => vote("UNAVAILABLE")}>Nie będę</button>
                 </div>
                 <label className="campaignField">
                   <span>Notatka (opcjonalna)</span>
                   <textarea value={note} maxLength={1000} onChange={(event) => setNote(event.target.value)} rows={2} disabled={Boolean(savingStatus)} />
                 </label>
                 <div className="campaignMaterialMeta">
-                  <span>available: {attendance.availableCount}</span>
-                  <span>maybe: {attendance.maybeCount}</span>
-                  <span>unavailable: {attendance.unavailableCount}</span>
-                  <span>no response: {attendance.noResponseCount}</span>
+                  <span>Będę: {attendance.availableCount}</span>
+                  <span>Może: {attendance.maybeCount}</span>
+                  <span>Nie będę: {attendance.unavailableCount}</span>
+                  <span>Brak odpowiedzi: {attendance.noResponseCount}</span>
                 </div>
               </>
             )}
@@ -180,11 +196,11 @@ export default function UpcomingSessionPanel({
             event.currentTarget.reset();
           }}
         >
-          <strong>Dodaj / zaplanuj sesje</strong>
-          <label className="campaignField"><span>Tytul</span><input name="title" required /></label>
+          <strong>Dodaj / zaplanuj sesję</strong>
+          <label className="campaignField"><span>Tytuł</span><input name="title" required /></label>
           <label className="campaignField"><span>Opis</span><input name="description" /></label>
           <label className="campaignField"><span>Termin</span><input name="scheduledFor" type="datetime-local" /></label>
-          <button className="campaignDetailsPrimaryBtn" type="submit" disabled={busy}>Zaplanuj sesje</button>
+          <button className="campaignDetailsPrimaryBtn" type="submit" disabled={busy}>Zaplanuj sesję</button>
         </form>
       )}
     </section>

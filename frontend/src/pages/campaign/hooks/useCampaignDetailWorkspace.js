@@ -4,24 +4,21 @@ import { useAuth } from "../../../auth/AuthContext";
 import { listCharacters } from "../../../api/characters";
 import {
   assignCharacterToCampaign,
-  createCampaignPlayerNote,
+  addFriendToCampaign,
   createCampaignSession,
   deleteCampaign,
-  deleteCampaignPlayerNote,
   detachCharacterFromCampaign,
   finishCampaignSession,
   getCampaignById,
   getCampaignCharacters,
   getSessionAttendance,
-  getCampaignPlayerNotes,
   leaveCampaign,
-  listCampaignMaterials,
+  listCampaignFriendCandidates,
   listCampaignMembers,
   listCampaignSessions,
   startCampaignSession,
   updateCampaign,
   updateMySessionAttendance,
-  updateCampaignPlayerNote,
 } from "../../../api/campaigns";
 
 function toTimestamp(value) {
@@ -55,8 +52,6 @@ export function useCampaignDetailWorkspace() {
   const [myCharacters, setMyCharacters] = useState([]);
   const [members, setMembers] = useState([]);
   const [sessions, setSessions] = useState([]);
-  const [materials, setMaterials] = useState([]);
-  const [playerNotes, setPlayerNotes] = useState([]);
   const [availabilityAttendance, setAvailabilityAttendance] = useState(null);
   const [availabilityError, setAvailabilityError] = useState("");
 
@@ -64,14 +59,12 @@ export function useCampaignDetailWorkspace() {
     setLoading(true);
     setError("");
     try {
-      const [campaignData, campaignCharactersData, ownCharacters, membersData, sessionsData, materialsData, playerNotesData] = await Promise.all([
+      const [campaignData, campaignCharactersData, ownCharacters, membersData, sessionsData] = await Promise.all([
         getCampaignById(token, campaignId),
         getCampaignCharacters(token, campaignId),
         listCharacters(token),
         listCampaignMembers(token, campaignId).catch(() => []),
         listCampaignSessions(token, campaignId),
-        listCampaignMaterials(token, campaignId),
-        getCampaignPlayerNotes(token, campaignId).catch(() => []),
       ]);
       const normalizedSessions = Array.isArray(sessionsData) ? sessionsData : [];
       const availabilitySession = pickAvailabilitySession(normalizedSessions);
@@ -89,8 +82,6 @@ export function useCampaignDetailWorkspace() {
       setMyCharacters(Array.isArray(ownCharacters) ? ownCharacters : []);
       setMembers(Array.isArray(membersData) ? membersData : []);
       setSessions(normalizedSessions);
-      setMaterials(Array.isArray(materialsData) ? materialsData : []);
-      setPlayerNotes(Array.isArray(playerNotesData) ? playerNotesData : []);
       setAvailabilityAttendance(attendanceData);
     } catch (err) {
       setError(err?.message || "Nie udalo sie pobrac workspace kampanii.");
@@ -116,6 +107,14 @@ export function useCampaignDetailWorkspace() {
       setBusy(false);
     }
   }, [loadAll]);
+
+  const loadFriendCandidates = useCallback(async () => {
+    const candidates = await listCampaignFriendCandidates(token, campaignId);
+    if (Array.isArray(candidates)) return candidates;
+    if (Array.isArray(candidates?.content)) return candidates.content;
+    if (Array.isArray(candidates?.items)) return candidates.items;
+    return [];
+  }, [campaignId, token]);
 
   const actions = useMemo(() => ({
     handleUpdateCampaign: (payload) => runAction(async () => {
@@ -145,6 +144,7 @@ export function useCampaignDetailWorkspace() {
     handleStartSession: (sessionId) => runAction(async () => {
       await startCampaignSession(token, campaignId, sessionId);
       setNotice("Sesja rozpoczeta.");
+      navigate(`/campaigns/${campaignId}/sessions/${sessionId}/live`);
     }),
     handleFinishSession: (sessionId) => runAction(async () => {
       await finishCampaignSession(token, campaignId, sessionId);
@@ -155,19 +155,12 @@ export function useCampaignDetailWorkspace() {
       setAvailabilityAttendance(data);
       setNotice("Zapisano dostepnosc.");
     }),
-    handleCreatePlayerNote: (payload) => runAction(async () => {
-      await createCampaignPlayerNote(token, campaignId, payload);
-      setNotice("Dodano notatke.");
+    loadFriendCandidates,
+    handleInviteFriend: (friendUserId) => runAction(async () => {
+      await addFriendToCampaign(token, campaignId, friendUserId);
+      setNotice("Zaproszono gracza do kampanii.");
     }),
-    handleUpdatePlayerNote: (noteId, payload) => runAction(async () => {
-      await updateCampaignPlayerNote(token, campaignId, noteId, payload);
-      setNotice("Zapisano notatke.");
-    }),
-    handleDeletePlayerNote: (noteId) => runAction(async () => {
-      await deleteCampaignPlayerNote(token, campaignId, noteId);
-      setNotice("Usunieto notatke.");
-    }),
-  }), [campaignId, navigate, runAction, token]);
+  }), [campaignId, loadFriendCandidates, navigate, runAction, token]);
 
   const myMember = members.find((member) => member?.self) || null;
   const isOwner = Boolean(
@@ -178,26 +171,6 @@ export function useCampaignDetailWorkspace() {
   );
   const myUserId = Number(myMember?.id ?? myMember?.userId ?? 0) || null;
   const inviteCode = campaign?.joinCode || campaign?.inviteCode || "";
-  const showMaterialsPanel = materials.length > 0;
-  const campaignTabs = isOwner
-    ? [
-      { key: "session", label: "Sesja" },
-      { key: "availability", label: "Dostepnosc" },
-      { key: "characters", label: "Postacie" },
-      { key: "players", label: "Gracze" },
-      ...(showMaterialsPanel ? [{ key: "materials", label: "Materialy" }] : []),
-      { key: "notes", label: "Notatki" },
-      { key: "settings", label: "Ustawienia" },
-    ]
-    : [
-      { key: "session", label: "Sesja" },
-      { key: "availability", label: "Dostepnosc" },
-      { key: "characters", label: "Postacie" },
-      { key: "players", label: "Gracze" },
-      ...(showMaterialsPanel ? [{ key: "materials", label: "Materialy" }] : []),
-      { key: "notes", label: "Notatki" },
-    ];
-
   return {
     campaignId,
     loading,
@@ -209,15 +182,11 @@ export function useCampaignDetailWorkspace() {
     myCharacters,
     members,
     sessions,
-    materials,
-    playerNotes,
     availabilityAttendance,
     availabilityError,
     isOwner,
     myUserId,
     inviteCode,
-    showMaterialsPanel,
-    campaignTabs,
     actions,
   };
 }

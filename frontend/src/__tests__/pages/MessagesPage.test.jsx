@@ -71,6 +71,8 @@ describe("MessagesPage", () => {
 
     expect((await screen.findAllByText("Jan")).length).toBeGreaterThan(0);
     expect(await screen.findByPlaceholderText("Napisz wiadomosc...")).toBeInTheDocument();
+    expect(screen.getByLabelText("Dodaj plik")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Emoji" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Wyslij" })).toBeDisabled();
   });
 

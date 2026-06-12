@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { logout as logoutApi } from "../api/auth";
@@ -39,18 +39,16 @@ export default function Sidebar() {
     { id: "library", title: "Biblioteka", items: SECTION_LIBRARY },
   ]), []);
   const activeSectionId = sections.find((section) => section.items.some((item) => location.pathname.startsWith(item.to)))?.id;
-  const [openSections, setOpenSections] = useState(() => new Set(["gameplay", activeSectionId].filter(Boolean)));
+  const [openSectionId, setOpenSectionId] = useState(() => activeSectionId || "gameplay");
+
+  useEffect(() => {
+    if (activeSectionId) {
+      setOpenSectionId(activeSectionId);
+    }
+  }, [activeSectionId]);
 
   const toggleSection = (id) => {
-    setOpenSections((previous) => {
-      const next = new Set(previous);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
+    setOpenSectionId((previous) => (previous === id ? null : id));
   };
 
   const handleLogout = () => {
@@ -80,7 +78,7 @@ export default function Sidebar() {
               key={section.id}
               title={section.title}
               items={section.items}
-              open={openSections.has(section.id) || section.id === activeSectionId}
+              open={openSectionId === section.id}
               active={section.id === activeSectionId}
               onToggle={() => toggleSection(section.id)}
             />

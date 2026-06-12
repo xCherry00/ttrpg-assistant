@@ -13,9 +13,9 @@ import pl.ttrpgassistant.backend.social.dto.SocialRequestResponse;
 import pl.ttrpgassistant.backend.social.dto.SocialUserCardResponse;
 import pl.ttrpgassistant.backend.user.ProfileVisibility;
 import pl.ttrpgassistant.backend.user.UserEntity;
+import pl.ttrpgassistant.backend.user.UserPresence;
 import pl.ttrpgassistant.backend.user.UserRepository;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
@@ -282,7 +282,9 @@ public class SocialService {
                 target.getFavoriteSystem(),
                 target.getRole().name(),
                 target.isMg(),
-                formatActivityLabel(target),
+                UserPresence.isOnline(target),
+                UserPresence.activityLabel(target),
+                target.getLastActiveAt(),
                 relationshipFor(viewer.getId(), target.getId()),
                 viewer.getId().equals(target.getId()) ? 0 : campaignRepository.countSharedCampaigns(viewer.getId(), target.getId()),
                 null,
@@ -303,7 +305,9 @@ public class SocialService {
                 base.favoriteSystem(),
                 base.role(),
                 base.isMg(),
+                base.online(),
                 base.activityLabel(),
+                base.lastActiveAt(),
                 base.relationship(),
                 base.sharedCampaignsCount(),
                 reason,
@@ -369,25 +373,6 @@ public class SocialService {
 
     private String formatTag(UserEntity user) {
         return user.getUsername() + "#" + String.format("%04d", user.getTagCode());
-    }
-
-    private String formatActivityLabel(UserEntity user) {
-        Instant lastActiveAt = user.getLastActiveAt();
-        if (lastActiveAt == null || user.getActivityVisibility() == ProfileVisibility.PRIVATE) {
-            return "aktywność ukryta";
-        }
-
-        Duration duration = Duration.between(lastActiveAt, Instant.now());
-        if (duration.toHours() < 24) {
-            return "aktywny dzisiaj";
-        }
-        if (duration.toDays() < 7) {
-            return "aktywny w tym tygodniu";
-        }
-        if (duration.toDays() < 30) {
-            return "aktywny w tym miesiącu";
-        }
-        return "dawno nieaktywny";
     }
 
     private UserEntity findUserByHandle(String handle) {

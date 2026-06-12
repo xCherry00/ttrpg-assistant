@@ -24,6 +24,8 @@ const FATE_LADDER = {
   4: "Wybitny",
 };
 
+const DEFAULT_STANDARD_POOL = Object.fromEntries(STANDARD_DICE.map((die) => [die, die === 20 ? 1 : 0]));
+
 const GENESYS_DICE = {
   ability: [{}, { success: 1 }, { success: 1 }, { advantage: 1 }, { advantage: 1 }, { success: 1, advantage: 1 }, { advantage: 2 }, { success: 2 }],
   proficiency: [{}, { success: 1 }, { success: 1 }, { success: 2 }, { success: 2 }, { advantage: 1 }, { success: 1, advantage: 1 }, { success: 1, advantage: 1 }, { success: 1, advantage: 1 }, { advantage: 2 }, { advantage: 2 }, { triumph: 1, success: 1 }],
@@ -100,8 +102,20 @@ function signed(value) {
   return `${number > 0 ? "+" : "-"}${Math.abs(number)}`;
 }
 
-function formatStandardFormula(qty, die, modifier = 0, rollType = "normal") {
-  const dice = qty === 1 ? `1k${die}` : `${qty}k${die}`;
+function standardDicePoolEntries(pool = {}) {
+  return STANDARD_DICE
+    .map((die) => ({ die, count: clampInt(pool[die] || 0, 0, 100) }))
+    .filter((item) => item.count > 0);
+}
+
+function formatStandardDicePool(pool = {}) {
+  const entries = standardDicePoolEntries(pool);
+  if (!entries.length) return "Brak kości";
+  return entries.map(({ count, die }) => `${count}k${die}`).join(" + ");
+}
+
+function formatStandardFormula(pool = {}, modifier = 0, rollType = "normal") {
+  const dice = formatStandardDicePool(pool);
   const mod = Number(modifier) ? ` ${Number(modifier) > 0 ? "+" : "-"} ${Math.abs(Number(modifier))}` : "";
   const suffix = rollType === "normal" ? "" : ` (${rollTypeLabel(rollType)})`;
   return `${dice}${mod}${suffix}`;
@@ -180,79 +194,70 @@ function interpretGenesys(entry) {
 }
 
 function standardBreakdown(entry) {
-  const dice = entry.selectedRoll ?? entry.rolls.reduce((sum, value) => sum + value, 0);
+  const dice = entry.selectedTotal ?? entry.diceTotal;
   const mod = entry.modifier ? ` ${entry.modifier > 0 ? "+" : "-"} ${Math.abs(entry.modifier)}` : "";
-  const selected = entry.selectedRoll ? `, wybrano ${entry.selectedRoll}` : "";
-  const dropped = entry.droppedRoll ? `, odrzucono ${entry.droppedRoll}` : "";
+  const selected = entry.selectedTotal ? `, wybrano ${entry.selectedTotal}` : "";
+  const dropped = entry.droppedTotal ? `, odrzucono ${entry.droppedTotal}` : "";
   return `${dice}${mod}${selected}${dropped}`;
-}
-
-function historyTitle(entry) {
-  if (entry.mode === "genesys") return genesysFormula(entry.dicePool);
-  return entry.formula;
-}
-
-function historyTotal(entry) {
-  if (entry.mode === "genesys") return genesysSummary(entry);
-  return String(entry.total);
-}
-
-function historyBreakdown(entry) {
-  if (entry.mode === "fate") return `${entry.fateRolls.join(" ")} | ${signed(entry.modifier)}`;
-  if (entry.mode === "genesys") return entry.interpretation || genesysSummary(entry);
-  return standardBreakdown(entry);
 }
 
 export default function DicePage() {
   const [mode, setMode] = useState("standard");
   const [lastRoll, setLastRoll] = useState(null);
-  const [history, setHistory] = useState([]);
-  const [standard, setStandard] = useState({ qty: 1, die: 20, modifier: 0, rollType: "normal" });
+  const [standard, setStandard] = useState({ dicePool: DEFAULT_STANDARD_POOL, modifier: 0, rollType: "normal" });
   const [fate, setFate] = useState({ qty: 4, modifier: 0 });
   const [genesysPool, setGenesysPool] = useState({ ability: 0, proficiency: 0, boost: 0, difficulty: 0, challenge: 0, setback: 0 });
 
   const currentFormula = useMemo(() => {
     if (mode === "fate") return fateFormula(fate.qty, fate.modifier);
     if (mode === "genesys") return genesysFormula(genesysPool);
-    return formatStandardFormula(standard.qty, standard.die, standard.modifier, standard.rollType);
+    return formatStandardFormula(standard.dicePool, standard.modifier, standard.rollType);
   }, [fate, genesysPool, mode, standard]);
 
   function completeRoll(entry) {
     setLastRoll(entry);
-    setHistory((current) => [entry, ...current].slice(0, 60));
   }
 
   function rollStandard() {
     const modifier = clampInt(standard.modifier, -9999, 9999);
-    const die = clampInt(standard.die, 2, 10000);
-    const qty = clampInt(standard.qty, 1, 100);
+    const dicePool = Object.fromEntries(STANDARD_DICE.map((die) => [die, clampInt(standard.dicePool?.[die] || 0, 0, 100)]));
+    const poolEntries = standardDicePoolEntries(dicePool);
+    if (!poolEntries.length) return;
     const isAdv = standard.rollType === "advantage" || standard.rollType === "disadvantage";
-    const rollQty = isAdv ? 2 : qty;
-    const rolls = Array.from({ length: rollQty }, () => rollDie(die));
-    const selectedRoll = isAdv
-      ? standard.rollType === "advantage" ? Math.max(...rolls) : Math.min(...rolls)
-      : null;
-    const droppedRoll = isAdv
-      ? standard.rollType === "advantage" ? Math.min(...rolls) : Math.max(...rolls)
-      : null;
-    const diceTotal = selectedRoll ?? rolls.reduce((sum, value) => sum + value, 0);
+    const rollPool = () => poolEntries.flatMap(({ die, count }) => (
+      Array.from({ length: count }, () => ({ die, value: rollDie(die) }))
+    ));
+    const rollSets = isAdv ? [rollPool(), rollPool()] : [rollPool()];
+    const setTotals = rollSets.map((set) => set.reduce((sum, item) => sum + item.value, 0));
+    const selectedIndex = isAdv
+      ? standard.rollType === "advantage"
+        ? (setTotals[0] >= setTotals[1] ? 0 : 1)
+        : (setTotals[0] <= setTotals[1] ? 0 : 1)
+      : 0;
+    const droppedIndex = isAdv ? (selectedIndex === 0 ? 1 : 0) : null;
+    const rolls = rollSets[selectedIndex];
+    const droppedRolls = droppedIndex === null ? [] : rollSets[droppedIndex];
+    const selectedTotal = isAdv ? setTotals[selectedIndex] : null;
+    const droppedTotal = droppedIndex === null ? null : setTotals[droppedIndex];
+    const diceTotal = setTotals[selectedIndex];
     const total = diceTotal + modifier;
+    const hasCriticalDie = rolls.some((item) => item.die === 20);
     completeRoll({
       id: id(),
       mode: "standard",
       modeLabel: "Standard",
-      formula: formatStandardFormula(qty, die, modifier, standard.rollType),
+      formula: formatStandardFormula(dicePool, modifier, standard.rollType),
+      dicePool,
       rolls,
-      die,
-      qty,
+      droppedRolls,
       modifier,
       rollType: standard.rollType,
-      selectedRoll,
-      droppedRoll,
+      selectedTotal,
+      droppedTotal,
       diceTotal,
       total,
-      isCritical: die === 20 && rolls.includes(20),
-      isFumble: die === 20 && rolls.includes(1) && !rolls.includes(20),
+      isCritical: hasCriticalDie && rolls.some((item) => item.die === 20 && item.value === 20),
+      isFumble: hasCriticalDie && rolls.some((item) => item.die === 20 && item.value === 1) && !rolls.some((item) => item.die === 20 && item.value === 20),
       timestamp: nowLabel(),
     });
   }
@@ -335,7 +340,6 @@ export default function DicePage() {
             genesysPool={genesysPool}
             setGenesysPool={setGenesysPool}
           />
-          <HistoryPanel history={history} onClear={() => setHistory([])} />
         </aside>
       </div>
     </div>
@@ -373,11 +377,13 @@ function StandardRollView({ config, roll }) {
         <div className="diceBreakdown">{roll ? standardBreakdown(roll) : "Ustaw parametry i wykonaj rzut."}</div>
       </div>
       <div className="diceDiceStage">
-        {roll ? roll.rolls.map((value, index) => <StandardDie key={`${value}-${index}`} value={value} die={roll.die} selected={!roll.selectedRoll || value === roll.selectedRoll} />) : <div className="diceEmptyStage">Brak rzutu.</div>}
+        {roll ? roll.rolls.map((item, index) => (
+          <StandardDie key={`${item.die}-${item.value}-${index}`} value={item.value} die={item.die} selected />
+        )) : <div className="diceEmptyStage">Brak rzutu.</div>}
       </div>
       <SummaryGrid items={[
-        ["Kość", `k${config.die}`],
-        ["Liczba rzutów", config.qty],
+        ["Pula kości", formatStandardDicePool(config.dicePool)],
+        ["Liczba kości", standardDicePoolEntries(config.dicePool).reduce((sum, item) => sum + item.count, 0)],
         ["Modyfikator", signed(config.modifier)],
         ["Typ rzutu", rollTypeLabel(config.rollType)],
       ]} />
@@ -490,13 +496,19 @@ function DiceConfigPanel({ mode, setMode, standard, setStandard, fate, setFate, 
       </label>
       {mode === "standard" && (
         <>
-          <label className="diceField">
-            <span>Kość</span>
-            <select value={standard.die} onChange={(event) => setStandard((current) => ({ ...current, die: clampInt(event.target.value, 2, 10000) }))}>
-              {STANDARD_DICE.map((die) => <option key={die} value={die}>k{die}</option>)}
-            </select>
-          </label>
-          <NumberStepper label="Liczba rzutów" value={standard.qty} min={1} max={100} onChange={(value) => setStandard((current) => ({ ...current, qty: value }))} />
+          <div className="diceStandardPool">
+            {STANDARD_DICE.map((die) => (
+              <StandardDieControl
+                key={die}
+                die={die}
+                value={standard.dicePool?.[die] || 0}
+                onChange={(value) => setStandard((current) => ({
+                  ...current,
+                  dicePool: { ...current.dicePool, [die]: value },
+                }))}
+              />
+            ))}
+          </div>
           <NumberStepper label="Modyfikator" value={standard.modifier} min={-9999} max={9999} onChange={(value) => setStandard((current) => ({ ...current, modifier: value }))} />
           <div className="diceRollTypeGrid">
             {ROLL_TYPES.map((item) => (
@@ -524,14 +536,25 @@ function DiceConfigPanel({ mode, setMode, standard, setStandard, fate, setFate, 
   );
 }
 
-function NumberStepper({ label, value, min, max, onChange }) {
+function StandardDieControl({ die, value, onChange }) {
+  return (
+    <div className="diceStandardDieControl">
+      <span className="diceStandardDieBadge">k{die}</span>
+      <strong>k{die}</strong>
+      <NumberStepper label="" ariaLabel={`k${die}`} value={value} min={0} max={100} onChange={onChange} />
+    </div>
+  );
+}
+
+function NumberStepper({ label, ariaLabel, value, min, max, onChange }) {
+  const controlLabel = ariaLabel || label || "wartość";
   return (
     <div className="diceStepper">
       <span>{label}</span>
       <div>
-        <button type="button" onClick={() => onChange(clampInt(value - 1, min, max))} disabled={value <= min}>-</button>
+        <button type="button" aria-label={`Zmniejsz ${controlLabel}`} onClick={() => onChange(clampInt(value - 1, min, max))} disabled={value <= min}>-</button>
         <input type="number" value={value} min={min} max={max} onChange={(event) => onChange(clampInt(event.target.value, min, max))} />
-        <button type="button" onClick={() => onChange(clampInt(value + 1, min, max))} disabled={value >= max}>+</button>
+        <button type="button" aria-label={`Zwiększ ${controlLabel}`} onClick={() => onChange(clampInt(value + 1, min, max))} disabled={value >= max}>+</button>
       </div>
     </div>
   );
@@ -543,7 +566,7 @@ function GenesysDieControl({ dieKey, label, value, onChange }) {
     <div className={`diceGenesysDieControl is-${meta.tone}`}>
       <span className="diceGenesysDieBadge"><GenesysSymbol type={meta.symbol} /></span>
       <strong>{label}</strong>
-      <NumberStepper label="" value={value} min={0} max={20} onChange={onChange} />
+      <NumberStepper label="" ariaLabel={label} value={value} min={0} max={20} onChange={onChange} />
     </div>
   );
 }
@@ -569,43 +592,5 @@ function GenesysSymbolLegend() {
         <span key={key}><GenesysSymbol type={key} /> {meta.label}</span>
       ))}
     </div>
-  );
-}
-
-function HistoryPanel({ history, onClear }) {
-  return (
-    <section className="diceCard diceHistoryCard">
-      <div className="diceSideHeader diceHistoryHead">
-        <div>
-          <h2>Historia rzutów</h2>
-          <p>{history.length ? `${history.length} ostatnich wpisów` : "Brak historii"}</p>
-        </div>
-        <button type="button" onClick={onClear}>Wyczyść</button>
-      </div>
-      <div className="diceHistoryList">
-        {history.length === 0 ? <div className="diceHistoryEmpty">Historia pojawi się po pierwszym rzucie.</div> : null}
-        {history.map((entry) => (
-          <article key={entry.id} className="diceHistoryItem">
-            <div className="diceHistoryTop">
-              <strong>{historyTitle(entry)}</strong>
-              <em>{historyTotal(entry)}</em>
-            </div>
-            <span>{entry.modeLabel} | {entry.timestamp}</span>
-            {entry.mode === "genesys" && genesysNetItems(entry).length ? (
-              <div className="diceHistorySymbols">
-                {genesysNetItems(entry).map((item) => (
-                  <span key={item.key}>
-                    <GenesysSymbol type={item.key} />
-                    <strong>x{item.count}</strong>
-                    <em>{GENESYS_SYMBOLS[item.key]?.label || item.key}</em>
-                  </span>
-                ))}
-              </div>
-            ) : null}
-            <p>{historyBreakdown(entry) || "Brak szczegółów"}</p>
-          </article>
-        ))}
-      </div>
-    </section>
   );
 }

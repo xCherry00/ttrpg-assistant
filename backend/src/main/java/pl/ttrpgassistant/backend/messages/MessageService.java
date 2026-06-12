@@ -16,8 +16,8 @@ import pl.ttrpgassistant.backend.messages.dto.MessageUnreadCountResponse;
 import pl.ttrpgassistant.backend.messages.dto.MessageUserPreviewResponse;
 import pl.ttrpgassistant.backend.social.FriendshipRepository;
 import pl.ttrpgassistant.backend.social.UserBlockRepository;
-import pl.ttrpgassistant.backend.user.ProfileVisibility;
 import pl.ttrpgassistant.backend.user.UserEntity;
+import pl.ttrpgassistant.backend.user.UserPresence;
 import pl.ttrpgassistant.backend.user.UserRepository;
 
 import java.io.IOException;
@@ -25,7 +25,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,6 +44,7 @@ public class MessageService {
 
     private static final int MAX_FETCH_MESSAGES = 80;
     private static final int DEFAULT_FETCH_MESSAGES = 40;
+    private static final int MAX_MESSAGE_CONTENT_LENGTH = 4000;
     private static final int MAX_ATTACHMENT_FILES = 6;
     private static final long MAX_ATTACHMENT_SIZE_BYTES = 10L * 1024L * 1024L;
     private static final Set<String> ALLOWED_ATTACHMENT_MIME_TYPES = Set.of(
@@ -216,6 +216,9 @@ public class MessageService {
         }
 
         String normalizedContent = normalizeContent(content);
+        if (normalizedContent.length() > MAX_MESSAGE_CONTENT_LENGTH) {
+            throw new IllegalArgumentException("content must be at most " + MAX_MESSAGE_CONTENT_LENGTH + " characters");
+        }
         List<MultipartFile> safeFiles = files == null ? List.of() : files.stream()
                 .filter(file -> file != null && !file.isEmpty())
                 .toList();
@@ -545,7 +548,9 @@ public class MessageService {
                 displayNameFor(user),
                 user.getAvatarUrl(),
                 user.getProfileBannerUrl(),
-                formatActivityLabel(user)
+                UserPresence.isOnline(user),
+                UserPresence.activityLabel(user),
+                user.getLastActiveAt()
         );
     }
 
@@ -560,22 +565,4 @@ public class MessageService {
         return user.getUsername() + "-" + String.format("%04d", user.getTagCode());
     }
 
-    private String formatActivityLabel(UserEntity user) {
-        Instant lastActiveAt = user.getLastActiveAt();
-        if (lastActiveAt == null || user.getActivityVisibility() == ProfileVisibility.PRIVATE) {
-            return "aktywność ukryta";
-        }
-
-        Duration duration = Duration.between(lastActiveAt, Instant.now());
-        if (duration.toHours() < 24) {
-            return "aktywny dzisiaj";
-        }
-        if (duration.toDays() < 7) {
-            return "aktywny w tym tygodniu";
-        }
-        if (duration.toDays() < 30) {
-            return "aktywny w tym miesiącu";
-        }
-        return "dawno nieaktywny";
-    }
 }

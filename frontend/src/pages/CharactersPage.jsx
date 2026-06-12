@@ -7,13 +7,11 @@ import {
   getCharacter,
   importCharacter,
   listCharacters,
-  quickCreateCharacter,
   quickCreateCocCharacter,
   updateCharacterSheet,
 } from "../api/characters";
 import { listCampaigns } from "../api/campaigns";
 import CharacterCreatorRouter from "../components/characters/CharacterCreatorRouter";
-import CharacterSheetRouter from "../components/characters/CharacterSheetRouter";
 import CharacterSystemSelector from "../components/characters/CharacterSystemSelector";
 import ImageLibraryPicker from "../components/common/ImageLibraryPicker";
 import { imagePlaceholder } from "../data/imageLibrary";
@@ -159,43 +157,11 @@ function getDescription(character) {
   );
 }
 
-function getShortNotes(character) {
-  const sheet = getSheet(character);
-  const notes = sheet.notes || {};
-  const backstory = sheet.backstory || {};
-  return character?.privateNotes || notes.privateNotes || notes.publicNotes || backstory.notes || backstory.personalDescription || "";
-}
-
 function getHistory(character) {
   const sheet = getSheet(character);
   const notes = sheet.notes || {};
   const backstory = sheet.backstory || {};
   return backstory.story || backstory.history || backstory.backstory || notes.backstory || "";
-}
-
-function getSessionNotes(character) {
-  const sheet = getSheet(character);
-  const notes = sheet.notes || {};
-  const sessionNotes = [
-    sheet.sessionNotes,
-    notes.sessionNotes,
-    notes.session,
-    notes.sessions,
-    notes.campaignSessionNotes,
-    character?.sessionNotes,
-  ];
-  const normalized = sessionNotes.flatMap((entry) => normalizeEntries(entry));
-  const inlineNotes = [
-    character?.privateNotes,
-    notes.privateNotes,
-    notes.publicNotes,
-    notes.characterNotes,
-    notes.playerNotes,
-  ].filter(hasValue);
-  return [
-    ...normalized.map((item) => `${item.label}${hasValue(item.value) ? `: ${item.value}` : ""}`),
-    ...inlineNotes,
-  ].join("\n\n");
 }
 
 function getBackstoryDraft(character) {
@@ -267,6 +233,76 @@ function getSpecial(character) {
   ];
 }
 
+function cloneSheet(character) {
+  try {
+    return JSON.parse(JSON.stringify(getSheet(character)));
+  } catch {
+    return {};
+  }
+}
+
+function buildSheetFromDraft(character, draft = {}) {
+  const sheet = cloneSheet(character);
+  const identity = sheet.identity && typeof sheet.identity === "object" ? sheet.identity : {};
+  const notes = sheet.notes && typeof sheet.notes === "object" ? sheet.notes : {};
+  const backstory = sheet.backstory && typeof sheet.backstory === "object" ? sheet.backstory : {};
+  const relations = sheet.relations && typeof sheet.relations === "object" ? sheet.relations : {};
+
+  identity.name = getCharacterName(character);
+  identity.race = getRace(character);
+  identity.class = getProfession(character);
+  identity.className = getProfession(character);
+  identity.level = getLevel(character);
+  identity.portraitUrl = getPortrait(character);
+  identity.campaignName = getCampaign(character);
+
+  if (draft.descriptionText !== undefined) {
+    identity.description = draft.descriptionText || "";
+    notes.description = draft.descriptionText || "";
+    backstory.description = draft.descriptionText || "";
+  }
+  if (draft.notesText !== undefined) {
+    notes.privateNotes = draft.notesText || "";
+    notes.characterNotes = draft.notesText || "";
+  }
+  if (draft.backstoryText !== undefined) {
+    backstory.story = draft.backstoryText || "";
+    backstory.history = draft.backstoryText || "";
+    backstory.backstory = draft.backstoryText || "";
+    notes.backstory = draft.backstoryText || "";
+  }
+  if (draft.familyText !== undefined) {
+    backstory.family = draft.familyText || "";
+    relations.family = draft.familyText || "";
+  }
+  if (draft.contactsText !== undefined) {
+    backstory.contacts = draft.contactsText || "";
+    backstory.friends = draft.contactsText || "";
+    relations.contacts = draft.contactsText || "";
+    relations.friends = draft.contactsText || "";
+  }
+
+  sheet.identity = identity;
+  sheet.notes = notes;
+  sheet.backstory = backstory;
+  sheet.relations = relations;
+
+  if (draft.attributesText !== undefined) sheet.attributes = linesToEntries(draft.attributesText);
+  if (draft.skillsText !== undefined) sheet.skills = linesToEntries(draft.skillsText);
+  if (draft.inventoryText !== undefined) {
+    const inventory = linesToEntries(draft.inventoryText);
+    sheet.inventory = inventory;
+    sheet.equipment = { ...(sheet.equipment && typeof sheet.equipment === "object" ? sheet.equipment : {}), items: inventory };
+  }
+  if (draft.specialText !== undefined) {
+    const special = linesToEntries(draft.specialText);
+    sheet.features = special;
+    sheet.featuresTraits = special;
+  }
+
+  return sheet;
+}
+
 function Icon({ name }) {
   const paths = {
     search: "M11 19a8 8 0 1 1 5.7-2.4L21 21",
@@ -276,7 +312,6 @@ function Icon({ name }) {
     edit: "m4 20 4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z",
     save: "M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2ZM17 21v-8H7v8M7 3v5h8",
     download: "M12 3v12m0 0 4-4m-4 4-4-4M4 19h16",
-    print: "M7 8V4h10v4M7 17H5a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2M7 14h10v6H7z",
     trash: "M4 7h16M10 11v6m4-6v6M6 7l1 14h10l1-14M9 7V4h6v3",
     user: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8c.8-3.4 3.4-5.5 7-5.5s6.2 2.1 7 5.5",
     group: "M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8 0a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM3.5 20c.4-3.4 2.2-5.5 4.5-5.5s4.1 2.1 4.5 5.5m.5 0c.3-2.2 1.6-3.7 3.5-3.7s3.2 1.5 3.5 3.7",
@@ -302,7 +337,7 @@ function CharacterPortrait({ character, size = "md", onClick }) {
   const content = (
     <>
       <img src={portrait && !failed ? portrait : imagePlaceholder("characterAvatars")} alt={`Portret ${name}`} onError={() => setFailed(true)} />
-      {onClick ? <span className="charactersPortraitChange"><Icon name="image" /> Zmien</span> : null}
+      {onClick ? <span className="charactersPortraitChange" aria-hidden="true"><Icon name="image" /></span> : null}
     </>
   );
 
@@ -809,7 +844,7 @@ function CharacterLibraryView({
   );
 }
 
-function CharacterHeader({ detail, readOnly, deleting, onBack, onEdit, onExport, onPrint, onDelete, onAvatarClick }) {
+function CharacterHeader({ detail, readOnly, deleting, onBack, onEdit, onExport, onDelete, onAvatarClick }) {
   const race = getRace(detail);
   const profession = getProfession(detail);
   const level = getLevel(detail);
@@ -833,7 +868,6 @@ function CharacterHeader({ detail, readOnly, deleting, onBack, onEdit, onExport,
         <div className="characterSheetActions">
           {!readOnly && <button type="button" className="charactersGhostBtn" onClick={onEdit}><Icon name="edit" /> Edytuj</button>}
           {!readOnly && <button type="button" className="charactersGhostBtn" onClick={onExport}><Icon name="download" /> Eksportuj JSON</button>}
-          <button type="button" className="charactersGhostBtn" onClick={onPrint}><Icon name="print" /> Drukuj</button>
           {!readOnly && <button type="button" className="charactersDangerBtn" disabled={deleting} onClick={onDelete}><Icon name="trash" /> Usuń</button>}
           {readOnly && <span className="charactersReadonlyBadge">Podgląd MG - tryb tylko do odczytu</span>}
         </div>
@@ -999,7 +1033,7 @@ function ManualTextarea({ value, onChange, onBlur, placeholder, rows = 7, classN
       value={value || ""}
       placeholder={placeholder}
       onChange={(event) => onChange(event.target.value)}
-      onBlur={onBlur}
+      onBlur={() => onBlur?.()}
     />
   );
 }
@@ -1013,7 +1047,7 @@ function EditableListPanel({ title, helper, value, empty, placeholder, onChange,
           <h3>{title}</h3>
           {helper && <p>{helper}</p>}
         </div>
-        <span>Zapis lokalny po kliknięciu poza polem</span>
+        <span>Zapis po kliknieciu poza polem</span>
       </div>
       <div className="characterManualGrid">
         <ManualTextarea value={value} onChange={onChange} onBlur={onSave} placeholder={placeholder} rows={12} />
@@ -1044,7 +1078,7 @@ function HistoryEditorPanel({ draft, onDraftChange, onDraftSave }) {
           <h3>Historia postaci</h3>
           <p>Opisz backstory, rodzinę, znajomych i ważne relacje tej postaci.</p>
         </div>
-        <span>Zapis lokalny po opuszczeniu pola</span>
+        <span>Zapis po opuszczeniu pola</span>
       </div>
       <div className="characterHistoryGrid">
         <ManualTextarea
@@ -1146,7 +1180,7 @@ function CharacterTabContent({ detail, activeTab, draft, onDraftChange, onDraftS
             <h3>Notatki sesyjne postaci</h3>
             <p>Tu trafiają notatki przypisane do postaci, a poniżej możesz dopisać własne obserwacje.</p>
           </div>
-          <span>Zapis lokalny po kliknięciu poza polem</span>
+          <span>Zapis po kliknieciu poza polem</span>
         </div>
         <ManualTextarea
           value={draft.notesText}
@@ -1161,8 +1195,6 @@ function CharacterTabContent({ detail, activeTab, draft, onDraftChange, onDraftS
   if (activeTab === "history") {
     return <HistoryEditorPanel draft={draft} onDraftChange={onDraftChange} onDraftSave={onDraftSave} />;
   }
-
-  const previewAttributes = linesToEntries(draft.attributesText ?? entriesToLines(attributes));
 
   return (
     <div className="characterSheetOverview">
@@ -1209,10 +1241,10 @@ function CharacterSheetView({
   onSave,
   onDelete,
   onExport,
-  onPrint,
 }) {
   const [activeTab, setActiveTab] = useState("basic");
   const [localDraft, setLocalDraft] = useState({});
+  const localDraftRef = useRef({});
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
 
   useEffect(() => {
@@ -1224,12 +1256,13 @@ function CharacterSheetView({
 
   useEffect(() => {
     if (!detail?.id) {
+      localDraftRef.current = {};
       setLocalDraft({});
       return;
     }
     const saved = readCharacterDrafts()[String(detail.id)] || {};
     const backstory = getBackstoryDraft(detail);
-    setLocalDraft({
+    const nextDraft = {
       descriptionText: saved.descriptionText ?? getDescription(detail),
       skillsText: saved.skillsText ?? entriesToLines(getSkills(detail)),
       attributesText: saved.attributesText ?? entriesToLines(getAttributes(detail)),
@@ -1238,16 +1271,33 @@ function CharacterSheetView({
       backstoryText: saved.backstoryText ?? backstory.story,
       familyText: saved.familyText ?? backstory.family,
       contactsText: saved.contactsText ?? backstory.contacts,
-    });
+    };
+    localDraftRef.current = nextDraft;
+    setLocalDraft(nextDraft);
   }, [detail]);
 
   function updateLocalDraftField(key, value) {
-    setLocalDraft((current) => ({ ...current, [key]: value }));
+    const nextDraft = { ...localDraftRef.current, [key]: value };
+    localDraftRef.current = nextDraft;
+    setLocalDraft(nextDraft);
   }
 
-  function saveLocalDraft() {
-    if (!detail?.id) return;
-    writeCharacterDraft(detail.id, localDraft);
+  async function saveLocalDraft(draft = localDraftRef.current) {
+    if (!detail?.id) return false;
+    if (!draft || typeof draft !== "object" || draft.nativeEvent || draft.target) {
+      draft = localDraftRef.current;
+    }
+    localDraftRef.current = draft;
+    writeCharacterDraft(detail.id, draft);
+    return onSave({
+      sheetJson: buildSheetFromDraft(detail, draft),
+      privateNotes: draft.notesText ?? detail.privateNotes ?? "",
+    }, { silent: true });
+  }
+
+  async function handleExport() {
+    await saveLocalDraft(localDraftRef.current);
+    onExport?.();
   }
 
   async function saveBasicEdit(payload) {
@@ -1270,8 +1320,7 @@ function CharacterSheetView({
         deleting={deleting}
         onBack={onBack}
         onEdit={() => setEditorOpen(true)}
-        onExport={onExport}
-        onPrint={onPrint}
+        onExport={handleExport}
         onDelete={() => setConfirmDeleteOpen(true)}
         onAvatarClick={() => setAvatarPickerOpen(true)}
       />
@@ -1294,19 +1343,6 @@ function CharacterSheetView({
           onSave={saveBasicEdit}
         />
       )}
-      {false && editorOpen && !readOnly && (
-        <section className="charactersPanel characterEditPanel">
-          <div className="charactersCreateHead">
-            <div>
-              <span className="charactersEyebrow">Edycja</span>
-              <h2>Edytuj dane postaci</h2>
-              <p>To istniejący formularz edycji, podpięty pod aktualną logikę zapisu.</p>
-            </div>
-            <button type="button" className="charactersGhostBtn" onClick={() => setEditorOpen(false)}>Zamknij edycję</button>
-          </div>
-          <CharacterSheetRouter detail={detail} onSave={onSave} saving={saving} readOnly={readOnly} />
-        </section>
-      )}
 
       <section className="characterSheetPanel">
         <CharacterSheetTabs activeTab={activeTab} onChange={setActiveTab} />
@@ -1322,12 +1358,31 @@ function CharacterSheetView({
       </section>
 
       {!readOnly && confirmDeleteOpen && (
-        <div className="charactersConfirmBox">
-          <p>Czy na pewno chcesz usunąć postać: <strong>{getCharacterName(detail)}</strong>?</p>
-          <div className="charactersActionsFooter">
-            <button type="button" className="charactersGhostBtn" disabled={deleting} onClick={() => setConfirmDeleteOpen(false)}>Anuluj</button>
-            <button type="button" className="charactersDangerBtn" disabled={deleting} onClick={onDelete}>{deleting ? "Usuwanie..." : "Potwierdź usunięcie"}</button>
-          </div>
+        <div className="charactersModalOverlay characterDeleteConfirmOverlay" role="presentation" onMouseDown={() => setConfirmDeleteOpen(false)}>
+          <section
+            className="charactersModal characterDeleteConfirmModal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="characterDeleteConfirmTitle"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <header className="charactersModalHeader">
+              <div>
+                <h2 id="characterDeleteConfirmTitle">Usunąć postać?</h2>
+                <p>Ta akcja jest trwała i usunie kartę postaci z Twojej listy.</p>
+              </div>
+              <button type="button" className="charactersModalClose" aria-label="Zamknij okno" disabled={deleting} onClick={() => setConfirmDeleteOpen(false)}>
+                <Icon name="x" />
+              </button>
+            </header>
+            <div className="characterDeleteConfirmBody">
+              <p>Czy na pewno chcesz usunąć postać: <strong>{getCharacterName(detail)}</strong>?</p>
+            </div>
+            <footer className="charactersModalFooter characterDeleteConfirmFooter">
+              <button type="button" className="charactersGhostBtn" disabled={deleting} onClick={() => setConfirmDeleteOpen(false)}>Anuluj</button>
+              <button type="button" className="charactersDangerBtn" disabled={deleting} onClick={onDelete}>{deleting ? "Usuwanie..." : "Potwierdź usunięcie"}</button>
+            </footer>
+          </section>
         </div>
       )}
     </div>
@@ -1426,25 +1481,6 @@ export default function CharactersPage() {
     return () => clearTimeout(timer);
   }, [notice]);
 
-  async function onCreate(payload) {
-    setCreating(true);
-    setError("");
-    try {
-      const created = await quickCreateCharacter(token, payload);
-      setCreatorOpen(false);
-      setSelectedCreationSystem(null);
-      await loadList();
-      navigate(`/characters/${created.id}`);
-      showNotice("success", "Postać utworzona.");
-    } catch (err) {
-      const message = err?.message || "Nie udało się utworzyć postaci.";
-      setError(message);
-      showNotice("error", message);
-    } finally {
-      setCreating(false);
-    }
-  }
-
   async function onCreateCoc(payload) {
     setCreating(true);
     setError("");
@@ -1514,7 +1550,7 @@ export default function CharactersPage() {
     }
   }
 
-  async function onSave(update) {
+  async function onSave(update, options = {}) {
     if (!selectedId) return false;
     setSaving(true);
     setError("");
@@ -1522,7 +1558,7 @@ export default function CharactersPage() {
       const saved = await updateCharacterSheet(token, selectedId, update);
       setDetail(saved);
       await loadList();
-      showNotice("success", "Zmiany zapisane.");
+      if (!options.silent) showNotice("success", "Zmiany zapisane.");
       return true;
     } catch (err) {
       const message = err?.message || "Nie udało się zapisać zmian.";
@@ -1584,11 +1620,6 @@ export default function CharactersPage() {
 
   function handleImportClick() {
     importInputRef.current?.click();
-  }
-
-  function handlePrint() {
-    if (!selectedId) return;
-    window.print();
   }
 
   async function handleImportFile(event) {
@@ -1680,7 +1711,6 @@ export default function CharactersPage() {
           onSave={onSave}
           onDelete={onDelete}
           onExport={handleExportJson}
-          onPrint={handlePrint}
         />
       )}
     </div>

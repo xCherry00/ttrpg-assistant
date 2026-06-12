@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -332,6 +333,21 @@ class CampaignRegressionIT {
         assertThat(second.getId()).isNotNull();
     }
 
+    @Test
+    void campaignSessionNoteShouldRejectOversizedFields() throws Exception {
+        UserEntity owner = createUser("session-note-limit-owner");
+        String ownerToken = tokenFor(owner);
+        Number campaignId = createCampaign(ownerToken, "Session Note Limit");
+        Number sessionId = createSession(ownerToken, campaignId.longValue(), "Long Note Session");
+        String oversized = "x".repeat(10001);
+
+        mockMvc.perform(put("/api/campaigns/" + campaignId.longValue() + "/sessions/" + sessionId.longValue() + "/note")
+                        .header("Authorization", "Bearer " + ownerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("summary", oversized))))
+                .andExpect(status().isBadRequest());
+    }
+
     private Number createCampaign(String token, String title) throws Exception {
         Map<String, Object> request = Map.of(
                 "title", title,
@@ -346,6 +362,21 @@ class CampaignRegressionIT {
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        return (Number) objectMapper.readValue(body, Map.class).get("id");
+    }
+
+    private Number createSession(String token, long campaignId, String title) throws Exception {
+        String body = mockMvc.perform(post("/api/campaigns/" + campaignId + "/sessions")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "title", title,
+                                "description", "",
+                                "scheduledFor", "2026-05-20T18:00:00Z"
+                        ))))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 

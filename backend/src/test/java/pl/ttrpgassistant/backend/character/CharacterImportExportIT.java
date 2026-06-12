@@ -38,6 +38,20 @@ class CharacterImportExportIT {
         UserEntity owner = createUser("char-export-owner");
         String ownerToken = tokenFor(owner);
         PlayerCharacterEntity character = createCharacter(owner.getId(), "Export Hero", "dnd5e");
+        character.setStatus("ACTIVE");
+        character.setPortraitUrl("/assets/portraits/export-hero.png");
+        character.setMaxHp(18);
+        character.setCurrentHp(7);
+        character.setTempHp(2);
+        character.setPrivateNotes("Current private notes");
+        character.setSheetJson("""
+                {
+                  "identity": {"name": "Old Name", "race": "Old Race", "className": "Old Class"},
+                  "combat": {"maxHp": 1, "currentHp": 1, "tempHp": 0},
+                  "notes": {"privateNotes": "Old notes"}
+                }
+                """);
+        character = playerCharacterRepository.save(character);
 
         String body = mockMvc.perform(get("/api/characters/" + character.getId() + "/export")
                         .header("Authorization", "Bearer " + ownerToken))
@@ -49,6 +63,26 @@ class CharacterImportExportIT {
         Map<String, Object> exportedCharacter = (Map<String, Object>) response.get("character");
         assertThat(exportedCharacter.get("name")).isEqualTo("Export Hero");
         assertThat(exportedCharacter.get("systemCode")).isEqualTo("dnd5e");
+        assertThat(exportedCharacter.get("status")).isEqualTo("ACTIVE");
+        assertThat(exportedCharacter.get("portraitUrl")).isEqualTo("/assets/portraits/export-hero.png");
+        assertThat(exportedCharacter.get("maxHp")).isEqualTo(18);
+        assertThat(exportedCharacter.get("currentHp")).isEqualTo(7);
+        assertThat(exportedCharacter.get("tempHp")).isEqualTo(2);
+        assertThat(exportedCharacter.get("privateNotes")).isEqualTo("Current private notes");
+        assertThat(exportedCharacter.get("createdAt")).isNotNull();
+        assertThat(exportedCharacter.get("updatedAt")).isNotNull();
+        Map<String, Object> exportedSheet = (Map<String, Object>) exportedCharacter.get("sheetJson");
+        Map<String, Object> identity = (Map<String, Object>) exportedSheet.get("identity");
+        Map<String, Object> combat = (Map<String, Object>) exportedSheet.get("combat");
+        Map<String, Object> notes = (Map<String, Object>) exportedSheet.get("notes");
+        assertThat(identity.get("name")).isEqualTo("Export Hero");
+        assertThat(identity.get("race")).isEqualTo("Human");
+        assertThat(identity.get("className")).isEqualTo("Fighter");
+        assertThat(identity.get("background")).isEqualTo("Soldier");
+        assertThat(combat.get("maxHp")).isEqualTo(18);
+        assertThat(combat.get("currentHp")).isEqualTo(7);
+        assertThat(combat.get("tempHp")).isEqualTo(2);
+        assertThat(notes.get("privateNotes")).isEqualTo("Current private notes");
     }
 
     @Test

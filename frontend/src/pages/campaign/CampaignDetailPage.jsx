@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import ImageLibraryPicker from "../../components/common/ImageLibraryPicker";
 import { imagePlaceholder, imageOrPlaceholder } from "../../data/imageLibrary";
@@ -26,7 +27,6 @@ function formatDate(value, fallback = "Brak terminu") {
   if (Number.isNaN(date.getTime())) return fallback;
   return date.toLocaleDateString("pl-PL", { day: "numeric", month: "short", year: "numeric" });
 }
-
 function formatWeekRange(value, fallback = "Brak terminu") {
   const date = new Date(value || 0);
   if (Number.isNaN(date.getTime())) return fallback;
@@ -43,7 +43,6 @@ function formatWeekRange(value, fallback = "Brak terminu") {
   const end = sunday.toLocaleDateString("pl-PL", { day: "numeric", month: "2-digit" });
   return `${start}-${end}`;
 }
-
 function formatTime(value, fallback = "--:--") {
   const date = new Date(value || 0);
   if (Number.isNaN(date.getTime())) return fallback;
@@ -102,7 +101,6 @@ function isGameMasterMember(member) {
     || role === "GAME_MASTER"
   );
 }
-
 function playerMembersOnly(members) {
   return (members || []).filter((member) => !isGameMasterMember(member));
 }
@@ -232,6 +230,11 @@ export default function CampaignDetailPage() {
   const [showInviteCode, setShowInviteCode] = useState(true);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [mediaModal, setMediaModal] = useState(null);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [inviteCandidates, setInviteCandidates] = useState([]);
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [inviteError, setInviteError] = useState("");
+  const [inviteBusyId, setInviteBusyId] = useState(null);
 
   const {
     campaignId,
@@ -241,17 +244,13 @@ export default function CampaignDetailPage() {
     busy,
     campaign,
     campaignCharacters,
-    myCharacters,
     members,
     sessions,
-    materials,
-    playerNotes,
     availabilityAttendance,
     availabilityError,
     isOwner,
     myUserId,
     inviteCode,
-    showMaterialsPanel,
     actions,
   } = useCampaignDetailWorkspace();
 
@@ -261,12 +260,59 @@ export default function CampaignDetailPage() {
   const playerCount = members.length > 0 ? playerMembers.length : Number(campaign?.playerCount || campaign?.memberCount || 0);
   const upcomingSession = useMemo(() => pickUpcomingSession(sessions), [sessions]);
   const activeSession = useMemo(() => pickActiveSession(sessions), [sessions]);
+  const memberIds = useMemo(() => new Set((members || []).map((member) => memberId(member)).filter(Boolean)), [members]);
+  const availableInviteCandidates = useMemo(
+    () => (inviteCandidates || []).filter((candidate) => {
+      const id = memberId(candidate);
+      return id && !memberIds.has(id);
+    }),
+    [inviteCandidates, memberIds],
+  );
 
   useEffect(() => {
     if (!isOwner && activeTab === "settings") {
       setActiveTab("session");
     }
   }, [activeTab, isOwner]);
+
+  useEffect(() => {
+    if (!inviteModalOpen || !isOwner) return undefined;
+    let active = true;
+    setInviteLoading(true);
+    setInviteError("");
+    actions.loadFriendCandidates()
+      .then((candidates) => {
+        if (active) setInviteCandidates(Array.isArray(candidates) ? candidates : []);
+      })
+      .catch((err) => {
+        if (active) {
+          setInviteCandidates([]);
+          setInviteError(err?.message || "Nie udało się pobrać listy znajomych.");
+        }
+      })
+      .finally(() => {
+        if (active) setInviteLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [actions, inviteModalOpen, isOwner]);
+
+  async function inviteCandidate(candidate) {
+    const id = memberId(candidate);
+    if (!id) return;
+    setInviteBusyId(id);
+    setInviteError("");
+    try {
+      await actions.handleInviteFriend(id);
+      setInviteModalOpen(false);
+      setInviteCandidates([]);
+    } catch (err) {
+      setInviteError(err?.message || "Nie udało się zaprosić gracza.");
+    } finally {
+      setInviteBusyId(null);
+    }
+  }
 
   return (
     <div className={`page campaignDetailsAdminPage${isOwner ? " campaignDetailsAdminPage--owner" : " campaignDetailsAdminPage--player"}`}>
@@ -286,6 +332,7 @@ export default function CampaignDetailPage() {
             playerLimit={playerLimit}
             isOwner={isOwner}
             onCopyInvite={() => copyText(inviteCode)}
+            onInvitePlayer={() => setInviteModalOpen(true)}
             onEditCampaign={() => setEditModalOpen(true)}
             onEditIcon={() => setMediaModal("icon")}
             onEditBanner={() => setMediaModal("banner")}
@@ -313,7 +360,6 @@ export default function CampaignDetailPage() {
               campaignId={campaignId}
               campaign={campaign}
               sessions={sessions}
-              members={members}
               upcomingSession={upcomingSession}
               isOwner={isOwner}
               busy={busy}
@@ -324,13 +370,9 @@ export default function CampaignDetailPage() {
 
           {activeTab === "availability" && (
             <AvailabilityWorkspace
-              campaign={campaign}
-              members={members}
               sessions={sessions}
-              campaignId={campaignId}
               attendance={availabilityAttendance}
               attendanceError={availabilityError}
-              inviteCode={inviteCode}
               isOwner={isOwner}
               busy={busy}
               onSave={actions.handleUpdateAvailability}
@@ -339,21 +381,14 @@ export default function CampaignDetailPage() {
 
           {activeTab === "characters" && (
             <CharactersWorkspace
-              campaign={campaign}
               campaignCharacters={campaignCharacters}
-              myCharacters={myCharacters}
               members={members}
               myUserId={myUserId}
-              isOwner={isOwner}
-              busy={busy}
-              onAssign={actions.handleAssignCharacter}
-              onDetach={actions.handleDetachCharacter}
             />
           )}
 
           {activeTab === "players" && (
             <PlayersWorkspace
-              campaign={campaign}
               members={members}
               campaignCharacters={campaignCharacters}
               playerCount={playerCount}
@@ -365,16 +400,9 @@ export default function CampaignDetailPage() {
             />
           )}
 
-          {activeTab === "materials" && showMaterialsPanel && (
-            <MaterialsWorkspace materials={materials} />
-          )}
-
           {activeTab === "settings" && isOwner && (
             <SettingsWorkspace
               campaign={campaign}
-              inviteCode={inviteCode}
-              playerCount={playerCount}
-              playerLimit={playerLimit}
               busy={busy}
               onUpdate={actions.handleUpdateCampaign}
               onLeave={actions.handleLeaveCampaign}
@@ -408,6 +436,17 @@ export default function CampaignDetailPage() {
               }}
             />
           )}
+
+          {inviteModalOpen && isOwner && (
+            <CampaignInviteModal
+              candidates={availableInviteCandidates}
+              loading={inviteLoading}
+              error={inviteError}
+              busyId={inviteBusyId}
+              onClose={() => setInviteModalOpen(false)}
+              onInvite={inviteCandidate}
+            />
+          )}
         </>
       )}
 
@@ -416,7 +455,7 @@ export default function CampaignDetailPage() {
   );
 }
 
-function CampaignAdminHeader({ campaign, campaignId, activeSession, upcomingSession, inviteCode, playerCount, playerLimit, isOwner, onCopyInvite, onEditCampaign, onEditIcon, onEditBanner }) {
+function CampaignAdminHeader({ campaign, campaignId, activeSession, upcomingSession, inviteCode, playerCount, playerLimit, isOwner, onCopyInvite, onInvitePlayer, onEditCampaign, onEditIcon, onEditBanner }) {
   const liveTarget = activeSession || (isOwner ? upcomingSession : null);
   const liveHref = liveTarget?.id ? `/campaigns/${campaignId}/sessions/${liveTarget.id}/live` : null;
 
@@ -442,7 +481,7 @@ function CampaignAdminHeader({ campaign, campaignId, activeSession, upcomingSess
         </div>
 
         <div className="cdAdminHeroActions">
-          {isOwner ? <button type="button" className="cdAdminSecondaryBtn"><CampaignAdminIcon name="user-plus" />Zaproś gracza</button> : null}
+          {isOwner ? <button type="button" className="cdAdminSecondaryBtn" onClick={onInvitePlayer}><CampaignAdminIcon name="user-plus" />Zaproś gracza</button> : null}
           {liveHref ? (
             <Link className={activeSession ? "cdAdminLiveBtn is-active" : "cdAdminLiveBtn"} to={liveHref}>
               <CampaignAdminIcon name="broadcast" />
@@ -479,8 +518,8 @@ function CampaignMediaModal({ campaign, mode, busy, onClose, onSave }) {
     await onSave?.(value);
   }
 
-  return (
-    <div className="cdEditOverlay" role="presentation" onMouseDown={onClose}>
+  return createPortal(
+    <div className="cdEditOverlay cdMediaOverlay" role="presentation" onMouseDown={onClose}>
       <section className="cdEditModal cdMediaModal" role="dialog" aria-modal="true" aria-labelledby="cdMediaTitle" onMouseDown={(event) => event.stopPropagation()}>
         <button type="button" className="cdEditClose" aria-label="Zamknij okno wyboru grafiki" disabled={busy} onClick={onClose}>
           <CampaignAdminIcon name="x" />
@@ -503,6 +542,52 @@ function CampaignMediaModal({ campaign, mode, busy, onClose, onSave }) {
             <button type="submit" className="cdAdminPrimaryBtn" disabled={busy}>Zapisz grafike</button>
           </div>
         </form>
+      </section>
+    </div>,
+    document.body,
+  );
+}
+
+function CampaignInviteModal({ candidates, loading, error, busyId, onClose, onInvite }) {
+  return (
+    <div className="cdEditOverlay cdInviteOverlay" role="presentation" onMouseDown={onClose}>
+      <section className="cdEditModal cdInviteModal" role="dialog" aria-modal="true" aria-labelledby="cdInviteTitle" onMouseDown={(event) => event.stopPropagation()}>
+        <button type="button" className="cdEditClose" aria-label="Zamknij okno zaproszenia" onClick={onClose}>
+          <CampaignAdminIcon name="x" />
+        </button>
+        <h2 id="cdInviteTitle">Zaproś gracza</h2>
+        <div className="cdInviteModalBody">
+          <p className="cdAdminLead">Wybierz znajomego, który nie bierze jeszcze udziału w tej kampanii.</p>
+
+          {error ? <div className="cdAdminError cdInviteError">{error}</div> : null}
+          {loading ? <div className="cdAdminState cdInviteState">Ładowanie znajomych...</div> : null}
+
+          {!loading && !error && candidates.length === 0 ? (
+            <EmptyState icon="users" title="Brak znajomych do zaproszenia" text="Wszyscy dostępni znajomi są już w tej kampanii albo lista znajomych jest pusta." />
+          ) : null}
+
+          {!loading && candidates.length > 0 ? (
+            <div className="cdInviteCandidateList" role="list">
+              {candidates.map((candidate) => {
+                const id = memberId(candidate);
+                const name = memberName(candidate);
+                const busy = busyId === id;
+                return (
+                  <div className="cdInviteCandidate" role="listitem" key={id || name}>
+                    <MemberAvatar member={candidate} />
+                    <div>
+                      <strong>{name}</strong>
+                      <span>@{candidate.username || candidate.handle || "gracz"}</span>
+                    </div>
+                    <button type="button" className="cdAdminPrimaryBtn" disabled={!id || busyId !== null} onClick={() => onInvite?.(candidate)}>
+                      {busy ? "Zapraszanie..." : "Zaproś"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          ) : null}
+        </div>
       </section>
     </div>
   );
@@ -659,7 +744,7 @@ function CampaignEditModal({ campaign, busy, onClose, onSave }) {
   );
 }
 
-function SessionsWorkspace({ campaign, campaignId, sessions, members, upcomingSession, isOwner, busy, onCreate, onStart }) {
+function SessionsWorkspace({ campaign, campaignId, sessions, upcomingSession, isOwner, busy, onCreate, onStart }) {
   const [sessionFilter, setSessionFilter] = useState("all");
   const filteredSessions = sessions.filter((session) => {
     if (sessionFilter === "planned") return session.status !== "FINISHED";
@@ -764,31 +849,11 @@ function SessionsWorkspace({ campaign, campaignId, sessions, members, upcomingSe
   );
 }
 
-function AvailabilityWorkspace({ campaign, members, sessions, campaignId, attendance, attendanceError, inviteCode, isOwner, busy, onSave }) {
+function AvailabilityWorkspace({ sessions, attendance, attendanceError, isOwner, busy, onSave }) {
   const session = pickUpcomingSession(sessions);
   const responses = Array.isArray(attendance?.responses) ? attendance.responses : [];
   const myResponse = responses.find((item) => item.self);
-  const playerMembers = useMemo(() => playerMembersOnly(members), [members]);
-  const gmMemberIds = useMemo(() => new Set((members || []).filter(isGameMasterMember).map(memberId).filter(Boolean)), [members]);
-  const playerResponses = responses.filter((response) => !gmMemberIds.has(Number(response.userId || response.id || 0)));
   const [week, setWeek] = useState(() => parseWeekNote(myResponse?.note, myResponse?.status));
-  const answered = playerResponses.length;
-  const totalMembers = Math.max(playerMembers.length, answered, 1);
-  const progress = Math.round((answered / totalMembers) * 100);
-  const rows = playerResponses.length > 0
-    ? playerResponses.map((response, index) => ({
-      id: response.userId || response.id || index,
-      name: memberName(response),
-      week: parseWeekNote(response.note, response.status),
-      updatedAt: response.updatedAt,
-    }))
-    : playerMembers.map((member, index) => ({
-      id: memberId(member) || index,
-      name: memberName(member),
-      week: { ...EMPTY_WEEK },
-      updatedAt: null,
-    }));
-
   useEffect(() => {
     setWeek(parseWeekNote(myResponse?.note, myResponse?.status));
   }, [myResponse?.note, myResponse?.status]);
@@ -868,7 +933,7 @@ function AvailabilityWorkspace({ campaign, members, sessions, campaignId, attend
   );
 }
 
-function CharactersWorkspace({ campaign, campaignCharacters, myCharacters, members, myUserId, isOwner, busy, onAssign, onDetach }) {
+function CharactersWorkspace({ campaignCharacters, members, myUserId }) {
   const membersById = new Map(members.map((member) => [memberId(member), member]));
 
   return (
@@ -920,7 +985,7 @@ function CharactersWorkspace({ campaign, campaignCharacters, myCharacters, membe
     </section>
   );
 }
-function PlayersWorkspace({ campaign, members, campaignCharacters, playerCount, playerLimit, inviteCode, showInviteCode, setShowInviteCode, isOwner }) {
+function PlayersWorkspace({ members, campaignCharacters, playerCount, playerLimit, inviteCode, showInviteCode, setShowInviteCode, isOwner }) {
   const progress = Math.min(100, Math.round((playerCount / Math.max(playerLimit, 1)) * 100));
   const charactersByUserId = new Map((campaignCharacters || []).map((character) => [Number(character.userId), character]));
   return (
@@ -937,16 +1002,17 @@ function PlayersWorkspace({ campaign, members, campaignCharacters, playerCount, 
             <div className="cdPlayersHead"><span>Gracz</span><span>Rola</span><span>Status</span><span>Postać</span><span>Ostatnia aktywność</span></div>
             {members.map((member, index) => {
               const character = charactersByUserId.get(Number(memberId(member)));
-              const presence = member.status || member.presence || member.activityStatus || "Brak danych";
+              const presence = member.online ? "Online" : "Offline";
+              const activity = member.activityLabel || (member.online ? "aktywny teraz" : "Brak danych");
               const lastSeen = member.lastActiveAt || member.lastSeenAt || member.updatedAt || member.joinedAt;
               const isGm = member.owner || member.mg || String(member.role || "").toUpperCase() === "GM";
               return (
                 <div className="cdPlayerRow" key={memberId(member) || index}>
                   <div className="cdPlayerIdentity"><MemberAvatar member={member} /><strong>{memberName(member)}{member.self ? <em>Ty</em> : null}</strong><small>@{member.username || "gracz"} #{String(memberId(member) || index + 1).padStart(4, "0")}</small></div>
                   <span className={isGm ? "cdRoleBadge is-gm" : "cdRoleBadge"}>{isGm ? "MG" : "Gracz"}</span>
-                  <span className="cdOnline"><i />{presence}</span>
+                  <span className={`cdOnline${member.online ? " is-online" : ""}`}><i />{presence}</span>
                   <span>{character?.characterName || character?.name || "Nie przypisano"}</span>
-                  <span>{lastSeen ? formatDate(lastSeen) : "Brak danych"}</span>
+                  <span>{activity}{lastSeen ? ` · ${formatDate(lastSeen)}` : ""}</span>
                 </div>
               );
             })}
@@ -969,105 +1035,32 @@ function PlayersWorkspace({ campaign, members, campaignCharacters, playerCount, 
   );
 }
 
-function NotesWorkspace({ notes, isOwner, myUserId, busy, onCreate, onDelete }) {
-  const [query, setQuery] = useState("");
-  const visibleNotes = notes.filter((note) => isOwner || Number(note.userId) === Number(myUserId));
-  const filteredNotes = visibleNotes.filter((note) => `${note.title || ""} ${note.content || ""}`.toLowerCase().includes(query.toLowerCase()));
-
-  function submit(event) {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const title = String(formData.get("title") || "").trim();
-    const content = String(formData.get("content") || "").trim();
-    if (!title || !content) return;
-    onCreate?.({ title, content });
-    event.currentTarget.reset();
-  }
-
-  return (
-    <section className="cdAdminWorkspace cdAdminNotesGrid">
-      <article className="cdAdminCard">
-        <h2>Nowa notatka</h2>
-        <form className="cdAdminForm" onSubmit={submit}>
-          <label><span>Tytuł</span><input name="title" placeholder="Wpisz tytuł notatki..." required maxLength={160} /></label>
-          <label><span>Treść</span><textarea name="content" rows={5} placeholder="Wpisz treść notatki..." required maxLength={10000} /></label>
-          <label><span>Kategoria</span><select name="category" defaultValue=""><option value="">Wybierz kategorię</option><option>Lokacje</option><option>NPC</option><option>Fabuła</option></select></label>
-          <label><span>Tagi (opcjonalnie)</span><input name="tags" placeholder="Dodaj tagi, np. lokacje, NPC, fabuła..." /></label>
-          <small>Oddzielaj tagi przecinkami</small>
-          <button type="submit" className="cdAdminPrimaryBtn cdAdminFullBtn" disabled={busy}>Dodaj notatkę</button>
-          <div className="cdInfoBox"><CampaignAdminIcon name="info" />Notatki są widoczne dla wszystkich uczestników kampanii.</div>
-        </form>
-      </article>
-      <article className="cdAdminCard">
-        <div className="cdNotesHead">
-          <h2>Notatki kampanii <span className="cdCountPill">{visibleNotes.length}</span></h2>
-          <label><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Szukaj notatek..." /><CampaignAdminIcon name="search" /></label>
-          <select defaultValue="all"><option value="all">Wszystkie kategorie</option></select>
-          <select defaultValue="newest"><option value="newest">Najnowsze</option></select>
-        </div>
-        {filteredNotes.length === 0 ? (
-          <EmptyState icon="note" title="Brak notatek w tej kampanii" text="Dodaj pierwszą notatkę, aby uporządkować wiedzę drużyny." />
-        ) : (
-          <div className="cdNoteRows">
-            {filteredNotes.slice(0, 4).map((note, index) => (
-              <div className="cdNoteRow" key={note.id}>
-                <span className={`cdNoteIcon is-${index % 4}`}><CampaignAdminIcon name={index % 3 === 0 ? "map" : index % 3 === 1 ? "user-plus" : "book"} /></span>
-                <div><strong>{note.title}</strong><p>{String(note.content || "").slice(0, 150)}{String(note.content || "").length > 150 ? "..." : ""}</p><em>{note.displayName || note.username ? `Autor: ${note.displayName || note.username}` : "Notatka kampanii"}</em></div>
-                <time>{formatDate(note.updatedAt || note.createdAt)}</time>
-                <button type="button" className="cdAdminIconBtn" disabled={busy} onClick={() => onDelete?.(note.id)} aria-label="Usuń notatkę"><CampaignAdminIcon name="more" /></button>
-              </div>
-            ))}
-          </div>
-        )}
-        <div className="cdAdminRowBetween cdNotesFooter"><span>Wyświetlanie {Math.min(filteredNotes.length, 4)} z {filteredNotes.length} notatek</span><button type="button" className="cdAdminSecondaryBtn">Zobacz wszystkie notatki</button></div>
-      </article>
-    </section>
-  );
-}
-
-function MaterialsWorkspace({ materials }) {
-  return (
-    <section className="cdAdminWorkspace cdAdminCard">
-      <div className="cdAdminRowBetween">
-        <div>
-          <h2>Materiały kampanii <span className="cdCountPill">{materials.length}</span></h2>
-          <p className="cdAdminLead">Mapy, handouty, linki i pliki pomocnicze dostępne dla tej kampanii.</p>
-        </div>
-        <button type="button" className="cdAdminSecondaryBtn"><CampaignAdminIcon name="book" />Dodaj materiał</button>
-      </div>
-
-      {materials.length === 0 ? (
-        <EmptyState icon="book" title="Brak materiałów kampanii" text="Dodaj mapę, handout albo link, aby mieć wszystko pod ręką podczas sesji." action="Dodaj pierwszy materiał" />
-      ) : (
-        <div className="cdMaterialsGrid">
-          {materials.map((material, index) => (
-            <article className="cdMaterialTile" key={material.id || material.url || index}>
-              <span><CampaignAdminIcon name={index % 2 ? "note" : "map"} /></span>
-              <strong>{material.title || material.name || "Materiał kampanii"}</strong>
-              <p>{material.description || material.type || "Materiał pomocniczy do sesji i przygotowań MG."}</p>
-              {material.url ? <a href={material.url} target="_blank" rel="noreferrer">Otwórz materiał</a> : <button type="button">Szczegóły</button>}
-            </article>
-          ))}
-        </div>
-      )}
-    </section>
-  );
-}
-
-function SettingsWorkspace({ campaign, inviteCode, playerCount, playerLimit, busy, onUpdate, onLeave, onDelete }) {
+function SettingsWorkspace({ campaign, busy, onUpdate, onLeave, onDelete }) {
   const [confirmAction, setConfirmAction] = useState(null);
   const [form, setForm] = useState({
     title: campaign.title || "",
     description: campaign.description || "",
     status: campaign.status || "active",
+    visibility: String(campaign.visibility || "PRIVATE").toUpperCase(),
     playerLimit: campaign.playerLimit || 6,
   });
+
+  useEffect(() => {
+    setForm({
+      title: campaign.title || "",
+      description: campaign.description || "",
+      status: campaign.status || "active",
+      visibility: String(campaign.visibility || "PRIVATE").toUpperCase(),
+      playerLimit: campaign.playerLimit || 6,
+    });
+  }, [campaign.title, campaign.description, campaign.status, campaign.visibility, campaign.playerLimit]);
 
   function reset() {
     setForm({
       title: campaign.title || "",
       description: campaign.description || "",
       status: campaign.status || "active",
+      visibility: String(campaign.visibility || "PRIVATE").toUpperCase(),
       playerLimit: campaign.playerLimit || 6,
     });
   }
@@ -1078,6 +1071,7 @@ function SettingsWorkspace({ campaign, inviteCode, playerCount, playerLimit, bus
       title: form.title.trim(),
       description: form.description.trim(),
       status: form.status,
+      visibility: form.visibility,
       playerLimit: Number(form.playerLimit) || 6,
       coverImageUrl: campaign.coverImageUrl || null,
       bannerImageUrl: campaign.bannerImageUrl || null,
@@ -1137,7 +1131,7 @@ function SettingsWorkspace({ campaign, inviteCode, playerCount, playerLimit, bus
           <label><span>Opis kampanii</span><textarea rows={4} value={form.description} onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))} /></label>
           <div className="cdAdminTwoCols">
             <label><span>Status kampanii</span><select value={form.status} onChange={(event) => setForm((prev) => ({ ...prev, status: event.target.value }))}><option value="active">Aktywna</option><option value="finished">Zakończona</option><option value="archived">Archiwalna</option></select></label>
-            <label><span>Widoczność kampanii</span><select defaultValue="public"><option value="public">Online - widoczna dla wszystkich</option><option value="private">Prywatna</option></select></label>
+            <label><span>Widoczność kampanii</span><select value={form.visibility} onChange={(event) => setForm((prev) => ({ ...prev, visibility: event.target.value }))}><option value="PRIVATE">Prywatna</option><option value="PUBLIC">Publiczna</option></select></label>
           </div>
           <div className="cdAdminTwoCols">
             <label><span>System RPG</span><select value={campaign.systemCode || "dnd5e"} disabled><option value={campaign.systemCode || "dnd5e"}>{systemLabel(campaign.systemCode)}</option></select></label>

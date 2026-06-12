@@ -33,12 +33,14 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<ForgotPasswordResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest req) {
+    public ResponseEntity<ForgotPasswordResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest req, HttpServletRequest request) {
+        authRateLimiter.checkPasswordResetRequest(clientKey(request, req.email()));
         return ResponseEntity.ok(authService.forgotPassword(req));
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest req) {
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest req, HttpServletRequest request) {
+        authRateLimiter.checkPasswordResetConfirm(clientKey(request, null));
         authService.resetPassword(req);
         return ResponseEntity.noContent().build();
     }

@@ -1,5 +1,7 @@
 package pl.ttrpgassistant.backend.campaign.dto;
 
+import java.time.Instant;
+
 public record CampaignMemberPreviewResponse(
         Long id,
         String displayName,
@@ -8,5 +10,8 @@ public record CampaignMemberPreviewResponse(
         String avatarUrl,
         String role,
         boolean owner,
-        boolean mg
+        boolean mg,
+        boolean online,
+        String activityLabel,
+        Instant lastActiveAt
 ) {}

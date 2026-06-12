@@ -64,7 +64,7 @@ export default function CocCharacterCreator({ onCreate, creating, onBack }) {
             />
           </div>
           <div className="charactersActionsFooter">
-            {onBack && <button type="button" className="charactersGhostBtn" disabled={creating} onClick={onBack}>Wroc do systemow</button>}
+            {onBack && <button type="button" className="charactersGhostBtn" disabled={creating} onClick={onBack}>Wróć do systemów</button>}
             <button
               type="button"
               className="charactersPrimaryBtn"
@@ -78,7 +78,7 @@ export default function CocCharacterCreator({ onCreate, creating, onBack }) {
                 portraitUrl: form.portraitUrl || null,
               })}
             >
-              {creating ? "Tworzenie..." : "Utworz badacza"}
+              {creating ? "Tworzenie..." : "Utwórz badacza"}
             </button>
           </div>
         </>

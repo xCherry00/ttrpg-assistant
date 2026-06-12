@@ -56,6 +56,34 @@ function pickHeroSession(sessions) {
   return { mode: "empty", session: null };
 }
 
+function buildHeroSessionOptions(sessions) {
+  const selected = [];
+  const seen = new Set();
+  const pushSession = (session) => {
+    const key = String(session?.id || "");
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    selected.push({
+      mode: normalizeStatus(session.status) === "IN_PROGRESS" ? "active" : "planned",
+      session,
+    });
+  };
+
+  sessions
+    .filter((session) => normalizeStatus(session.status) === "IN_PROGRESS")
+    .slice()
+    .sort((a, b) => toTimestamp(a.scheduledFor || a.updatedAt || a.createdAt) - toTimestamp(b.scheduledFor || b.updatedAt || b.createdAt))
+    .forEach(pushSession);
+
+  sessions
+    .filter((session) => normalizeStatus(session.status) === "PLANNED")
+    .slice()
+    .sort((a, b) => toTimestamp(a.scheduledFor) - toTimestamp(b.scheduledFor))
+    .forEach(pushSession);
+
+  return selected.slice(0, 3);
+}
+
 function pickAvailabilitySession(sessions) {
   const planned = sessions
     .filter((session) => normalizeStatus(session.status) === "PLANNED")
@@ -115,17 +143,19 @@ function buildAvailabilityRows(members, attendance) {
 }
 
 function availabilityStatusLabel(status) {
-  if (status === "available") return "Dostepny";
-  if (status === "maybe") return "Moze";
-  if (status === "unavailable") return "Niedostepny";
+  if (status === "available") return "Dostępny";
+  if (status === "maybe") return "Może";
+  if (status === "unavailable") return "Niedostępny";
   return "Brak odp.";
 }
 
 function formatSessionStatus(status) {
   const normalized = normalizeStatus(status);
+  if (normalized === "ACTIVE") return "Aktywna";
   if (normalized === "IN_PROGRESS") return "Trwa";
   if (normalized === "PLANNED") return "Zaplanowana";
-  if (normalized === "FINISHED") return "Zakonczona";
+  if (normalized === "FINISHED") return "Zakończona";
+  if (normalized === "ARCHIVED") return "Archiwalna";
   return normalized || "Nieznany";
 }
 
@@ -145,6 +175,12 @@ function getCampaignRoleLabel(campaign) {
 
 function pickSessionImage(session) {
   return session?.imageUrl || session?.bannerImageUrl || session?.campaignBannerImageUrl || session?.sceneImageUrl || session?.coverImageUrl || session?.campaignCoverImageUrl || "";
+}
+
+function heroSessionRankLabel(index) {
+  if (index === 0) return "Najbliższa";
+  if (index === 1) return "Druga";
+  return "Trzecia";
 }
 
 function RoleDonutChart({ items, total }) {
@@ -259,7 +295,7 @@ function buildActivity(campaigns, characters, sessions) {
   const characterRows = characters.map((character) => ({
     id: `character-${character.id}`,
     icon: "users",
-    text: `Postac ${character.name || "bez nazwy"} jest gotowa do gry.`,
+    text: `Postać ${character.name || "bez nazwy"} jest gotowa do gry.`,
     time: character.updatedAt || character.createdAt || 0,
     fallback: "Postac",
   }));
@@ -288,6 +324,7 @@ export default function DashboardPage() {
   const [attendanceMembers, setAttendanceMembers] = useState([]);
   const [attendanceLoading, setAttendanceLoading] = useState(false);
   const [attendanceError, setAttendanceError] = useState("");
+  const [selectedHeroSessionIndex, setSelectedHeroSessionIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -352,7 +389,7 @@ export default function DashboardPage() {
           navigate("/login", { replace: true });
           return;
         }
-        setError(err?.message || "Nie udalo sie odswiezyc danych dashboardu.");
+        setError(err?.message || "Nie udało się odświeżyć danych dashboardu.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -367,7 +404,15 @@ export default function DashboardPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, navigate]);
 
-  const hero = useMemo(() => pickHeroSession(sessions), [sessions]);
+  const heroOptions = useMemo(() => buildHeroSessionOptions(sessions), [sessions]);
+
+  useEffect(() => {
+    if (heroOptions.length === 0 || selectedHeroSessionIndex >= heroOptions.length) {
+      setSelectedHeroSessionIndex(0);
+    }
+  }, [heroOptions.length, selectedHeroSessionIndex]);
+
+  const hero = heroOptions[selectedHeroSessionIndex] || pickHeroSession([]);
 
   const attendanceCampaigns = useMemo(
     () => campaigns
@@ -436,7 +481,7 @@ export default function DashboardPage() {
         if (!cancelled) {
           setAttendance(null);
           setAttendanceMembers([]);
-          setAttendanceError(err?.message || "Nie udalo sie pobrac obecnosci graczy.");
+          setAttendanceError(err?.message || "Nie udało się pobrać obecności graczy.");
         }
       } finally {
         if (!cancelled) setAttendanceLoading(false);
@@ -474,7 +519,7 @@ export default function DashboardPage() {
   const roleStats = useMemo(() => countRole(campaigns), [campaigns]);
   const availabilityRows = useMemo(() => buildAvailabilityRows(attendanceMembers, attendance), [attendanceMembers, attendance]);
 
-  const heroTitle = hero.mode === "active" ? "Aktywna sesja" : hero.mode === "planned" ? "Najblizsza sesja" : "Brak najblizszej sesji";
+  const heroTitle = hero.mode === "active" ? "Aktywna sesja" : hero.mode === "planned" ? "Najbliższa sesja" : "Brak najbliższej sesji";
   const heroSession = hero.session;
   const heroImage = pickSessionImage(heroSession) || imagePlaceholder("campaignBanners");
   const roleChartItems = [
@@ -494,12 +539,12 @@ export default function DashboardPage() {
                 {hero.mode === "active" ? (
                   <Link className="dashboardHero__primary" to={`/campaigns/${heroSession.campaignId}/sessions/${heroSession.id}/live`}>
                     <DashboardIcon name="play" />
-                    Dolacz do sesji
+                    Dołącz do sesji
                   </Link>
                 ) : (
                   <Link className="dashboardHero__primary" to={`/campaigns/${heroSession.campaignId}`}>
                     <DashboardIcon name="calendar" />
-                    Otworz sesje
+                    Otwórz sesję
                   </Link>
                 )}
                 <Link className="dashboardHero__secondary" to={`/campaigns/${heroSession.campaignId}`}>
@@ -522,6 +567,32 @@ export default function DashboardPage() {
           )}
         </div>
         <img src={heroImage} alt={heroSession?.title || "Placeholder banera sesji"} className="dashboardHero__image" />
+        {heroOptions.length > 0 ? (
+          <div
+            className="dashboardHeroSessionTabs"
+            role="tablist"
+            aria-label="Najbliższe sesje"
+            style={{ "--hero-session-count": heroOptions.length }}
+          >
+            {heroOptions.map((option, index) => {
+              const session = option.session;
+              const selected = index === selectedHeroSessionIndex;
+              return (
+                <button
+                  key={session.id || index}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  className={`dashboardHeroSessionTab${selected ? " is-active" : ""}`}
+                  onClick={() => setSelectedHeroSessionIndex(index)}
+                >
+                  <span>{heroSessionRankLabel(index)}</span>
+                  <strong>{session.title || "Sesja"}</strong>
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
       </article>
 
       <section className="dashboardWorkspaceGrid2026">
@@ -529,16 +600,16 @@ export default function DashboardPage() {
           <section className="dashboardStatsGrid2026" aria-label="Statystyki dashboardu">
             <StatCard icon="briefcase" label="Aktywne kampanie" value={campaigns.length} hint={`${roleStats.asOwner} jako GM`} />
             <StatCard icon="users" label="Postacie" value={characters.length} hint="Gotowe karty" />
-            <StatCard icon="calendar" label="Nadchodzace sesje" value={plannedSessions.length} hint="Najblizszy termin" />
+            <StatCard icon="calendar" label="Nadchodzące sesje" value={plannedSessions.length} hint="Najbliższy termin" />
             <StatCard icon="archive" label="Odbyte sesje" value={finishedSessions.length} hint="Historia gry" />
           </section>
 
           <section className="dashboardMainSplit2026">
             <article className="dashboardPanel dashboardListPanel2026">
-              <PanelHeader title="Ostatnie kampanie" subtitle="Kampanie, do ktorych najczesciej wracasz" to="/campaigns" />
+              <PanelHeader title="Ostatnie kampanie" subtitle="Kampanie, do których najczęściej wracasz" to="/campaigns" />
               <div className="dashboardList2026 scrollRegion">
                 {recentCampaigns.length === 0 ? (
-                  <div className="dashboardEmpty2026">Brak kampanii. Utworz albo dolacz do kampanii, aby zobaczyc ja tutaj.</div>
+                  <div className="dashboardEmpty2026">Brak kampanii. Utwórz albo dołącz do kampanii, aby zobaczyć ją tutaj.</div>
                 ) : recentCampaigns.map((campaign) => (
                   <Link key={campaign.id} to={`/campaigns/${campaign.id}`} className="dashboardCampaignRow2026">
                     <span className="dashboardRowThumb2026" aria-hidden="true"><DashboardIcon name="briefcase" /></span>
@@ -553,7 +624,7 @@ export default function DashboardPage() {
             </article>
 
             <article className="dashboardPanel dashboardListPanel2026">
-              <PanelHeader title="Nadchodzace sesje" subtitle="Najblizsze terminy w twoich kampaniach" to="/campaigns" />
+              <PanelHeader title="Nadchodzące sesje" subtitle="Najbliższe terminy w twoich kampaniach" to="/campaigns" />
               <div className="dashboardList2026 scrollRegion">
                 {plannedSessions.length === 0 ? (
                   <div className="dashboardEmpty2026">Brak zaplanowanych sesji.</div>
@@ -575,10 +646,10 @@ export default function DashboardPage() {
           </section>
 
           <article className="dashboardPanel dashboardActivityPanel2026">
-            <PanelHeader title="Ostatnia aktywnosc" subtitle="Szybki przeglad zmian w twoim workspace" />
+            <PanelHeader title="Ostatnia aktywność" subtitle="Szybki przegląd zmian w twoim workspace" />
             <div className="dashboardActivityList2026 scrollRegion">
               {activityRows.length === 0 ? (
-                <div className="dashboardEmpty2026">Brak aktywnosci do pokazania.</div>
+                <div className="dashboardEmpty2026">Brak aktywności do pokazania.</div>
               ) : activityRows.map((item) => (
                 <div key={item.id} className="dashboardActivityRow2026">
                   <span aria-hidden="true"><DashboardIcon name={item.icon} /></span>
@@ -592,12 +663,12 @@ export default function DashboardPage() {
 
         <aside className="dashboardRightColumn2026">
           <article className="dashboardPanel dashboardRolePanel2026">
-            <PanelHeader title="Rola w kampaniach" subtitle="Podzial twoich kampanii" />
+            <PanelHeader title="Rola w kampaniach" subtitle="Podział twoich kampanii" />
             <RoleDonutChart items={roleChartItems} total={roleStats.total} />
           </article>
 
           <article className="dashboardPanel dashboardAvailabilityPanel2026">
-            <PanelHeader title="Obecnosc graczy" subtitle={attendanceSession?.title || "Najblizsza sesja"} />
+            <PanelHeader title="Obecność graczy" subtitle={attendanceSession?.title || "Najbliższa sesja"} />
 
             {attendanceCampaigns.length > 0 ? (
               <div className="dashboardCampaignTabs2026" role="tablist" aria-label="Kampanie obecnosci">
@@ -621,18 +692,18 @@ export default function DashboardPage() {
 
             <div className="dashboardAvailabilityTableWrap2026">
               {attendanceCampaigns.length === 0 ? (
-                <div className="dashboardEmpty2026">Brak kampanii z sesjami do pokazania obecnosci.</div>
+                <div className="dashboardEmpty2026">Brak kampanii z sesjami do pokazania obecności.</div>
               ) : !attendanceSession ? (
                 <div className="dashboardEmpty2026">Brak aktywnej lub zaplanowanej sesji w kampanii {selectedAttendanceCampaign?.title || ""}.</div>
               ) : attendanceLoading ? (
-                <div className="dashboardEmpty2026">Ladowanie obecnosci graczy...</div>
+                <div className="dashboardEmpty2026">Ładowanie obecności graczy...</div>
               ) : attendanceError ? (
                 <div className="dashboardEmpty2026">{attendanceError}</div>
               ) : availabilityRows.length === 0 ? (
                 <div className="dashboardEmpty2026">Brak graczy lub odpowiedzi dla wybranej sesji.</div>
               ) : (
                 <>
-                  <div className="dashboardAvailabilityTable2026" role="table" aria-label="Obecnosc graczy w tygodniu">
+                  <div className="dashboardAvailabilityTable2026" role="table" aria-label="Obecność graczy w tygodniu">
                     <div className="dashboardAvailabilityHeader2026" role="row">
                       <span role="columnheader">Gracz</span>
                       {WEEK_DAYS.map((day) => <span key={day} role="columnheader">{day}</span>)}
@@ -645,9 +716,9 @@ export default function DashboardPage() {
                     ))}
                   </div>
                   <div className="dashboardAvailabilityLegend2026">
-                    <span><AvailabilityDot status="available" /> Dostepny</span>
-                    <span><AvailabilityDot status="maybe" /> Moze</span>
-                    <span><AvailabilityDot status="unavailable" /> Niedostepny</span>
+                    <span><AvailabilityDot status="available" /> Dostępny</span>
+                    <span><AvailabilityDot status="maybe" /> Może</span>
+                    <span><AvailabilityDot status="unavailable" /> Niedostępny</span>
                     <span><AvailabilityDot status="none" /> Brak odp.</span>
                   </div>
                 </>
@@ -659,7 +730,7 @@ export default function DashboardPage() {
 
       {(loading || error) && (
         <div className={`dashboardStatusMessage${error ? " is-error" : ""}`}>
-          {error || "Odswiezanie danych dashboardu..."}
+          {error || "Odświeżanie danych dashboardu..."}
         </div>
       )}
     </div>

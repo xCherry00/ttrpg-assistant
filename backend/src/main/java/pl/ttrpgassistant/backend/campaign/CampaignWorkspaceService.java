@@ -120,7 +120,7 @@ public class CampaignWorkspaceService {
                 .createdByUserId(userId)
                 .build());
 
-        notifyCampaignMembers(campaignId, userId, "SESSION_CREATED", "Dodano nowa sesje: " + session.getTitle(), false);
+        notifyCampaignMembers(campaignId, userId, "SESSION_CREATED", "Dodano nową sesję: " + session.getTitle(), false);
         return toSessionSummary(userId, session, campaignSessionAttendanceRepository.findBySessionId(session.getId()), 0);
     }
 
@@ -137,7 +137,7 @@ public class CampaignWorkspaceService {
         session.setStatus(SESSION_STATUS_IN_PROGRESS);
         session.setStartedAt(Instant.now());
         CampaignSessionEntity saved = campaignSessionRepository.save(session);
-        notifyCampaignMembers(campaignId, userId, "SESSION_STARTED", "MG rozpoczal sesje: " + saved.getTitle(), true);
+        notifyCampaignMembers(campaignId, userId, "SESSION_STARTED", "MG rozpoczął sesję: " + saved.getTitle(), true);
         return toSessionSummary(userId, saved, campaignSessionAttendanceRepository.findBySessionId(saved.getId()), countMessages(saved.getId()));
     }
 
@@ -165,7 +165,7 @@ public class CampaignWorkspaceService {
                         .build())
         );
 
-        notifyCampaignMembers(campaignId, userId, "SESSION_FINISHED", "Zakonczono sesje: " + saved.getTitle(), true);
+        notifyCampaignMembers(campaignId, userId, "SESSION_FINISHED", "Zakończono sesję: " + saved.getTitle(), true);
         return toSessionSummary(userId, saved, campaignSessionAttendanceRepository.findBySessionId(saved.getId()), countMessages(saved.getId()));
     }
 
@@ -185,7 +185,7 @@ public class CampaignWorkspaceService {
     public CampaignSessionMessageResponse addMessage(Long userId, Long campaignId, Long sessionId, CreateCampaignSessionMessageRequest request) {
         CampaignSessionEntity session = requireMemberSession(userId, campaignId, sessionId);
         if (!SESSION_STATUS_IN_PROGRESS.equals(normalizeSessionStatus(session.getStatus()))) {
-            throw new IllegalArgumentException("Chat jest aktywny tylko w trakcie trwajacej sesji.");
+            throw new IllegalArgumentException("Chat jest aktywny tylko w trakcie trwającej sesji.");
         }
 
         CampaignSessionMessageEntity saved = campaignSessionMessageRepository.save(CampaignSessionMessageEntity.builder()
@@ -221,8 +221,8 @@ public class CampaignWorkspaceService {
 
         String title = session.getTitle();
         String message = session.getFinishedAt() == null
-                ? "MG zaktualizowal notatke do sesji: " + title
-                : "MG zaktualizowal zakonczona notatke sesji: " + title;
+                ? "MG zaktualizował notatkę do sesji: " + title
+                : "MG zaktualizował zakończoną notatkę sesji: " + title;
         notifyCampaignMembers(campaignId, userId, "SESSION_NOTE_UPDATED", message, true);
 
         return toNoteResponse(session, saved);
@@ -289,7 +289,7 @@ public class CampaignWorkspaceService {
                 .content(normalizeText(request.content()))
                 .createdByUserId(userId)
                 .build());
-        notifyCampaignMembers(campaignId, userId, "MATERIAL_CREATED", "Dodano nowy material kampanii: " + material.getTitle(), false);
+        notifyCampaignMembers(campaignId, userId, "MATERIAL_CREATED", "Dodano nowy materiał kampanii: " + material.getTitle(), false);
         return new CampaignMaterialResponse(
                 material.getId(),
                 material.getType(),
@@ -482,7 +482,7 @@ public class CampaignWorkspaceService {
 
     private String displayNameFor(UserEntity user) {
         if (user == null) {
-            return "Nieznany uzytkownik";
+            return "Nieznany użytkownik";
         }
         if (user.getDisplayName() != null && !user.getDisplayName().isBlank()) {
             return user.getDisplayName().trim();

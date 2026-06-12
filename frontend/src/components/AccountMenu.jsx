@@ -125,7 +125,7 @@ export default function AccountMenu() {
   const displayName = useMemo(() => {
     if (user?.displayName?.trim()) return user.displayName.trim();
     if (user?.email) return user.email.split("@")[0];
-    return "Uzytkownik";
+    return "Użytkownik";
   }, [user]);
 
   const avatarLabel = useMemo(() => displayName.slice(0, 1).toUpperCase(), [displayName]);
@@ -164,7 +164,7 @@ export default function AccountMenu() {
           <span className="topNav__avatar">{avatarLabel}</span>
         )}
         <span className="topNav__avatarMeta">
-          <span className="topNav__avatarLabel">Uzytkownik</span>
+          <span className="topNav__avatarLabel">Użytkownik</span>
           <span className="topNav__avatarName">{displayName}</span>
         </span>
         <span className="topNav__avatarChevron" aria-hidden="true">

@@ -78,7 +78,7 @@ export default function CampaignSessionsPanel({
       setNoteForm({ title: "", content: "" });
       setNoteNotice("Usuńieto notatke.");
     } catch (err) {
-      setNoteError(err?.message || "Nie udało się usunac notatki.");
+      setNoteError(err?.message || "Nie udało się usunąć notatki.");
     } finally {
       setNoteSaving(false);
     }
@@ -106,7 +106,7 @@ export default function CampaignSessionsPanel({
             <label className="campaignField"><span>Tytul</span><input name="title" required /></label>
             <label className="campaignField"><span>Opis</span><input name="description" /></label>
             <label className="campaignField"><span>Termin</span><input name="scheduledFor" type="datetime-local" /></label>
-            <button className="campaignDetailsPrimaryBtn" type="submit" disabled={busy}>Utwórz sesje</button>
+            <button className="campaignDetailsPrimaryBtn" type="submit" disabled={busy}>Utwórz sesję</button>
           </form>
         )}
 
@@ -133,7 +133,7 @@ export default function CampaignSessionsPanel({
                   )}
                   {session.status === "PLANNED" && (
                     <button className="campaignDetailsGhostBtn" type="button" disabled>
-                      Sesja jeszcze nie rozpoczeta
+                      Sesja jeszcze nierozpoczęta
                     </button>
                   )}
                   {session.status === "FINISHED" && (
@@ -180,7 +180,7 @@ export default function CampaignSessionsPanel({
                   />
                 </label>
                 <label className="campaignField">
-                  <span>Tresc notatki</span>
+                  <span>Treść notatki</span>
                   <textarea
                     rows={8}
                     value={noteForm.content}

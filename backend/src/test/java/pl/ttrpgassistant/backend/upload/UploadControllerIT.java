@@ -14,6 +14,7 @@ import pl.ttrpgassistant.backend.user.UserRepository;
 import pl.ttrpgassistant.backend.user.UserRole;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
 
@@ -31,9 +32,9 @@ class UploadControllerIT {
     @Autowired PasswordEncoder passwordEncoder;
 
     @Test
-    void uploadAcceptsPngJpegWebp() throws Exception {
+    void uploadAcceptsRealPng() throws Exception {
         String token = tokenFor(createUser("upload-ok"));
-        MockMultipartFile png = new MockMultipartFile("file", "test.png", "image/png", "png-content".getBytes(StandardCharsets.UTF_8));
+        MockMultipartFile png = new MockMultipartFile("file", "test.png", "image/png", realPngBytes());
         String response = mockMvc.perform(multipart("/api/uploads/images")
                         .file(png)
                         .header("Authorization", "Bearer " + token))
@@ -54,8 +55,18 @@ class UploadControllerIT {
     }
 
     @Test
+    void uploadRejectsFakeImageContent() throws Exception {
+        String token = tokenFor(createUser("upload-fake-image"));
+        MockMultipartFile png = new MockMultipartFile("file", "fake.png", "image/png", "png-content".getBytes(StandardCharsets.UTF_8));
+        mockMvc.perform(multipart("/api/uploads/images")
+                        .file(png)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void uploadRequiresAuth() throws Exception {
-        MockMultipartFile png = new MockMultipartFile("file", "test.png", "image/png", "png-content".getBytes(StandardCharsets.UTF_8));
+        MockMultipartFile png = new MockMultipartFile("file", "test.png", "image/png", realPngBytes());
         mockMvc.perform(multipart("/api/uploads/images").file(png))
                 .andExpect(status().isUnauthorized());
     }
@@ -73,5 +84,9 @@ class UploadControllerIT {
                 .passwordHash(passwordEncoder.encode("password-123"))
                 .role(UserRole.PLAYER)
                 .build());
+    }
+
+    private byte[] realPngBytes() {
+        return Base64.getDecoder().decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=");
     }
 }

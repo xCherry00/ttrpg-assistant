@@ -67,11 +67,21 @@ function conversationAvatar(conversation) {
 
 function PeerAvatar({ conversation, className }) {
   const avatar = conversationAvatar(conversation);
+  const online = Boolean(conversation?.peer?.online);
   return (
     <span className={`${className}${avatar ? " has-image" : ""}`}>
       {avatar ? <img src={avatar} alt={`Avatar ${conversationName(conversation)}`} /> : conversationInitial(conversation)}
-      <i className={`messagesStatusDot${hasUnread(conversation) ? " is-online" : ""}`} aria-hidden="true" />
+      <i className={`messagesStatusDot${online ? " is-online" : ""}`} aria-hidden="true" />
     </span>
+  );
+}
+
+function AttachmentIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="m7.5 12.5 6.8-6.8a3 3 0 0 1 4.2 4.2l-8.1 8.1a4.4 4.4 0 0 1-6.2-6.2l8.3-8.3" />
+      <path d="m9.4 14.6 7.4-7.4" />
+    </svg>
   );
 }
 
@@ -81,10 +91,6 @@ function peerTag(peer) {
     return `${peer.username}#${String(peer.tagCode).padStart(4, "0")}`;
   }
   return peer.username || peer.handle || "Brak identyfikatora";
-}
-
-function hasUnread(conversation) {
-  return Number(conversation?.unreadCount || 0) > 0;
 }
 
 function handleNewConversationFocus() {
@@ -420,7 +426,7 @@ export default function MessagesPage() {
                 <div className="messagesComposer__bar">
                   <label className="messagesFileInput" aria-label="Dodaj plik">
                     <input type="file" multiple onChange={(event) => setFiles(Array.from(event.target.files || []))} disabled={activeConversation.status === "incoming_request" || sending} />
-                    <span>+</span>
+                    <AttachmentIcon />
                   </label>
                   <textarea
                     value={draft}
@@ -428,7 +434,6 @@ export default function MessagesPage() {
                     placeholder={activeConversation.status === "incoming_request" ? "Najpierw zaakceptuj prosbe o kontakt." : "Napisz wiadomosc..."}
                     disabled={activeConversation.status === "incoming_request" || sending}
                   />
-                  <button type="button" className="messagesEmojiButton" aria-label="Emoji">:)</button>
                   <button type="button" className="btn btn-primary messagesSendButton" disabled={sending || activeConversation.status === "incoming_request" || (!draft.trim() && files.length === 0)} onClick={handleSend}>Wyslij</button>
                 </div>
               </div>
@@ -440,7 +445,7 @@ export default function MessagesPage() {
           {activeConversation?.peer ? (
             <div className="messagesDetails__content">
               <div className="messagesDetails__top">
-                <span className="messagesDetails__presence" aria-hidden="true" />
+                <span className={`messagesDetails__presence${activeConversation.peer.online ? " is-online" : ""}`} aria-hidden="true" />
                 <div className={`messagesDetails__avatar${activeConversation.peer.avatarUrl ? " has-image" : ""}`}>
                   {activeConversation.peer.avatarUrl ? <img src={activeConversation.peer.avatarUrl} alt={`Avatar ${activeConversation.peer.displayName}`} /> : activeConversation.peer.displayName.slice(0, 1).toUpperCase()}
                 </div>

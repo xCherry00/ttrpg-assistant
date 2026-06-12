@@ -7,7 +7,19 @@ describe("DicePage", () => {
 
     expect(screen.getByRole("button", { name: "Advantage" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Disadvantage" })).toBeInTheDocument();
+    ["k4", "k6", "k8", "k10", "k12", "k20", "k100"].forEach((die) => {
+      expect(screen.getAllByText(die).length).toBeGreaterThan(0);
+    });
     expect(screen.queryByRole("button", { name: "Przewaga" })).not.toBeInTheDocument();
+  });
+
+  it("builds a standard dice pool from multiple die controls", () => {
+    render(<DicePage />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Zwiększ k4" }));
+    fireEvent.click(screen.getByRole("button", { name: "Zwiększ k6" }));
+
+    expect(screen.getAllByText("1k4 + 1k6 + 1k20").length).toBeGreaterThan(0);
   });
 
   it("switches roll modes without losing the workspace", () => {
@@ -39,6 +51,6 @@ describe("DicePage", () => {
     const finalValue = container.querySelector(".diceBigNumber");
     expect(finalValue).toBeTruthy();
     expect(finalValue.textContent).not.toBe("-");
-    expect(screen.getByText(/Historia rzut/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Historia rzut/i)).not.toBeInTheDocument();
   });
 });

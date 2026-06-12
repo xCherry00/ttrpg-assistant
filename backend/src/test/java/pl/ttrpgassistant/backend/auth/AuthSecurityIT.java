@@ -260,6 +260,48 @@ class AuthSecurityIT {
     }
 
     @Test
+    void forgotPasswordShouldBeRateLimited() throws Exception {
+        String email = uniqueEmail("forgot-limit");
+        createUser(email, "password-123");
+
+        for (int i = 0; i < 3; i++) {
+            mockMvc.perform(post("/api/auth/forgot-password")
+                            .with(remoteAddr("10.20.30.40"))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(Map.of("email", email))))
+                    .andExpect(status().isOk());
+        }
+
+        mockMvc.perform(post("/api/auth/forgot-password")
+                        .with(remoteAddr("10.20.30.40"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("email", email))))
+                .andExpect(status().isTooManyRequests());
+    }
+
+    @Test
+    void resetPasswordShouldBeRateLimitedByClient() throws Exception {
+        Map<String, Object> payload = Map.of(
+                "token", UUID.randomUUID() + ".invalid",
+                "newPassword", "password-456"
+        );
+
+        for (int i = 0; i < 10; i++) {
+            mockMvc.perform(post("/api/auth/reset-password")
+                            .with(remoteAddr("10.20.30.41"))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(payload)))
+                    .andExpect(status().isBadRequest());
+        }
+
+        mockMvc.perform(post("/api/auth/reset-password")
+                        .with(remoteAddr("10.20.30.41"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isTooManyRequests());
+    }
+
+    @Test
     void resetPasswordWithValidTokenShouldChangePasswordAndRejectOldJwt() throws Exception {
         String email = uniqueEmail("reset-ok");
         String oldPassword = "password-123";

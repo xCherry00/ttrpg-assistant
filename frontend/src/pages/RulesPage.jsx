@@ -6,10 +6,10 @@ import "../styles/rules.css";
 const SECTION_DEFS = [
   { key: "overview", label: "Czym jest ten system?" },
   { key: "core-test", label: "Podstawowa mechanika testow" },
-  { key: "character-creation", label: "Tworzenie postaci w skrocie" },
+  { key: "character-creation", label: "Tworzenie postaci w skrócie" },
   { key: "combat", label: "Walka w skrocie" },
   { key: "health", label: "Zdrowie i obrazenia" },
-  { key: "progression", label: "Rozwoj postaci" },
+  { key: "progression", label: "Rozwój postaci" },
   { key: "game-flow", label: "Minimalny flow gry" },
 ];
 

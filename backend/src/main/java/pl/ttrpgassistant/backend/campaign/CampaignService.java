@@ -14,6 +14,7 @@ import pl.ttrpgassistant.backend.campaign.dto.JoinCampaignRequest;
 import pl.ttrpgassistant.backend.common.error.ResourceNotFoundException;
 import pl.ttrpgassistant.backend.social.FriendshipRepository;
 import pl.ttrpgassistant.backend.user.UserEntity;
+import pl.ttrpgassistant.backend.user.UserPresence;
 import pl.ttrpgassistant.backend.user.UserRepository;
 
 import java.security.SecureRandom;
@@ -164,7 +165,7 @@ public class CampaignService {
 
         CampaignSummaryResponse summary = toSummary(campaign, userId, "PLAYER");
         if (!exists) {
-            campaignWorkspaceService.notifyCampaignMembers(campaign.getId(), userId, "MEMBER_JOINED", displayNameFor(getUser(userId)) + " dolaczyl do kampanii.", true);
+            campaignWorkspaceService.notifyCampaignMembers(campaign.getId(), userId, "MEMBER_JOINED", displayNameFor(getUser(userId)) + " dołączył do kampanii.", true);
         }
         return new JoinCampaignResponse(summary, !exists, exists ? "You already belong to this campaign." : "Joined campaign successfully.");
     }
@@ -185,7 +186,7 @@ public class CampaignService {
                     .role("player")
                     .build();
             campaignMemberRepository.save(member);
-            campaignWorkspaceService.notifyCampaignMembers(campaignId, userId, "MEMBER_ADDED", displayNameFor(friend) + " zostal dodany do kampanii.", true);
+            campaignWorkspaceService.notifyCampaignMembers(campaignId, userId, "MEMBER_ADDED", displayNameFor(friend) + " został dodany do kampanii.", true);
         }
 
         return toSummary(campaign, userId, resolveMembershipRole(userId, campaign));
@@ -222,7 +223,7 @@ public class CampaignService {
                 .orElseThrow(() -> new ResourceNotFoundException("Campaign member not found"));
         campaignMemberRepository.delete(targetMember);
         String displayName = displayNameFor(getUser(targetUserId));
-        campaignWorkspaceService.notifyCampaignMembers(campaignId, userId, "MEMBER_REMOVED", displayName + " zostal usuniety z kampanii.", true);
+        campaignWorkspaceService.notifyCampaignMembers(campaignId, userId, "MEMBER_REMOVED", displayName + " został usunięty z kampanii.", true);
         return new CampaignMemberActionResponse(true, displayName + " has been removed from the campaign.");
     }
 
@@ -237,7 +238,7 @@ public class CampaignService {
         CampaignMemberEntity member = campaignMemberRepository.findById(memberId)
                 .orElseThrow(() -> new ResourceNotFoundException("Campaign member not found"));
         campaignMemberRepository.delete(member);
-        campaignWorkspaceService.notifyCampaignMembers(campaignId, userId, "MEMBER_LEFT", displayNameFor(getUser(userId)) + " opuscil kampanie.", false);
+        campaignWorkspaceService.notifyCampaignMembers(campaignId, userId, "MEMBER_LEFT", displayNameFor(getUser(userId)) + " opuścił kampanię.", false);
 
         return new CampaignMemberActionResponse(true, "You left the campaign.");
     }
@@ -301,6 +302,9 @@ public class CampaignService {
                 owner,
                 user.isMg(),
                 user.getId().equals(currentUserId),
+                UserPresence.isOnline(user),
+                UserPresence.activityLabel(user),
+                user.getLastActiveAt(),
                 member.getCreatedAt()
         );
     }
@@ -432,7 +436,10 @@ public class CampaignService {
                             user.getAvatarUrl(),
                             role,
                             owner,
-                            user.isMg()
+                            user.isMg(),
+                            UserPresence.isOnline(user),
+                            UserPresence.activityLabel(user),
+                            user.getLastActiveAt()
                     );
                 })
                 .filter(item -> item != null)

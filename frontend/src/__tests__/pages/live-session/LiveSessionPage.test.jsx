@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import LiveSessionPage from "../../../pages/live-session/LiveSessionPage";
 import * as campaignsApi from "../../../api/campaigns";
@@ -8,18 +8,14 @@ vi.mock("../../../auth/AuthContext", () => ({
 }));
 
 vi.mock("../../../api/campaigns", () => ({
-  getCampaignById: vi.fn(),
-  listCampaignSessions: vi.fn(),
-  getCampaignCharacters: vi.fn(),
-  listCampaignMembers: vi.fn(),
-  getCampaignDiceRolls: vi.fn(),
-  getSessionLiveState: vi.fn(),
-  startCampaignSession: vi.fn(),
   finishCampaignSession: vi.fn(),
-  createRequestedRoll: vi.fn(),
-  getRequestedRolls: vi.fn(),
-  fulfillRequestedRoll: vi.fn(),
-  cancelRequestedRoll: vi.fn(),
+  getCampaignById: vi.fn(),
+  getCampaignCharacters: vi.fn(),
+  getSessionAttendance: vi.fn(),
+  getSessionLiveState: vi.fn(),
+  listCampaignMembers: vi.fn(),
+  listCampaignSessions: vi.fn(),
+  startCampaignSession: vi.fn(),
   updateSessionLiveState: vi.fn(),
 }));
 
@@ -33,17 +29,16 @@ function renderPage() {
   );
 }
 
-function seedDefaults() {
-  campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "Dragonfall", owner: false, systemCode: "dnd5e" });
-  campaignsApi.listCampaignSessions.mockResolvedValue([{ id: 2, title: "Session Two", status: "IN_PROGRESS" }]);
+function seedDefaults({ owner = false, status = "IN_PROGRESS" } = {}) {
+  campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "Dragonfall", owner, systemCode: "dnd5e" });
+  campaignsApi.listCampaignSessions.mockResolvedValue([{ id: 2, title: "Session Two", status }]);
   campaignsApi.getCampaignCharacters.mockResolvedValue([]);
   campaignsApi.listCampaignMembers.mockResolvedValue([{ id: 33, self: true, owner: false, mg: false, username: "ela" }]);
-  campaignsApi.getCampaignDiceRolls.mockResolvedValue([]);
+  campaignsApi.getSessionAttendance.mockResolvedValue({ responses: [] });
   campaignsApi.getSessionLiveState.mockResolvedValue({ sceneTitle: "Ruiny", sceneImageUrl: "", sceneDescription: "Mgla" });
-  campaignsApi.getRequestedRolls.mockResolvedValue([]);
 }
 
-describe("LiveSessionPage role split", () => {
+describe("LiveSessionPage", () => {
   beforeEach(() => {
     Object.values(campaignsApi).forEach((fn) => {
       if (typeof fn === "function" && "mockReset" in fn) fn.mockReset();
@@ -51,169 +46,40 @@ describe("LiveSessionPage role split", () => {
     seedDefaults();
   });
 
-  it("MG sees scene form and quick requested roll action", async () => {
-    campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "Dragonfall", owner: true, systemCode: "dnd5e" });
-
+  it("renders the live scene workspace without requested-roll controls", async () => {
     renderPage();
 
-    await waitFor(() => {
-      expect(screen.getByRole("heading", { name: "Scene Panel" })).toBeInTheDocument();
-      expect(screen.getByLabelText("Tytul sceny")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "Zadaj rzut" })).toBeInTheDocument();
-    });
+    expect(await screen.findByRole("heading", { name: /Panel sceny/i })).toBeInTheDocument();
+    expect(screen.queryByText(/Wymagane rzuty/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Zadaj rzut/i)).not.toBeInTheDocument();
   });
 
-  it("player sees read-only scene and no requested roll GM panel", async () => {
+  it("lets GM add a scene", async () => {
+    seedDefaults({ owner: true });
     renderPage();
 
-    await waitFor(() => {
-      expect(screen.getByRole("heading", { name: "Aktualna scena" })).toBeInTheDocument();
-      expect(screen.queryByLabelText("Tytul sceny")).not.toBeInTheDocument();
-      expect(screen.queryByRole("button", { name: "Zadaj rzut" })).not.toBeInTheDocument();
-    });
+    fireEvent.click(await screen.findByRole("button", { name: /Dodaj scen/i }));
+
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Dodaj scen/i })).toBeInTheDocument();
   });
 
-  it("clicking Zadaj rzut opens quick panel", async () => {
-    campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "Dragonfall", owner: true, systemCode: "dnd5e" });
+  it("blocks a player from entering a planned session", async () => {
+    seedDefaults({ status: "PLANNED" });
     renderPage();
 
-    fireEvent.click(await screen.findByRole("button", { name: "Zadaj rzut" }));
-    expect(await screen.findByRole("button", { name: "Wyślij do graczy" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Trudność / DC")).toBeInTheDocument();
+    expect(await screen.findByText(/Sesja nie zosta/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /kampanii/i })).toBeInTheDocument();
   });
 
-  it("MG can choose players without entering IDs", async () => {
-    campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "Dragonfall", owner: true, systemCode: "dnd5e" });
-    campaignsApi.getCampaignCharacters.mockResolvedValue([{ characterId: 100, characterName: "Ela", userId: 33, systemCode: "dnd5e" }]);
-    campaignsApi.createRequestedRoll.mockResolvedValue({});
-    renderPage();
-
-    fireEvent.click(await screen.findByRole("button", { name: "Zadaj rzut" }));
-    fireEvent.change(screen.getByLabelText("Do kogo?"), { target: { value: "CHARACTER" } });
-    fireEvent.click(screen.getByRole("checkbox"));
-    fireEvent.change(screen.getByLabelText("Etykieta rzutu"), { target: { value: "Percepcja" } });
-    fireEvent.click(screen.getByRole("button", { name: "Wyślij do graczy" }));
-
-    await waitFor(() => {
-      expect(campaignsApi.createRequestedRoll).toHaveBeenCalledWith(
-        "test-token",
-        "10",
-        "2",
-        expect.objectContaining({
-          targetMode: "CHARACTER",
-          targetCharacterIds: [100],
-        }),
-      );
-    });
-  });
-
-  it("player sees only own requested rolls", async () => {
-    campaignsApi.getCampaignCharacters.mockResolvedValue([
-      { characterId: 100, characterName: "Ela", userId: 33, systemCode: "dnd5e" },
-    ]);
-    campaignsApi.getRequestedRolls.mockResolvedValue([
-      { id: 1, rollLabel: "My Roll", status: "PENDING", targetCharacterId: 100, rollExpression: "1d20" },
-      { id: 2, rollLabel: "Other Roll", status: "PENDING", targetCharacterId: 999, rollExpression: "1d20" },
-    ]);
-
-    renderPage();
-
-    await waitFor(() => {
-      expect(screen.getByText("My Roll")).toBeInTheDocument();
-      expect(screen.queryByText("Other Roll")).not.toBeInTheDocument();
-    });
-  });
-
-  it("MG sees start/finish actions by status", async () => {
-    campaignsApi.getCampaignById.mockResolvedValue({ id: 10, title: "Dragonfall", owner: true, systemCode: "dnd5e" });
-    campaignsApi.listCampaignSessions.mockResolvedValue([{ id: 2, title: "Session Two", status: "PLANNED" }]);
-
-    renderPage();
-
-    expect(await screen.findByRole("button", { name: "Rozpocznij sesje" })).toBeInTheDocument();
-
-    campaignsApi.listCampaignSessions.mockResolvedValue([{ id: 2, title: "Session Two", status: "IN_PROGRESS" }]);
-    renderPage();
-
-    expect(await screen.findByRole("button", { name: "Zakończ sesje" })).toBeInTheDocument();
-  });
-
-  it("player does not see start/finish actions", async () => {
-    campaignsApi.listCampaignSessions.mockResolvedValue([{ id: 2, title: "Session Two", status: "PLANNED" }]);
-    renderPage();
-
-    await waitFor(() => {
-      expect(screen.queryByRole("button", { name: "Rozpocznij sesje" })).not.toBeInTheDocument();
-      expect(screen.queryByRole("button", { name: "Zakończ sesje" })).not.toBeInTheDocument();
-    });
-  });
-
-  it("FINISHED blocks requested roll creation and shows post-session note CTA for player", async () => {
-    campaignsApi.listCampaignSessions.mockResolvedValue([{ id: 2, title: "Session Two", status: "FINISHED" }]);
-    renderPage();
-
-    await waitFor(() => {
-      expect(screen.queryByRole("button", { name: "Zadaj rzut" })).not.toBeInTheDocument();
-      expect(screen.getByRole("link", { name: "Dodaj notatki po sesji" })).toBeInTheDocument();
-    });
-  });
-
-  it("does not render initiative preview panel", async () => {
-    renderPage();
-
-    await waitFor(() => {
-      expect(screen.queryByText(/Initiative Preview/i)).not.toBeInTheDocument();
-      expect(screen.queryByText(/\/initiative/i)).not.toBeInTheDocument();
-    });
-  });
-
-  it("planned state shows proper message", async () => {
-    campaignsApi.listCampaignSessions.mockResolvedValue([{ id: 2, title: "Session Two", status: "PLANNED" }]);
-    renderPage();
-
-    await waitFor(() => {
-      expect(screen.getByText("Sesja jest zaplanowana i jeszcze się nie rozpoczęła.")).toBeInTheDocument();
-    });
-  });
-
-  it("player can execute pending requested roll", async () => {
-    campaignsApi.getRequestedRolls.mockResolvedValue([
-      { id: 22, rollLabel: "Perception", status: "PENDING", targetUserId: 33, dcVisible: false, rollExpression: "1d20" },
-    ]);
-    campaignsApi.fulfillRequestedRoll.mockResolvedValue({});
-
-    renderPage();
-    fireEvent.click(await screen.findByRole("button", { name: /Wykonaj rzut/i }));
-
-    await waitFor(() => {
-      expect(campaignsApi.fulfillRequestedRoll).toHaveBeenCalledWith("test-token", "10", "2", 22, {});
-    });
-  });
-
-  it("renders roll history and stats panel from data", async () => {
-    campaignsApi.getCampaignDiceRolls.mockResolvedValue([
-      { id: 1, total: 12, rolledByUsername: "ela", rollLabel: "Perception", createdAt: "2026-05-24T10:00:00Z" },
-      { id: 2, total: 18, rolledByUsername: "ela", rollLabel: "Attack", createdAt: "2026-05-24T10:05:00Z" },
-      { id: 3, total: 5, rolledByUsername: "arek", rollLabel: "Save", createdAt: "2026-05-24T10:06:00Z" },
-    ]);
-    renderPage();
-
-    expect(await screen.findByRole("heading", { name: "Historia rzutów" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Statystyki rzutów" })).toBeInTheDocument();
-    expect(screen.getByText("Liczba rzutów:")).toBeInTheDocument();
-    expect(screen.getByText("3")).toBeInTheDocument();
-  });
-
-  it("shows character mini panel with avatar/name/level and empty state when missing", async () => {
+  it("shows character picker for player with assigned characters", async () => {
     campaignsApi.getCampaignCharacters.mockResolvedValue([
       { characterId: 100, characterName: "Ela", userId: 33, level: 4, systemCode: "dnd5e", portraitUrl: "https://img.test/ela.png" },
     ]);
     renderPage();
-    expect(await screen.findByText("Ela")).toBeInTheDocument();
-    expect(screen.getByText("Poziom: 4")).toBeInTheDocument();
 
-    campaignsApi.getCampaignCharacters.mockResolvedValue([]);
-    renderPage();
-    expect(await screen.findByText("Nie masz przypisanej postaci w tej kampanii.")).toBeInTheDocument();
+    const dialog = await screen.findByRole("dialog");
+    expect(dialog).toBeInTheDocument();
+    expect(screen.getAllByText("Ela").length).toBeGreaterThan(0);
   });
 });

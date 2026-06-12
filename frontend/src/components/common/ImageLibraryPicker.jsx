@@ -23,7 +23,7 @@ export default function ImageLibraryPicker({
         </div>
         {value ? (
           <button type="button" onClick={onRemove} disabled={disabled}>
-            Usun
+            Usuń
           </button>
         ) : null}
       </div>

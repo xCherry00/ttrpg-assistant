@@ -13,7 +13,6 @@ describe("CharacterSidebar", () => {
         onCreate={vi.fn()}
         onExport={vi.fn()}
         onImport={vi.fn()}
-        onPrint={vi.fn()}
       />,
     );
 

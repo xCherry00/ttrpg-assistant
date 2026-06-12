@@ -1392,7 +1392,7 @@
 
 .messagesComposer__bar {
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) 40px auto;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
   align-items: end;
   gap: 10px;
 }
@@ -1407,8 +1407,7 @@
   padding: 13px 14px;
 }
 
-.messagesFileInput,
-.messagesEmojiButton {
+.messagesFileInput {
   display: grid;
   place-items: center;
   width: 48px;
@@ -1421,12 +1420,14 @@
   font-size: 20px;
 }
 
-.messagesEmojiButton {
-  width: 40px;
-  height: 40px;
-  min-height: 40px;
-  align-self: center;
-  font-size: 14px;
+.messagesFileInput svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .messagesSendButton {
@@ -1497,6 +1498,10 @@
   width: 14px;
   height: 14px;
   border-radius: 999px;
+  background: #a8b2ad;
+}
+
+.messagesDetails__presence.is-online {
   background: #20a66f;
 }
 
@@ -1646,10 +1651,6 @@
 
   .messagesComposer__bar {
     grid-template-columns: 44px minmax(0, 1fr) auto;
-  }
-
-  .messagesEmojiButton {
-    display: none;
   }
 
   .messageBubble {

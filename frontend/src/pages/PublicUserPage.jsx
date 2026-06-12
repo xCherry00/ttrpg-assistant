@@ -34,12 +34,12 @@ function normalizeRole(user) {
 
 function relationLabel(relation) {
   switch (relation) {
-    case "SELF": return "To jest Twoj profil";
+    case "SELF": return "To jest Twój profil";
     case "FRIENDS": return "Znajomy";
-    case "INCOMING_REQUEST": return "Zaproszenie od uzytkownika";
-    case "OUTGOING_REQUEST": return "Zaproszenie wyslane";
+    case "INCOMING_REQUEST": return "Zaproszenie od użytkownika";
+    case "OUTGOING_REQUEST": return "Zaproszenie wysłane";
     case "BLOCKED_BY_ME": return "Zablokowany";
-    case "BLOCKED_ME": return "Interakcje niedostepne";
+    case "BLOCKED_ME": return "Interakcje niedostępne";
     default: return "Brak relacji";
   }
 }
@@ -52,7 +52,7 @@ function safeText(value, fallback = "Brak") {
 
 function formatTag(user) {
   const tag = user?.tagCode === null || user?.tagCode === undefined ? "0000" : String(user.tagCode).padStart(4, "0");
-  return `@${safeText(user?.username, "uzytkownik")}#${tag}`;
+  return `@${safeText(user?.username, "użytkownik")}#${tag}`;
 }
 
 function profileBannerFor(user) {
@@ -93,7 +93,7 @@ export default function PublicUserPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [activePanel, setActivePanel] = useState("relation");
+  const activePanel = "relation";
 
   const loadProfile = useCallback(async () => {
     setLoading(true);
@@ -102,7 +102,7 @@ export default function PublicUserPage() {
       const data = await getPublicProfile(token, handle);
       setProfile(data);
     } catch (err) {
-      setError(err?.message || "Nie udalo sie pobrac profilu.");
+      setError(err?.message || "Nie udało się pobrać profilu.");
     } finally {
       setLoading(false);
     }
@@ -135,7 +135,7 @@ export default function PublicUserPage() {
       const id = conversation?.id || conversation?.conversationId;
       navigate(id ? `/messages?conversation=${id}` : "/messages");
     } catch (err) {
-      setError(err?.message || "Nie udalo sie otworzyc rozmowy.");
+      setError(err?.message || "Nie udało się otworzyć rozmowy.");
     } finally {
       setBusy(false);
     }
@@ -143,28 +143,38 @@ export default function PublicUserPage() {
 
   const user = profile?.user;
   const relation = String(user?.relationship || "NONE");
-  const displayName = safeText(user?.displayName || user?.username, "Uzytkownik");
+  const displayName = safeText(user?.displayName || user?.username, "Użytkownik");
   const initial = useMemo(() => displayName.slice(0, 1).toUpperCase(), [displayName]);
   const sharedCampaignsCount = Number(user?.sharedCampaignsCount || profile?.sharedCampaignsCount || 0);
   const mutualFriendsCount = Number(user?.mutualFriendsCount || profile?.mutualFriendsCount || 0);
 
   const achievements = useMemo(() => [
     { id: "first-campaign", title: "Pierwsza kampania", desc: "Uczestniczy w kampanii", unlocked: (profile?.campaignsCount ?? 0) >= 1 },
-    { id: "gm-table", title: "Prowadzacy", desc: "Prowadzi kampanie jako MG", unlocked: (profile?.ownedCampaignsCount ?? 0) >= 1 },
-    { id: "social", title: "Druzyna", desc: "Buduje siec znajomych", unlocked: (profile?.friendsCount ?? 0) >= 5 },
-    { id: "shared", title: "Wspolny stol", desc: "Macie wspolna kampanie", unlocked: sharedCampaignsCount >= 1 },
+    { id: "gm-table", title: "Prowadzący", desc: "Prowadzi kampanie jako MG", unlocked: (profile?.ownedCampaignsCount ?? 0) >= 1 },
+    { id: "social", title: "Drużyna", desc: "Buduje sieć znajomych", unlocked: (profile?.friendsCount ?? 0) >= 5 },
+    { id: "shared", title: "Wspólny stół", desc: "Macie wspólną kampanię", unlocked: sharedCampaignsCount >= 1 },
   ], [profile?.campaignsCount, profile?.friendsCount, profile?.ownedCampaignsCount, sharedCampaignsCount]);
 
   const canInteract = relation !== "SELF" && relation !== "BLOCKED_BY_ME" && relation !== "BLOCKED_ME";
   const publicCampaigns = Array.isArray(profile?.campaigns) ? profile.campaigns : [];
   const sharedCampaigns = Array.isArray(profile?.sharedCampaigns) ? profile.sharedCampaigns : [];
+  const mutualFriends = Array.isArray(profile?.mutualFriends)
+    ? profile.mutualFriends
+    : Array.isArray(profile?.sharedFriends)
+      ? profile.sharedFriends
+      : [];
 
   return (
     <div className="page profileDesk publicProfileDesk">
-      {loading && <div className="profileState profileStateLight">Ladowanie profilu...</div>}
+      {loading && <div className="profileState profileStateLight">Ładowanie profilu...</div>}
       {error && <div className="profileState profileStateLight is-error">{error}</div>}
 
       {!loading && user && (
+        <>
+        <div className="publicProfileTopbar">
+          <Link to="/friends" className="profileSecondaryAction">Wróć do znajomych</Link>
+        </div>
+
         <div className="profileShell">
           <aside className="profileCardPanel">
             <div className="profileBanner profileBannerUpload" aria-label="Baner profilu">
@@ -173,48 +183,47 @@ export default function PublicUserPage() {
             <div className="profileAvatarRow">
               <div className="profileAvatarLarge" aria-label={`Avatar ${displayName}`}>
                 {user.avatarUrl ? <img src={user.avatarUrl} alt="Avatar uzytkownika" /> : initial}
-                <i className={String(user.activityLabel || "").toLowerCase().includes("aktywn") ? "is-online" : ""} aria-hidden="true" />
+                <i className={user.online ? "is-online" : ""} aria-hidden="true" />
               </div>
             </div>
 
             <div className="profileCardBody">
               <div className="profilePublicIntro">
                 <h1>Profil gracza</h1>
-                <p>Publiczne informacje, relacja i wspolne kampanie.</p>
-                <Link to="/friends" className="profileSecondaryAction">Wroc do znajomych</Link>
+                <p>Publiczne informacje, relacja i wspólne kampanie.</p>
               </div>
               <h2>{displayName}</h2>
               <p className="profileHandle">{formatTag(user)}</p>
-              <p className="profileQuote">{safeText(user.bio, "Ten uzytkownik nie dodal jeszcze opisu.")}</p>
+              <p className="profileQuote">{safeText(user.bio, "Ten użytkownik nie dodał jeszcze opisu.")}</p>
 
               <div className="profileMetaList">
                 <InfoRow label="Rola" value={normalizeRole(user)} />
-                <InfoRow label="Status" value={safeText(user.activityLabel, "Aktywnosc ukryta")} />
+                <InfoRow label="Status" value={safeText(user.activityLabel, "Aktywność ukryta")} />
                 <InfoRow label="Ulubiony system" value={safeText(user.favoriteSystem)} />
                 <InfoRow label="Strefa czasowa" value={safeText(user.timezone)} />
-                <InfoRow label="Dolaczyl" value={formatDate(user.createdAt || user.joinedAt)} />
+                <InfoRow label="Dołączył" value={formatDate(user.createdAt || user.joinedAt)} />
               </div>
 
               <div className="profileCardActions">
                 <button type="button" className="profilePrimaryAction" onClick={handleMessage} disabled={!canInteract || busy}>
-                  <Icon name="message" /> Wyslij wiadomosc
+                  <Icon name="message" /> Wyślij wiadomość
                 </button>
 
-                {relation === "SELF" && <Link to="/profile" className="profileSecondaryAction"><Icon name="user" /> Moj profil</Link>}
+                {relation === "SELF" && <Link to="/profile" className="profileSecondaryAction"><Icon name="user" /> Mój profil</Link>}
                 {relation === "NONE" && (
-                  <button type="button" className="profileSecondaryAction" disabled={busy} onClick={() => runAction(() => sendFriendRequest(token, user.id), "Nie udalo sie wyslac zaproszenia.")}>
+                  <button type="button" className="profileSecondaryAction" disabled={busy} onClick={() => runAction(() => sendFriendRequest(token, user.id), "Nie udało się wysłać zaproszenia.")}>
                     <Icon name="friends" /> Dodaj znajomego
                   </button>
                 )}
                 {relation === "FRIENDS" && (
-                  <button type="button" className="profileSecondaryAction" disabled={busy} onClick={() => runAction(() => removeFriend(token, user.id), "Nie udalo sie usunac znajomego.")}>
+                  <button type="button" className="profileSecondaryAction" disabled={busy} onClick={() => runAction(() => removeFriend(token, user.id), "Nie udało się usunąć znajomego.")}>
                     <Icon name="friends" /> Znajomy
                   </button>
                 )}
-                {relation === "OUTGOING_REQUEST" && <button type="button" className="profileSecondaryAction" disabled>Zaproszenie wyslane</button>}
-                {relation === "INCOMING_REQUEST" && <Link to="/friends" className="profileSecondaryAction"><Icon name="friends" /> Obsluz zaproszenie</Link>}
+                {relation === "OUTGOING_REQUEST" && <button type="button" className="profileSecondaryAction" disabled>Zaproszenie wysłane</button>}
+                {relation === "INCOMING_REQUEST" && <Link to="/friends" className="profileSecondaryAction"><Icon name="friends" /> Obsłuż zaproszenie</Link>}
                 {(relation === "NONE" || relation === "OUTGOING_REQUEST" || relation === "INCOMING_REQUEST" || relation === "FRIENDS") && (
-                  <button type="button" className="profileSecondaryAction is-danger" disabled={busy} onClick={() => runAction(() => blockUser(token, user.id), "Nie udalo sie zablokowac uzytkownika.")}>
+                  <button type="button" className="profileSecondaryAction is-danger" disabled={busy} onClick={() => runAction(() => blockUser(token, user.id), "Nie udało się zablokować użytkownika.")}>
                     <Icon name="block" /> Zablokuj
                   </button>
                 )}
@@ -223,57 +232,64 @@ export default function PublicUserPage() {
           </aside>
 
           <main className="profileMainPanel">
-            <nav className="profileTabs" aria-label="Sekcje profilu publicznego">
-              {[
-                ["relation", "Relacja"],
-                ["campaigns", "Kampanie"],
-              ].map(([id, label]) => (
-                <button key={id} type="button" className={activePanel === id ? "is-active" : ""} onClick={() => setActivePanel(id)}>
-                  {label}
-                </button>
-              ))}
-            </nav>
-
             {activePanel === "relation" && (
               <section className="profileSplitContent">
-                <article className="profileContentPanel">
+                <article className="profileContentPanel profileContentPanel--wide">
                   <header className="profileSectionHeader">
-                    <h2>Akcje</h2>
+                    <h2>Relacje</h2>
                     <p>Status relacji: {relationLabel(relation)}</p>
                   </header>
-                  <div className="profileRelationActions">
-                    <button type="button" className="profilePrimaryAction" onClick={handleMessage} disabled={!canInteract || busy}><Icon name="message" /> Wiadomosc</button>
-                    {relation === "NONE" && <button type="button" className="profileSecondaryAction" disabled={busy} onClick={() => runAction(() => sendFriendRequest(token, user.id))}><Icon name="friends" /> Dodaj znajomego</button>}
-                    {relation === "FRIENDS" && <button type="button" className="profileSecondaryAction" disabled={busy} onClick={() => runAction(() => removeFriend(token, user.id))}><Icon name="friends" /> Usun znajomego</button>}
-                    {(relation === "NONE" || relation === "OUTGOING_REQUEST" || relation === "INCOMING_REQUEST" || relation === "FRIENDS") && <button type="button" className="profileSecondaryAction is-danger" disabled={busy} onClick={() => runAction(() => blockUser(token, user.id))}><Icon name="block" /> Zablokuj</button>}
-                  </div>
-                </article>
-                <article className="profileContentPanel">
-                  <header className="profileSectionHeader"><h2>Relacje</h2></header>
                   <div className="profileRelationStats">
                     <div>
-                      <span>Wspolne kampanie</span>
+                      <span>Wspólne kampanie</span>
                       <strong>{sharedCampaignsCount}</strong>
                     </div>
                     <div>
-                      <span>Wspolni znajomi</span>
+                      <span>Wspólni znajomi</span>
                       <strong>{mutualFriendsCount}</strong>
                     </div>
                   </div>
                 </article>
                 <article className="profileContentPanel">
-                  <header className="profileSectionHeader"><h2>Wspolne kampanie</h2></header>
+                  <header className="profileSectionHeader"><h2>Wspólne kampanie</h2></header>
                   {sharedCampaigns.length > 0 ? (
                     <div className="profileCampaignListV3">
                       {sharedCampaigns.slice(0, 3).map((campaign) => (
                         <article key={campaign.id || campaign.title}>
                           <span><Icon name="campaign" /></span>
-                          <div><strong>{safeText(campaign.title || campaign.name, "Kampania")}</strong><small>{safeText(campaign.role, "Wspolna kampania")}</small></div>
+                          <div><strong>{safeText(campaign.title || campaign.name, "Kampania")}</strong><small>{safeText(campaign.role, "Wspólna kampania")}</small></div>
                         </article>
                       ))}
                     </div>
                   ) : (
-                    <EmptyState title="Nie macie jeszcze wspolnych kampanii" text="Gdy zagracie razem, wspolne kampanie pojawia sie w tym miejscu." />
+                    <EmptyState title="Nie macie jeszcze wspólnych kampanii" text="Gdy zagracie razem, wspólne kampanie pojawią się w tym miejscu." />
+                  )}
+                </article>
+                <article className="profileContentPanel">
+                  <header className="profileSectionHeader">
+                    <h2>Wspólni znajomi</h2>
+                    <p>{mutualFriendsCount} wspólnych</p>
+                  </header>
+                  {mutualFriends.length > 0 ? (
+                    <div className="profileCampaignListV3">
+                      {mutualFriends.slice(0, 6).map((friend) => {
+                        const friendName = safeText(friend.displayName || friend.username, "Znajomy");
+                        const friendInitial = friendName.slice(0, 1).toUpperCase();
+                        return (
+                          <article key={friend.id || friend.handle || friendName}>
+                            <span className="profileFriendAvatar">
+                              {friend.avatarUrl ? <img src={friend.avatarUrl} alt="" /> : friendInitial}
+                            </span>
+                            <div>
+                              <strong>{friendName}</strong>
+                              <small>{friend.handle ? `@${friend.handle}` : formatTag(friend)}</small>
+                            </div>
+                          </article>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <EmptyState title="Brak wspólnych znajomych" text="Gdy będziecie mieli wspólne kontakty, pojawią się w tym miejscu." />
                   )}
                 </article>
               </section>
@@ -283,8 +299,8 @@ export default function PublicUserPage() {
               <section className="profileContentPanel">
                 <header className="profileSectionHeader"><h2>Informacje publiczne</h2></header>
                 <div className="profileInfoGridV3">
-                  <InfoRow label="Dolaczyl" value={formatDate(user.createdAt || user.joinedAt)} />
-                  <InfoRow label="Ostatnia aktywnosc" value={safeText(user.activityLabel, "Aktywnosc ukryta")} />
+                  <InfoRow label="Dołączył" value={formatDate(user.createdAt || user.joinedAt)} />
+                  <InfoRow label="Ostatnia aktywność" value={safeText(user.activityLabel, "Aktywność ukryta")} />
                   <InfoRow label="Ulubiony system" value={safeText(user.favoriteSystem)} />
                   <InfoRow label="Strefa czasowa" value={safeText(user.timezone)} />
                 </div>
@@ -304,14 +320,14 @@ export default function PublicUserPage() {
                     ))}
                   </div>
                 ) : (
-                  <EmptyState title="Brak widocznych kampanii" text="Ten uzytkownik nie udostepnia publicznie kampanii albo nie macie wspolnych kampanii." />
+                  <EmptyState title="Brak widocznych kampanii" text="Ten użytkownik nie udostępnia publicznie kampanii albo nie macie wspólnych kampanii." />
                 )}
               </section>
             )}
 
             {activePanel === "achievements" && (
               <section className="profileContentPanel">
-                <header className="profileSectionHeader"><h2>Osiagniecia</h2></header>
+                <header className="profileSectionHeader"><h2>Osiągnięcia</h2></header>
                 <div className="profileAchievementGridV3">
                   {achievements.map((item) => (
                     <article key={item.id} className={item.unlocked ? "is-unlocked" : ""}>
@@ -326,6 +342,7 @@ export default function PublicUserPage() {
             )}
           </main>
         </div>
+        </>
       )}
     </div>
   );

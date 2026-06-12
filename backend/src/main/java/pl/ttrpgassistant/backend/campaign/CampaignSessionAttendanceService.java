@@ -119,7 +119,7 @@ public class CampaignSessionAttendanceService {
 
     private String displayNameFor(UserEntity user) {
         if (user == null) {
-            return "Nieznany uzytkownik";
+            return "Nieznany użytkownik";
         }
         if (user.getDisplayName() != null && !user.getDisplayName().isBlank()) {
             return user.getDisplayName().trim();

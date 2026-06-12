@@ -16,7 +16,7 @@
   box-shadow: 0 1px 0 rgba(232, 181, 88, 0.06), 0 8px 32px rgba(0,0,0,0.3);
 }
 
-/* â”€â”€â”€ BRAND â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* BRAND */
 
 .topNav__left { min-width: 0; }
 
@@ -84,7 +84,7 @@
   background-clip: text;
 }
 
-/* â”€â”€â”€ CENTER NAV â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* CENTER NAV */
 
 .topNav__center {
   display: flex;
@@ -117,7 +117,7 @@
   border-color: var(--border-accent);
 }
 
-/* â”€â”€â”€ PANEL (tools dropdown) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* PANEL (tools dropdown) */
 
 .topNav__panel { position: relative; min-width: max-content; }
 .topNav__panelGroup { display: flex; gap: 8px; }
@@ -205,7 +205,7 @@
 }
 .topNav__panelDropdownIcon svg { width: 16px; height: 16px; }
 
-/* â”€â”€â”€ RIGHT (avatar) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* RIGHT (avatar) */
 
 .topNav__right { position: relative; }
 
@@ -298,7 +298,7 @@
   height: 16px;
 }
 
-/* â”€â”€â”€ USER MENU â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* USER MENU */
 
 .topNav__menu {
   position: absolute;
@@ -468,7 +468,7 @@
   text-align: center;
 }
 
-/* â”€â”€â”€ LIGHT THEME â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* LIGHT THEME */
 
 :root[data-theme="light"] .topNav {
   background: linear-gradient(180deg, rgba(248,242,232,0.97), rgba(242,234,220,0.94));
@@ -494,7 +494,7 @@
   border-color: rgba(80,58,20,0.16);
 }
 
-/* â”€â”€â”€ RESPONSIVE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* RESPONSIVE */
 
 @media (max-width: 900px) {
   .topNav {

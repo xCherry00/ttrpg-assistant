@@ -73,7 +73,7 @@ select:focus-visible {
 
 ::selection { background: rgba(232, 181, 88, 0.28); }
 
-/* â”€â”€â”€ APP SHELL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* APP SHELL */
 
 #root { min-height: 100vh; }
 
@@ -557,7 +557,7 @@ select:focus-visible {
   font-weight: 800;
 }
 
-/* â”€â”€â”€ PAGE SCAFFOLD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* PAGE SCAFFOLD */
 
 .page {
   width: 100%;
@@ -644,7 +644,7 @@ select:focus-visible {
   content: none;
 }
 
-/* â”€â”€â”€ SURFACE CARDS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* SURFACE CARDS */
 
 .panel {
   border-radius: var(--radius-xl);
@@ -673,7 +673,7 @@ select:focus-visible {
   box-shadow: var(--shadow-md);
 }
 
-/* â”€â”€â”€ BUTTONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* BUTTONS */
 
 button {
   transition: transform 0.2s var(--ease), box-shadow 0.2s ease, background 0.18s ease, border-color 0.18s ease, opacity 0.18s ease;
@@ -730,7 +730,7 @@ button:active:not(:disabled) { transform: translateY(0px); }
 
 .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-/* â”€â”€â”€ INPUTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* INPUTS */
 
 .input {
   width: 320px;
@@ -777,7 +777,7 @@ button:active:not(:disabled) { transform: translateY(0px); }
 }
 .inputClear:hover { background: var(--card); }
 
-/* â”€â”€â”€ GLOSSARY CONTROLS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* GLOSSARY CONTROLS */
 
 .glossaryControls {
   display: flex;
@@ -786,7 +786,7 @@ button:active:not(:disabled) { transform: translateY(0px); }
   flex-wrap: wrap;
 }
 
-/* â”€â”€â”€ EMPTY STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* EMPTY STATE */
 
 .empty {
   border-radius: var(--radius-lg);
@@ -798,7 +798,7 @@ button:active:not(:disabled) { transform: translateY(0px); }
 .emptyTitle { font-weight: 700; margin-bottom: 6px; font-size: 16px; }
 .emptyText  { color: var(--text-2); line-height: 1.6; font-size: 14px; }
 
-/* â”€â”€â”€ PUBLIC SHELL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* PUBLIC PROFILE - centered card */
 
 .publicShell {
   min-height: 100vh;
@@ -813,12 +813,12 @@ button:active:not(:disabled) { transform: translateY(0px); }
   padding: 0;
 }
 
-/* â”€â”€â”€ SELECT COLORS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* SELECT COLORS */
 
 select { color: inherit; }
 select option { color: #000; background: #fff; }
 
-/* â”€â”€â”€ ANIMATIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ANIMATIONS */
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
@@ -970,7 +970,7 @@ select option { color: #000; background: #fff; }
   }
 }
 
-/* â”€â”€â”€ RESPONSIVE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* RESPONSIVE */
 
 @media (max-width: 720px) {
   .appContent { padding: 12px 12px 28px; }

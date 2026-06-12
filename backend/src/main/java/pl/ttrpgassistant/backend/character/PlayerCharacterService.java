@@ -13,6 +13,11 @@ import pl.ttrpgassistant.backend.character.dto.PlayerCharacterSummaryResponse;
 import pl.ttrpgassistant.backend.character.dto.QuickCreateDndCharacterRequest;
 import pl.ttrpgassistant.backend.character.dto.UpdateCharacterSheetRequest;
 import pl.ttrpgassistant.backend.character.dto.CreateCocQuickCharacterRequest;
+import pl.ttrpgassistant.backend.campaign.CampaignCharacterEntity;
+import pl.ttrpgassistant.backend.campaign.CampaignCharacterId;
+import pl.ttrpgassistant.backend.campaign.CampaignCharacterRepository;
+import pl.ttrpgassistant.backend.campaign.CampaignEntity;
+import pl.ttrpgassistant.backend.campaign.CampaignRepository;
 import pl.ttrpgassistant.backend.common.error.ResourceNotFoundException;
 
 import java.time.Instant;
@@ -30,6 +35,8 @@ public class PlayerCharacterService {
     private final DndCharacterSheetService dndSheetService;
     private final CocCharacterSheetService cocSheetService;
     private final DndCompendiumService compendiumService;
+    private final CampaignRepository campaignRepository;
+    private final CampaignCharacterRepository campaignCharacterRepository;
     private final ObjectMapper objectMapper;
 
     @Transactional(readOnly = true)
@@ -47,26 +54,39 @@ public class PlayerCharacterService {
     @Transactional(readOnly = true)
     public CharacterExportResponse exportForUser(Long userId, Long characterId) {
         PlayerCharacterEntity entity = requireOwnedCharacter(userId, characterId);
+        Map<String, Object> sheet = sheetForExport(entity);
         Map<String, Object> metadata = new LinkedHashMap<>();
+        metadata.put("id", entity.getId());
+        metadata.put("ownerUserId", entity.getOwnerUserId());
         metadata.put("status", entity.getStatus());
         metadata.put("maxHp", entity.getMaxHp());
         metadata.put("currentHp", entity.getCurrentHp());
         metadata.put("tempHp", entity.getTempHp());
         metadata.put("privateNotes", entity.getPrivateNotes() == null ? "" : entity.getPrivateNotes());
+        metadata.put("createdAt", entity.getCreatedAt());
+        metadata.put("updatedAt", entity.getUpdatedAt());
 
         return new CharacterExportResponse(
                 EXPORT_VERSION,
                 Instant.now(),
                 new CharacterExportResponse.CharacterExportPayload(
+                        entity.getId(),
                         entity.getName(),
                         entity.getSystemCode(),
+                        entity.getStatus(),
                         entity.getRaceName(),
                         entity.getClassName(),
                         entity.getBackgroundName(),
                         entity.getLevel(),
+                        entity.getMaxHp(),
+                        entity.getCurrentHp(),
+                        entity.getTempHp(),
+                        entity.getPrivateNotes() == null ? "" : entity.getPrivateNotes(),
                         entity.getPortraitUrl(),
-                        readSheet(entity.getSheetJson()),
-                        metadata
+                        sheet,
+                        metadata,
+                        entity.getCreatedAt(),
+                        entity.getUpdatedAt()
                 )
         );
     }
@@ -81,7 +101,8 @@ public class PlayerCharacterService {
         if (!systemCode.equals("dnd5e") && !systemCode.equals("coc7e")) {
             throw new IllegalArgumentException("Unsupported character system.");
         }
-        validateSheetJson(payload.sheetJson());
+        Map<String, Object> sheet = payload.sheetJson();
+        validateSheetJson(sheet);
 
         Map<String, Object> metadata = payload.metadata() == null ? Map.of() : payload.metadata();
         int maxHp = intValue(metadata.get("maxHp"), 1);
@@ -107,10 +128,16 @@ public class PlayerCharacterService {
                 .currentHp(Math.max(0, currentHp))
                 .tempHp(Math.max(0, tempHp))
                 .privateNotes(privateNotes)
-                .sheetJson(writeSheet(payload.sheetJson()))
+                .sheetJson(writeSheet(sheet))
                 .build();
 
         PlayerCharacterEntity saved = playerCharacterRepository.save(entity);
+        String campaignName = campaignNameFromSheet(sheet);
+        if (!campaignName.isBlank()) {
+            syncCampaignAssignment(userId, saved, sheet, campaignName);
+            saved.setSheetJson(writeSheet(sheet));
+            saved = playerCharacterRepository.save(saved);
+        }
         return new CharacterImportResponse(saved.getId(), saved.getName(), saved.getSystemCode(), saved.getCreatedAt());
     }
 
@@ -176,7 +203,13 @@ public class PlayerCharacterService {
     @Transactional
     public PlayerCharacterDetailsResponse updateSheet(Long userId, Long characterId, UpdateCharacterSheetRequest request) {
         PlayerCharacterEntity entity = requireOwnedCharacter(userId, characterId);
-        Map<String, Object> sheet = readSheet(entity.getSheetJson());
+        Map<String, Object> sheet = request.sheetJson() == null
+                ? readSheet(entity.getSheetJson())
+                : new LinkedHashMap<>(request.sheetJson());
+
+        if (request.sheetJson() != null) {
+            validateSheetJson(sheet);
+        }
 
         if (request.name() != null && !request.name().isBlank()) {
             String name = request.name().trim();
@@ -206,7 +239,7 @@ public class PlayerCharacterService {
             map(sheet, "identity").put("level", request.level());
         }
         if (request.campaignName() != null) {
-            map(sheet, "identity").put("campaignName", nullToEmpty(request.campaignName()));
+            syncCampaignAssignment(userId, entity, sheet, request.campaignName());
         }
         if (request.currentHp() != null) {
             entity.setCurrentHp(request.currentHp());
@@ -338,6 +371,27 @@ public class PlayerCharacterService {
         }
     }
 
+    private Map<String, Object> sheetForExport(PlayerCharacterEntity entity) {
+        Map<String, Object> sheet = readSheet(entity.getSheetJson());
+
+        Map<String, Object> identity = map(sheet, "identity");
+        identity.put("name", entity.getName());
+        identity.put("race", nullToEmpty(entity.getRaceName()));
+        identity.put("className", nullToEmpty(entity.getClassName()));
+        identity.put("class", nullToEmpty(entity.getClassName()));
+        identity.put("background", nullToEmpty(entity.getBackgroundName()));
+        identity.put("level", entity.getLevel());
+        identity.put("portraitUrl", entity.getPortraitUrl() == null ? "" : entity.getPortraitUrl());
+
+        Map<String, Object> combat = map(sheet, "combat");
+        combat.put("maxHp", entity.getMaxHp());
+        combat.put("currentHp", entity.getCurrentHp());
+        combat.put("tempHp", entity.getTempHp());
+
+        map(sheet, "notes").put("privateNotes", entity.getPrivateNotes() == null ? "" : entity.getPrivateNotes());
+        return sheet;
+    }
+
     private String normalizeNullable(String value) {
         if (value == null || value.isBlank()) {
             return null;
@@ -347,6 +401,60 @@ public class PlayerCharacterService {
 
     private String normalizeSystemCode(String raw) {
         return raw == null ? "" : raw.trim().toLowerCase();
+    }
+
+    private void syncCampaignAssignment(Long userId, PlayerCharacterEntity entity, Map<String, Object> sheet, String rawCampaignName) {
+        String campaignName = nullToEmpty(rawCampaignName);
+        Map<String, Object> identity = map(sheet, "identity");
+        if (campaignName.isBlank()) {
+            detachActiveCampaignAssignments(entity.getId(), null);
+            identity.put("campaignName", "");
+            return;
+        }
+
+        CampaignEntity campaign = campaignRepository.findVisibleForUser(userId).stream()
+                .filter(candidate -> campaignName.equalsIgnoreCase(nullToEmpty(candidate.getTitle())))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Campaign not found"));
+
+        if (!normalizeSystemCode(campaign.getSystemCode()).equals(normalizeSystemCode(entity.getSystemCode()))) {
+            throw new IllegalArgumentException("Character system must match campaign system.");
+        }
+
+        detachActiveCampaignAssignments(entity.getId(), campaign.getId());
+
+        CampaignCharacterEntity assignment = campaignCharacterRepository
+                .findByIdCampaignIdAndIdCharacterId(campaign.getId(), entity.getId())
+                .orElseGet(() -> CampaignCharacterEntity.builder()
+                        .id(new CampaignCharacterId(campaign.getId(), entity.getId()))
+                        .userId(userId)
+                        .role("PLAYER_CHARACTER")
+                        .build());
+        if (!assignment.isActive()) {
+            assignment.setActive(true);
+            assignment.setRemovedAt(null);
+            assignment.setAssignedAt(Instant.now());
+        }
+        assignment.setUserId(userId);
+        assignment.setRole("PLAYER_CHARACTER");
+        campaignCharacterRepository.save(assignment);
+        identity.put("campaignName", campaign.getTitle());
+    }
+
+    private void detachActiveCampaignAssignments(Long characterId, Long exceptCampaignId) {
+        campaignCharacterRepository.findByIdCharacterIdAndActiveTrue(characterId).forEach((assignment) -> {
+            if (exceptCampaignId != null && exceptCampaignId.equals(assignment.getId().getCampaignId())) {
+                return;
+            }
+            assignment.setActive(false);
+            assignment.setRemovedAt(Instant.now());
+            campaignCharacterRepository.save(assignment);
+        });
+    }
+
+    private String campaignNameFromSheet(Map<String, Object> sheet) {
+        Object raw = map(sheet, "identity").get("campaignName");
+        return raw == null ? "" : String.valueOf(raw).trim();
     }
 
     private void validateSheetJson(Map<String, Object> sheetJson) {

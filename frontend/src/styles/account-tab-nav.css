@@ -1,6 +1,4 @@
-/* =========================================================
-   ACCOUNT TAB NAV â€” shared by Profile, Friends, Settings
-   ========================================================= */
+/* ACCOUNT TAB NAV - shared by Profile, Friends, Settings */
 
 .accountTabNav {
   display: flex;
@@ -33,7 +31,7 @@
   background: var(--primary-dim);
 }
 
-/* â”€â”€â”€ LIGHT THEME â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* LIGHT THEME */
 
 :root[data-theme="light"] .accountTabNav {
   border-bottom-color: rgba(80,58,20,0.14);

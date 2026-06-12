@@ -475,20 +475,26 @@ export default function CompendiumPage() {
             ))}
           </select>
         </label>
-        <label>
-          <span>Szukaj</span>
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Szukaj wpisow..." />
-        </label>
       </section>
 
       <div className="compendiumLayout">
         <aside className="compendiumCategories" aria-label="Kategorie kompendium">
-          {categories.map((item) => (
-            <button key={item.code} type="button" className={item.code === category ? "is-active" : ""} onClick={() => setCategory(item.code)}>
-              <strong>{item.label}</strong>
-              <span>{item.description}</span>
-            </button>
-          ))}
+          <label className="compendiumCategorySearch">
+            <span className="compendiumCategorySearchIcon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M11 19a8 8 0 1 1 5.7-2.4L21 21" />
+              </svg>
+            </span>
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Szukaj wpisow..." />
+          </label>
+          <div className="compendiumCategoryList">
+            {categories.map((item) => (
+              <button key={item.code} type="button" className={item.code === category ? "is-active" : ""} onClick={() => setCategory(item.code)}>
+                <strong>{item.label}</strong>
+                <span>{item.description}</span>
+              </button>
+            ))}
+          </div>
         </aside>
 
         <main className="compendiumTablePanel">

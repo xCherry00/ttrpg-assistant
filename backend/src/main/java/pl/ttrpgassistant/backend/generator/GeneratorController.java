@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
 import pl.ttrpgassistant.backend.generator.dto.GeneratorDefinitionResponse;
 import pl.ttrpgassistant.backend.generator.dto.GeneratorFormResponse;
 import pl.ttrpgassistant.backend.generator.dto.GeneratorPoolResponse;
@@ -59,13 +60,22 @@ public class GeneratorController {
 
     @PostMapping("/{system}/{type}/generate")
     public Object generate(
+            Authentication auth,
             @PathVariable String system,
             @PathVariable String type,
             @RequestBody(required = false) GeneratorRequest request
     ) {
         if (service.hasVariant(system, type)) {
-            return service.generateVariant(system, type, request);
+            return service.generateVariant(system, type, request, authenticatedUserId(auth));
         }
         return service.generate(system, type, request);
+    }
+
+    private Long authenticatedUserId(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal() == null) {
+            return null;
+        }
+        Object principal = auth.getPrincipal();
+        return principal instanceof Long userId ? userId : null;
     }
 }

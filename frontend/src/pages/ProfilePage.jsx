@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { getMyProfile, updateDisplayName, updateProfileImages } from "../api/settings";
@@ -10,6 +10,7 @@ import { BASIC_RULES } from "../data/basicRules";
 import "../styles/profile.css";
 
 const RECENT_GENERATIONS_KEY = "ttrpg_recent_generations_v1";
+const MAX_PROFILE_SESSION_HOURS = 24;
 
 const TOOL_META = {
   npc: { name: "Generator NPC", desc: "Postacie niezalezne do sesji" },
@@ -136,7 +137,8 @@ function toSessionHours(session) {
   const finish = safeDate(session?.finishedAt);
   if (!start || !finish) return 0;
   const diff = finish.getTime() - start.getTime();
-  return diff > 0 ? diff / (1000 * 60 * 60) : 0;
+  if (diff <= 0) return 0;
+  return Math.min(diff / (1000 * 60 * 60), MAX_PROFILE_SESSION_HOURS);
 }
 
 function StatCard({ icon, label, value, hint }) {
@@ -190,10 +192,24 @@ export default function ProfilePage() {
   const [avatarError, setAvatarError] = useState("");
   const [profileDraft, setProfileDraft] = useState(() => readProfileDraft());
   const [modalDraft, setModalDraft] = useState(() => readProfileDraft());
-  const [modalAvatar, setModalAvatar] = useState({ file: null, preview: "", remove: false });
-  const [modalBanner, setModalBanner] = useState({ file: null, preview: "", remove: false });
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [imagePicker, setImagePicker] = useState(null);
+  const [imagePickerValue, setImagePickerValue] = useState("");
+  const [imageSaving, setImageSaving] = useState(false);
   const [activeProfilePanel, setActiveProfilePanel] = useState("activity");
+
+  const closeEditModal = useCallback((force = false) => {
+    if (nameSaving && !force) return;
+    setIsEditModalOpen(false);
+    setNameError("");
+    setAvatarError("");
+  }, [nameSaving]);
+
+  const closeImagePicker = useCallback(() => {
+    if (imageSaving) return;
+    setImagePicker(null);
+    setImagePickerValue("");
+  }, [imageSaving]);
 
   useEffect(() => {
     let cancelled = false;
@@ -256,7 +272,7 @@ export default function ProfilePage() {
           if (!cancelled) setSessions(allSessions);
         }
       } catch (err) {
-        if (!cancelled) setError(err?.message || "Nie udalo sie pobrac profilu.");
+        if (!cancelled) setError(err?.message || "Nie udało się pobrać profilu.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -277,22 +293,24 @@ export default function ProfilePage() {
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isEditModalOpen]);
+  }, [closeEditModal, isEditModalOpen]);
 
   useEffect(() => {
-    return () => {
-      if (modalAvatar.preview?.startsWith("blob:")) URL.revokeObjectURL(modalAvatar.preview);
-      if (modalBanner.preview?.startsWith("blob:")) URL.revokeObjectURL(modalBanner.preview);
-    };
-  }, [modalAvatar.preview, modalBanner.preview]);
+    if (!imagePicker) return undefined;
+
+    function handleKeyDown(event) {
+      if (event.key === "Escape") closeImagePicker();
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [closeImagePicker, imagePicker]);
 
   const displayName = useMemo(() => {
     if (profile?.displayName?.trim()) return profile.displayName.trim();
     if (profile?.email) return profile.email.split("@")[0];
-    return "Uzytkownik";
+    return "Użytkownik";
   }, [profile]);
-
-  const avatarLabel = useMemo(() => displayName.slice(0, 1).toUpperCase(), [displayName]);
 
   const stats = useMemo(() => {
     const campaignTotal = campaigns.length;
@@ -321,7 +339,7 @@ export default function ProfilePage() {
         key,
         count,
         name: TOOL_META[key]?.name || `Generator ${key.toUpperCase()}`,
-        desc: TOOL_META[key]?.desc || "Ostatnio uzywane narzedzie",
+        desc: TOOL_META[key]?.desc || "Ostatnio używane narzędzie",
       }));
 
     return ranked.length > 0 ? ranked : [];
@@ -330,7 +348,7 @@ export default function ProfilePage() {
   const recentActivity = useMemo(() => {
     const generationEvents = recentGenerations.slice(0, 8).map((entry) => ({
       id: `gen-${entry.createdAt}-${entry.id}`,
-      title: entry?.title || "Wygenerowano material",
+      title: entry?.title || "Wygenerowano materiał",
       subtitle: TOOL_META[String(entry?.id || "").toLowerCase()]?.name || "Generator",
       at: entry?.createdAt,
       icon: "generator",
@@ -339,8 +357,8 @@ export default function ProfilePage() {
     const sessionEvents = sessions.map((session) => ({
       id: `ses-${session.id}`,
       title: session?.status === "finished"
-        ? `Zakonczono sesje "${session.title || "Sesja"}"`
-        : `Zaktualizowano sesje "${session.title || "Sesja"}"`,
+        ? `Zakończono sesję "${session.title || "Sesja"}"`
+        : `Zaktualizowano sesję "${session.title || "Sesja"}"`,
       subtitle: session?.campaignTitle || "Kampania",
       at: session?.updatedAt || session?.finishedAt || session?.startedAt || session?.createdAt,
       icon: "session",
@@ -374,33 +392,49 @@ export default function ProfilePage() {
     setAvatarError("");
     setDisplayNameInput(displayName);
     setModalDraft(profileDraft);
-    setModalAvatar({ file: null, preview: "", remove: false });
-    setModalBanner({ file: null, preview: "", remove: false });
     setIsEditModalOpen(true);
   }
 
-  function closeEditModal(force = false) {
-    if (nameSaving && !force) return;
-    setIsEditModalOpen(false);
-    setNameError("");
+  function openImagePicker(kind) {
     setAvatarError("");
-    setModalAvatar((current) => {
-      if (current.preview?.startsWith("blob:")) URL.revokeObjectURL(current.preview);
-      return { file: null, preview: "", remove: false };
-    });
-    setModalBanner((current) => {
-      if (current.preview?.startsWith("blob:")) URL.revokeObjectURL(current.preview);
-      return { file: null, preview: "", remove: false };
-    });
+    setNameSuccess("");
+    setImagePicker(kind);
+    setImagePickerValue(kind === "banner" ? bannerSrc : avatarSrc);
   }
 
-  function handleLibraryImageSelected(kind, src) {
-    const setter = kind === "banner" ? setModalBanner : setModalAvatar;
-    setter((current) => {
-      if (current.preview?.startsWith("blob:")) URL.revokeObjectURL(current.preview);
-      return { file: null, preview: src, remove: false };
-    });
+  async function saveProfileImage() {
+    if (!imagePicker) return;
     setAvatarError("");
+    setNameSuccess("");
+    setImageSaving(true);
+    try {
+      const nextAvatarSrc = imagePicker === "avatar" ? imagePickerValue : avatarSrc;
+      const nextBannerSrc = imagePicker === "banner" ? imagePickerValue : bannerSrc;
+
+      if (nextAvatarSrc) {
+        localStorage.setItem(getAvatarStorageKey(profile?.email), nextAvatarSrc);
+      } else {
+        localStorage.removeItem(getAvatarStorageKey(profile?.email));
+      }
+      if (nextBannerSrc) {
+        localStorage.setItem(getBannerStorageKey(profile?.email), nextBannerSrc);
+      } else {
+        localStorage.removeItem(getBannerStorageKey(profile?.email));
+      }
+
+      const updated = await updateProfileImages(token, nextAvatarSrc, nextBannerSrc);
+      setProfile((prev) => ({ ...(prev || {}), ...updated }));
+      setAvatarSrc(nextAvatarSrc);
+      setBannerSrc(nextBannerSrc);
+      setNameSuccess(imagePicker === "banner" ? "Zapisano baner profilu." : "Zapisano avatar profilu.");
+      window.dispatchEvent(new Event("ttrpg-profile-updated"));
+      setImagePicker(null);
+      setImagePickerValue("");
+    } catch (err) {
+      setAvatarError(err?.message || "Nie udało się zapisać obrazu profilu.");
+    } finally {
+      setImageSaving(false);
+    }
   }
 
   async function handleSaveProfile(event) {
@@ -412,15 +446,15 @@ export default function ProfilePage() {
     const trimmed = displayNameInput.trim();
     const trimmedBio = (modalDraft.bio || "").trim();
     if (!trimmed) {
-      setNameError("Nazwa publiczna nie moze byc pusta.");
+      setNameError("Nazwa publiczna nie może być pusta.");
       return;
     }
     if (trimmed.length > 120) {
-      setNameError("Nazwa publiczna moze miec maksymalnie 120 znakow.");
+      setNameError("Nazwa publiczna może mieć maksymalnie 120 znaków.");
       return;
     }
     if (trimmedBio.length > 300) {
-      setNameError("Opis moze miec maksymalnie 300 znakow.");
+      setNameError("Opis może mieć maksymalnie 300 znaków.");
       return;
     }
 
@@ -428,56 +462,31 @@ export default function ProfilePage() {
     try {
       let updated = trimmed === displayName ? { displayName: trimmed } : await updateDisplayName(token, trimmed);
       const nextDraft = { ...modalDraft, bio: trimmedBio };
-      let nextAvatarSrc = avatarSrc;
-      let nextBannerSrc = bannerSrc;
-
-      if (modalAvatar.remove) {
-        localStorage.removeItem(getAvatarStorageKey(profile?.email));
-        nextAvatarSrc = "";
-      }
-      if (modalBanner.remove) {
-        localStorage.removeItem(getBannerStorageKey(profile?.email));
-        nextBannerSrc = "";
-      }
-      if (modalAvatar.preview) {
-        nextAvatarSrc = modalAvatar.preview;
-        localStorage.setItem(getAvatarStorageKey(profile?.email), nextAvatarSrc);
-      }
-      if (modalBanner.preview) {
-        nextBannerSrc = modalBanner.preview;
-        localStorage.setItem(getBannerStorageKey(profile?.email), nextBannerSrc);
-      }
-
-      updated = await updateProfileImages(token, nextAvatarSrc, nextBannerSrc);
       writeProfileDraft(profile?.email, nextDraft);
       setProfile((prev) => ({ ...(prev || {}), ...updated, displayName: updated.displayName || trimmed, ...nextDraft }));
       setDisplayNameInput(updated.displayName || trimmed);
       setProfileDraft(nextDraft);
-      setAvatarSrc(nextAvatarSrc);
-      setBannerSrc(nextBannerSrc);
       setNameSuccess("Zapisano zmiany profilu.");
       window.dispatchEvent(new Event("ttrpg-profile-updated"));
       closeEditModal(true);
     } catch (err) {
-      setNameError(err?.message || "Nie udalo sie zapisac.");
+      setNameError(err?.message || "Nie udało się zapisać.");
     } finally {
       setNameSaving(false);
     }
   }
 
   const tabs = [
-    ["activity", "Aktywnosc"],
+    ["activity", "Aktywność"],
     ["campaigns", "Kampanie"],
-    ["achievements", "Osiagniecia"],
   ];
 
-  const modalAvatarSrc = modalAvatar.remove ? "" : (modalAvatar.preview || avatarSrc);
-  const modalBannerSrc = modalBanner.remove ? "" : (modalBanner.preview || bannerSrc);
-  const previewName = displayNameInput.trim() || displayName;
-  const previewBio = (modalDraft.bio || "").trim() || "Ten uzytkownik nie dodal jeszcze opisu.";
-  const profileBio = profileDraft.bio?.trim() || "Ten uzytkownik nie dodal jeszcze opisu.";
+  const profileBio = profileDraft.bio?.trim() || "Ten użytkownik nie dodał jeszcze opisu.";
   const profileFavoriteSystem = safeText(profileDraft.favoriteSystem, "Brak");
   const profileTimezone = safeText(profileDraft.timezone, "Brak");
+  const imagePickerTitle = imagePicker === "banner" ? "Zmien baner profilu" : "Zmien avatar profilu";
+  const imagePickerType = imagePicker === "banner" ? "campaignBanners" : "avatars";
+  const imagePickerPreviewAlt = imagePicker === "banner" ? "Baner profilu" : "Avatar profilu";
 
   return (
     <div className="page profileDesk">
@@ -487,14 +496,16 @@ export default function ProfilePage() {
       {!loading && !error && (
         <div className="profileShell">
           <aside className="profileCardPanel">
-            <div className="profileBanner profileBanner--forest profileBannerUpload" aria-label="Baner profilu">
+            <button type="button" className="profileBanner profileBanner--forest profileBannerUpload profileImageTrigger" onClick={() => openImagePicker("banner")} aria-label="Zmien baner profilu">
               <img src={bannerSrc || imagePlaceholder("campaignBanners")} alt="Baner profilu" onError={() => setBannerSrc("")} />
-            </div>
+              <span>Zmien baner</span>
+            </button>
             <div className="profileAvatarRow">
-              <div className="profileAvatarLarge" aria-label={`Avatar ${displayName}`}>
+              <button type="button" className="profileAvatarLarge profileAvatarUpload profileImageTrigger" onClick={() => openImagePicker("avatar")} aria-label="Zmien avatar profilu">
                 <img src={avatarSrc || imagePlaceholder("avatars")} alt="Avatar uzytkownika" onError={() => setAvatarSrc("")} />
                 <i aria-hidden="true" />
-              </div>
+                <span>Zmien avatar</span>
+              </button>
             </div>
 
             <div className="profileCardBody">
@@ -506,7 +517,7 @@ export default function ProfilePage() {
                 <InfoRow label="Rola" value={getRoleLabel(profile)} />
                 <InfoRow label="Ulubiony system" value={profileFavoriteSystem} />
                 <InfoRow label="Strefa czasowa" value={profileTimezone} />
-                <InfoRow label="Dolaczyl" value={formatDate(profile?.createdAt || profile?.joinedAt)} />
+                <InfoRow label="Dołączył" value={formatDate(profile?.createdAt || profile?.joinedAt)} />
               </div>
 
               <div className="profileCardActions">
@@ -527,7 +538,7 @@ export default function ProfilePage() {
               <StatCard icon="session" label="Sesje" value={stats.sessionTotal} hint={`Jako MG: ${stats.mgCampaigns}`} />
               <StatCard icon="generator" label="Wygenerowane" value={stats.generatedTotal} hint={`NPC: ${stats.npcCount}`} />
               <StatCard icon="friends" label="Znajomi" value={stats.friendsCount} hint="Spolecznosc" />
-              <StatCard icon="clock" label="Czas spedzony" value={`${stats.spentHours} h`} hint="Prowadzenie sesji" />
+              <StatCard icon="clock" label="Czas spędzony" value={`${stats.spentHours} h`} hint="Prowadzenie sesji" />
             </section>
 
             <nav className="profileTabs" aria-label="Sekcje profilu">
@@ -541,11 +552,11 @@ export default function ProfilePage() {
             {activeProfilePanel === "activity" && (
               <section className="profileContentPanel">
                 <header className="profileSectionHeader">
-                  <h2>Ostatnia aktywnosc</h2>
+                  <h2>Ostatnia aktywność</h2>
                   <Link to="/messages">Zobacz wszystkie</Link>
                 </header>
                 {recentActivity.length === 0 ? (
-                  <EmptyState title="Brak aktywnosci" text="Gdy pojawia sie sesje, notatki albo generatory, zobaczysz je tutaj." />
+                  <EmptyState title="Brak aktywności" text="Gdy pojawią się sesje, notatki albo generatory, zobaczysz je tutaj." />
                 ) : (
                   <div className="profileActivityListV3">
                     {recentActivity.map((item) => (
@@ -566,11 +577,11 @@ export default function ProfilePage() {
             {activeProfilePanel === "tools" && (
               <section className="profileContentPanel">
                 <header className="profileSectionHeader">
-                  <h2>Narzedzia</h2>
-                  <Link to="/generators">Otworz generatory</Link>
+                  <h2>Narzędzia</h2>
+                  <Link to="/generators">Otwórz generatory</Link>
                 </header>
                 {favoriteTools.length === 0 ? (
-                  <EmptyState title="Brak ostatnich narzedzi" text="Po uzyciu generatorow pokazemy tu najczesciej wybierane moduly." />
+                  <EmptyState title="Brak ostatnich narzędzi" text="Po użyciu generatorów pokażemy tu najczęściej wybierane moduły." />
                 ) : (
                   <div className="profileToolGrid">
                     {favoriteTools.map((tool) => (
@@ -578,7 +589,7 @@ export default function ProfilePage() {
                         <span><Icon name="tools" /></span>
                         <strong>{tool.name}</strong>
                         <p>{tool.desc}</p>
-                        <small>{tool.count} uzyc</small>
+                        <small>{tool.count} użyć</small>
                       </Link>
                     ))}
                   </div>
@@ -587,7 +598,7 @@ export default function ProfilePage() {
             )}
 
             {activeProfilePanel === "campaigns" && (
-              <section className="profileContentPanel">
+              <section className="profileContentPanel profileContentPanel--campaigns">
                 <header className="profileSectionHeader">
                   <h2>Kampanie</h2>
                   <Link to="/campaigns">Zobacz kampanie</Link>
@@ -596,8 +607,8 @@ export default function ProfilePage() {
                   <div className="profileEmptyState">
                     <span><Icon name="campaign" /></span>
                     <strong>Brak kampanii</strong>
-                    <p>Twoje kampanie pojawia sie tutaj po utworzeniu albo dolaczeniu.</p>
-                    <Link className="profilePrimaryAction" to="/campaigns">Przejdz do kampanii</Link>
+                    <p>Twoje kampanie pojawią się tutaj po utworzeniu albo dołączeniu.</p>
+                    <Link className="profilePrimaryAction" to="/campaigns">Przejdź do kampanii</Link>
                   </div>
                 ) : (
                   <div className="profileCampaignSections">
@@ -612,7 +623,7 @@ export default function ProfilePage() {
                               <span><Icon name="campaign" /></span>
                               <div>
                                 <strong>{campaign.title}</strong>
-                                <small>{campaign.status} ? {campaign.system} ? ostatnio {formatDate(campaign.updatedAt)}</small>
+                                <small>{campaign.status} · {campaign.system} · ostatnio {formatDate(campaign.updatedAt)}</small>
                               </div>
                             </Link>
                           ))}
@@ -622,7 +633,7 @@ export default function ProfilePage() {
                     <section>
                       <h3>Jako gracz</h3>
                       {playerCampaigns.length === 0 ? (
-                        <p className="profileSubtleText">Brak kampanii, w ktorych grasz jako uczestnik.</p>
+                        <p className="profileSubtleText">Brak kampanii, w których grasz jako uczestnik.</p>
                       ) : (
                         <div className="profileCampaignListV3">
                           {playerCampaigns.map((campaign) => (
@@ -630,7 +641,7 @@ export default function ProfilePage() {
                               <span><Icon name="campaign" /></span>
                               <div>
                                 <strong>{campaign.title}</strong>
-                                <small>{campaign.status} ? {campaign.system} ? ostatnio {formatDate(campaign.updatedAt)}</small>
+                                <small>{campaign.status} · {campaign.system} · ostatnio {formatDate(campaign.updatedAt)}</small>
                               </div>
                             </Link>
                           ))}
@@ -639,15 +650,6 @@ export default function ProfilePage() {
                     </section>
                   </div>
                 )}
-              </section>
-            )}
-
-            {activeProfilePanel === "achievements" && (
-              <section className="profileContentPanel">
-                <header className="profileSectionHeader">
-                  <h2>Osiagniecia</h2>
-                </header>
-                <EmptyState title="Brak osiagniec" text="Osiagniecia pojawia sie tutaj po zdobyciu pierwszych odznak." />
               </section>
             )}
 
@@ -661,7 +663,7 @@ export default function ProfilePage() {
             <header className="profileEditModal__header">
               <div>
                 <h2 id="profile-edit-title">Edytuj profil</h2>
-                <p>Zmien podstawowe informacje widoczne na Twoim profilu.</p>
+                <p>Zmień podstawowe informacje widoczne na Twoim profilu.</p>
               </div>
               <button type="button" className="profileModalClose" onClick={() => closeEditModal()} aria-label="Zamknij modal" disabled={nameSaving}>
                 <Icon name="close" />
@@ -671,45 +673,11 @@ export default function ProfilePage() {
             <form className="profileEditModal__body" onSubmit={handleSaveProfile}>
               <div className="profileEditModal__form">
                 <section className="profileModalSection">
-                  <h3>Avatar profilu</h3>
-                  <ImageLibraryPicker
-                    type="avatars"
-                    label="Avatar"
-                    helpText="Wybierz gotowy avatar z biblioteki."
-                    value={modalAvatarSrc}
-                    onChange={(src) => handleLibraryImageSelected("avatar", src)}
-                    onRemove={() => setModalAvatar((current) => {
-                      if (current.preview?.startsWith("blob:")) URL.revokeObjectURL(current.preview);
-                      return { file: null, preview: "", remove: true };
-                    })}
-                    previewAlt="Avatar profilu"
-                    disabled={nameSaving}
-                  />
-                </section>
-
-                <section className="profileModalSection">
-                  <h3>Baner profilu</h3>
-                  <ImageLibraryPicker
-                    type="campaignBanners"
-                    label="Baner"
-                    helpText="Wybierz gotowy baner profilu z biblioteki."
-                    value={modalBannerSrc}
-                    onChange={(src) => handleLibraryImageSelected("banner", src)}
-                    onRemove={() => setModalBanner((current) => {
-                      if (current.preview?.startsWith("blob:")) URL.revokeObjectURL(current.preview);
-                      return { file: null, preview: "", remove: true };
-                    })}
-                    previewAlt="Baner profilu"
-                    disabled={nameSaving}
-                  />
-                </section>
-
-                <section className="profileModalSection">
                   <h3>Dane publiczne</h3>
                   <div className="profileEditForm">
                     <label>
                       <span>Nazwa publiczna</span>
-                      <input value={displayNameInput} onChange={(event) => setDisplayNameInput(event.target.value)} maxLength={120} placeholder="Nazwa wyswietlana" />
+                      <input value={displayNameInput} onChange={(event) => setDisplayNameInput(event.target.value)} maxLength={120} placeholder="Nazwa wyświetlana" />
                     </label>
                     <label>
                       <span>Opis / bio</span>
@@ -717,7 +685,7 @@ export default function ProfilePage() {
                         value={modalDraft.bio}
                         onChange={(event) => setModalDraft((draft) => ({ ...draft, bio: event.target.value.slice(0, 300) }))}
                         maxLength={300}
-                        placeholder="Napisz kilka zdan o swoim stylu gry, postaciach albo kampaniach."
+                        placeholder="Napisz kilka zdań o swoim stylu gry, postaciach albo kampaniach."
                       />
                       <small>{(modalDraft.bio || "").length}/300</small>
                     </label>
@@ -745,22 +713,6 @@ export default function ProfilePage() {
                 </section>
               </div>
 
-              <aside className="profilePreviewCard" aria-label="Podglad zmian profilu">
-                <div className="profilePreviewCard__banner profileBanner--forest">
-                  <img src={modalBannerSrc || imagePlaceholder("campaignBanners")} alt="Podglad banera" />
-                </div>
-                <div className="profilePreviewCard__avatar">
-                  <img src={modalAvatarSrc || imagePlaceholder("avatars")} alt="Podglad avatara" />
-                </div>
-                <strong>{previewName}</strong>
-                <span>{profile?.handle ? `@${profile.handle}` : profile?.email || "Brak email"}</span>
-                <p>{previewBio}</p>
-                <div className="profilePreviewMeta">
-                  <InfoRow label="Ulubiony system" value={safeText(modalDraft.favoriteSystem, "Brak")} />
-                  <InfoRow label="Strefa czasowa" value={safeText(modalDraft.timezone, "Brak")} />
-                </div>
-              </aside>
-
               {(nameError || avatarError) && <div className="profileInlineMsg is-error">{nameError || avatarError}</div>}
 
               <footer className="profileEditModal__footer">
@@ -768,6 +720,43 @@ export default function ProfilePage() {
                 <button type="submit" className="profilePrimaryAction" disabled={nameSaving}>{nameSaving ? "Zapisywanie..." : "Zapisz zmiany"}</button>
               </footer>
             </form>
+          </section>
+        </div>
+      )}
+
+      {imagePicker && (
+        <div className="profileModalBackdrop" onMouseDown={(event) => event.target === event.currentTarget && closeImagePicker()}>
+          <section className="profileImagePickerModal" role="dialog" aria-modal="true" aria-labelledby="profile-image-picker-title">
+            <header className="profileEditModal__header">
+              <div>
+                <h2 id="profile-image-picker-title">{imagePickerTitle}</h2>
+                <p>Wybierz gotowy obraz z biblioteki profilu.</p>
+              </div>
+              <button type="button" className="profileModalClose" onClick={closeImagePicker} aria-label="Zamknij modal" disabled={imageSaving}>
+                <Icon name="close" />
+              </button>
+            </header>
+
+            <div className="profileImagePickerModal__body">
+              <ImageLibraryPicker
+                type={imagePickerType}
+                label={imagePicker === "banner" ? "Baner" : "Avatar"}
+                helpText={imagePicker === "banner" ? "Wybierz gotowy baner profilu z biblioteki." : "Wybierz gotowy avatar z biblioteki."}
+                value={imagePickerValue}
+                onChange={setImagePickerValue}
+                onRemove={() => setImagePickerValue("")}
+                previewAlt={imagePickerPreviewAlt}
+                disabled={imageSaving}
+              />
+              {avatarError && <div className="profileInlineMsg is-error">{avatarError}</div>}
+            </div>
+
+            <footer className="profileEditModal__footer">
+              <button type="button" className="profileSecondaryAction" onClick={closeImagePicker} disabled={imageSaving}>Anuluj</button>
+              <button type="button" className="profilePrimaryAction" onClick={saveProfileImage} disabled={imageSaving}>
+                {imageSaving ? "Zapisywanie..." : "Zapisz obraz"}
+              </button>
+            </footer>
           </section>
         </div>
       )}

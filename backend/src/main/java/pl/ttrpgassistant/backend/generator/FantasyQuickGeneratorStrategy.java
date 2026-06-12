@@ -139,20 +139,20 @@ public class FantasyQuickGeneratorStrategy implements GeneratorStrategy {
             );
             case "npc_fantasy" -> List.of(
                     stats(tone, system, "Rasa", stringParam(params, "race", "Losowa")),
-                    section("Imie i profesja", title + " Ă˘â‚¬â€ť " + stringParam(params, "profession", "Losowa") + ". Osoba, ktora ma powod byc tam, gdzie sa gracze."),
+                    section("Imie i profesja", title + " - " + stringParam(params, "profession", "Losowa") + ". Osoba, ktora ma powod byc tam, gdzie sa gracze."),
                     section("Wyglad", pick("Wysoki, ciemne oczy, blizna na prawym policzku i zbyt drogie buty jak na zawod.", "Drobna, szybkie ruchy, zawsze patrzy na wyjscie.", "Starszy, spokojny glos, rece zdradzaja zawod lepiej niz slowa.")),
                     section("Osobowosc", pick("Uprzejmy, ale mowi tylko tyle ile musi.", "Bezposredni do granicy impertynencji.", "Cierpliwy obserwator, ktory zapamietuje wszystko.")),
-                    section("Motywacja", pick("Chroni kogos, kogo nie wymienia z imienia.", "Szuka czegoÄąâ€ş, co straci dawno temu.", "Splacono go za milczenie Ă˘â‚¬â€ť ale nie wiedzial o co chodzi.")),
-                    section("Sekret", pick("Zna odpowiedz na pytanie, ktorego gracze jeszcze nie zadali.", "Byl obecny przy zdarzeniu, o ktorym wszyscy milcza.", "Ma powod, zeby gracze nie doszli do celu Ă˘â‚¬â€ť niekoniecznie zly.")),
+                    section("Motywacja", pick("Chroni kogos, kogo nie wymienia z imienia.", "Szuka czegos, co stracil dawno temu.", "Splacono go za milczenie - ale nie wiedzial o co chodzi.")),
+                    section("Sekret", pick("Zna odpowiedz na pytanie, ktorego gracze jeszcze nie zadali.", "Byl obecny przy zdarzeniu, o ktorym wszyscy milcza.", "Ma powod, zeby gracze nie doszli do celu - niekoniecznie zly.")),
                     section("Hak dla druzyny", "NPC moze stac sie sojusznikiem, informatorem albo komplikacja. Nie pokazuj od razu, po ktorej stronie stoi.")
             );
             case "encounter_fantasy" -> List.of(
                     stats(tone, system, "Typ spotkania", stringParam(params, "encounterType", "Losowy")),
                     section("Opis sytuacji", "Druzyna wpada na " + title + ". Sytuacja wyglada prosto, dopoki ktos nie zada drugiego pytania."),
                     section("Uczestnicy", pick("Grupa najemnikow z rozkazami, o ktorych nie mowia.", "Lokalna milicja z podejrzanie konkretnym pytaniem.", "Kurier, ktory rozpoznaje jeden z symboli na ekwipunku druzyny.")),
-                    section("Cel spotkania", pick("Eskortowac, przeszkodzic albo zaobserwowac Ă˘â‚¬â€ť do wyboru w zaleznosci od decyzji graczy.", "Zbadac, wynegocjowac albo uciec Ă˘â‚¬â€ť kazda opcja prowadzi gdzie indziej.", "Pomoc, zdemaskowac albo zignorowac Ă˘â‚¬â€ť ignorowanie ma konsekwencje.")),
+                    section("Cel spotkania", pick("Eskortowac, przeszkodzic albo zaobserwowac - do wyboru w zaleznosci od decyzji graczy.", "Zbadac, wynegocjowac albo uciec - kazda opcja prowadzi gdzie indziej.", "Pomoc, zdemaskowac albo zignorowac - ignorowanie ma konsekwencje.")),
                     section("Mozliwa walka", "Walka jest mozliwa, ale nie konieczna. Jesli do niej dojdzie, jedna strona ma cel wazniejszy niz zwyciestwo."),
-                    section("Nagroda albo konsekwencja", pick("Informacja, ktora zmienia plan.", "Kontakt, ktory wrÄ‚Ĺ‚ci pozniej z wlasnym pytaniem.", "Przedmiot, ktory ktos inny bedzie chcial odzyskac."))
+                    section("Nagroda albo konsekwencja", pick("Informacja, ktora zmienia plan.", "Kontakt, ktory wroci pozniej z wlasnym pytaniem.", "Przedmiot, ktory ktos inny bedzie chcial odzyskac."))
             );
             case "trap_fantasy" -> List.of(
                     stats(tone, system, "Typ pulapki", stringParam(params, "trapType", "Losowa")),
@@ -165,8 +165,8 @@ public class FantasyQuickGeneratorStrategy implements GeneratorStrategy {
             case "loot_fantasy" -> cleanLootSections(params);
             case "faction_fantasy" -> List.of(
                     stats(tone, system, "Typ frakcji", stringParam(params, "factionType", "Losowa")),
-                    section("Nazwa i cel", title + " dziala na widoku albo z cienia Ă˘â‚¬â€ť w obu przypadkach cel jest ten sam: kontrola nad konkretnym zasobem lub tajemnica."),
-                    section("Lider", pick("Osoba publiczna, ktorej autorytetu nikt nie kwestionuje otwarcie.", "Ktos, kto formalnie nie istnieje w zadnym rejestrze.", "Komitet Ă˘â‚¬â€ť zadna decyzja nie ma jednego autora.")),
+                    section("Nazwa i cel", title + " dziala na widoku albo z cienia - w obu przypadkach cel jest ten sam: kontrola nad konkretnym zasobem lub tajemnica."),
+                    section("Lider", pick("Osoba publiczna, ktorej autorytetu nikt nie kwestionuje otwarcie.", "Ktos, kto formalnie nie istnieje w zadnym rejestrze.", "Komitet - zadna decyzja nie ma jednego autora.")),
                     section("Symbol i metody", "Typ: " + stringParam(params, "factionType", "Losowa") + ". " + pick("Dziala przez posrednikow i nigdy nie pozostawia bezposrednich sladow.", "Uzywa legalnych kanalow do nielegalnych celow.", "Oferuje pomoc najpierw, rachunek pozniej.")),
                     section("Zasoby", pick("Siec informatorow w kazdym wiekszym miescie.", "Dostep do dokumentow, ktore oficjalnie nie istnieja.", "Pieniadze i ludzie gotowi dzialac bez pytan.")),
                     section("Konflikt i slabosc", "Frakcja ma wewnetrzna sprzecznosc, ktora gracze moga wykorzystac, jesli ja znajda. Jej cel i metody nie sa tak spojne jak wyglada z zewnatrz.")
@@ -214,7 +214,7 @@ public class FantasyQuickGeneratorStrategy implements GeneratorStrategy {
                     section("Monety", purseCoins()),
                     section("Przedmioty", pick(
                             "kosciana kostka do gry, dwa guziki z liberii i zlozony rachunek z gospody",
-                            "maly grzebien, kawalek kredy, tani pierscien i zwiniÄ™ta woskowana karteczka",
+                            "maly grzebien, kawalek kredy, tani pierscien i zwinieta woskowana karteczka",
                             "naparstek, pekniety medalion, trzy paciorki modlitewne i suszony listek miety",
                             "zeton z domu gry, igla w korku, kawalek czerwonej nici i bardzo maly kluczyk"
                     )),
@@ -256,38 +256,11 @@ public class FantasyQuickGeneratorStrategy implements GeneratorStrategy {
         );
     }
 
-    private List<GeneratorOutputSection> lootSections(Map<String, Object> params) {
-        String lootType = stringParam(params, "lootType", "Losowy");
-        String rarity = stringParam(params, "rarity", "Losowa");
-        if (isPickpocketLoot(lootType)) {
-            return List.of(
-                    section("Typ", "KradzieÄąÄ˝ kieszonkowa"),
-                    section("Rzadkosc / wartosc", randomChoice(rarity) ? pick("Banalny", "Uzyteczny", "Cenny", "Dziwny", "Przeklety", "Fabularny") : rarity),
-                    section("Monety", purseCoins()),
-                    section("Przedmioty", pick(
-                            "koÄąâ€şciana kostka do gry, dwa guziki z liberiĂ„â€¦ i zÄąâ€šoÄąÄ˝ony rachunek z gospody",
-                            "maÄąâ€šy grzebieÄąâ€ž, kawaÄąâ€šek kredy, tani pierÄąâ€şcieÄąâ€ž i zwiniĂ„â„˘ta woskowana karteczka",
-                            "naparstek, pĂ„â„˘kniĂ„â„˘ty medalion, trzy paciorki modlitewne i suszony listek miĂ„â„˘ty",
-                            "ÄąÄ˝eton z domu gry, igÄąâ€ša w korku, kawaÄąâ€šek czerwonej nici i bardzo maÄąâ€šy kluczyk",
-                            "czarna wstĂ„â€¦ÄąÄ˝ka, poÄąâ€šamany sygnet, okruch bursztynu i kartka z jednĂ„â€¦ godzinĂ„â€¦"
-                    ))
-            );
-        }
-        return List.of(
-                section("Typ", lootType),
-                section("Rzadkosc / wartosc", randomChoice(rarity) ? pick("Banalny", "Uzyteczny", "Cenny", "Dziwny", "Przeklety", "Fabularny") : rarity),
-                section("Monety", pick("kilka monet rÄ‚Ĺ‚ÄąÄ˝nych mennic", "niewielka sakiewka srebra", "drobne kosztownoÄąâ€şci Äąâ€šatwe do ukrycia", "garÄąâ€şĂ„â€ˇ starych miedziakÄ‚Ĺ‚w i jedna obca zÄąâ€šota moneta", "srebrne krĂ„â€¦ÄąÄ˝ki bez wybitego herbu", "opÄąâ€šata podrÄ‚Ĺ‚ÄąÄ˝na w zapieczĂ„â„˘towanej kopercie")),
-                section("GÄąâ€šÄ‚Ĺ‚wny przedmiot", pick("pierÄąâ€şcieÄąâ€ž z herbem rodu, ktÄ‚Ĺ‚ry oficjalnie nie istnieje", "mapa z jednym nieopisanym szlakiem", "klucz bez pasujĂ„â€¦cego zamka w pobliÄąÄ˝u", "maÄąâ€šy relikwiarz pachnĂ„â€¦cy ozonem", "nÄ‚Ĺ‚ÄąÄ˝ z koÄąâ€şcianĂ„â€¦ rĂ„â„˘kojeÄąâ€şciĂ„â€¦ i Äąâ€şwieÄąÄ˝Ă„â€¦ rysĂ„â€¦", "ksiĂ„â„˘ga rachunkowa z wyrwanymi stronami", "fiolka z pÄąâ€šynem, ktÄ‚Ĺ‚ry nie zamarza")),
-                section("Dziwny detal", pick("jedna moneta jest ciepÄąâ€ša", "opakowanie pachnie kadzidÄąâ€šem", "na metalu widaĂ„â€ˇ Äąâ€şwieÄąÄ˝e zadrapania", "w sakiewce jest czyjÄąâ€ş mleczny zĂ„â€¦b", "przedmiot cichnie, gdy pada na niego Äąâ€şwiatÄąâ€šo", "na materiale wyszyto znak lokalnej frakcji")),
-                section("Sekret", pick("KtoÄąâ€ş rozpozna ten Äąâ€šup i bĂ„â„˘dzie chciaÄąâ€š wiedzieĂ„â€ˇ, skĂ„â€¦d gracze go majĂ„â€¦.", "Najcenniejszy przedmiot jest dowodem w cudzej sprawie.", "ÄąÂup pochodzi z miejsca, ktÄ‚Ĺ‚re wedÄąâ€šug mapy nie istnieje.", "Prawdziwa wartoÄąâ€şĂ„â€ˇ kryje siĂ„â„˘ w znaku, nie w materiale."))
-        );
-    }
-
     private String purseCoins() {
         return pick(
                 roll(2, 8) + " cp, " + roll(1, 6) + " sp",
                 roll(1, 12) + " cp, " + roll(2, 4) + " sp, " + roll(1, 2) + " gp",
-                roll(3, 6) + " cp i " + roll(1, 4) + " faÄąâ€šszywe srebrniki",
+                roll(3, 6) + " cp i " + roll(1, 4) + " falszywe srebrniki",
                 roll(1, 6) + " sp, " + roll(1, 4) + " gp i jedna moneta z obcej mennicy",
                 roll(4, 10) + " cp w kilku drobnych woreczkach"
         );
@@ -295,15 +268,15 @@ public class FantasyQuickGeneratorStrategy implements GeneratorStrategy {
 
     private boolean isPickpocketLoot(String lootType) {
         String normalized = normalize(lootType)
-                .replace("ÄąÄ˝", "z")
-                .replace("Ä‚Ĺ‚", "o")
-                .replace("Ă„â€¦", "a")
-                .replace("Ă„â„˘", "e")
-                .replace("Äąâ€š", "l")
-                .replace("Äąâ€ş", "s")
-                .replace("Ă„â€ˇ", "c")
-                .replace("Äąâ€ž", "n")
-                .replace("ÄąĹź", "z");
+                .replace("ż", "z")
+                .replace("ó", "o")
+                .replace("ą", "a")
+                .replace("ę", "e")
+                .replace("ł", "l")
+                .replace("ś", "s")
+                .replace("ć", "c")
+                .replace("ń", "n")
+                .replace("ź", "z");
         return normalized.contains("kradziez kieszonkowa") || normalized.contains("pickpocket") || normalized.contains("purse");
     }
 
@@ -327,7 +300,7 @@ public class FantasyQuickGeneratorStrategy implements GeneratorStrategy {
             case "npc_fantasy" -> pick("Eryn z Polnocnych Drog", "Bram Kossfeld", "Sibylle bez Nazwiska");
             case "encounter_fantasy" -> pick("Patrol z Nieoczekiwanym Rozkazem", "Uzbrojony Kurierski Konwoj", "Poszukiwacze bez Zleceniodawcy");
             case "trap_fantasy" -> pick("Pulapka Budowniczego Krypt", "Mechanizm Starej Wiey", "Magiczna Przeszkoda Bez Nazwy");
-            case "loot_fantasy" -> pick("Sakwa Nieplanowanej Ucieczki", "Skrzynka zastawiona jako dÄąâ€šug", "ÄąÂup bez mapy powrotnej", "Depozyt pod zÄąâ€šamanĂ„â€¦ pieczĂ„â„˘ciĂ„â€¦", "Paczka z cudzym herbem", "Reszta po zaginionym poborcy");
+            case "loot_fantasy" -> pick("Sakwa Nieplanowanej Ucieczki", "Skrzynka zastawiona jako dlug", "Lup bez mapy powrotnej", "Depozyt pod zlamana pieczecia", "Paczka z cudzym herbem", "Reszta po zaginionym poborcy");
             case "faction_fantasy" -> pick("Bractwo Otwartej Dloni", "Krag Bez Herbu", "Kompania Trzech Nazwisk");
             default -> pick("Pod Czarnym Kogutem", "Trzy Swiece", "Gospoda U Zlamanej Wloczni");
         };
@@ -346,7 +319,7 @@ public class FantasyQuickGeneratorStrategy implements GeneratorStrategy {
             case "npc_fantasy" -> new Spec("NPC fantasy");
             case "encounter_fantasy" -> new Spec("Spotkanie fantasy");
             case "trap_fantasy" -> new Spec("Pulapka fantasy");
-            case "loot_fantasy" -> new Spec("ÄąÂup");
+            case "loot_fantasy" -> new Spec("Lup");
             case "faction_fantasy" -> new Spec("Frakcja fantasy");
             default -> new Spec("Tawerna fantasy");
         };

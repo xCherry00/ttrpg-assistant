@@ -11,6 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import pl.ttrpgassistant.backend.user.UserEntity;
+import pl.ttrpgassistant.backend.user.UserPresence;
 import pl.ttrpgassistant.backend.user.UserRepository;
 
 import java.io.IOException;
@@ -65,6 +66,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
                 return;
             }
+            if (UserPresence.shouldRefresh(user)) {
+                user.setLastActiveAt(Instant.now());
+                userRepository.save(user);
+            }
 
             var authorities = role == null
                     ? List.<SimpleGrantedAuthority>of()
@@ -88,9 +93,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             return authHeader.substring("Bearer ".length()).trim();
-        }
-        if ("/api/realtime/events".equals(request.getServletPath())) {
-            return request.getParameter("token");
         }
         return null;
     }

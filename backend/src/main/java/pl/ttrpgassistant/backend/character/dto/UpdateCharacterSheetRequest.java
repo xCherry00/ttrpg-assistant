@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import java.util.List;
+import java.util.Map;
 import pl.ttrpgassistant.backend.common.validation.SafeImageOrHttpUrl;
 
 public record UpdateCharacterSheetRequest(
@@ -16,5 +17,6 @@ public record UpdateCharacterSheetRequest(
         @Min(0) @Max(999) Integer currentHp,
         @Min(0) @Max(999) Integer tempHp,
         @Size(max = 12000) String privateNotes,
-        List<@Size(max = 200) String> inventory
+        List<@Size(max = 200) String> inventory,
+        Map<String, Object> sheetJson
 ) {}

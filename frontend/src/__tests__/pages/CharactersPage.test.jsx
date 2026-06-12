@@ -65,14 +65,13 @@ describe("CharactersPage", () => {
     charactersApi.deleteCharacter.mockResolvedValue({});
     global.URL.createObjectURL = vi.fn(() => "blob:mock");
     global.URL.revokeObjectURL = vi.fn();
-    window.print = vi.fn();
   });
 
-  it("renders sidebar actions including print and no backend PDF button", async () => {
+  it("renders sidebar actions without print or backend PDF button", async () => {
     renderPage();
     expect(await screen.findByRole("button", { name: "Eksportuj JSON" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Importuj JSON" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Drukuj" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Drukuj" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /PDF/i })).not.toBeInTheDocument();
   });
 
@@ -101,13 +100,10 @@ describe("CharactersPage", () => {
     await waitFor(() => expect(charactersApi.quickCreateCocCharacter).toHaveBeenCalled());
   });
 
-  it("supports save, delete and print flow", async () => {
+  it("supports save and delete flow", async () => {
     renderPage();
     fireEvent.click(await screen.findByRole("button", { name: "save-sheet" }));
     await waitFor(() => expect(charactersApi.updateCharacterSheet).toHaveBeenCalled());
-
-    fireEvent.click(screen.getByRole("button", { name: "Drukuj" }));
-    expect(window.print).toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole("button", { name: "Usuń postać" }));
     fireEvent.click(screen.getByRole("button", { name: "Potwierdz usuniecie" }));

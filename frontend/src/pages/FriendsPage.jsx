@@ -34,8 +34,9 @@ function userTag(user) {
 }
 
 function statusText(user) {
+  if (typeof user?.online === "boolean") return user.online ? "Online" : "Offline";
   const activity = String(user?.activityLabel || "").toLowerCase();
-  if (user?.online || activity.includes("aktywny teraz") || activity.includes("online")) return "Online";
+  if (activity.includes("aktywny teraz") || activity.includes("online")) return "Online";
   return "Offline";
 }
 

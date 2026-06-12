@@ -81,7 +81,7 @@ export default function ParticipantsPanel({
         {(participants || []).length === 0 ? (
           <div className="empty">
             <div className="emptyTitle">Brak participantow</div>
-            <div className="emptyText">Dodaj postac kampanii albo customowego przeciwnika.</div>
+            <div className="emptyText">Dodaj postać kampanii albo własnego przeciwnika.</div>
           </div>
         ) : (
           <div className="initTableScroll">
@@ -133,9 +133,9 @@ export default function ParticipantsPanel({
 
       <section className="initControlPanel">
         <form onSubmit={onSubmitCharacter} className="initToolbar" style={{ alignItems: "flex-end" }}>
-          <span className="initControlLabel">Dodaj postac kampanii</span>
+          <span className="initControlLabel">Dodaj postać kampanii</span>
           <select className="cellSelect" value={characterForm.characterId} onChange={(e) => onCharacterFormChange({ ...characterForm, characterId: e.target.value })}>
-            <option value="">- wybierz postac -</option>
+            <option value="">- wybierz postać -</option>
             {campaignCharacters.map((character) => (
               <option key={character.characterId} value={character.characterId}>{character.characterName}</option>
             ))}
@@ -144,7 +144,7 @@ export default function ParticipantsPanel({
           <input className="cellInput cellInput--tiny" type="number" placeholder="Mod" value={characterForm.initiativeModifier} onChange={(e) => onCharacterFormChange({ ...characterForm, initiativeModifier: e.target.value })} />
           <input className="cellInput cellInput--tiny" type="number" placeholder="Max HP" value={characterForm.maxHp} onChange={(e) => onCharacterFormChange({ ...characterForm, maxHp: e.target.value })} />
           <input className="cellInput cellInput--tiny" type="number" placeholder="Cur HP" value={characterForm.currentHp} onChange={(e) => onCharacterFormChange({ ...characterForm, currentHp: e.target.value })} />
-          <button className="btn btn-primary" disabled={characterDisabled} type="submit">Dodaj postac</button>
+          <button className="btn btn-primary" disabled={characterDisabled} type="submit">Dodaj postać</button>
         </form>
       </section>
     </>

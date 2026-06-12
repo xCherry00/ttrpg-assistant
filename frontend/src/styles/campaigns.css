@@ -1866,6 +1866,75 @@
   overflow: hidden !important;
 }
 
+@media (max-width: 760px) {
+  .campaignsSaas,
+  .appContentInner:has(.campaignsSaas) .campaignsSaas {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    overflow: visible !important;
+  }
+
+  .campaignListTabs,
+  .campaignQuickActions,
+  .campaignToolbar,
+  .campaignFilterPills,
+  .campaignSort,
+  .campaignsMain,
+  .campaignsLayout,
+  .appContentInner:has(.campaignsSaas) .campaignToolbar,
+  .appContentInner:has(.campaignsSaas) .campaignsLayout {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .campaignToolbar,
+  .appContentInner:has(.campaignsSaas) .campaignToolbar {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .campaignFilterPills {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    overflow: visible !important;
+    justify-content: flex-start !important;
+  }
+
+  .campaignFilterPills button {
+    flex: 0 0 auto !important;
+  }
+
+  .campaignSort select {
+    width: 100% !important;
+  }
+
+  .campaignListTabs {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-column: 1 !important;
+    justify-self: stretch !important;
+  }
+
+  .campaignListTabs button {
+    width: auto !important;
+    min-width: 0 !important;
+    padding-inline: 10px !important;
+  }
+
+  .campaignsMain {
+    padding-right: 0 !important;
+  }
+
+  .campaignGrid,
+  .appContentInner:has(.campaignsSaas) .campaignGrid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 @media (max-width: 560px) {
   .campaignJoinModal {
     width: calc(100vw - 24px);

@@ -1,5 +1,7 @@
 package pl.ttrpgassistant.backend.messages.dto;
 
+import java.time.Instant;
+
 public record MessageUserPreviewResponse(
         long id,
         String handle,
@@ -8,6 +10,8 @@ public record MessageUserPreviewResponse(
         String displayName,
         String avatarUrl,
         String profileBannerUrl,
-        String activityLabel
+        boolean online,
+        String activityLabel,
+        Instant lastActiveAt
 ) {
 }

@@ -64,9 +64,9 @@ function displayName(item, index) {
 }
 
 function statusLabel(status) {
-  if (status === "available") return "Dostepny";
-  if (status === "maybe") return "Moze";
-  if (status === "unavailable") return "Niedostepny";
+  if (status === "available") return "Dostępny";
+  if (status === "maybe") return "Może";
+  if (status === "unavailable") return "Niedostępny";
   return "Brak odp.";
 }
 
@@ -104,7 +104,7 @@ export default function CampaignAvailabilityPanel({ campaignId, sessions, member
         const self = data?.responses?.find((item) => item.self);
         setWeek(parseWeekNote(self?.note, self?.status));
       } catch (err) {
-        if (!cancelled) setError(err?.message || "Nie udalo sie pobrac dostepnosci.");
+        if (!cancelled) setError(err?.message || "Nie udało się pobrać dostępności.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -128,9 +128,9 @@ export default function CampaignAvailabilityPanel({ campaignId, sessions, member
       const payload = { status: apiStatusFromWeek(week), note: stringifyWeekNote(week) };
       const data = await updateMySessionAttendance(token, campaignId, session.id, payload);
       setAttendance(data);
-      setNotice("Zapisano dostepnosc na tydzien.");
+      setNotice("Zapisano dostępność na tydzień.");
     } catch (err) {
-      setError(err?.message || "Nie udalo sie zapisac dostepnosci.");
+      setError(err?.message || "Nie udało się zapisać dostępności.");
     } finally {
       setSaving(false);
     }
@@ -156,32 +156,32 @@ export default function CampaignAvailabilityPanel({ campaignId, sessions, member
     <section className="campaignDetailsCard panel-soft campaignAvailabilityPanel">
       <div className="campaignAvailabilityHeader">
         <div>
-          <h2 className="campaignDetailsCardTitle">Dostepnosc</h2>
+          <h2 className="campaignDetailsCardTitle">Dostępność</h2>
           <p className="campaignDetailsHelpText">
-            Zaznacz, kiedy pasuje Ci gra w tygodniu najblizszej sesji. Dane sa zapisywane w odpowiedzi frekwencji sesji.
+            Zaznacz, kiedy pasuje Ci gra w tygodniu najbliższej sesji. Dane są zapisywane w odpowiedzi frekwencji sesji.
           </p>
         </div>
         <span className="campaignMemberBadge">{session?.title || "Brak sesji"}</span>
       </div>
 
-      {!session ? <div className="campaignDetailsEmpty">Brak sesji, dla ktorej mozna zbierac dostepnosc.</div> : null}
-      {loading ? <div className="campaignDetailsEmpty">Ladowanie dostepnosci...</div> : null}
+      {!session ? <div className="campaignDetailsEmpty">Brak sesji, dla której można zbierać dostępność.</div> : null}
+      {loading ? <div className="campaignDetailsEmpty">Ładowanie dostępności...</div> : null}
       {error ? <div className="campaignDetailsError">{error}</div> : null}
       {notice ? <div className="campaignDetailsNotice">{notice}</div> : null}
 
       {session && !loading ? (
         <div className="campaignAvailabilityWorkspace">
           <div className="campaignAvailabilityVoteCard">
-            <strong>Twoja dostepnosc</strong>
+            <strong>Twoja dostępność</strong>
             <small>{myResponse?.status ? `Aktualny status sesji: ${myResponse.status}` : "Nie zapisano jeszcze odpowiedzi."}</small>
-            <div className="campaignAvailabilityWeekEditor" aria-label="Twoja tygodniowa dostepnosc">
+            <div className="campaignAvailabilityWeekEditor" aria-label="Twoja tygodniowa dostępność">
               {WEEK_DAYS.map((day) => (
                 <div key={day} className="campaignAvailabilityDayEditor">
                   <span>{day}</span>
                   <div>
                     {[
-                      ["available", "Dostepny"],
-                      ["maybe", "Moze"],
+                      ["available", "Dostępny"],
+                      ["maybe", "Może"],
                       ["unavailable", "Nie"],
                       ["none", "-"],
                     ].map(([status, label]) => (
@@ -200,13 +200,13 @@ export default function CampaignAvailabilityPanel({ campaignId, sessions, member
               ))}
             </div>
             <button className="campaignDetailsPrimaryBtn" type="button" disabled={saving} onClick={saveWeek}>
-              {saving ? "Zapisywanie..." : "Zapisz dostepnosc"}
+              {saving ? "Zapisywanie..." : "Zapisz dostępność"}
             </button>
           </div>
 
           <div className="campaignAvailabilityTableCard">
-            <strong>Podglad graczy</strong>
-            <div className="campaignAvailabilityTable" role="table" aria-label="Dostepnosc graczy w tygodniu">
+            <strong>Podgląd graczy</strong>
+            <div className="campaignAvailabilityTable" role="table" aria-label="Dostępność graczy w tygodniu">
               <div className="campaignAvailabilityTableHead" role="row">
                 <span role="columnheader">Gracz</span>
                 {WEEK_DAYS.map((day) => <span key={day} role="columnheader">{day}</span>)}
@@ -221,9 +221,9 @@ export default function CampaignAvailabilityPanel({ campaignId, sessions, member
               ))}
             </div>
             <div className="campaignAvailabilityLegend">
-              <span><AvailabilityDot status="available" /> Dostepny</span>
-              <span><AvailabilityDot status="maybe" /> Moze</span>
-              <span><AvailabilityDot status="unavailable" /> Niedostepny</span>
+              <span><AvailabilityDot status="available" /> Dostępny</span>
+              <span><AvailabilityDot status="maybe" /> Może</span>
+              <span><AvailabilityDot status="unavailable" /> Niedostępny</span>
               <span><AvailabilityDot status="none" /> Brak odp.</span>
             </div>
           </div>

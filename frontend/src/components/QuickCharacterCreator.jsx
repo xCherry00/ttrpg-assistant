@@ -64,8 +64,8 @@ export default function QuickCharacterCreator({ onCreate, creating, onBack }) {
       </div>
 
       <div className="charactersActionsFooter">
-        {onBack && <button type="button" className="charactersGhostBtn" disabled={creating} onClick={onBack}>Wroc do systemow</button>}
-        <button type="button" className="charactersPrimaryBtn" disabled={creating || !form.name.trim()} onClick={() => onCreate(form)}>{creating ? "Tworzenie..." : "Utworz postac"}</button>
+        {onBack && <button type="button" className="charactersGhostBtn" disabled={creating} onClick={onBack}>Wróć do systemów</button>}
+        <button type="button" className="charactersPrimaryBtn" disabled={creating || !form.name.trim()} onClick={() => onCreate(form)}>{creating ? "Tworzenie..." : "Utwórz postać"}</button>
       </div>
     </div>
   );

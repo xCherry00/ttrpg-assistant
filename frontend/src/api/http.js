@@ -11,26 +11,26 @@ export function unwrapPage(data) {
 function mapErrorMessage(status, rawMessage) {
   const message = String(rawMessage || "").toLowerCase();
 
-  if (status === 401) return "Sesja wygasla. Zaloguj sie ponownie.";
-  if (status === 403) return "Nie masz uprawnien do tej operacji.";
+  if (status === 401) return "Sesja wygasła. Zaloguj się ponownie.";
+  if (status === 403) return "Nie masz uprawnień do tej operacji.";
   if (status === 404) return "Nie znaleziono zasobu.";
-  if (status === 409) return "Konflikt danych. Odswiez widok i sprobuj ponownie.";
-  if (status === 422 || status === 400) return "Niepoprawne dane formularza. Sprawdz pola i sprobuj ponownie.";
-  if (status >= 500) return "Wystapil nieoczekiwany blad. Sprobuj ponownie.";
+  if (status === 409) return "Konflikt danych. Odśwież widok i spróbuj ponownie.";
+  if (status === 422 || status === 400) return "Niepoprawne dane formularza. Sprawdź pola i spróbuj ponownie.";
+  if (status >= 500) return "Wystąpił nieoczekiwany błąd. Spróbuj ponownie.";
 
-  if (!message) return "Wystapil nieoczekiwany blad. Sprobuj ponownie.";
+  if (!message) return "Wystąpił nieoczekiwany błąd. Spróbuj ponownie.";
 
   if (message.includes("unable to reach the server") || message.includes("network error")) {
-    return "Brak polaczenia z serwerem. Sprawdz polaczenie i sprobuj ponownie.";
+    return "Brak połączenia z serwerem. Sprawdź połączenie i spróbuj ponownie.";
   }
   if (message.includes("compendium system not found")) {
-    return "Nie udalo sie pobrac danych kompendium. Sprobuj ponownie za chwile.";
+    return "Nie udało się pobrać danych kompendium. Spróbuj ponownie za chwilę.";
   }
   if (message.includes("unexpected error")) {
-    return "Wystapil nieoczekiwany blad. Sprobuj ponownie.";
+    return "Wystąpił nieoczekiwany błąd. Spróbuj ponownie.";
   }
 
-  return "Wystapil nieoczekiwany blad. Sprobuj ponownie.";
+  return "Wystąpił nieoczekiwany błąd. Spróbuj ponownie.";
 }
 
 /**
@@ -114,7 +114,7 @@ export async function httpRequest(
   } catch (err) {
     // Re-throw with additional context
     if (err instanceof TypeError) {
-      throw new Error("Brak polaczenia z serwerem. Sprawdz polaczenie i sprobuj ponownie.");
+      throw new Error("Brak połączenia z serwerem. Sprawdź połączenie i spróbuj ponownie.");
     }
     throw err;
   }

@@ -13,5 +13,8 @@ public record CampaignMemberResponse(
         boolean owner,
         boolean mg,
         boolean self,
+        boolean online,
+        String activityLabel,
+        Instant lastActiveAt,
         Instant joinedAt
 ) {}
