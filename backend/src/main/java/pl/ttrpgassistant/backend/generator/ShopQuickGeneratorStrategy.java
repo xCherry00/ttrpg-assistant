@@ -59,15 +59,15 @@ public class ShopQuickGeneratorStrategy implements GeneratorStrategy {
         List<GeneratorOutputSection> base = List.of(
                 section("Nazwa", name),
                 section("Typ i klimat", shopType + " | " + (randomChoice(shopMood) ? pick("Zwyczajny", "Podejrzany", "Ekskluzywny", "Zaniedbany", "Tajemniczy", "Objazdowy", "Nielegalny") : shopMood)),
-                section("Wlasciciel", pick("Mira, byla zwiadowczyni", "Orven, cierpliwy rzemieslnik", "Dalia, kupczyni z pamiecia do twarzy")),
-                section("Oferta dnia", pick("10% taniej na podstawowe racje", "drugi drobiazg pol ceny", "jedna usluga identyfikacji gratis", "ostrzenie broni bez oplaty przy wiekszym zakupie")),
-                section("Specjalny towar", pick("mapa kanalow", "swieca palaca sie niebieskim plomieniem", "zamknieta szkatulka bez klucza", "kompas wskazujacy osobe zamiast polnocy", "pudelko z czarnym piaskiem"))
+                section("Właściciel", pick("Mira, była zwiadowczyni", "Orven, cierpliwy rzemieślnik", "Dalia, kupczyni z pamięcią do twarzy")),
+                section("Oferta dnia", pick("10% taniej na podstawowe racje", "drugi drobiazg pol ceny", "jedna usluga identyfikacji gratis", "ostrzenie broni bez oplaty przy większym zakupie")),
+                section("Specjalny towar", pick("mapa kanalow", "swieca palaca sie niebieskim płomieniem", "zamknieta szkatulka bez klucza", "kompas wskazujacy osobe zamiast północy", "pudelko z czarnym piaskiem"))
         );
 
         return List.of(
                 base.get(0), base.get(1), base.get(2), base.get(3),
                 base.get(4),
-                section("Problem sklepu", pick("Wlasciciel jest szantazowany.", "Towar znika noca.", "Sklep ma ukryte zaplecze.", "Towar dnia jest przeklety.", "Na zapleczu ukrywa sie ranny czlowiek."))
+                section("Problem sklepu", pick("Właściciel jest szantazowany.", "Towar znika noca.", "Sklep ma ukryte zaplecze.", "Towar dnia jest przeklety.", "Na zapleczu ukrywa sie ranny czlowiek."))
         );
     }
 

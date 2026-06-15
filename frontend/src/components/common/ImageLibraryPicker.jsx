@@ -8,14 +8,15 @@ export default function ImageLibraryPicker({
   label = "Obraz",
   helpText = "Wybierz obraz z biblioteki.",
   disabled = false,
-  previewAlt = "Podglad obrazu",
+  previewAlt = "Podgląd obrazu",
+  className = "",
 }) {
   const items = imageLibraryItems(type);
   const selected = items.find((item) => item.src === value) || null;
   const previewSrc = value || imagePlaceholder(type);
 
   return (
-    <div className="imageLibraryPicker">
+    <div className={`imageLibraryPicker${className ? ` ${className}` : ""}`}>
       <div className="imageLibraryPicker__head">
         <div>
           <span>{label}</span>

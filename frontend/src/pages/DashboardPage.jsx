@@ -192,7 +192,7 @@ function RoleDonutChart({ items, total }) {
 
   return (
     <div className="dashboardRoleChart2026">
-      <svg className="dashboardRoleSvg2026" viewBox="0 0 120 120" role="img" aria-label="Diagram kampanii wedlug roli GM i gracz">
+      <svg className="dashboardRoleSvg2026" viewBox="0 0 120 120" role="img" aria-label="Diagram kampanii według roli GM i gracz">
         <circle className="dashboardRoleTrack2026" cx="60" cy="60" r="42" />
         {positiveTotal > 0 ? visibleItems.map((item, index) => {
           const value = Math.max(0, Number(item.value || 0));
@@ -238,7 +238,7 @@ function RoleDonutChart({ items, total }) {
         ))}
       </div>
       <div className={`dashboardRoleTooltip2026${activeItem ? " is-visible" : ""}`} role="status" aria-live="polite">
-        {activeItem ? `${activeItem.label}: ${activeItem.value}` : `Lacznie kampanii: ${total}`}
+        {activeItem ? `${activeItem.label}: ${activeItem.value}` : `Łącznie kampanii: ${total}`}
       </div>
     </div>
   );
@@ -288,7 +288,7 @@ function buildActivity(campaigns, characters, sessions) {
   const campaignRows = campaigns.map((campaign) => ({
     id: `campaign-${campaign.id}`,
     icon: "briefcase",
-    text: `Kampania ${campaign.title || "bez nazwy"} jest dostepna w twoim workspace.`,
+    text: `Kampania ${campaign.title || "bez nazwy"} jest dostępna w twoim workspace.`,
     time: campaignUpdatedAt(campaign),
     fallback: "Kampania",
   }));
@@ -297,7 +297,7 @@ function buildActivity(campaigns, characters, sessions) {
     icon: "users",
     text: `Postać ${character.name || "bez nazwy"} jest gotowa do gry.`,
     time: character.updatedAt || character.createdAt || 0,
-    fallback: "Postac",
+    fallback: "Postać",
   }));
   const sessionRows = sessions.map((session) => ({
     id: `session-${session.id}`,
@@ -549,18 +549,18 @@ export default function DashboardPage() {
                 )}
                 <Link className="dashboardHero__secondary" to={`/campaigns/${heroSession.campaignId}`}>
                   <DashboardIcon name="users" />
-                  Otworz kampanie
+                  Otwórz kampanię
                 </Link>
               </div>
             </>
           ) : (
             <>
               <h2>Nie masz jeszcze zaplanowanej sesji</h2>
-              <p>Przydaloby sie to zmienic: zaplanuj termin w kampanii, a ten panel pokaze najblizsze spotkanie druzyny.</p>
+              <p>Przydałoby się to zmienić: zaplanuj termin w kampanii, a ten panel pokaże najbliższe spotkanie drużyny.</p>
               <div className="dashboardHero__actions">
                 <Link className="dashboardHero__secondary" to="/campaigns">
                   <DashboardIcon name="briefcase" />
-                  Przejdz do kampanii
+                  Przejdź do kampanii
                 </Link>
               </div>
             </>

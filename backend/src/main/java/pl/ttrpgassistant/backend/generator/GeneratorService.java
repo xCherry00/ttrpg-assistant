@@ -550,7 +550,7 @@ public class GeneratorService {
         int budget = DND_XP_THRESHOLDS.getOrDefault(partyLevel, DND_XP_THRESHOLDS.get(5))[difficultyIndex] * partySize;
         double maxCr = Math.max(0.25, Math.min(partyLevel + 2, 10));
         List<EncounterCreature> candidates = DND_SRD_ENCOUNTER_POOL.stream()
-                .filter(creature -> creature.challengeRating() <= maxCr)
+                .filter(creaturę -> creaturę.challengeRating() <= maxCr)
                 .sorted((left, right) -> Integer.compare(right.xp(), left.xp()))
                 .toList();
 
@@ -590,8 +590,8 @@ public class GeneratorService {
         };
         budget = Math.round(budget * (partySize / 4.0f));
         Map<String, Object> pool = readPayload(findPool("encounter", "pf2e", "default"));
-        List<Object> creatures = asList(pool.get("creatures"));
-        Map<String, Object> creature = asMap(pickObject(creatures));
+        List<Object> creaturęs = asList(pool.get("creaturęs"));
+        Map<String, Object> creaturę = asMap(pickObject(creaturęs));
 
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("System", "Pathfinder 2E");
@@ -599,8 +599,8 @@ public class GeneratorService {
         payload.put("Liczba graczy", partySize);
         payload.put("Trudność", difficulty);
         payload.put("Budżet XP", budget);
-        payload.put("Propozycja", creature.get("name") + " x2 albo jeden mocniejszy przeciwnik z poziomu " + partyLevel);
-        payload.put("Środowisko", creature.get("environment"));
+        payload.put("Propozycja", creaturę.get("name") + " x2 albo jeden mocniejszy przeciwnik z poziomu " + partyLevel);
+        payload.put("Środowisko", creaturę.get("environment"));
         return result("encounter", "pf2e", "Encounter PF2E", payload, "algorithm");
     }
 
@@ -980,7 +980,7 @@ public class GeneratorService {
                 results.add(item);
             }
         }
-        return results.isEmpty() ? "slad po poprzednim wlascicielu" : String.join("; ", results);
+        return results.isEmpty() ? "ślad po poprzednim właścicielu" : String.join("; ", results);
     }
 
     private boolean isRandomChoice(String value) {

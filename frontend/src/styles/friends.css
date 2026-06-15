@@ -795,6 +795,7 @@
   width: 18px;
   height: 18px;
   flex: 0 0 auto;
+  object-fit: contain;
   fill: none;
   stroke: currentColor;
   stroke-width: 2;
@@ -1246,6 +1247,11 @@
 .friendsPrimaryAction,
 .friendsSecondaryAction {
   min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
 }
 
 .friendsInfoCard {

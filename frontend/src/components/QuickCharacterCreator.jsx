@@ -47,7 +47,7 @@ export default function QuickCharacterCreator({ onCreate, creating, onBack }) {
 
       <div className="charactersPortraitPicker">
         <div className="charactersPortraitPreview">
-          <img src={form.portraitUrl || imagePlaceholder("characterAvatars")} alt="Podglad portretu" />
+          <img src={form.portraitUrl || imagePlaceholder("characterAvatars")} alt="Podgląd portretu" />
         </div>
         <div className="charactersPortraitControls">
           <div className="charactersEyebrow">Portret</div>

@@ -61,7 +61,7 @@ const GENERATOR_CATEGORY_CONFIG = [
   { value: "characters", label: "Postacie", icon: "hood", aliases: ["name", "npc", "coc_investigator_npc", "character", "person"] },
   { value: "locations", label: "Lokacje", icon: "castle", aliases: ["location", "tavern", "shop_fantasy", "settlement_fantasy", "district_fantasy", "castle_fantasy", "place"] },
   { value: "organizations", label: "Organizacje", icon: "shield", aliases: ["faction", "organization", "organisations", "organizations"] },
-  { value: "world", label: "Swiat", icon: "planet", aliases: ["fantasy_world", "calendar_fantasy", "demographics_fantasy", "scifi_world", "star_system", "world"] },
+  { value: "world", label: "Świat", icon: "planet", aliases: ["fantasy_world", "calendar_fantasy", "demographics_fantasy", "scifi_world", "star_system", "world"] },
   { value: "adventures", label: "Przygody", icon: "scroll", aliases: ["hook", "quest_fantasy", "encounter", "encounter_quick", "complication_quick", "adventure", "scene"] },
   { value: "items", label: "Przedmioty", icon: "chest", aliases: ["loot", "loot_fantasy", "magic_item", "item", "treasure"] },
   { value: "clues", label: "Wskazowki", icon: "eye", aliases: ["clue", "document_quick", "hint", "evidence"] },
@@ -245,9 +245,9 @@ const CARD_META = {
     order: 180,
   },
   fantasy_world: {
-    title: "Swiat fantasy",
+    title: "Świat fantasy",
     tag: "Worldbuilding",
-    description: "Swiat fantasy z magia, geografia, konfliktem, krolestwem i sekretem.",
+    description: "Świat fantasy z magią, geografią, konfliktem, królestwem i sekretem.",
     tone: "green",
     icon: "planet",
     order: 240,
@@ -293,9 +293,9 @@ const CARD_META = {
     order: 135,
   },
   scifi_world: {
-    title: "Swiat sci-fi",
+    title: "Świat sci-fi",
     tag: "Planeta",
-    description: "Swiat sci-fi z technologia, rzadem, kultura, konfliktem i sekretem.",
+    description: "Świat sci-fi z technologią, rządem, kulturą, konfliktem i sekretem.",
     tone: "blue",
     icon: "planet",
     order: 135,
@@ -1251,7 +1251,7 @@ const GENERATOR_RESULT_KINDS = {
 
 const GENERATOR_RESULT_FIELDS = {
   npc: [
-    ["Imie", ["imie", "name", "nazwa"]],
+    ["Imię", ["imie", "name", "nazwa"]],
     ["Rola", ["rola", "role", "profesja", "zawod"]],
     ["Wyglad", ["wyglad", "appearance"]],
     ["Osobowosc", ["osobowosc", "personality"]],
@@ -1264,7 +1264,7 @@ const GENERATOR_RESULT_FIELDS = {
     ["Klimat", ["klimat", "atmosfera", "mood"]],
     ["Opis", ["opis", "description"]],
     ["Wazny detal", ["detal", "wazny detal"]],
-    ["Zagrozenie lub tajemnica", ["zagrozenie", "tajemnica", "sekret", "secret"]],
+    ["Zagrożenie lub tajemnica", ["zagrozenie", "tajemnica", "sekret", "secret"]],
   ],
   organization: [
     ["Nazwa", ["nazwa", "name"]],
@@ -1283,14 +1283,14 @@ const GENERATOR_RESULT_FIELDS = {
   ],
   adventure: [
     ["Problem", ["problem", "co sie dzieje"]],
-    ["Zleceniodawca / zrodlo", ["zleceniodawca", "zrodlo", "source"]],
+    ["Zleceniodawca / źródło", ["zleceniodawca", "zrodlo", "source"]],
     ["Komplikacja / twist", ["komplikacja", "twist", "zwrot"]],
     ["Pierwszy trop", ["trop", "wskazowka", "wskazowka", "clue"]],
     ["Konsekwencja porazki", ["konsekwencja", "porazka", "failure"]],
   ],
   loot: [
     ["Monety", ["monety", "coins"]],
-    ["Glowny przedmiot", ["glowny", "przedmiot", "item"]],
+    ["Główny przedmiot", ["glowny", "przedmiot", "item"]],
     ["Dziwny detal", ["dziwny", "detal", "quirk"]],
     ["Sekret albo ukryta wlasciwosc", ["sekret", "ukryta", "wlasciwosc"]],
   ],
@@ -1312,8 +1312,8 @@ const GENERATOR_RESULT_FIELDS = {
   dungeonAdvanced: [
     ["Nazwa lochu", ["nazwa", "name"]],
     ["Legenda", ["legenda", "legend"]],
-    ["Lista pomieszczen", ["pomieszczenia", "rooms"]],
-    ["Specjalne zagrozenia", ["zagrozenia", "hazards"]],
+    ["Lista pomieszczeń", ["pomieszczenia", "rooms"]],
+    ["Specjalne zagrożenia", ["zagrozenia", "hazards"]],
     ["Skarb albo cel wyprawy", ["skarb", "cel", "treasure", "goal"]],
   ],
   event: [
@@ -1321,13 +1321,13 @@ const GENERATOR_RESULT_FIELDS = {
     ["Uczestnicy", ["uczestnicy", "participants"]],
     ["Miejsce", ["miejsce", "place", "location"]],
     ["Skutek", ["skutek", "effect"]],
-    ["Mozliwa reakcja graczy", ["reakcja", "graczy", "reaction"]],
+    ["Możliwa reakcja graczy", ["reakcja", "graczy", "reaction"]],
   ],
   food: [
     ["Nazwa potrawy", ["nazwa", "potrawa", "dish"]],
-    ["Skladniki", ["skladniki", "ingredients"]],
+    ["Składniki", ["skladniki", "ingredients"]],
     ["Smak", ["smak", "taste"]],
-    ["Cena albo dostepnosc", ["cena", "dostepnosc", "price"]],
+    ["Cena albo dostępność", ["cena", "dostepnosc", "price"]],
     ["Efekt fabularny", ["efekt", "fabularny", "story"]],
   ],
 };
@@ -1364,7 +1364,7 @@ function NameGeneratorResult({ result, sections, activeValues, icon }) {
         <div>
           <h2>Wygenerowane imiona i nazwiska</h2>
           <p>
-            Kultura: {safeResultValue(activeValues?.culture || activeValues?.Culture, "Losowa")}  - Format: {safeResultValue(activeValues?.nameFormat || activeValues?.format, "Imie + nazwisko")}  - Plec: {safeResultValue(activeValues?.gender, "Losowa")}
+            Kultura: {safeResultValue(activeValues?.culture || activeValues?.Culture, "Losowa")}  - Format: {safeResultValue(activeValues?.nameFormat || activeValues?.format, "Imię + nazwisko")}  - Płeć: {safeResultValue(activeValues?.gender, "Losowa")}
           </p>
         </div>
       </div>
@@ -1801,7 +1801,7 @@ export default function GeneratorsPage() {
               ) : (
                 <div className="generatorWindowEmpty">
                   <GeneratorIcon name={activeDefinition?.icon || "spark"} />
-                  <strong>Wynik pojawi sie tutaj</strong>
+                  <strong>Wynik pojawi się tutaj</strong>
                   <span>Ustaw parametry po lewej i uruchom generator.</span>
                 </div>
               )}
@@ -1818,7 +1818,7 @@ export default function GeneratorsPage() {
         <section className="generatorCatalogWarning" role="status">
           <div>
             <strong>Katalog generatorow dziala w trybie awaryjnym.</strong>
-            <span>{catalogError || "Nie udalo sie pobrac pelnej listy generatorow z backendu."}</span>
+            <span>{catalogError || "Nie udało się pobrać pełnej listy generatorów z backendu."}</span>
           </div>
           <button type="button" onClick={() => setCatalogReloadKey((value) => value + 1)} disabled={catalogLoading}>
             {catalogLoading ? "Sprawdzam..." : "Sprobuj ponownie"}
@@ -1867,7 +1867,7 @@ export default function GeneratorsPage() {
             <label className="generatorsSort">
               <span>Sortuj:</span>
               <select value={catalogSort} onChange={(event) => setCatalogSort(event.target.value)}>
-                <option value="popular">Popularnosc</option>
+                <option value="popular">Popularność</option>
                 <option value="name">Nazwa</option>
                 <option value="type">Typ</option>
               </select>
@@ -1915,7 +1915,7 @@ export default function GeneratorsPage() {
             })}
             {!catalogLoading && visibleCatalog.length === 0 && (
               <div className="generatorCatalogEmpty">
-                Brak generatorow dla wybranych filtrow. Zmien kategorie lub wyszukiwana fraze.
+                Brak generatorów dla wybranych filtrów. Zmień kategorię lub wyszukiwaną frazę.
               </div>
             )}
           </section>

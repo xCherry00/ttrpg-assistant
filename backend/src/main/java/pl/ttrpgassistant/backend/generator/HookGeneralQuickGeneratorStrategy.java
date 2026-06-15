@@ -47,14 +47,14 @@ public class HookGeneralQuickGeneratorStrategy implements GeneratorStrategy {
                 new GeneratorOutputSection("stats", "Podsumowanie", null, List.of(
                         item("Setting", setting),
                         item("Rodzaj", displayKind(kind, entry)),
-                        item("Stawka", randomChoice(stakes) ? pick(List.of("Los osady", "Artefakt", "Znikniecia", "Dlug", "Rytual")) : stakes),
+                        item("Stawka", randomChoice(stakes) ? pick(List.of("Los osady", "Artefakt", "Zniknięcia", "Dług", "Rytuał")) : stakes),
                         item("Poziom komplikacji", twistLevel)
                 )),
                 section("Problem", problemFor(setting, entry)),
-                section("Zleceniodawca / zrodlo", pick(List.of("lokalny urzednik ukrywajacy presje frakcji", "swiadek, ktory mowi prawde tylko czesciowo", "rodzina ofiary", "anonimowy list zostawiony w bezpiecznym miejscu"))),
+                section("Zleceniodawca / źródło", pick(List.of("lokalny urzednik ukrywajacy presje frakcji", "swiadek, który mowi prawde tylko częściowo", "rodzina ofiary", "anonimowy list zostawiony w bezpiecznym miejscu"))),
                 section("Komplikacja / twist", twistFor(twistLevel, setting)),
                 section("Pierwszy trop", leadFor(setting, entry)),
-                section("Konsekwencja porazki", consequenceFor(setting))
+                section("Konsekwencja porażki", consequenceFor(setting))
         );
 
         return new GeneratorStructuredResultResponse(
@@ -119,29 +119,29 @@ public class HookGeneralQuickGeneratorStrategy implements GeneratorStrategy {
         return switch (looseKey(twistLevel)) {
             case "moralnie niejednoznaczny" -> pick(List.of(
                     "Uratowanie jednej osoby zaszkodzi wielu innym.",
-                    "Zabojca dzialal w obronie kogos slabszego.",
+                    "Zabojca działal w obronie kogos slabszego.",
                     "Artefakt nie powinien zostac odzyskany."
             ));
             case "mroczny" -> pick(List.of(
-                    "Rytual juz sie rozpoczal.",
+                    "Rytuał już się rozpoczął.",
                     "Zaginiona osoba nie chce zostac znaleziona.",
                     "Nagroda jest przekleta."
             ));
             default -> pick(List.of(
                     "Zleceniodawca jest winny.",
                     "Prawdziwy wrog udaje pomocnika.",
-                    "Zlecenie jest testem lojalnosci.",
-                    "Potwor chroni wiekszy sekret."
+                    "Zlecenie jest testem lojalności.",
+                    "Potwor chroni większy sekret."
             ));
         };
     }
 
     private String consequenceFor(String setting) {
         return switch (looseKey(setting)) {
-            case "postapo" -> "Spolecznosc straci zasob, bez ktorego kolejna scena bedzie trudniejsza.";
-            case "sci-fi", "scifi" -> "Dane, reputacja albo dostep zostana przejete przez nieprzyjazna strone.";
+            case "postapo" -> "Społeczność straci zasob, bez którego kolejna scena bedzie trudniejsza.";
+            case "sci-fi", "scifi" -> "Dane, reputacja albo dostęp zostana przejete przez nieprzyjazna strone.";
             case "horror" -> "Prawda zostanie zaslonieta kolejnym oficjalnym wyjasnieniem.";
-            default -> "Problem rozleje sie na lokalna frakcje, reputacje druzyny albo bezpieczenstwo niewinnych.";
+            default -> "Problem rozleje sie na lokalna frakcję, reputacje drużyny albo bezpieczenstwo niewinnych.";
         };
     }
 

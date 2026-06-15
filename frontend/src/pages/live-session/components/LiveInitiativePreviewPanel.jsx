@@ -15,8 +15,8 @@ function allegianceLabel(type) {
 }
 
 function statusMessage(sessionStatus) {
-  if (sessionStatus === "PLANNED") return "Podglad inicjatywy będzie dostępny po rozpoczęciu sesji.";
-  if (sessionStatus === "FINISHED") return "Sesja zakończona. Podglad inicjatywy jest w trybie read-only.";
+  if (sessionStatus === "PLANNED") return "Podgląd inicjatywy będzie dostępny po rozpoczęciu sesji.";
+  if (sessionStatus === "FINISHED") return "Sesja zakończona. Podgląd inicjatywy jest w trybie read-only.";
   return "";
 }
 
@@ -95,12 +95,12 @@ export default function LiveInitiativePreviewPanel({
         <p className="liveSessionPlaceholder">
           Brak aktywnego starcia dla tej sesji.
           {isOwner && encounters.length > 0 ? " Wybierz encounter z listy powyzej." : ""}
-          {isOwner && encounters.length === 0 ? " Globalny /initiative dziala jako szybki lokalny tracker i nie zapisuje encounterów kampanijnych." : ""}
+          {isOwner && encounters.length === 0 ? " Globalny /initiative działa jako szybki lokalny tracker i nie zapisuje encounterów kampanijnych." : ""}
         </p>
       )}
 
       {!loading && liveState?.activeEncounterId && !encounter && (
-        <p className="liveSessionPlaceholder">Nie udało się pobrac danych aktywnego starcia.</p>
+        <p className="liveSessionPlaceholder">Nie udało się pobrać danych aktywnego starcia.</p>
       )}
 
       {!loading && encounter && isOwner && (

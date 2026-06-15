@@ -4,12 +4,22 @@ import { useAuth } from "../auth/AuthContext";
 import { logout as logoutApi } from "../api/auth";
 import { getMyProfile } from "../api/settings";
 import { imagePlaceholder } from "../data/imageLibrary";
+import AppIcon from "./common/AppIcon";
 
 const INITIATIVE_CACHE_KEY = "ttrpg_initiative_rows_v1";
 const SHELL_PANEL_EVENT = "ttrpg-shell-panel-open";
 const PANEL_ID = "account";
 
 function Icon({ name }) {
+  const assetIcons = {
+    profile: "profile",
+    settings: "settings",
+  };
+
+  if (assetIcons[name]) {
+    return <AppIcon name={assetIcons[name]} className="topNav__menuAssetIcon" />;
+  }
+
   const paths = {
     profile: (
       <>
@@ -76,7 +86,7 @@ export default function AccountMenu() {
       setUser(null);
       setAvatarSrc("");
       setBannerSrc(imagePlaceholder("campaignBanners"));
-      setUserError("Nie udalo sie pobrac danych konta.");
+      setUserError("Nie udało się pobrać danych konta.");
     } finally {
       setLoadingUser(false);
     }

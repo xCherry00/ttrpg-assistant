@@ -101,15 +101,15 @@ public class LocationGeneralQuickGeneratorStrategy implements GeneratorStrategy 
         if (!randomChoice(requested)) {
             return requested;
         }
-        return pick(List.of("Bezpieczne miejsce", "Miejsce sledztwa", "Miejsce walki", "Miejsce rozmowy", "Miejsce zasadzki", "Miejsce handlu", "Miejsce rytualu", "Miejsce finalu"));
+        return pick(List.of("Bezpieczne miejsce", "Miejsce śledztwa", "Miejsce walki", "Miejsce rozmowy", "Miejsce zasadzki", "Miejsce handlu", "Miejsce rytualu", "Miejsce finalu"));
     }
 
     private String sensoryDetail() {
         return pick(List.of(
                 "Zapach mokrego drewna.",
-                "Zimny przeciag od podlogi.",
+                "Zimny przeciąg od podlogi.",
                 "Stlumione szepty za sciana.",
-                "Slady blota prowadza donikad.",
+                "Ślady blota prowadza donikad.",
                 "Metaliczny posmak w powietrzu.",
                 "Woda kapie z sufitu mimo suchej pogody.",
                 "Slychac tykanie, choc nie ma zegara.",
@@ -149,9 +149,9 @@ public class LocationGeneralQuickGeneratorStrategy implements GeneratorStrategy 
         if ("osada".equals(typeKey)) {
             return pick(List.of("Brzeziny nad Traktem", "Kamienny Bród", "Zielona Strażnica", "Mokre Łąki", "Wilczy Jar", "Siedem Lip"));
         }
-        if ("swiatynia".equals(typeKey)) return pick(List.of("Świątynia Trzeciego Dzwonu", "Kaplica Białych Popiołów", "Sanktuarium pod Lipą", "Dom Cichej Przysięgi"));
+        if ("świątynia".equals(typeKey)) return pick(List.of("Świątynia Trzeciego Dzwonu", "Kaplica Białych Popiołów", "Sanktuarium pod Lipą", "Dom Cichej Przysięgi"));
         if ("biblioteka".equals(typeKey)) return pick(List.of("Biblioteka pod Złotym Pyłem", "Archiwum Starej Wieży", "Czytelnia Miedzianych Tablic", "Skryptorium bez Okien"));
-        if ("port".equals(typeKey)) return pick(List.of("Port Słonych Latarni", "Nabrzeże Trzech Ceł", "Przystań Krzywego Żurawia", "Stary Basen Kupiecki"));
+        if ("port".equals(typeKey)) return pick(List.of("Port Słonych Latarni", "Nabrzeże Trzech Ceł", "Przystań Krżywego Żurawia", "Stary Basen Kupiecki"));
         if ("las".equals(typeKey)) return pick(List.of("Las Cichych Dębów", "Bór Wilczych Znaków", "Zielony Mrok", "Gaj Złamanych Strzał"));
         if ("ruiny".equals(typeKey)) return pick(List.of("Ruiny Siedmiu Łuków", "Zawalony Dwór", "Stare Mury Darven", "Kamienne Gardło"));
         if ("zamek".equals(typeKey)) return pick(List.of("Zamek na Kruczej Skale", "Twierdza Białej Rdzy", "Strażnica nad Mgłą", "Czerwony Donżon"));
@@ -166,17 +166,17 @@ public class LocationGeneralQuickGeneratorStrategy implements GeneratorStrategy 
 
     private String horrorName(String typeKey) {
         return switch (typeKey) {
-            case "miejsce sledztwa" -> pick(List.of("Dom przy Czarnej Ulicy", "Piwnica Wardów", "Pokój 12", "Puste Mieszkanie nad Apteką"));
+            case "miejsce śledztwa" -> pick(List.of("Dom przy Czarnej Ulicy", "Piwnica Wardów", "Pokój 12", "Puste Mieszkanie nad Apteką"));
             case "archiwum" -> pick(List.of("Archiwum bez Sygnatury", "Czytelnia Zamkniętych Akt", "Magazyn Starych Spisów", "Rejestr pod Ratuszem"));
             case "szpital" -> pick(List.of("Szpital Świętej Marty", "Oddział Zachodni", "Klinika Różana", "Sala po Remoncie"));
-            case "swiatynia" -> pick(List.of("Kaplica za Cmentarzem", "Kościół przy Suchym Dębie", "Zakrystia bez Okna", "Dom Parafialny św. Rocha"));
+            case "świątynia" -> pick(List.of("Kaplica za Cmentarzem", "Kościół przy Suchym Dębie", "Zakrystia bez Okna", "Dom Parafialny św. Rocha"));
             case "las" -> pick(List.of("Las za Kaplicą", "Bór bez Ptaków", "Zagajnik Mokradeł", "Ścieżka pod Czarną Sosną"));
             case "motel" -> pick(List.of("Motel pod Sosnami", "Pokój 6", "Zajazd Ostatni Zjazd", "Recepcja przy Trasie 12"));
             case "stary dom" -> pick(List.of("Dom Różanych Tapet", "Willa bez Dzieci", "Stary Dom Hale'ów", "Kamienica przy Studni"));
             case "kostnica" -> pick(List.of("Kostnica Miejska", "Chłodnia pod Szpitalem", "Sala Sekcyjna B", "Zakład przy Cmentarzu"));
             case "szkola" -> pick(List.of("Szkoła nr 4", "Stara Sala Gimnastyczna", "Korytarz przy Bibliotece", "Internat św. Łucji"));
             case "dworzec" -> pick(List.of("Dworzec Końcowy", "Peron Trzeci", "Poczekalnia Nocna", "Stacja Pod Lasem"));
-            case "sanatorium" -> pick(List.of("Sanatorium Różane", "Pawilon Ciszy", "Zakład na Wzgórzu", "Weranda Doktora Lenza"));
+            case "sanatorium" -> pick(List.of("Sanatorium Różane", "Pawilon Ciszy", "Zakład na Wzgórzu", "Weranda Doktóra Lenza"));
             default -> pick(List.of("Dom przy Czarnej Ulicy", "Archiwum bez Sygnatury", "Las za Kaplicą", "Motel pod Sosnami"));
         };
     }
@@ -206,7 +206,7 @@ public class LocationGeneralQuickGeneratorStrategy implements GeneratorStrategy 
             case "bunkier" -> pick(List.of("Bunkier K-9", "Żelazna Komora", "Schron Dowództwa", "Drzwi Numer 4"));
             case "farma" -> pick(List.of("Farma za Wiaduktem", "Pole Trzech Studni", "Szklarnia Ruty", "Gospodarstwo przy Maszcie"));
             case "fabryka" -> pick(List.of("Fabryka Czerwonego Pyłu", "Hala Tłoczni", "Zakład Bez Zmian", "Stare Taśmy"));
-            case "posterunek" -> pick(List.of("Posterunek Most", "Budka przy Trasie", "Wieża Północna", "Brama Sektora B"));
+            case "posterunek" -> pick(List.of("Posterunek Most", "Budka przy Trasie", "Wieża Północna", "Brama Sektóra B"));
             case "targ zlomu" -> pick(List.of("Targ Rdzy", "Plac Starych Części", "Rynek Filtrów", "Aleja Blach"));
             case "wieza radiowa" -> pick(List.of("Wieża Głuchych", "Maszt Trzeciego Sygnału", "Radio Suchy Dach", "Antena Północ"));
             case "stacja benzynowa" -> pick(List.of("Stacja Ostatni Bak", "Dystrybutor 6", "Zajazd pod Pompą", "Suchy Kanister"));
@@ -283,7 +283,7 @@ public class LocationGeneralQuickGeneratorStrategy implements GeneratorStrategy 
         if ("sklep".equals(typeKey)) {
             return pick(List.of("Półki stoją gęsto, towary opisano nierównym pismem, a pod ladą widać zamkniętą szufladę z lepszym zamkiem", "Wystawa jest skromna, lecz zapach ziół, metalu i starego papieru obiecuje rzeczy spoza oficjalnego cennika")) + ".";
         }
-        if ("swiatynia".equals(typeKey)) {
+        if ("świątynia".equals(typeKey)) {
             return pick(List.of("Kamień jest wypolerowany kolanami wiernych, ale najświętszy symbol ma świeżą rysę", "Świece palą się równo, choć przeciąg porusza chorągwiami przy wejściu")) + ".";
         }
         if ("biblioteka".equals(typeKey)) {
@@ -293,7 +293,7 @@ public class LocationGeneralQuickGeneratorStrategy implements GeneratorStrategy 
             return pick(List.of("Mokre deski, liny i latarnie tworzą gęsty chaos, w którym łatwo zgubić ślad albo człowieka", "Sól zjadła farbę z szyldów, lecz jeden magazyn wygląda podejrzanie świeżo")) + ".";
         }
         if ("las".equals(typeKey)) {
-            return pick(List.of("Drzewa rosną zbyt równo, a ścieżka znika tam, gdzie powinna być najbardziej uczęszczana", "Korzenie, mech i cisza układają się jak naturalna brama do czegoś starszego")) + ".";
+            return pick(List.of("Drzewa rosną zbyt równo, a ścieżka znika tam, gdzie powinna być najbardziej uczęszczana", "Korzenie, mech i ciszą układają się jak naturalna brama do czegoś starszego")) + ".";
         }
         if ("ruiny".equals(typeKey) || "zamek".equals(typeKey) || "kopalnia".equals(typeKey)) {
             return pick(List.of("Spękane mury, ciemne otwory i świeże ślady na kamieniu mówią, że to miejsce nie jest tak martwe, jak wygląda", "Stara konstrukcja trzyma się uporem, a najnowsze ślady prowadzą dokładnie tam, gdzie powinno być najniebezpieczniej")) + ".";
@@ -313,9 +313,9 @@ public class LocationGeneralQuickGeneratorStrategy implements GeneratorStrategy 
 
     private String problemFor(String setting, String type) {
         return switch (normalize(setting)) {
-            case "sci-fi", "scifi" -> pick(List.of("Jeden system raportuje fałszywe dane", "Załoga ukrywa konflikt przed pasażerami", "Dostęp do kluczowego modułu został zablokowany", "Ktoś podmienił harmonogram dokowania", "Czujniki widzą ruch tam, gdzie nie ma ludzi"));
+            case "sci-fi", "scifi" -> pick(List.of("Jeden system raportuje fałsżywe dane", "Załoga ukrywa konflikt przed pasażerami", "Dostęp do kluczowego modułu został zablokowany", "Ktoś podmienił harmonogram dokowania", "Czujniki widzą ruch tam, gdzie nie ma ludzi"));
             case "postapo" -> pick(List.of("Kończy się zasób, na którym oparto bezpieczeństwo", "Ktoś zna boczne wejście", "Wewnątrz narasta spór o zasady", "Nowi przybysze przynieśli chorobę albo plotkę", "Znikają narzędzia potrzebne do napraw"));
-            case "horror" -> pick(List.of("Trop prowadzi do osoby, która oficjalnie nie ma związku ze sprawą", "Miejsce było już przeszukane, ale coś się zmieniło", "Ktoś usuwa dowody szybciej niż gracze je znajdują", "Świadek odmawia wejścia do środka", "W każdym raporcie brakuje tej samej godziny"));
+            case "horror" -> pick(List.of("Trop prowadzi do osoby, która oficjalnie nie ma związku ze sprawą", "Miejsce było już przeszukane, ale coś się zmieńiło", "Ktoś usuwa dowody szybciej niż gracze je znajdują", "Świadek odmawia wejścia do środka", "W każdym raporcie brakuje tej samej godziny"));
             default -> pick(List.of("Lokalna frakcja chce przejąć kontrolę", "Ktoś znika po zmroku", "Właściciel albo strażnik prosi o dyskretną pomoc", "Nowy podatek wywołał cichy bunt", "Ważny gość zniknął bez śladu"));
         };
     }
@@ -332,7 +332,7 @@ public class LocationGeneralQuickGeneratorStrategy implements GeneratorStrategy 
     private String hookFor(String setting, String type) {
         return switch (normalize(setting)) {
             case "sci-fi", "scifi" -> "Drużyna dostaje dostęp, ale tylko jeśli rozwiąże problem zanim system automatycznie go ukryje.";
-            case "postapo" -> "Miejsce może dać zasób albo schronienie, lecz wejście w jego sprawy zmieni lokalny układ sił.";
+            case "postapo" -> "Miejsce może dać zasób albo schronienie, lecz wejście w jego sprawy zmieńi lokalny układ sił.";
             case "horror" -> "Trop jest prosty do znalezienia, ale jego znaczenie robi się jasne dopiero po złej decyzji.";
             default -> "Wprowadź miejsce jako szybką scenę: jeden detal, jedna osoba, jeden problem i decyzja dla drużyny.";
         };

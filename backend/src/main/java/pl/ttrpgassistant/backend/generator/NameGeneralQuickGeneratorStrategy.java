@@ -144,7 +144,7 @@ public class NameGeneralQuickGeneratorStrategy implements GeneratorStrategy {
 
     private String formatName(String given, String family, String format) {
         return switch (looseKey(format)) {
-            case "tylko imie" -> given;
+            case "tylko imię" -> given;
             case "tylko nazwisko" -> family;
             default -> given + " " + family;
         };

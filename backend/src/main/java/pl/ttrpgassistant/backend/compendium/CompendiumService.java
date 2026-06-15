@@ -20,13 +20,13 @@ public class CompendiumService {
     private static final String DND5E_API_BASE_HTTP = "http://www.dnd5eapi.co/api/2014";
     private static final int LIST_LIMIT = 1000;
     private static final List<Category> DND5E_CATEGORIES = List.of(
-            new Category("monsters", "Potwory", "CR, XP, statystyki i akcje potworow SRD.", List.of("name", "challenge_rating", "xp", "type", "size", "alignment")),
-            new Category("spells", "Zaklecia", "Poziom, szkola, komponenty, klasy i opis zaklec SRD.", List.of("name", "level", "school", "casting_time", "range", "duration")),
-            new Category("magic-items", "Magiczne przedmioty", "Magiczne przedmioty dostepne w SRD.", List.of("name", "equipment_category", "rarity", "desc")),
-            new Category("equipment", "Ekwipunek", "Bronie, pancerze, sprzet i koszt.", List.of("name", "equipment_category", "cost", "weight")),
+            new Category("monsters", "Potwory", "CR, XP, statystyki i akcje potworów SRD.", List.of("name", "challenge_rating", "xp", "type", "size", "alignment")),
+            new Category("spells", "Zaklęcia", "Poziom, szkoła, komponenty, klasy i opis zaklęć SRD.", List.of("name", "level", "school", "casting_time", "range", "duration")),
+            new Category("magic-items", "Magiczne przedmioty", "Magiczne przedmioty dostępne w SRD.", List.of("name", "equipment_category", "rarity", "desc")),
+            new Category("equipment", "Ekwipunek", "Bronie, pancerze, sprzęt i koszt.", List.of("name", "equipment_category", "cost", "weight")),
             new Category("conditions", "Stany", "Stany mechaniczne D&D 5E.", List.of("name", "desc")),
-            new Category("skills", "Umiejetnosci", "Umiejetnosci i powiazane cechy.", List.of("name", "ability_score", "desc")),
-            new Category("damage-types", "Typy obrazen", "Typy obrazen z opisami SRD.", List.of("name", "desc"))
+            new Category("skills", "Umiejętności", "Umiejętności i powiązane cechy.", List.of("name", "ability_score", "desc")),
+            new Category("damage-types", "Typy obrażeń", "Typy obrażeń z opisami SRD.", List.of("name", "desc"))
     );
 
     private final ObjectMapper objectMapper;

@@ -52,8 +52,8 @@ public class NpcGeneralQuickGeneratorStrategy implements GeneratorStrategy {
         List<GeneratorOutputSection> sections = new ArrayList<>();
         sections.add(section("Kim jest", ("Fantasy".equalsIgnoreCase(setting) ? race + ", " : "") + role + "."));
         sections.add(section("Motyw", motif + "."));
-        sections.add(section("Wyglad", appearance + ". Ma jeden charakterystyczny detal, ktory latwo zapamietac przy stole."));
-        sections.add(section("Osobowosc", personality + ". " + motivation + "."));
+        sections.add(section("Wygląd", appearance + ". Ma jeden charakterystyczny detal, który łatwo zapamietac przy stole."));
+        sections.add(section("Osobowość", personality + ". " + motivation + "."));
 
         return new GeneratorStructuredResultResponse(
                 null,
@@ -110,18 +110,18 @@ public class NpcGeneralQuickGeneratorStrategy implements GeneratorStrategy {
         }
         return pick(List.of(
                 "Czlowiek", "Elf", "Krasnolud", "Niziolek", "Gnom", "Polelf", "Polork", "Tiefling",
-                "Smocze dziecie", "Aasimar", "Goblin", "Ork", "Kobold", "Lesny duch w ludzkiej skorze"
+                "Smocze dziecie", "Aasimar", "Goblin", "Ork", "Kobold", "Lesny duch w ludzkiej skórze"
         ));
     }
 
     private String motifFor(Map<String, Object> params, String setting) {
         String requested = stringParam(params, "motif", "Losowy");
         List<String> motifs = switch (normalize(setting)) {
-            case "fantasy" -> List.of("Dlug", "Zakazana magia", "Rodzina", "Zdrada", "Ambicja", "Relikwia", "Zemsta", "Przysiega", "Ucieczka", "Tajemnica rodu");
-            case "horror" -> List.of("Wina", "Obsesja", "Zaginiona osoba", "Koszmar", "Milczenie", "Kult", "Falszywe wspomnienie", "Zakazany dowod", "Strach przed domem", "Niechciane dziedzictwo");
-            case "sci-fi", "scifi" -> List.of("Kontrakt", "Dane", "Implant", "Dezercja", "Dlug korporacyjny", "Falszywa tozsamosc", "Awaria", "Zakazana technologia", "Misja ratunkowa", "Ucieczka z kolonii");
+            case "fantasy" -> List.of("Dług", "Zakazana magia", "Rodzina", "Zdrada", "Ambicja", "Relikwia", "Zemsta", "Przysiega", "Ucieczka", "Tajemnica rodu");
+            case "horror" -> List.of("Wina", "Obsesja", "Zaginiona osoba", "Koszmar", "Milczenie", "Kult", "Falsżywe wspomnienie", "Zakazany dowod", "Strach przed domem", "Niechciane dziedzictwo");
+            case "sci-fi", "scifi" -> List.of("Kontrakt", "Dane", "Implant", "Dezercja", "Dług korporacyjny", "Fałszywa tożsamość", "Awaria", "Zakazana technologia", "Misja ratunkowa", "Ucieczka z kolonii");
             case "postapo" -> List.of("Przetrwanie", "Woda", "Leki", "Rodzina", "Utracone schronienie", "Wina ocalalego", "Stary szlak", "Glod", "Bezpieczna zima", "Zdradzona osada");
-            default -> List.of("Kariera", "Sekret", "Dlug", "Rodzina", "Ambicja", "Strach", "Uklad", "Znikniecie", "Reputacja", "Ostatnia szansa");
+            default -> List.of("Kariera", "Sekret", "Dług", "Rodzina", "Ambicja", "Strach", "Uklad", "Znikniecie", "Reputacja", "Ostatnia szansa");
         };
         if (!randomChoice(requested) && motifs.stream().anyMatch(motif -> normalize(motif).equals(normalize(requested)))) {
             return requested;
@@ -132,9 +132,9 @@ public class NpcGeneralQuickGeneratorStrategy implements GeneratorStrategy {
     private List<?> rolesFor(String setting, Map<String, Object> pool) {
         return switch (normalize(setting)) {
             case "sci-fi", "scifi" -> List.of("Pilot", "Mechanik", "Medyk", "Najemnik", "Analityk", "Przemytnik", "Oficer stacji", "Haker", "Dyplomata", "Inzynier napedu", "Kurier orbitalny", "Lowca danych");
-            case "postapo" -> List.of("Ocalaly", "Lider osady", "Szabrownik", "Medyk", "Lowca zasobow", "Straznik bramy", "Handlarz woda", "Zwiadowca", "Mechanik", "Kucharz osady", "Kaznodzieja", "Byly zolnierz");
-            case "horror" -> List.of("Sledczy", "Swiadek", "Podejrzany", "Lekarz", "Bibliotekarz", "Okultysta", "Dziennikarz", "Ksiadz", "Dozorca", "Fotograf", "Patolog", "Archiwistka");
-            case "realistyczny" -> List.of("Dziennikarz", "Policjant", "Lekarz", "Prawnik", "Kierowca", "Urzednik", "Nauczyciel", "Ochroniarz", "Recepcjonistka", "Technik", "Sasiad", "Wlasciciel baru");
+            case "postapo" -> List.of("Ocalały", "Lider osady", "Szabrownik", "Medyk", "Łowca zasobów", "Strażnik bramy", "Handlarz wodą", "Zwiadowca", "Mechanik", "Kucharz osady", "Kaznodzieja", "Były żołnierz");
+            case "horror" -> List.of("Śledczy", "Świadek", "Podejrzany", "Lekarz", "Bibliotekarz", "Okultysta", "Dziennikarz", "Ksiądz", "Dozorca", "Fotograf", "Patolog", "Archiwistka");
+            case "realistyczny" -> List.of("Dzieńnikarz", "Policjant", "Lekarz", "Prawnik", "Kierowca", "Urzednik", "Naucżyciel", "Ochroniarz", "Recepcjonistka", "Technik", "Sasiad", "Właściciel baru");
             default -> asList(pool.get("roles"));
         };
     }
@@ -143,50 +143,50 @@ public class NpcGeneralQuickGeneratorStrategy implements GeneratorStrategy {
         return switch (normalize(setting)) {
             case "sci-fi", "scifi" -> pick(List.of(
                     "Nosi zuzyty kombinezon z niezgodnymi oznaczeniami i implant przy skroni",
-                    "Ma spokojny glos, oczy po korekcji optycznej i narzedzia przypiete do pasa",
-                    "Wyglada jak ktos, kto od dawna sypia w fotelu pilota",
-                    "Ma rekawice serwisowe, slady po oparzeniach i zbyt czysty identyfikator"
+                    "Ma spokojny głos, oczy po korekcji optycznej i narzedzia przypiete do pasa",
+                    "Wygląda jak ktoś, kto od dawna sypia w fotelu pilota",
+                    "Ma rekawice serwisowe, ślady po oparzeniach i zbyt czysty identyfikator"
             ));
             case "postapo" -> pick(List.of(
-                    "Nosi warstwowe ubrania, prowizoryczny pancerz i plecak naprawiany drutem",
+                    "Nosi warstwowe ubrania, prowizoryczny pancerz i plecąk naprawiany drutem",
                     "Liczy wyjscia z pomieszczenia, zanim zacznie rozmowe",
-                    "Trzyma najcenniejszy przedmiot blisko ciala i nie odwraca sie plecami",
-                    "Ma maske przeciwpylowa na szyi, nawet kiedy powietrze wyglada czysto"
+                    "Trzyma najcenniejszy przedmiot blisko ciala i nie odwraca sie plecąmi",
+                    "Ma maske przeciwpyłowa na szyi, nawet kiedy powietrze wygląda czysto"
             ));
             case "horror" -> pick(List.of(
-                    "Wyglada zwyczajnie, ale rece zdradzaja wiele nieprzespanych nocy",
+                    "Wygląda zwyczajnie, ale ręce zdradzaja wiele nieprzespanych nocy",
                     "Mowi cicho, unika luster i reaguje za szybko na jedno slowo",
-                    "Elegancki ubior psuje zapach wilgoci, lekow albo starego papieru",
+                    "Elegancki ubior psuje zapach wilgoći, lekow albo starego papieru",
                     "Nosi przy sobie notatnik zapisany tym samym zdaniem"
             ));
             case "realistyczny" -> pick(List.of(
                     "Ma zmeczona twarz, praktyczne ubranie i ruchy kogos stalego w rutynie",
-                    "Wyglada na osobe, ktora wie wiecej niz powinna mowic",
+                    "Wygląda na osobe, która wie więcej niż powinna mowic",
                     "Jest uprzejmy, ale obserwuje rozmowce zanim odpowie",
-                    "Ma telefon z peknietym ekranem i kieszenie pelne paragonow"
+                    "Ma telefon z peknietym ekranem i kieszenie pełne paragonow"
             ));
             default -> pick(List.of(
-                    "Ma znoszony plaszcz, czujne spojrzenie i rece przyzwyczajone do pracy",
+                    "Ma znoszony płaszcz, czujne spojrzenie i ręce przyzwyczajone do pracy",
                     "Nosi prosty stroj z jednym zbyt drogim dodatkiem",
-                    "Porusza sie ostroznie, jakby sluchal czegos za sciana",
-                    "Wyglada na osobe, ktora przyszla tu w konkretnym celu"
+                    "Porusza sie ostroznie, jakby sluchal czegoś za sciana",
+                    "Wygląda na osobe, która przyszla tu w konkretnym celu"
             ));
         };
     }
     private List<?> personalitiesFor(String setting, Map<String, Object> pool) {
         return switch (normalize(setting)) {
-            case "sci-fi", "scifi" -> List.of("Pragmatyczny i precyzyjny", "Sarkastyczny, ale lojalny po podpisaniu umowy", "Nerwowy, gdy systemy milcza", "Zbyt spokojny pod ostrzalem", "Ufa procedurom bardziej niz ludziom");
+            case "sci-fi", "scifi" -> List.of("Pragmatyczny i precyzyjny", "Sarkastyczny, ale lojalny po podpisaniu umowy", "Nerwowy, gdy systemy milcza", "Zbyt spokojny pod ostrzalem", "Ufa procedurom bardziej niż ludziom");
             case "postapo" -> List.of("Nieufny, konkretny i oszczedny w slowach", "Pomaga, ale zawsze liczy koszt", "Twardy na pokaz, zmeczony pod spodem", "Smieje sie tylko wtedy, gdy sytuacja robi sie zla", "Nie lubi obietnic bez zaplaty z gory");
-            case "horror" -> List.of("Uprzejmy, lecz bliski zalamania", "Racjonalizuje rzeczy, ktorych juz nie umie wyjasnic", "Zbyt spokojny jak na to, co widzial", "Wciaz poprawia jeden detal ubrania", "Odpowiada tak, jakby ktos go podsluchiwal");
+            case "horror" -> List.of("Uprzejmy, lecz bliski zalamania", "Racjonalizuje rzeczy, których juz nie umie wyjasnic", "Zbyt spokojny jak na to, co widzial", "Wciaz poprawia jeden detal ubrania", "Odpowiada tak, jakby ktoś go podsluchiwal");
             default -> asList(pool.get("personalities"));
         };
     }
 
     private List<?> motivationsFor(String setting, Map<String, Object> pool) {
         return switch (normalize(setting)) {
-            case "sci-fi", "scifi" -> List.of("Chce splacic kontrakt zanim ktos sprawdzi jego prawdziwe dane", "Szuka dostepu do systemu, ktory moze go oczyscic", "Chroni zaloge przed informacja, ktora rozbilaby misje", "Potrzebuje czesci, ktorej nie wolno kupic legalnie", "Probuje ukryc blad, ktory moze kosztowac zycie");
-            case "postapo" -> List.of("Potrzebuje lekow dla kogos z osady", "Chce znalezc bezpieczne miejsce zanim zima zamknie drogi", "Ukrywa zasob, ktory moze wywolac konflikt", "Szuka osoby zabranej przez inna grupe", "Chce odzyskac mape, zanim trafi w zle rece");
-            case "horror" -> List.of("Chce udowodnic, ze to nadal ma racjonalne wyjasnienie", "Szuka osoby, ktora zniknela po tej samej wskazowce", "Probuje naprawic blad sprzed lat", "Chroni kogos, kto moze byc winny", "Chce opuscic miasto, ale boi sie drogi");
+            case "sci-fi", "scifi" -> List.of("Chce spłacić kontrakt zanim ktoś sprawdzi jego prawdziwe dane", "Szuka dostępu do systemu, który może go oczyścić", "Chroni załogę przed informacją, która rozbiłaby misje", "Potrzebuje części, której nie wolno kupić legalnie", "Próbuje ukryć błąd, który może kosztowac życie");
+            case "postapo" -> List.of("Potrzebuje lekow dla kogos z osady", "Chce znalezc bezpieczne miejsce zanim zima zamknie drogi", "Ukrywa zasob, który może wywolac konflikt", "Szuka osoby zabranej przez inna grupe", "Chce odzyskac mape, zanim trafi w zle ręce");
+            case "horror" -> List.of("Chce udowodnic, ze to nadal ma racjonalne wyjasnienie", "Szuka osoby, która zniknela po tej samej wskazowce", "Próbuje naprawic błąd sprzed lat", "Chroni kogos, kto może byc winny", "Chce opuscic miasto, ale boi sie drogi");
             default -> asList(pool.get("motivations"));
         };
     }

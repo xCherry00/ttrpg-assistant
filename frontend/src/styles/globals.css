@@ -38,6 +38,81 @@ body {
   background-attachment: fixed;
 }
 
+.appToast {
+  position: fixed;
+  right: clamp(16px, 3vw, 32px);
+  top: clamp(72px, 9vh, 104px);
+  z-index: 3000;
+  width: min(420px, calc(100vw - 32px));
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid rgba(224, 82, 82, 0.35);
+  border-radius: 14px;
+  background: rgba(255, 249, 248, 0.98);
+  color: #b42318;
+  box-shadow: 0 20px 54px rgba(42, 18, 18, 0.18);
+  font-weight: 750;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.appToast--success {
+  border-color: rgba(31, 122, 98, 0.28);
+  background: rgba(245, 253, 249, 0.98);
+  color: #13705a;
+}
+
+:is(
+  .campaignError,
+  .friendsState--error,
+  .compendiumError,
+  .campaignDetailsError,
+  .profileStateLight.is-error,
+  .generatorError,
+  .cdAdminError,
+  .notificationMenu__state.is-error
+) {
+  position: fixed !important;
+  right: clamp(16px, 3vw, 32px) !important;
+  top: clamp(72px, 9vh, 104px) !important;
+  z-index: 2990 !important;
+  width: min(420px, calc(100vw - 32px)) !important;
+  min-height: 48px !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 14px 16px !important;
+  border-radius: 14px !important;
+  box-shadow: 0 20px 54px rgba(42, 18, 18, 0.18) !important;
+}
+
+@media (max-width: 640px) {
+  .appToast {
+    left: 16px;
+    right: 16px;
+    top: 78px;
+    width: auto;
+  }
+
+  :is(
+    .campaignError,
+    .friendsState--error,
+    .compendiumError,
+    .campaignDetailsError,
+    .profileStateLight.is-error,
+    .generatorError,
+    .cdAdminError,
+    .notificationMenu__state.is-error
+  ) {
+    left: 16px !important;
+    right: 16px !important;
+    top: 78px !important;
+    width: auto !important;
+  }
+}
+
 /* Subtle dot grid overlay */
 body::before {
   content: "";

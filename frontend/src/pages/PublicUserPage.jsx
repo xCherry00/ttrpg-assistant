@@ -112,7 +112,7 @@ export default function PublicUserPage() {
     loadProfile();
   }, [loadProfile]);
 
-  async function runAction(action, fallback = "Akcja nie powiodla sie.") {
+  async function runAction(action, fallback = "Akcja nie powiodła się.") {
     if (!profile?.user) return;
     setBusy(true);
     setError("");
@@ -135,7 +135,7 @@ export default function PublicUserPage() {
       const id = conversation?.id || conversation?.conversationId;
       navigate(id ? `/messages?conversation=${id}` : "/messages");
     } catch (err) {
-      setError(err?.message || "Nie udało się otworzyć rozmowy.");
+      setError(err?.message || "Nie udało się otwórzyć rozmowy.");
     } finally {
       setBusy(false);
     }
@@ -145,8 +145,15 @@ export default function PublicUserPage() {
   const relation = String(user?.relationship || "NONE");
   const displayName = safeText(user?.displayName || user?.username, "Użytkownik");
   const initial = useMemo(() => displayName.slice(0, 1).toUpperCase(), [displayName]);
-  const sharedCampaignsCount = Number(user?.sharedCampaignsCount || profile?.sharedCampaignsCount || 0);
-  const mutualFriendsCount = Number(user?.mutualFriendsCount || profile?.mutualFriendsCount || 0);
+  const publicCampaigns = Array.isArray(profile?.campaigns) ? profile.campaigns : [];
+  const sharedCampaigns = Array.isArray(profile?.sharedCampaigns) ? profile.sharedCampaigns : [];
+  const mutualFriends = Array.isArray(profile?.mutualFriends)
+    ? profile.mutualFriends
+    : Array.isArray(profile?.sharedFriends)
+      ? profile.sharedFriends
+      : [];
+  const sharedCampaignsCount = Number(sharedCampaigns.length || user?.sharedCampaignsCount || profile?.sharedCampaignsCount || 0);
+  const mutualFriendsCount = Number(mutualFriends.length || user?.mutualFriendsCount || profile?.mutualFriendsCount || 0);
 
   const achievements = useMemo(() => [
     { id: "first-campaign", title: "Pierwsza kampania", desc: "Uczestniczy w kampanii", unlocked: (profile?.campaignsCount ?? 0) >= 1 },
@@ -156,14 +163,6 @@ export default function PublicUserPage() {
   ], [profile?.campaignsCount, profile?.friendsCount, profile?.ownedCampaignsCount, sharedCampaignsCount]);
 
   const canInteract = relation !== "SELF" && relation !== "BLOCKED_BY_ME" && relation !== "BLOCKED_ME";
-  const publicCampaigns = Array.isArray(profile?.campaigns) ? profile.campaigns : [];
-  const sharedCampaigns = Array.isArray(profile?.sharedCampaigns) ? profile.sharedCampaigns : [];
-  const mutualFriends = Array.isArray(profile?.mutualFriends)
-    ? profile.mutualFriends
-    : Array.isArray(profile?.sharedFriends)
-      ? profile.sharedFriends
-      : [];
-
   return (
     <div className="page profileDesk publicProfileDesk">
       {loading && <div className="profileState profileStateLight">Ładowanie profilu...</div>}
@@ -182,7 +181,7 @@ export default function PublicUserPage() {
             </div>
             <div className="profileAvatarRow">
               <div className="profileAvatarLarge" aria-label={`Avatar ${displayName}`}>
-                {user.avatarUrl ? <img src={user.avatarUrl} alt="Avatar uzytkownika" /> : initial}
+                {user.avatarUrl ? <img src={user.avatarUrl} alt="Avatar użytkownika" /> : initial}
                 <i className={user.online ? "is-online" : ""} aria-hidden="true" />
               </div>
             </div>

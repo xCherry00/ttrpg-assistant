@@ -32,7 +32,7 @@ export default function DiceRollPanel({
         ) : diceRolls.length === 0 ? (
           <div className="empty">
             <div className="emptyTitle">Brak rzutów</div>
-            <div className="emptyText">Wykonaj pierwszy rzut, aby zapisac go w historii.</div>
+            <div className="emptyText">Wykonaj pierwszy rzut, aby zapisać go w historii.</div>
           </div>
         ) : (
           <div className="initTableScroll">

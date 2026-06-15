@@ -136,7 +136,7 @@ public class EncounterDndQuickGeneratorStrategy implements GeneratorStrategy {
         boolean includeEnvironmentFeature = boolParam(params, "includeEnvironmentFeature", true);
 
         String conflict = pick(asList(pool.get("nonCombatConflicts")));
-        String solution = pick(asList(pool.get("solutions")));
+        String sólution = pick(asList(pool.get("sólutions")));
         String consequence = pick(asList(pool.get("failureConsequences")));
         String skillChallenge = pick(asList(pool.get("skillChallenges")));
         String envFeature = includeEnvironmentFeature ? environmentFeature(pool, environment) : "Brak dodatkowego elementu środowiska.";
@@ -150,7 +150,7 @@ public class EncounterDndQuickGeneratorStrategy implements GeneratorStrategy {
                         item("Środowisko", environment)
                 )),
                 section("Konflikt", conflict),
-                section("Możliwe rozwiązania", solution),
+                section("Możliwe rozwiązania", sólution),
                 section("Konsekwencja porażki", consequence),
                 section("Test / skill challenge", skillChallenge),
                 section("Element środowiska", envFeature),
@@ -284,7 +284,7 @@ public class EncounterDndQuickGeneratorStrategy implements GeneratorStrategy {
             case "ruiny" -> "w ruinach";
             case "góry", "gory" -> "w górach";
             case "bagna" -> "na bagnach";
-            case "podziemia" -> "w podziemiach";
+            case "podziemią" -> "w podziemiąch";
             case "lochy" -> "w lochach";
             default -> "w " + environment.toLowerCase(Locale.ROOT);
         };

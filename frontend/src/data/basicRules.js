@@ -4,28 +4,28 @@ export const BASIC_RULES = [
     rulesApiCode: "general",
     name: "Ogólne zasady RPG",
     legalStatus: "local-summary",
-    legalNote: "Skrot ogolnych zasad gry fabularnej dla poczatkujacych.",
+    legalNote: "Skrót ogólnych zasad gry fabularnej dla początkujących.",
     sourcePolicy: "summary",
     sources: [
-      { name: "TTRPG Assistant - skrot zasad ogolnych", url: "#" },
+      { name: "TTRPG Assistant - skrót zasad ogólnych", url: "#" },
     ],
     sections: {
       overview:
-        "Gry RPG to forma wspolnego tworzenia historii. Gracze wcielaja sie w fikcyjne postacie i decyduja, co one robia, mowia oraz do czego daza. Mistrz Gry opisuje swiat, miejsca, bohaterow niezaleznych, zagrozenia i skutki dzialan druzyny. W odroznieniu od gry planszowej RPG zwykle nie ma jednej planszy ani z gory ustalonej listy ruchow, a w odroznieniu od gry komputerowej nie ogranicza Cie kod programu. Najwazniejsze sa rozmowa, wyobraznia, decyzje przy stole i wspolne ustalanie, co dzieje sie dalej.",
+        "Gry RPG to forma wspólnego tworzenia historii. Gracze wcielają się w fikcyjne postacie i decydują, co one robią, mówią oraz do czego dążą. Mistrz Gry opisuje świat, miejsca, bohaterów niezależnych, zagrożenia i skutki działań drużyny. W odróżnieniu od gry planszowej RPG zwykle nie ma jednej planszy ani z góry ustalonej listy ruchów, a w odróżnieniu od gry komputerowej nie ogranicza Cię kod programu. Najważniejsze są rozmowa, wyobraźnia, decyzje przy stole i wspólne ustalanie, co dzieje się dalej.",
       "core-test":
-        "Test wykonuje sie wtedy, gdy postac probuje zrobic cos waznego, a wynik nie jest oczywisty. Jesli bohater spokojnie otwiera zwykle drzwi, test nie jest potrzebny. Jesli probuje sforsowac zamek pod presja czasu, przekonac straznika albo przeskoczyc nad przepascia, rzut pomaga rozstrzygnac sytuacje. Wynik testu nie musi dzielic swiata tylko na sukces i porazke. Nieudany rzut moze oznaczac komplikacje, koszt, utrate czasu, zwrocenie uwagi przeciwnikow albo nowy problem, ktory popycha historie naprzod.",
+        "Test wykonuje się wtedy, gdy postać próbuje zrobić coś ważnego, a wynik nie jest oczywisty. Jeśli bohater spokojnie otwiera zwykłe drzwi, test nie jest potrzebny. Jeśli próbuje sforsować zamek pod presją czasu, przekonać strażnika albo przeskoczyć nad przepaścią, rzut pomaga rozstrzygnąć sytuację. Wynik testu nie musi dzielić świata tylko na sukces i porażkę. Nieudany rzut może oznaczać komplikacje, koszt, utratę czasu, zwrócenie uwagi przeciwników albo nowy problem, który popycha historię naprzód.",
       "character-creation":
-        "Gracz prowadzi swoja postac: opisuje jej decyzje, reakcje, zamiary i sposob dzialania. Postac gracza to bohater tej osoby w swiecie gry. Moze miec imie, wyglad, charakter, umiejetnosci, slabe strony, ekwipunek, relacje i wlasne cele. Nie trzeba od razu grac teatralnie ani mowic innym glosem. Wystarczy powiedziec, co postac robi i dlaczego. Z czasem wielu graczy zaczyna dodawac sposob mowienia, gesty, przekonania i emocje bohatera, bo pomaga to poczuc, ze postac jest czyms wiecej niz zestawem liczb na karcie.",
+        "Gracz prowadzi swoją postać: opisuje jej decyzje, reakcje, zamiary i sposób działania. Postać gracza to bohater tej osoby w świecie gry. Może mieć imię, wygląd, charakter, umiejętności, słabe strony, ekwipunek, relacje i własne cele. Nie trzeba od razu grać teatralnie ani mówić innym głosem. Wystarczy powiedzieć, co postać robi i dlaczego. Z czasem wielu graczy zaczyna dodawać sposób mówienia, gesty, przekonania i emocje bohatera, bo pomaga to poczuć, że postać jest czymś więcej niż zestawem liczb na karcie.",
       combat:
-        "Mistrz Gry prowadzi swiat gry. Opisuje sceny, miejsca, pogode, nastroj, przeciwnikow, sojusznikow i zwyklych mieszkancow swiata. Przedstawia wyzwania, zadaje pytania graczom, odgrywa postacie niezalezne i pomaga rozstrzygac konsekwencje dzialan. MG nie jest przeciwnikiem graczy. Jego zadaniem jest prowadzenie ciekawej, spojnej sytuacji, w ktorej decyzje druzyny maja znaczenie. Czasem oznacza to walke, czasem rozmowe, sledztwo, ucieczke, negocjacje albo trudny wybor bez idealnego rozwiazania.",
+        "Mistrz Gry prowadzi świat gry. Opisuje sceny, miejsca, pogodę, nastrój, przeciwników, sojuszników i zwykłych mieszkańców świata. Przedstawia wyzwania, zadaje pytania graczom, odgrywa postacie niezależne i pomaga rozstrzygać konsekwencje działań. MG nie jest przeciwnikiem graczy. Jego zadaniem jest prowadzenie ciekawej, spójnej sytuacji, w której decyzje drużyny mają znaczenie. Czasem oznacza to walkę, czasem rozmowę, śledztwo, ucieczkę, negocjacje albo trudny wybór bez idealnego rozwiązania.",
       health:
-        "Typowa sesja to jedno spotkanie graczy i Mistrza Gry. Moze odbywac sie przy stole, online albo w mieszanej formie. Najczesciej MG opisuje sytuacje, gracze mowia, co robia ich postacie, a potem grupa ustala, jaki jest skutek. Gra przechodzi przez sceny: rozmowe w karczmie, badanie ruin, poscig, starcie, odpoczynek, narade albo spotkanie z wazna postacia. Nie kazda scena wymaga rzutu. Czasem wystarczy dobra decyzja, ciekawa rozmowa albo logiczny plan.",
+        "Typowa sesja to jedno spotkanie graczy i Mistrza Gry. Może odbywać się przy stole, online albo w mieszanej formie. Najczęściej MG opisuje sytuację, gracze mówią, co robią ich postacie, a potem grupa ustala, jaki jest skutek. Gra przechodzi przez sceny: rozmowę w karczmie, badanie ruin, pościg, starcie, odpoczynek, naradę albo spotkanie z ważną postacią. Nie każda scena wymaga rzutu. Czasem wystarczy dobra decyzja, ciekawa rozmowa albo logiczny plan.",
       progression:
-        "Odgrywanie postaci oznacza patrzenie na wydarzenia oczami bohatera. Gracz moze zadac sobie pytanie: czego moja postac chce, czego sie boi, komu ufa i co jest dla niej wazne? Nie chodzi o aktorstwo ani perfekcyjny wystep. Chodzi o podejmowanie decyzji, ktore pasuja do postaci i tworza ciekawa historie z reszta druzyny. RPG dziala najlepiej, gdy gracze sluchaja siebie nawzajem, daja innym miejsce przy stole i buduja sceny wspolnie zamiast probowac wygrac kosztem calej grupy.",
+        "Odgrywanie postaci oznacza patrzenie na wydarzenia oczami bohatera. Gracz może zadać sobie pytanie: czego moja postać chce, czego się boi, komu ufa i co jest dla niej ważne? Nie chodzi o aktorstwo ani perfekcyjny występ. Chodzi o podejmowanie decyzji, które pasują do postaci i tworzą ciekawą historię z resztą drużyny. RPG działa najlepiej, gdy gracze słuchają siebie nawzajem, dają innym miejsce przy stole i budują sceny wspólnie zamiast próbować wygrać kosztem całej grupy.",
       "game-flow":
-        "Kampania to seria polaczonych sesji, w ktorych wracaja te same postacie, watki, miejsca i konsekwencje dawnych wyborow. Jedna sesja moze byc osobna przygoda, ale kampania pozwala zobaczyc dluzszy rozwoj bohaterow i swiata. Historia zwykle sklada sie ze scen, a sceny z decyzji graczy i reakcji swiata. Druzyna moze zmienic plan, ominac walke, zaprzyjaznic sie z kims nieoczekiwanym albo stworzyc problem, ktorego nikt nie przewidzial. To wlasnie sprawia, ze RPG jest zywe.",
+        "Kampania to seria połączonych sesji, w których wracają te same postacie, wątki, miejsca i konsekwencje dawnych wyborów. Jedna sesja może być osobną przygodą, ale kampania pozwala zobaczyć dłuższy rozwój bohaterów i świata. Historia zwykle składa się ze scen, a sceny z decyzji graczy i reakcji świata. Drużyna może zmienić plan, ominąć walkę, zaprzyjaźnić się z kimś nieoczekiwanym albo stworzyć problem, którego nikt nie przewidział. To właśnie sprawia, że RPG jest żywe.",
       "dice-rolls":
-        "Kosci pomagaja rozstrzygac niepewne sytuacje w sposob bezstronny i emocjonujacy. Rozne gry uzywaja roznych kosci: d4, d6, d8, d10, d12, d20, d100, kosci Fate/Fudge albo specjalnych kosci symbolicznych. Zapis 2d6+3 oznacza rzut dwiema szesciennymi koscmi i dodanie 3 do wyniku. Same kosci nie sa jednak cala gra. System RPG okresla, kiedy rzucac, jakie cechy dodawac, jak interpretowac sukces, porazke, obrazenia, strach, magie, sledztwo czy rozwoj postaci. Dlatego D&D 5e, Call of Cthulhu, Warhammer, Pathfinder i Mork Borg moga opowiadac podobne przygody, ale robia to innymi zasadami i innym klimatem.",
+        "Kości pomagają rozstrzygać niepewne sytuacje w sposób bezstronny i emocjonujący. Różne gry używają różnych kości: d4, d6, d8, d10, d12, d20, d100, kości Fate/Fudge albo specjalnych kości symbolicznych. Zapis 2d6+3 oznacza rzut dwiema sześciennymi kośćmi i dodanie 3 do wyniku. Same kości nie są jednak całą grą. System RPG określa, kiedy rzucać, jakie cechy dodawać, jak interpretować sukces, porażkę, obrażenia, strach, magię, śledztwo czy rozwój postaci. Dlatego D&D 5e, Call of Cthulhu, Warhammer, Pathfinder i Mork Borg mogą opowiadać podobne przygody, ale robią to innymi zasadami i innym klimatem.",
     },
   },
   {
@@ -34,7 +34,7 @@ export const BASIC_RULES = [
     name: "D&D 5e",
     legalStatus: "local-summary-with-attribution",
     legalNote:
-      "Skrot oparty o ogolne zasady i tresci dostepne w SRD/Basic Rules. Nie zawiera pelnego podrecznika.",
+      "Skrót oparty o ogólne zasady i treści dostępne w SRD/Basic Rules. Nie zawiera pełnego podręcznika.",
     sourcePolicy: "summary-with-attribution",
     sources: [
       { name: "D&D SRD 5.1 / 5.2", url: "https://www.dndbeyond.com/srd" },
@@ -42,19 +42,19 @@ export const BASIC_RULES = [
     ],
     sections: {
       overview:
-        "D&D 5e to heroic fantasy, w ktorym druzyna postaci eksploruje swiat, rozwiazuje konflikty, walczy z przeciwnikami i rozwija sie przez kolejne poziomy.",
+        "D&D 5e to heroic fantasy, w którym drużyna postaci eksploruje świat, rozwiązuje konflikty, walczy z przeciwnikami i rozwija się przez kolejne poziomy.",
       "core-test":
-        "Podstawowy test to rzut d20 + odpowiedni modyfikator. Wynik porownuje sie z poziomem trudnosci DC albo z Armor Class przeciwnika. Jesli wynik jest rowny lub wyzszy, test zwykle konczy sie sukcesem.",
+        "Podstawowy test to rzut d20 + odpowiedni modyfikator. Wynik porównuje się z poziomem trudności DC albo z Armor Class przeciwnika. Jeśli wynik jest równy lub wyższy, test zwykle kończy się sukcesem.",
       "character-creation":
-        "Postac zwykle sklada sie z rasy/pochodzenia, klasy, tla, szesciu atrybutow, bieglosci, ekwipunku i zaklec, jesli klasa ich uzywa.",
+        "Postać zwykle składa się z rasy/pochodzenia, klasy, tła, sześciu atrybutów, biegłości, ekwipunku i zaklęć, jeśli klasa ich używa.",
       combat:
-        "Walka dziala w rundach i turach. Kolejnosc ustala inicjatywa. W swojej turze postac zwykle moze sie poruszyc, wykonac akcje, czasem akcje bonusowa i pozniej reakcje poza swoja tura.",
+        "Walka działa w rundach i turach. Kolejność ustala inicjatywa. W swojej turze postać zwykle może się poruszyć, wykonać akcję, czasem akcję bonusową i później reakcję poza swoją turą.",
       health:
-        "Punkty zycia okreslaja wytrzymalosc postaci. Armor Class okresla trudnosc trafienia. Po spadku do 0 HP postac jest zagrozona smiercia i uzywa mechaniki death saving throws, jesli dana sytuacja tego wymaga.",
+        "Punkty życia określają wytrzymałość postaci. Armor Class określa trudność trafienia. Po spadku do 0 HP postać jest zagrożona śmiercią i używa mechaniki death saving throws, jeśli dana sytuacja tego wymaga.",
       progression:
-        "Rozwoj odbywa sie przez poziomy. Postac zyskuje nowe cechy klasowe, wieksza wytrzymalosc, lepsze mozliwosci walki, zaklecia lub inne zdolnosci.",
+        "Rozwój odbywa się przez poziomy. Postać zyskuje nowe cechy klasowe, większą wytrzymałość, lepsze możliwości walki, zaklęcia lub inne zdolności.",
       "game-flow":
-        "Typowa sesja sklada sie z opisu sceny przez MG, deklaracji dzialan graczy, testow, konsekwencji, walki lub eksploracji, a potem rozwoju fabuly.",
+        "Typowa sesja składa się z opisu sceny przez MG, deklaracji działań graczy, testów, konsekwencji, walki lub eksploracji, a potem rozwoju fabuły.",
     },
   },
   {
@@ -63,7 +63,7 @@ export const BASIC_RULES = [
     name: "Call of Cthulhu 7e",
     legalStatus: "local-summary-link-only",
     legalNote:
-      "W aplikacji trzymamy tylko wlasne streszczenie i link do oficjalnego Quick-Start. Nie kopiujemy duzych fragmentow PDF.",
+      "W aplikacji trzymamy tylko własne streszczenie i link do oficjalnego Quick-Start. Nie kopiujemy dużych fragmentów PDF.",
     sourcePolicy: "link-only",
     sources: [
       {
@@ -73,19 +73,19 @@ export const BASIC_RULES = [
     ],
     sections: {
       overview:
-        "Call of Cthulhu 7e to gra sledczo-horrorowa, w ktorej badacze odkrywaja tajemnice, konfrontuja sie z zagrozeniami Mythosu i czesto ryzykuja zdrowie psychiczne bardziej niz zwykle obrazenia.",
+        "Call of Cthulhu 7e to gra śledczo-horrorowa, w której badacze odkrywają tajemnice, konfrontują się z zagrożeniami Mythosu i często ryzykują zdrowie psychiczne bardziej niż zwykłe obrażenia.",
       "core-test":
-        "Podstawowa mechanika opiera sie na rzucie k100. Umiejetnosci i cechy maja wartosci procentowe. Test zwykle konczy sie sukcesem, jesli wynik jest rowny lub nizszy od odpowiedniej wartosci.",
+        "Podstawowa mechanika opiera się na rzucie k100. Umiejętności i cechy mają wartości procentowe. Test zwykle kończy się sukcesem, jeśli wynik jest równy lub niższy od odpowiedniej wartości.",
       "character-creation":
-        "Postac jest badaczem. Wazne sa cechy, umiejetnosci, profesja, motywacje, kontakty i zasoby. Postacie nie sa superbohaterami, tylko ludzmi narazonymi na zjawiska, ktorych nie rozumieja.",
+        "Postać jest badaczem. Ważne są cechy, umiejętności, profesja, motywacje, kontakty i zasoby. Postacie nie są superbohaterami, tylko ludźmi narażonymi na zjawiska, których nie rozumieją.",
       combat:
-        "Walka jest niebezpieczna i czesto mniej korzystna niz ucieczka, negocjacje albo ostrozne dzialanie. System premiuje sledztwo i przetrwanie, nie ciagle starcia.",
+        "Walka jest niebezpieczna i często mniej korzystna niż ucieczka, negocjacje albo ostrożne działanie. System premiuje śledztwo i przetrwanie, nie ciągłe starcia.",
       health:
-        "Istotne sa punkty zycia oraz Sanity. Utrata Sanity odzwierciedla kontakt z trauma, koszmarem i Mythosem. Psychiczne konsekwencje moga byc rownie wazne jak obrazenia fizyczne.",
+        "Istotne są punkty życia oraz Sanity. Utrata Sanity odzwierciedla kontakt z traumą, koszmarem i Mythosem. Psychiczne konsekwencje mogą być równie ważne jak obrażenia fizyczne.",
       progression:
-        "Rozwoj postaci zwykle wynika z uzywania umiejetnosci, doswiadczen fabularnych i konsekwencji sledztwa. Postac moze stawac sie skuteczniejsza, ale nie zmienia sie w heroiczna jednostke odporna na zagrozenia.",
+        "Rozwój postaci zwykle wynika z używania umiejętności, doświadczeń fabularnych i konsekwencji śledztwa. Postać może stawać się skuteczniejsza, ale nie zmienia się w heroiczną jednostkę odporną na zagrożenia.",
       "game-flow":
-        "Typowa sesja opiera sie na zleceniu lub tajemnicy, zbieraniu tropow, rozmowach, analizie poszlak, odkrywaniu prawdy i konfrontacji z czyms groznym albo niezrozumialym.",
+        "Typowa sesja opiera się na zleceniu lub tajemnicy, zbieraniu tropów, rozmowach, analizie poszlak, odkrywaniu prawdy i konfrontacji z czymś groźnym albo niezrozumiałym.",
     },
   },
   {
@@ -94,27 +94,27 @@ export const BASIC_RULES = [
     name: "Warhammer 4e",
     legalStatus: "local-summary-link-only",
     legalNote:
-      "Brak pelnego darmowego SRD do lokalnego przechowywania zasad. Aplikacja zawiera tylko wlasny ogolny skrot i linki do oficjalnych darmowych zasobow.",
+      "Brak pełnego darmowego SRD do lokalnego przechowywania zasad. Aplikacja zawiera tylko własny ogólny skrót i linki do oficjalnych darmowych zasobów.",
     sourcePolicy: "link-only",
     sources: [
       { name: "Cubicle 7 WFRP Free Resources", url: "https://cubicle7games.com/en_EU/free-tabletop-roleplaying-games" },
-      { name: "WFRP starter/startowe materialy", url: "https://cubicle7games.com/" },
+      { name: "WFRP starter/startowe materiały", url: "https://cubicle7games.com/" },
     ],
     sections: {
       overview:
-        "Warhammer Fantasy Roleplay 4e to mroczne, brutalne fantasy, w ktorym postacie sa czescia niebezpiecznego swiata pelnego korupcji, chorob, przemocy, Chaosu i spolecznych napiec.",
+        "Warhammer Fantasy Roleplay 4e to mroczne, brutalne fantasy, w którym postacie są częścią niebezpiecznego świata pełnego korupcji, chorób, przemocy, Chaosu i społecznych napięć.",
       "core-test":
-        "System uzywa testow procentowych. Rzut k100 porownuje sie z odpowiednia cecha lub umiejetnoscia. Nizszy wynik zwykle oznacza lepszy rezultat, a stopien sukcesu lub porazki moze wplywac na jakosc efektu.",
+        "System używa testów procentowych. Rzut k100 porównuje się z odpowiednią cechą lub umiejętnością. Niższy wynik zwykle oznacza lepszy rezultat, a stopień sukcesu lub porażki może wpływać na jakość efektu.",
       "character-creation":
-        "Postac okreslaja cechy, umiejetnosci, talenty, rasa, profesja i kariera. Kariera ma duze znaczenie, bo opisuje miejsce postaci w swiecie i kierunek jej rozwoju.",
+        "Postać określają cechy, umiejętności, talenty, rasa, profesja i kariera. Kariera ma duże znaczenie, bo opisuje miejsce postaci w świecie i kierunek jej rozwoju.",
       combat:
-        "Walka jest ryzykowna, taktyczna i moze prowadzic do powaznych konsekwencji. Znaczenie maja przewagi, pozycja, bron, pancerz, trafienia i efekty krytyczne.",
+        "Walka jest ryzykowna, taktyczna i może prowadzić do poważnych konsekwencji. Znaczenie mają przewagi, pozycja, broń, pancerz, trafienia i efekty krytyczne.",
       health:
-        "Postacie moga otrzymywac rany, krytyki i dlugofalowe konsekwencje. Starcia sa grozne, a obrazenia moga zostawic trwaly slad.",
+        "Postacie mogą otrzymywać rany, krytyki i długofalowe konsekwencje. Starcia są groźne, a obrażenia mogą zostawić trwały ślad.",
       progression:
-        "Rozwoj odbywa sie przez kariere, wydawanie doswiadczenia, rozwijanie cech, umiejetnosci i talentow. Postac moze zmieniac sciezki kariery.",
+        "Rozwój odbywa się przez karierę, wydawanie doświadczenia, rozwijanie cech, umiejętności i talentów. Postać może zmieniać ścieżki kariery.",
       "game-flow":
-        "Typowa sesja laczy sledztwo, spoleczne konflikty, podroze, walke, zagrozenie Chaosem i trudne decyzje moralne.",
+        "Typowa sesja łączy śledztwo, społeczne konflikty, podróże, walkę, zagrożenie Chaosem i trudne decyzje moralne.",
     },
   },
   {
@@ -123,7 +123,7 @@ export const BASIC_RULES = [
     name: "Pathfinder 2e",
     legalStatus: "local-summary-with-links",
     legalNote:
-      "Najbezpieczniej linkowac do Archives of Nethys i trzymac w aplikacji tylko wlasny skrot. Nie kopiowac duzych baz danych bez pelnej weryfikacji licencji i atrybucji.",
+      "Najbezpieczniej linkować do Archives of Nethys i trzymać w aplikacji tylko własny skrót. Nie kopiować dużych baz danych bez pełnej weryfikacji licencji i atrybucji.",
     sourcePolicy: "summary-with-links",
     sources: [
       { name: "Archives of Nethys Pathfinder 2e", url: "https://2e.aonprd.com/" },
@@ -131,19 +131,19 @@ export const BASIC_RULES = [
     ],
     sections: {
       overview:
-        "Pathfinder 2e to taktyczne fantasy oparte na precyzyjnych zasadach, rozwoju postaci przez poziomy i duzej liczbie wyborow mechanicznych.",
+        "Pathfinder 2e to taktyczne fantasy oparte na precyzyjnych zasadach, rozwoju postaci przez poziomy i dużej liczbie wyborów mechanicznych.",
       "core-test":
-        "Podstawowy test to rzut d20 + modyfikator przeciwko DC. System czesto rozroznia cztery stopnie wyniku: critical success, success, failure i critical failure. Roznica 10 lub wiecej od DC zwykle decyduje o krytycznym wyniku.",
+        "Podstawowy test to rzut d20 + modyfikator przeciwko DC. System często rozróżnia cztery stopnie wyniku: critical success, success, failure i critical failure. Różnica 10 lub więcej od DC zwykle decyduje o krytycznym wyniku.",
       "character-creation":
-        "Postac tworzy sie przez wybor pochodzenia, dziedzictwa, tla, klasy, atrybutow, umiejetnosci i atutow. Duza czesc rozwoju opiera sie na regularnych wyborach atutow.",
+        "Postać tworzy się przez wybór pochodzenia, dziedzictwa, tła, klasy, atrybutów, umiejętności i atutów. Duża część rozwoju opiera się na regularnych wyborach atutów.",
       combat:
-        "Walka dziala na systemie trzech akcji na ture. Postac moze laczyc ruch, ataki, uzycie przedmiotow, zaklecia i inne aktywnosci. Reakcje sa osobnym typem dzialania.",
+        "Walka działa na systemie trzech akcji na turę. Postać może łączyć ruch, ataki, użycie przedmiotów, zaklęcia i inne aktywności. Reakcje są osobnym typem działania.",
       health:
-        "Punkty zycia okreslaja wytrzymalosc. Wazne sa tez pancerz, rzuty obronne, stany i efekty krytyczne. System mocno wykorzystuje warunki i precyzyjne modyfikatory.",
+        "Punkty życia określają wytrzymałość. Ważne są też pancerz, rzuty obronne, stany i efekty krytyczne. System mocno wykorzystuje warunki i precyzyjne modyfikatory.",
       progression:
-        "Rozwoj odbywa sie poziomami. Postac otrzymuje nowe atuty, zdolnosci klasowe, zwiekszenia umiejetnosci i kolejne opcje mechaniczne.",
+        "Rozwój odbywa się poziomami. Postać otrzymuje nowe atuty, zdolności klasowe, zwiększenia umiejętności i kolejne opcje mechaniczne.",
       "game-flow":
-        "Typowa sesja laczy eksploracje, encountery, testy umiejetnosci, walke taktyczna i rozwoj fabularny.",
+        "Typowa sesja łączy eksplorację, encountery, testy umiejętności, walkę taktyczną i rozwój fabularny.",
     },
   },
   {
@@ -152,7 +152,7 @@ export const BASIC_RULES = [
     name: "Mork Borg",
     legalStatus: "local-summary-with-link",
     legalNote:
-      "Bare Bones Edition jest darmowym zrodlem referencyjnym, ale aplikacja nadal uzywa wlasnego skrotu i linku do zrodla.",
+      "Bare Bones Edition jest darmowym źródłem referencyjnym, ale aplikacja nadal używa własnego skrótu i linku do źródła.",
     sourcePolicy: "summary-with-link",
     sources: [
       { name: "MORK BORG Bare Bones Edition", url: "https://jnohr.itch.io/mrk-borg-free" },
@@ -160,19 +160,19 @@ export const BASIC_RULES = [
     ],
     sections: {
       overview:
-        "Mork Borg to krotki, brutalny, apokaliptyczny system OSR, nastawiony na szybkie rozstrzygniecia, smierc, groteske i ponury klimat konca swiata.",
+        "Mork Borg to krótki, brutalny, apokaliptyczny system OSR, nastawiony na szybkie rozstrzygnięcia, śmierć, groteskę i ponury klimat końca świata.",
       "core-test":
-        "Podstawa sa proste rzuty k20 przeciwko trudnosci DR. Wiele sytuacji rozstrzygaja szybkie testy, a zasady sa celowo lekkie.",
+        "Podstawą są proste rzuty k20 przeciwko trudności DR. Wiele sytuacji rozstrzygają szybkie testy, a zasady są celowo lekkie.",
       "character-creation":
-        "Postacie sa kruche, dziwne i czesto skazane na marny koniec. Tworzenie postaci jest szybkie, a duze znaczenie maja losowe elementy, ekwipunek i klimat.",
+        "Postacie są kruche, dziwne i często skazane na marny koniec. Tworzenie postaci jest szybkie, a duże znaczenie mają losowe elementy, ekwipunek i klimat.",
       combat:
-        "Walka jest smiertelna i szybka. Gracze czesto rzucaja za swoje dzialania ofensywne i defensywne. Lepiej myslec ostroznie niz zakladac, ze kazda walka jest do wygrania.",
+        "Walka jest śmiertelna i szybka. Gracze często rzucają za swoje działania ofensywne i defensywne. Lepiej myśleć ostrożnie niż zakładać, że każda walka jest do wygrania.",
       health:
-        "Postacie maja niewiele wytrzymalosci, a obrazenia szybko staja sie powaznym problemem. Smierc lub trwale konsekwencje sa naturalna czescia gry.",
+        "Postacie mają niewiele wytrzymałości, a obrażenia szybko stają się poważnym problemem. Śmierć lub trwałe konsekwencje są naturalną częścią gry.",
       progression:
-        "Rozwoj jest prosty i mniej rozbudowany niz w heroic fantasy. Wazniejszy jest klimat, przetrwanie i konsekwencje niz dlugie planowanie buildow.",
+        "Rozwój jest prosty i mniej rozbudowany niż w heroic fantasy. Ważniejszy jest klimat, przetrwanie i konsekwencje niż długie planowanie buildów.",
       "game-flow":
-        "Typowa sesja to eksploracja, ryzyko, szybkie decyzje, dziwne znaleziska, brutalne starcia i narastajace poczucie konca swiata.",
+        "Typowa sesja to eksploracja, ryzyko, szybkie decyzje, dziwne znaleziska, brutalne starcia i narastające poczucie końca świata.",
     },
   },
 ];

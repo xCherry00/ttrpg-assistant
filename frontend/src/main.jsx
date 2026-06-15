@@ -4,7 +4,6 @@ import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthContext";
 import AppErrorBoundary from "./components/AppErrorBoundary";
 
-import "./styles/theme.css";
 import "./styles/globals.css";
 import "./styles/ui.css";
 import "./styles/topnav.css";
@@ -21,15 +20,13 @@ import "./styles/compendium.css";
 import "./styles/profile.css";
 import "./styles/friends.css";
 import "./styles/messages.css";
+import "./styles/notes.css";
 import "./styles/dice.css";
 import "./styles/layout-redesign-2026.css";
 
 
 
 import App from "./App";
-
-const storedTheme = localStorage.getItem("ttrpg_theme") || "light";
-document.documentElement.setAttribute("data-theme", storedTheme);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

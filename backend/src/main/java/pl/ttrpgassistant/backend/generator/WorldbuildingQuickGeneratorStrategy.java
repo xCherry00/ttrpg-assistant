@@ -70,23 +70,23 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
         FantasyWorldFrame frame = fantasyWorldFrame();
         return List.of(
                 stats("Fantasy", "Skala", stringParam(params, "scale", "Losowa")),
-                section("Tozsamosc swiata", title + " to " + frame.identity() + "."),
+                section("Tozsamosc świata", title + " to " + frame.identity() + "."),
                 section("Magia", pick(
-                        "Magia jest powszechna w rytualach, ale rzadka w codziennym uzyciu.",
-                        "Magia zanika i kazde jej uzycie przyciaga uwage uczonych, wladzy albo kultow.",
+                        "Magia jest powszechna w rytualach, ale rzadka w codziennym użyćiu.",
+                        "Magia zanika i każde jej użycie prżyciaga uwage uczonych, władzy albo kultow.",
                         "Magia jest narzedziem elit, przez co zwykli ludzie traktuja ja jak podatki: boja sie jej i potrzebuja.",
-                        "Magia jest zakazana oficjalnie, lecz kazda wieksza frakcja ma wlasnych praktykow."
+                        "Magia jest zakazana oficjalnie, lecz każda większa frakcja ma wlasnych praktykow."
                 )),
                 section("Geografia", frame.geography()),
-                section("Glowny konflikt", frame.conflict()),
-                section("Wazne centrum wladzy", frame.powerCenter()),
-                section("Sekret swiata", pick(
-                        "Ksiezyc jest wiezieniem dla czegos, co zaczyna snic przez ludzi.",
-                        "Najstarsze mapy pokazuja kontynent, ktorego nikt nie pamieta.",
-                        "Bogowie nie znikneli. Zmienili tylko sposob pobierania dlugow.",
-                        "Wszystkie wielkie magie pochodza z jednego bledu, ktory ktos chce powtorzyc."
+                section("Główny konflikt", frame.conflict()),
+                section("Wazne centrum władzy", frame.powerCenter()),
+                section("Sekret świata", pick(
+                        "Ksiezyc jest wiezieniem dla czegoś, co zaczyna snic przez ludzi.",
+                        "Najstarsze mapy pokazuja kontynent, którego nikt nie pamieta.",
+                        "Bogowie nie znikneli. Zmieńili tylko sposób pobierania długów.",
+                        "Wszystkie wielkie magie pochodza z jednego bledu, który ktoś chce powtorzyc."
                 )),
-                section("Jak uzyc na sesji", "Daj graczom jeden widoczny konflikt, jedna lokalna konsekwencje i jeden sekret w tle. Swiat ma pracowac przy stole, nie tylko brzmiec ladnie.")
+                section("Jak użyć na sesji", "Daj graczom jeden widoczny konflikt, jedna lokalna konsekwencje i jeden sekret w tle. Świat ma pracowac przy stole, nie tylko brzmiec ladnie.")
         );
     }
 
@@ -95,25 +95,25 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
             case 0 -> new FantasyWorldFrame(
                     "stary kontynent po upadku kilku imperiow",
                     "Centralny lancuch gor dzieli kontynent na zachod kupiecki i wschod pelen ruin.",
-                    "Imperium rozpada sie na ambitne prowincje, a kazda twierdzi, ze dziedziczy prawdziwe prawo.",
+                    "Imperium rozpada sie na ambitne prowincje, a każda twierdzi, ze dziedziczy prawdziwe prawo.",
                     "Zelazna Korona Tharnu - bogata, zdyscyplinowana i coraz bardziej paranoiczna."
             );
             case 1 -> new FantasyWorldFrame(
-                    "archipelag setek wysp polaczonych handlem, magia i starymi przysiegami",
-                    "Wyspy ukladaja sie wokol niebezpiecznego Morza Wewnetrznego; najwazniejsze szlaki prowadza przez cieśniny, rafy i porty-neutralne.",
+                    "archipelag setek wysp połączonych handlem, magia i starymi przysiegami",
+                    "Wyspy układają sie wokol niebezpiecznego Morza Wewnetrznego; najwazniejsze szlaki prowadza przez cieśniny, rafy i porty-neutralne.",
                     "Kupieckie ligi przejely realna wladze nad szlakami, a dawne korony probuja odzyskac znaczenie przez blokady i piractwo.",
-                    "Wolne Miasta Brzegu - chaotyczna liga portow, bogata, niezalezna i podatna na szantaz."
+                    "Wolne Miasta Brzegu - chaotyczna liga portow, bogata, niezależna i podatna na szantaz."
             );
             case 2 -> new FantasyWorldFrame(
-                    "kraina odbudowana po dlugim okresie ciemnosci",
+                    "kraina odbudowana po długim okresie ciemnosci",
                     "Rzeki sa prawdziwymi granicami politycznymi, bo stare drogi przecinaja przeklete puszcze i pola dawnych bitew.",
-                    "Dwie religie chca tych samych swietych miejsc, ale zadna nie jest calkiem niewinna.",
+                    "Dwie religie chca tych samych swietych miejsc, ale żadna nie jest calkiem niewinna.",
                     "Federacja Liliowego Lasu - dyplomatyczna na pokaz, bezlitosna w obronie sekretow."
             );
             default -> new FantasyWorldFrame(
-                    "mlody pograniczny swiat, gdzie granice dopiero nabieraja znaczenia",
-                    "Pustkowia na polnocy kryja starsze drogi niz obecne osady, a kazda nowa mapa szybko sie dezaktualizuje.",
-                    "Stara pieczec slabnie, a frakcje spieraja sie, czy ja naprawic, zniszczyc czy wykorzystac.",
+                    "mlody pograniczny świat, gdzie granice dopiero nabieraja znaczenia",
+                    "Pustkowia na północy kryją starsze drogi niż obecne osady, a każda nowa mapa szybko sie dezaktualizuje.",
+                    "Stara pieczec slabnie, a frakcję spieraja sie, czy ja naprawic, zniszczyc czy wykorzystać.",
                     "Dawne Holdy Karadu - dumne, zadluzone i zamkniete dla obcych."
             );
         };
@@ -122,31 +122,31 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
     private List<GeneratorOutputSection> calendar(Map<String, Object> params, String title) {
         int days = pickInt(6, 7, 8);
         String months = String.join(", ", pick(
-                "Glebokozimie, Odwilz, Siew, Jasnokwiat, Sloncegrod, Zniwa, Dymne Pola, Popielnik, Krotkodzien, Koniec Roku",
+                "Glebokozimię, Odwilz, Siew, Jasnokwiat, Sloncegrod, Zniwa, Dymne Pola, Popielnik, Krotkodzien, Koniec Roku",
                 "Mroznik, Wilczyc, Blotnik, Zielnik, Zar, Burznik, Plon, Mgielnik, Ciennik, Ostatni Ogien",
-                "Pierwszy Deszcz, Mloda Trawa, Wysokie Slonce, Czerwone Zniwo, Cichy Wiatr, Czarne Liscie, Dluga Noc, Nowy Plomien"
+                "Pierwszy Deszcz, Mloda Trawa, Wysokie Slonce, Czerwone Zniwo, Cichy Wiatr, Czarne Liscie, Długa Noc, Nowy Plomien"
         ).split(", "));
         return List.of(
                 stats("Fantasy", "Dni tygodnia", days),
-                section("Nazwa kalendarza", title + " mierzy czas wedlug cyklu prac, swiat i dawnych znakow na niebie."),
+                section("Nazwa kalendarza", title + " mierzy czas według cyklu prac, świat i dawnych znakow na niebie."),
                 section("Tydzien", "Tydzien ma " + days + " dni. Nazwy dni: " + String.join(", ", pickN(
-                        List.of("Dzien Slonca", "Dzien Ksiezyca", "Dzien Zelaza", "Dzien Wody", "Dzien Kupcow", "Dzien Przysiag", "Dzien Odpoczynku", "Dzien Cieni"),
+                        List.of("Dzień Słońca", "Dzień Księżyca", "Dzień Żelaza", "Dzień Wody", "Dzień Kupców", "Dzień Przysiąg", "Dzień Odpoczynku", "Dzień Cieni"),
                         days
                 )) + "."),
                 section("Miesiace", months + ". Miesiace nie musza byc rowne; roznice sa dobrym miejscem na swieta, podatki i przesady."),
                 section("Ksiezyce", pick(
-                        "Jeden blady ksiezyc, cykl okolo 29 dni. Pelnie sa wazne dla sadow i przysiag.",
-                        "Dwa ksiezyce: jasny i rdzawy. Gdy oba sa pelne, nie zawiera sie malzenstw.",
+                        "Jeden błądy ksiezyc, cykl okolo 29 dni. Pelnie sa ważne dla sadow i przysiag.",
+                        "Dwa ksiezyce: jasny i rdzawy. Gdy oba sa pełne, nie zawiera sie malzenstw.",
                         "Trzy male ksiezyce, kazdy zwiazany z innym rodzajem wrozby."
                 )),
                 section("Swieta", pick(
-                        "Noc Dluga: wspomina sie zmarlych i nie otwiera drzwi po trzecim pukaniu.",
-                        "Pierwszy Siew: dlugi targ, publiczne pojednania i ukryte umowy.",
-                        "Dzien Pustych Dzwonow: swieto ciszy po dawnej wojnie.",
-                        "Zniwna Korona: wybiera sie osobe, ktora przez jeden dzien moze obrazic kazdego bez kary."
+                        "Noc Długa: wspomina sie zmarlych i nie otwiera drzwi po trzecim pukaniu.",
+                        "Pierwszy Siew: długi targ, publiczne pojednania i ukryte umowy.",
+                        "Dzień Pustych Dzwonow: swieto ciszy po dawnej wojnie.",
+                        "Zniwna Korona: wybiera sie osobe, która przez jeden dzien może obrazic każdego bez kary."
                 )),
                 section("Dzisiejsza data", "Dzis jest " + (1 + random.nextInt(28)) + ". dzien miesiaca " + pick("Odwilz", "Jasnokwiat", "Plon", "Ciennik") + ", rok " + (800 + random.nextInt(900)) + "."),
-                section("Uzycie przy stole", "Kalendarz najlepiej dziala, gdy daje presje: termin swieta, nadchodzaca pelnie, podatek, zakaz albo dzien, w ktorym nikt nie chce podrozowac.")
+                section("Użycie przy stole", "Kalendarz najlepiej działa, gdy daje presje: termin swieta, nadchodzaca pelnie, podatek, zakaz albo dzien, w którym nikt nie chce podrozowac.")
         );
     }
 
@@ -155,23 +155,23 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
         int population = populationFor(size);
         return List.of(
                 stats("Fantasy", "Populacja", population),
-                section("Typ osady", title + " to " + sizeLabel(size) + " liczaca okolo " + population + " mieszkancow."),
-                section("Grupy mieszkancow", "Ludzie stanowia najwieksza grupe, ale widoczne sa tez mniejszosci: " + String.join(", ", pickN(
-                        List.of("krasnoludzcy rzemieslnicy", "elficcy uchodzcy", "niziolekcy handlarze", "polorkowie najemnicy", "gnomscy skrybowie", "rodziny z dalekiego pogranicza"),
+                section("Typ osady", title + " to " + sizeLabel(size) + " liczaca okolo " + population + " mieszkańców."),
+                section("Grupy mieszkańców", "Ludzie stanowia największa grupe, ale widoczne sa tez mniejszosci: " + String.join(", ", pickN(
+                        List.of("krasnoludzcy rzemieślnicy", "elficcy uchodźcy", "niziołecy handlarze", "półorkowie najemnicy", "gnomscy skrybowie", "rodziny z dalekiego pogranicza"),
                         3
                 )) + "."),
-                section("Zawody", "Najwiecej jest rolnikow, tragarzy i rzemieslnikow. Wplyw maja: " + String.join(", ", pickN(
-                        List.of("mlodynarze", "kowale", "przewoznicy", "kaplani", "straznicy", "aptekarze", "pisarze", "rybacy"),
+                section("Zawody", "Najwięcej jest rolników, tragarzy i rzemieślników. Wpływ mają: " + String.join(", ", pickN(
+                        List.of("mlodynarze", "kowale", "przewoznicy", "kapłani", "straznicy", "aptekarze", "pisarze", "rybacy"),
                         4
                 )) + "."),
-                section("Jezyki i religia", "Na targu slychac " + String.join(", ", pickN(List.of("wspolny", "krasnoludzki", "elficki", "orkowy", "jezyk kupiecki", "stary dialekt lokalny"), 3)) + ". Dominujaca wiara: " + pick("Kosciol Slonca", "Stara Wiara", "kult patrona rzeki", "brak jednej dominujacej religii") + "."),
+                section("Języki i religia", "Na targu słychać " + String.join(", ", pickN(List.of("wspólny", "krasnoludzki", "elficki", "orkowy", "język kupiecki", "stary dialekt lokalny"), 3)) + ". Dominująca wiara: " + pick("Kościół Słońca", "Stara Wiara", "kult patrona rzeki", "brak jednej dominujacej religii") + "."),
                 section("Napiecie spoleczne", pick(
                         "Nowi przybysze sa potrzebni do pracy, ale obwinia sie ich za wzrost cen.",
-                        "Cech kontroluje dostep do pracy i blokuje ludzi spoza rodzin.",
+                        "Cech kontroluje dostęp do pracy i blokuje ludzi spoza rodzin.",
                         "Religia i handel sa splecione, wiec kazdy spor ekonomiczny szybko staje sie moralny.",
-                        "Wladza udaje stabilnosc, ale wszyscy wiedza, ze zapasy sa nizsze niz oficjalnie."
+                        "Wladza udaje stabilnosc, ale wszyscy wiedza, ze zapasy sa niższe niż oficjalnie."
                 )),
-                section("Hak dla MG", "Uzyj demografii do decyzji: kto ma informacje, kto boi sie zmian, kto moze pomoc i kto straci, jesli gracze rozwiaza problem.")
+                section("Hak dla MG", "Uzyj demografii do decyzji: kto ma informacje, kto boi sie zmian, kto może pomoc i kto straci, jesli gracze rozwiążą problem.")
         );
     }
 
@@ -181,26 +181,26 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
                 stats("Fantasy", "Typ", type),
                 section("Opis", title + " to " + (isRandom(type) ? pick("zamek na wzgorzu", "twierdza rzeczna", "forteca graniczna", "nadmorski bastion") : type.toLowerCase()) + ", widoczny z daleka i trudny do zignorowania."),
                 section("Stan", pick(
-                        "Dobrze utrzymany, ale jedna czesc pozostaje zamknieta od lat.",
-                        "Czesciowo zrujnowany po dawnym oblezeniu, mimo to nadal zamieszkany.",
+                        "Dobrze utrzymany, ale jedna część pozostaje zamknieta od lat.",
+                        "Częściowo zrujnowany po dawnym oblężeniu, mimo to nadal zamieszkany.",
                         "Niedawno odbudowany, przez co starsze fundamenty nie pasuja do nowych murow.",
-                        "Zbyt cichy jak na miejsce z taka liczba straznikow."
+                        "Zbyt cichy jak na miejsce z taką liczbą strażników."
                 )),
                 section("Cechy szczegolne", String.join("; ", pickN(
-                        List.of("ukryta furta w murze", "studnia na dziedzincu", "kaplica bez symboli", "wieza sygnalowa", "stare lochy", "biblioteka z zamknietym skrzydlem", "sucha fosa", "most zwodzony z nowym mechanizmem"),
+                        List.of("ukryta furta w murze", "studnia na dziedzincu", "kaplica bez symboli", "wieza sygnalowa", "stare lochy", "biblioteka z zamknietym skrzydlem", "sucha fosa", "most zwodzony z nowym mechaniżmem"),
                         3
                 )) + "."),
-                section("Wladca", pick(
-                        "zubożaly rod szlachecki, ktory ukrywa skale dlugow",
-                        "weteran wojenny trzymajacy porzadek bardziej sila niz prawem",
-                        "rada zarzadcow, gdzie kazdy reprezentuje inna frakcje",
-                        "czarodziejka, ktora kupila zamek, ale nie otrzymala wszystkiego, co pod nim lezy"
+                section("Władca", pick(
+                        "zubożaly rod szlachecki, który ukrywa skale długów",
+                        "weteran wojenny trzymajacy porzadek bardziej sila niż prawem",
+                        "rada zarzadcow, gdzie kazdy reprezentuje inna frakcję",
+                        "czarodziejka, która kupiła zamek, ale nie otrzymała wszystkiego, co pod nim leży"
                 )),
                 section("Problem", pick(
-                        "Garnizon jest podzielony i czeka tylko na pretekst do buntu.",
-                        "W nocy ktos otwiera jedna z bram od srodka.",
-                        "Pod zamkiem znaleziono tunel starszy niz sama warownia.",
-                        "Wladca potrzebuje pomocy, ale oficjalnie nie moze jej poprosic."
+                        "Garniżon jest podzielony i czeka tylko na pretekst do buntu.",
+                        "W nocy ktoś otwiera jedna z bram od srodka.",
+                        "Pod zamkiem znaleziono tunel starszy niż sama warownia.",
+                        "Władca potrzebuje pomocy, ale oficjalnie nie może jej poprosic."
                 )),
                 section("Sekret", pick(
                         "Zamek zbudowano jako wiezienie, nie rezydencje.",
@@ -390,28 +390,28 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
     }
 
     private String dungeonSetting(Map<String, Object> params) {
-        String resolved = stringParam(params, "_resolvedDungeonSetting", "");
-        if (!resolved.isBlank()) {
-            return resolved;
+        String resólved = stringParam(params, "_resólvedDungeonSetting", "");
+        if (!resólved.isBlank()) {
+            return resólved;
         }
         String requested = stringParam(params, "setting", "Fantasy");
         if (!isRandom(requested)) {
-            params.put("_resolvedDungeonSetting", requested);
+            params.put("_resólvedDungeonSetting", requested);
             return requested;
         }
         String setting = pick("Fantasy", "Horror", "Sci-Fi", "Postapo", "Realistyczny");
-        params.put("_resolvedDungeonSetting", setting);
+        params.put("_resólvedDungeonSetting", setting);
         return setting;
     }
 
     private String dungeonTheme(Map<String, Object> params, String setting) {
-        String resolved = stringParam(params, "_resolvedDungeonTheme", "");
-        if (!resolved.isBlank()) {
-            return resolved;
+        String resólved = stringParam(params, "_resólvedDungeonTheme", "");
+        if (!resólved.isBlank()) {
+            return resólved;
         }
         String requested = stringParam(params, "theme", "Losowy");
         if (!isRandom(requested)) {
-            params.put("_resolvedDungeonTheme", requested);
+            params.put("_resólvedDungeonTheme", requested);
             return requested;
         }
         String theme;
@@ -422,7 +422,7 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
         } else if ("Postapo".equalsIgnoreCase(setting)) {
             theme = pick("Schron", "Metro po katastrofie", "Zatopiony supermarket", "Fabryka filtrów", "Stara baza wojskowa", "Osada pod tamą", "Magazyn leków", "Tunel ewakuacyjny");
         } else if ("Realistyczny".equalsIgnoreCase(setting)) {
-            theme = pick("Zamknięty magazyn", "Podziemia kamienicy", "Stary fort", "Nieczynny hotel", "Piwnica komisariatu", "Tunel przemytników", "Archiwum miejskie", "Kanały techniczne");
+            theme = pick("Zamknięty magazyn", "Podziemią kamienicy", "Stary fort", "Nieczynny hotel", "Piwnica komisariatu", "Tunel przemytników", "Archiwum miejskie", "Kanały techniczne");
         } else {
             theme = pick(
                     "Krypta", "Kopalnia", "Świątynia", "Wieża maga", "Kryjówka bandytów", "Ruiny krasnoludzkie",
@@ -430,7 +430,7 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
                     "Jaskinia potworów", "Zatopione ruiny", "Magiczne laboratorium", "Stara kanalizacja"
             );
         }
-        params.put("_resolvedDungeonTheme", theme);
+        params.put("_resólvedDungeonTheme", theme);
         return theme;
     }
 
@@ -449,7 +449,7 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
             );
             case "świątynia", "sanktuarium kultu" -> pick(
                     "Święte symbole są przemalowane, jakby ktoś poprawiał cudzą wiarę.",
-                    "Zapach kadzidła miesza się z wilgocią i krwią.",
+                    "Zapach kadzidła miesza się z wilgoćią i krwią.",
                     "Miejsce nadal reaguje na modlitwy, tylko nie zawsze na właściwe."
             );
             case "wieża maga", "magiczne laboratorium" -> pick(
@@ -517,7 +517,7 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
             return List.of("uszkodzona AI traktująca intruzów jak infekcję", "drony serwisowe z błędnym protokołem", "wyciek biologiczny", "piraci szukający tego samego", "system próżniowy odcinający sekcje");
         }
         if (setting.contains("postapo")) {
-            return List.of("skażenie i brak czasu", "banda szabrowników", "głód, który zmienił ludzi w wrogów", "stare zabezpieczenia wojskowe", "mutacja pilnująca zapasów");
+            return List.of("skażenie i brak czasu", "banda szabrowników", "głód, który zmieńił ludzi w wrogów", "stare zabezpieczenia wojskowe", "mutacja pilnująca zapasów");
         }
         if (setting.contains("realistyczny")) {
             return List.of("uzbrojeni ludzie pilnujący przejścia", "zawalenie konstrukcji", "kamera, alarm albo czujnik ruchu", "ktoś ukryty w środku", "presja czasu przed przyjazdem służb");
@@ -557,7 +557,7 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
                 "Skarb w tej sali jest przynętą; zabranie go przesuwa główne zagrożenie bliżej wyjścia.",
                 "Pomieszczenie zaczyna się zalewać, gdy ktoś dotknie właściwego tropu.",
                 "Sojusznik z poprzedniej sceny ujawnia własny plan i próbuje zamknąć drużynę w środku.",
-                "Drzwi za plecami prowadzą teraz do innego miejsca, więc powrót wymaga decyzji albo kosztu.",
+                "Drzwi za plecąmi prowadzą teraz do innego miejsca, więc powrót wymaga decyzji albo kosztu.",
                 "Najbardziej oczywisty przeciwnik okazuje się strażnikiem trzymającym większy problem w ryzach."
         );
     }
@@ -575,7 +575,7 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
     private List<String> rewardOptions(String key) {
         return List.of(
                 "Nagroda jest użyteczna od razu, ale ma znak właściciela, który po nią przyjdzie.",
-                "Prawdziwym skarbem jest informacja: loch był tylko wejściem do większej sprawy.",
+                "Prawdziwym skarbem jest informacją: loch był tylko wejściem do większej sprawy.",
                 "Drużyna znajduje relikwię i dowód, że zleceniodawca pominął najważniejszy szczegół.",
                 "Ocalona osoba wie, jak wyjść, lecz nie jest tą osobą, za którą ją wzięto.",
                 "Zabranie skarbu zamyka obecny problem, ale otwiera nowe przejście na mapie."
@@ -610,7 +610,7 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
                     "Ściany są pokryte zdjęciami tej samej osoby, ale każde pokazuje ją w innym wieku i przy innych drzwiach.",
                     "W szafkach leżą opisane próbki; jedna ma nazwisko bohatera i datę sprzed dziesięciu lat.",
                     "Zamknięte drzwi stukają od środka trzy razy, zawsze zanim ktoś wypowie kłamstwo.",
-                    "Na podłodze narysowano krąg z soli i popiołu; przerwanie linii ucisza cały budynek.",
+                    "Na podłodze narysowano krąg z sóli i popiołu; przerwanie linii uciszą cały budynek.",
                     "Wanna, stół operacyjny albo łóżko jest czyste, ale odpływ pod nim nadal pracuje.",
                     "Radio gra lokalne wiadomości z jutra i przerywa, gdy ktoś spróbuje zapisać szczegóły.",
                     "Lustro pokazuje pomieszczenie bez drużyny, za to z kimś stojącym przy wyjściu.",
@@ -618,7 +618,7 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
                     "Na suficie wiszą mokre ślady dłoni, które kończą się dokładnie nad najcichszą osobą w drużynie.",
                     "Kartoteka zawiera akta ludzi, którzy dopiero mają tu wejść; przy jednym nazwisku dopisano godzinę śmierci.",
                     "W kącie stoi manekin ubrany jak zaginiony świadek, a jego kieszeń kryje prawdziwy klucz.",
-                    "Pod dywanem ukryto właz do wąskiego szybu, z którego dobiega oddech zsynchronizowany z oddechem graczy.",
+                    "Pod dywanem ukryto właz do wąskiego szybu, z którego dobiega oddech zsynchroniżowany z oddechem graczy.",
                     "Zegar ścienny cofa się o minutę po każdym głośnym dźwięku.",
                     "Łóżka są równo pościelone, lecz pod każdym materacem leży ta sama mokra fotografia.",
                     "W zamrażarce nie ma ciał, tylko podpisane worki z rzeczami osób, które jeszcze żyją.",
@@ -626,7 +626,7 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
                     "Maszyna do pisania sama zapisuje ostatnie słowa osoby, która dotknie klawiszy.",
                     "Plama na ścianie układa się w mapę, jeśli polać ją czystą wodą.",
                     "W pokoju dziecięcym zabawki patrzą w stronę zamkniętej kratki wentylacyjnej.",
-                    "Telefon bez kabla dzwoni tylko wtedy, gdy ktoś stoi plecami do wyjścia.",
+                    "Telefon bez kabla dzwoni tylko wtedy, gdy ktoś stoi plecąmi do wyjścia.",
                     "W pralni obraca się jedna pusta pralka; w bębnie słychać pukanie z innego piętra.",
                     "Ołtarzyk z domowych przedmiotów wskazuje, że ktoś próbował tu odprawić rytuał ochronny i przegrał.",
                     "Na podłodze leży świeży raport policyjny opisujący dokładnie tę scenę, ale z inną liczbą osób.",
@@ -654,7 +654,7 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
                     "Magazyn części zawiera dokładnie to, czego drużyna potrzebuje, oraz aktywny nadajnik korporacyjny.",
                     "W centrum sali wiruje mapa gwiezdna z jedną planetą oznaczoną jako 'nie otwierać'.",
                     "Warsztat robotyczny składa z resztek maszynę o twarzy ostatniej osoby, która tu zginęła.",
-                    "Pokój dekontaminacji nie otworzy drugich drzwi, dopóki ktoś nie przyzna się do skażenia.",
+                    "Pokój dekontaminacji nie otwórzy drugich drzwi, dopóki ktoś nie przyzna się do skażenia.",
                     "Laboratorium próżniowe trzyma w polu siłowym narzędzie, które nie powinno istnieć w tej epoce.",
                     "Serwerownia chłodzi się ciekłym azotem; alarm cieplny wskazuje jedną żywą istotę za szafami.",
                     "Mesa załogi ma świeże posiłki, ale datownik pokazuje ostatni cykl sprzed dwudziestu lat.",
@@ -668,8 +668,8 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
                     "Sala odpraw ma hologram kapitana, który rozpoznaje tylko jednego intruza jako członka załogi.",
                     "Kanał techniczny jest zbyt czysty i prowadzi do sekcji usuniętej z planów.",
                     "Sonda badawcza wróciła z zewnątrz pusta, choć zapis masy wskazuje pasażera.",
-                    "Komora obcych próbek ma pęknięty pojemnik i system gaśniczy pełen soli.",
-                    "Konsola nawigacyjna proponuje skok do koordynatów opisanych jako 'dom'.",
+                    "Komora obcych próbek ma pęknięty pojemnik i system gaśniczy pełen sóli.",
+                    "Konsóla nawigacyjna proponuje skok do koordynatów opisanych jako 'dom'.",
                     "Drukarka przemysłowa kończy przedmiot zamówiony przez kogoś, kto nie żyje od lat.",
                     "Moduł łączności odbiera prywatne wiadomości załogi, ale wszystkie nadano z przyszłej godziny.",
                     "Pokój map taktycznych pokazuje intruzów jako czerwone plamy, a jedną osobę jako błąd systemu.",
@@ -696,7 +696,7 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
                     "Stacja pomp działa ręcznie; jedno uruchomienie daje wodę, drugie budzi alarm w całym kompleksie.",
                     "Kantyna została zamieniona w salę sądu, a wyroki wiszą na tablicy zamiast menu.",
                     "W chłodni przechowywane są leki, mięso i zapieczętowany worek z oznaczeniem 'nie liczyć'.",
-                    "Stary punkt kontroli promieniowania pika tylko przy jednym plecaku z drużyny.",
+                    "Stary punkt kontroli promieniowania pika tylko przy jednym plecąku z drużyny.",
                     "Kanał wentylacyjny prowadzi do pokoju dzieci, gdzie kredą narysowano trasę patrolu.",
                     "Zbrojownia jest zamknięta od zewnątrz, ale od środka ktoś regularnie oliwi broń.",
                     "Szklarnia daje plony, lecz rośliny odwracają liście od jednej konkretnej osoby.",
@@ -715,8 +715,8 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
                     "Stary automat z wodą działa tylko za żetony znalezione przy martwych strażnikach.",
                     "Magazyn nasion zawiera jedną skrzynkę podpisaną datą z następnego roku.",
                     "Sala generatorów ma ręczny przełącznik i wyraźne ślady po ostatniej walce o prąd.",
-                    "Przedsionek śluzy jest pełen notatek ostrzegających przed powrotem na powierzchnię.",
-                    "Warsztat rusznikarza ma niedokończoną broń i nabój z wyrytym imieniem.",
+                    "Przedsionek śluzy jest pełen notatek ostrzegających przed powrótem na powierzchnię.",
+                    "Warsztat rusznikarza ma niedokończoną broń i nabój z wyrytym imięniem.",
                     "Pokój dziecięcy przerobiono na skład amunicji, ale zabawki nadal leżą w równych rzędach.",
                     "Chłodnia z wodą ma działającą pompę i ślad świeżo przeciętego węża."
             );
@@ -780,7 +780,7 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
                 "Sala z wahadłami zatrzymuje pułapkę tylko wtedy, gdy ktoś porusza się w rytmie starej pieśni.",
                 "Korytarz posągów prowadzi przez twarze dawnych złodziei; jeden posąg ma twarz kogoś z drużyny.",
                 "Jadalnia jest zastawiona świeżą ucztą, ale każde krzesło nosi wyryte imię gościa.",
-                "Kaplica boczna ma ołtarz bez bóstwa; modlitwa do dowolnego imienia odpowiada głosem spod posadzki.",
+                "Kaplica boczna ma ołtarz bez bóstwa; modlitwa do dowolnego imięnia odpowiada głosem spod posadzki.",
                 "Sala map pokazuje loch z góry, lecz jedno pomieszczenie przesuwa się, gdy nikt na nie nie patrzy.",
                 "Komora z mgłą ukrywa przeciwnika, ale mgła układa się w strzałki, jeśli mówić szeptem.",
                 "Pracownia run ma trzy świecące znaki: jeden otwiera drzwi, drugi budzi strażnika, trzeci kłamie.",
@@ -804,66 +804,66 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
         return List.of(
                 stats("Horror", "Grupa zawodowa", group),
                 section("Kim jest", title + " pracuje jako " + occupation(group) + ". Na pierwszy rzut oka to zwykla osoba zwiazana ze sprawa."),
-                section("Wyglad", pick(
-                        "Blade oczy, staranny ubior i rece, ktore ciagle poprawiaja mankiety.",
+                section("Wygląd", pick(
+                        "Blade oczy, staranny ubior i ręce, które ciagle poprawiaja mankiety.",
                         "Zmeczona twarz, notatnik trzymany zbyt mocno i wzrok uciekajacy do drzwi.",
-                        "Elegancki wyglad psuje tylko zapach alkoholu, lekow albo wilgoci.",
+                        "Elegancki wygląd psuje tylko zapach alkoholu, lekow albo wilgoći.",
                         "Mowi spokojnie, ale reaguje za szybko na jedno konkretne slowo."
                 )),
                 section("Obsesja", pick(
                         "Porownuje wszystkie zdarzenia z jednym starym przypadkiem.",
-                        "Zbiera wycinki, mapy i fotografie miejsc, ktorych nigdy nie odwiedzil.",
+                        "Zbiera wycinki, mapy i fotografie miejsc, których nigdy nie odwiedzil.",
                         "Wierzy, ze sny sa raportami z innego miejsca.",
-                        "Probuje udowodnic, ze wszystko ma racjonalne wyjasnienie, nawet gdy juz w to nie wierzy."
+                        "Próbuje udowodnic, ze wszystko ma racjonalne wyjasnienie, nawet gdy juz w to nie wierzy."
                 )),
                 section("Sekret", pick(
                         "Byl obecny przy rytuale, ale zapamietal go jako wypadek.",
-                        "Ukrywa tom albo przedmiot, ktorego nie umie zniszczyc.",
-                        "Jego rodzina ma zwiazek z miejscem sledztwa.",
-                        "Raz juz widzial istote i przezyl, bo ktos inny zaplacil cene."
+                        "Ukrywa tom albo przedmiot, którego nie umie zniszczyc.",
+                        "Jego rodzina ma zwiazek z miejscem śledztwa.",
+                        "Raz juz widzial istote i przezyl, bo ktoś inny zaplacil cene."
                 )),
                 section("Stabilnosc psychiczna", pick(
-                        "Stabilny, ale zaprzeczenie kosztuje go coraz wiecej.",
+                        "Stabilny, ale zaprzeczenie kosztuje go coraz więcej.",
                         "Nadszarpniety: bezsennosc, luki w pamieci i przesadna czujnosc.",
-                        "Kruchy: potrafi dzialac, dopoki nikt nie dotknie sedna sprawy.",
-                        "Na granicy: prawda i urojenie mieszaja sie w uzyteczny, ale niebezpieczny sposob."
+                        "Kruchy: potrafi działać, dopoki nikt nie dotknie sedna sprawy.",
+                        "Na granicy: prawda i urojenie mieszaja sie w uzyteczny, ale niebezpieczny sposób."
                 )),
-                section("Trop dla graczy", "NPC zna fragment prawdy. Nie musi podac go wprost: moze oddac klucz, wskazac nazwisko, rozpoznac symbol albo ostrzec przed miejscem.")
+                section("Trop dla graczy", "NPC zna fragment prawdy. Nie musi podac go wprost: może oddac klucz, wskazac nazwisko, rozpoznac symbol albo ostrzec przed miejscem.")
         );
     }
 
     private List<GeneratorOutputSection> scifiWorld(Map<String, Object> params, String title) {
         return List.of(
                 stats("Sci-Fi", "Skala", stringParam(params, "scale", "Losowa")),
-                section("Typ swiata", title + " to " + pick("kolonia graniczna", "swiat korporacyjny", "planeta po terraformacji", "stacja-miasto", "niezalezny port orbitalny") + "."),
+                section("Typ świata", title + " to " + pick("kolonia graniczna", "świat korporacyjny", "planeta po terraformacji", "stacja-miasto", "niezależny port orbitalny") + "."),
                 section("Poziom technologii", pick(
-                        "Technologia jest wysoka, ale nierowno dostepna.",
-                        "Kolonia dziala na sprzecie drugiej reki i lokalnych obejsciach.",
-                        "Systemy sa zautomatyzowane, lecz AI ma ograniczenia, o ktorych nikt nie mowi.",
-                        "Miejsce wyglada nowoczesnie, ale infrastruktura jest na granicy awarii."
+                        "Technologia jest wysoka, ale nierówno dostępna.",
+                        "Kolonia działa na sprzecie drugiej reki i lokalnych obejsciach.",
+                        "Systemy sa zautomatyzowane, lecz AI ma ograniczenia, o których nikt nie mowi.",
+                        "Miejsce wygląda nowoczesnie, ale infrastruktura jest na granicy awarii."
                 )),
                 section("Rzad i kultura", pick(
                         "Rzadza kontrakty korporacyjne, a prawo jest dodatkiem do regulaminu.",
-                        "Lokalna rada jest wybierana, ale dostep do tlenu i pracy kontroluje jedna firma.",
-                        "Spolecznosc powstala z uchodzcow i nie ufa zadnej zewnetrznej wladzy.",
-                        "Kultura opiera sie na statusie technicznym: kto naprawia systemy, ten ma glos."
+                        "Lokalna rada jest wybierana, ale dostęp do tlenu i pracy kontroluje jedna firma.",
+                        "Społeczność powstala z uchodzcow i nie ufa żadnej zewnętrznej władzy.",
+                        "Kultura opiera sie na statusie technicznym: kto naprawia systemy, ten ma głos."
                 )),
                 section("Konflikt", pick(
                         "Bunt pracownikow przeciwko warunkom kontraktu.",
-                        "Spor o dostep do punktu skoku albo jedynego portu.",
-                        "Kryzys ekologiczny, ktory administracja ukrywa przed inwestorami.",
+                        "Spor o dostęp do punktu skoku albo jedynego portu.",
+                        "Kryzys ekologiczny, który administracja ukrywa przed inwestorami.",
                         "Religijny albo ideologiczny rozlam po pierwszym kontakcie z czyms obcym."
                 )),
                 section("Sekret", pick(
                         "Terraformacja obudzila cos pod powierzchnia.",
-                        "Dane zalozycielskie zostaly sfalszowane.",
+                        "Dane zalożycielskie zostały sfalszowane.",
                         "Woda, powietrze albo siec zawiera czynnik zmieniajacy zachowanie ludzi.",
-                        "Pod miastem sa ruiny starsze niz ludzka obecnosc w systemie."
+                        "Pod miastem sa ruiny starsze niż ludzka obecnosc w systemie."
                 )),
                 section("Hak przygodowy", pick(
-                        "Druzyna przybywa w chwili, gdy konflikt przechodzi w otwarta faze.",
-                        "Jedyna osoba z potrzebna czescia ukrywa sie po zlej stronie sporu.",
-                        "Lokalne wladze chca, by druzyna zniknela, ale najpierw potrzebuja pomocy.",
+                        "Drużyna przybywa w chwili, gdy konflikt przechodzi w otwarta faze.",
+                        "Jedyna osoba z potrzebna częścia ukrywa sie po zlej stronie sporu.",
+                        "Lokalne wladze chca, by drużyna zniknela, ale najpierw potrzebuja pomocy.",
                         "Sygnał alarmowy powtarza sie od miesiecy, choc oficjalnie go nie ma."
                 ))
         );
@@ -873,7 +873,7 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
         int count = planetCount(params);
         return List.of(
                 stats("Sci-Fi", "Planety", count),
-                section("Gwiazda", title + " krazy wokol gwiazdy typu " + pick("zolty karzel", "czerwony karzel", "pomaranczowy podolbrzym", "uklad podwojny", "slaby pulsar") + "."),
+                section("Gwiazda", title + " krazy wokol gwiazdy typu " + pick("zolty karzel", "czerwony karzel", "pomaranczowy podolbrzym", "uklad podwojny", "słaby pulsar") + "."),
                 section("Planety", planets(count)),
                 section("Zagrozenia", String.join("; ", pickN(
                         List.of("gesty pas asteroid", "niestabilny punkt skoku", "pirackie trasy przelotowe", "burze jonowe", "strefa kwarantanny", "pole szczatkow po dawnej bitwie", "zaklocenia sensorow"),
@@ -884,12 +884,12 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
                         3
                 )) + "."),
                 section("Kontrola", pick(
-                        "System formalnie nalezy do sojuszu kolonialnego, ale realnie rzadzi lokalna flota.",
-                        "Kontrola jest sporna, a kazda frakcja ma inne mapy prawne.",
+                        "System formalnie należy do sojuszu kolonialnego, ale realnie rzadzi lokalna flota.",
+                        "Kontrola jest sporna, a każda frakcja ma inne mapy prawne.",
                         "Korporacja posiada prawa wydobywcze, co w praktyce oznacza wladze.",
                         "System jest niekartowany; kazdy, kto tu przylatuje, sam definiuje prawo."
                 )),
-                section("Hak", "Najlepszy punkt wejscia to problem na skali systemu: zgubiony statek, blokada punktu skoku, konflikt o zasob albo sygnal z miejsca, ktorego nie ma na mapach.")
+                section("Hak", "Najlepszy punkt wejscia to problem na skali systemu: zgubiony statek, blokada punktu skoku, konflikt o zasob albo sygnal z miejsca, którego nie ma na mapach.")
         );
     }
 
@@ -902,7 +902,7 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
                     .append(" - atmosfera: ")
                     .append(pick("oddychalna", "toksyczna", "cienka", "brak", "tylko kopuly mieszkalne"))
                     .append(", populacja: ")
-                    .append(pick("brak", "automaty", "mala placowka", "kolonia", "duze miasta"))
+                    .append(pick("brak", "automaty", "mała placowka", "kolonia", "duze miasta"))
                     .append(", zasob: ")
                     .append(pick("rudy metali", "lod paliwowy", "dane ruin", "biomasa", "nic oczywistego"));
         }
@@ -1413,10 +1413,10 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
             return dungeonTitle(setting, dungeonTheme(params, setting));
         }
         return switch (code) {
-            case "calendar_fantasy" -> pick("Kalendarz Dziesieciu Ogni", "Rok Cichego Ksiezyca", "Rachuba Starych Drog");
+            case "calendar_fantasy" -> pick("Kalendarz Dziesieciu Ogni", "Rok Cichego Księżyca", "Rachuba Starych Drog");
             case "demographics_fantasy" -> pick("Brzeziny", "Kamienny Brod", "Ostatni Targ", "Nadbrzezna Straznica");
             case "castle_fantasy" -> pick("Zamek Czarny Most", "Twierdza Nad Mgla", "Warownia Trzech Bram", "Forteca Srebrnego Progu");
-            case "dungeon_advanced" -> pick("Wielki Kompleks pod Bramą", "Podziemia Trzech Poziomów", "Labirynt Starego Rdzenia", "Twierdza pod Ziemią");
+            case "dungeon_advanced" -> pick("Wielki Kompleks pod Bramą", "Podziemią Trzech Poziomów", "Labirynt Starego Rdzenia", "Twierdza pod Ziemią");
             case "coc_investigator_npc" -> pick("Helena Ward", "Marek Voss", "Oskar Feld", "Irena Koss", "Tomasz Armitage");
             case "scifi_world" -> pick("Hespera IX", "Nowy Ostrow", "Lima-7", "Port Kallisto", "Vega Dolna");
             case "star_system" -> pick("System Kallisto", "Vega Minor", "Proxima Drift", "Tau Cerber", "Epsilon Latarnia");
@@ -1436,7 +1436,7 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
             return pick("Schron Pod Martwą Tamą", "Metro Ostatniego Kursu", "Baza Filtr-7", "Magazyn Czystej Wody");
         }
         if (settingKey.contains("realistyczny")) {
-            return pick("Podziemia Starego Fortu", "Magazyn przy Nabrzeżu", "Tunel pod Kamienicą", "Archiwum Bez Okien");
+            return pick("Podziemią Starego Fortu", "Magazyn przy Nabrzeżu", "Tunel pod Kamienicą", "Archiwum Bez Okien");
         }
         return switch (normalize(theme)) {
             case "krypta", "katakumby" -> pick("Krypta Bez Dzwonu", "Katakumby Srebrnych Kości", "Grobowiec Pod Mokrym Murem");
@@ -1451,14 +1451,14 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
     private String label(String code) {
         return switch (code) {
             case "calendar_fantasy" -> "Kalendarz fantasy";
-            case "demographics_fantasy" -> "Demografia sredniowieczna";
+            case "demographics_fantasy" -> "Demografia średniowieczna";
             case "castle_fantasy" -> "Zamek fantasy";
             case "five_room_dungeon" -> "Loch";
             case "dungeon_advanced" -> "Loch zaawansowany";
             case "coc_investigator_npc" -> "NPC grozy sledczej";
-            case "scifi_world" -> "Swiat sci-fi";
+            case "scifi_world" -> "Świat sci-fi";
             case "star_system" -> "System gwiezdny";
-            default -> "Swiat fantasy";
+            default -> "Świat fantasy";
         };
     }
 
@@ -1477,12 +1477,12 @@ public class WorldbuildingQuickGeneratorStrategy implements GeneratorStrategy {
 
     private String occupation(String group) {
         return switch (group) {
-            case "Sledczy" -> pick("prywatny detektyw", "policjant", "dziennikarz");
+            case "Sledczy", "Śledczy" -> pick("prywatny detektyw", "policjant", "dziennikarz");
             case "Uczony" -> pick("profesor", "lekarz", "archeolog", "bibliotekarz");
             case "Elita" -> pick("prawnik", "kolekcjoner", "dziedzic fortuny", "artystka z dobrego domu");
             case "Mistyk" -> pick("okultysta", "medium", "badacz snow", "kolekcjoner zakazanych ksiazek");
-            case "Twardziel" -> pick("byly zolnierz", "bokser", "marynarz", "ochroniarz");
-            default -> pick("sekretarz", "sklepikarz", "nauczyciel", "pielegniarka", "kierowca");
+            case "Twardziel" -> pick("byly żołnierz", "bokser", "marynarz", "ochroniarz");
+            default -> pick("sekretarz", "sklepikarz", "naucżyciel", "pielegniarka", "kierowca");
         };
     }
 

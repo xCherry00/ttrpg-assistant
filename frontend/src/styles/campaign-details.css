@@ -5705,8 +5705,8 @@
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   overflow-x: hidden !important;
-  overflow-y: hidden !important;
-  padding: 56px 16px !important;
+  overflow-y: auto !important;
+  padding: 24px 16px !important;
 }
 
 .cdMediaOverlay::before,
@@ -5918,7 +5918,7 @@ body > .cdMediaOverlay {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  overflow: hidden !important;
+  overflow: auto !important;
   padding: 24px !important;
   background: transparent !important;
   backdrop-filter: none !important;
@@ -5927,7 +5927,7 @@ body > .cdMediaOverlay {
 
 body > .cdMediaOverlay .cdMediaModal {
   width: 460px !important;
-  height: 640px !important;
+  height: min(640px, calc(100dvh - 48px)) !important;
   max-width: calc(100vw - 48px) !important;
   max-height: calc(100dvh - 48px) !important;
   display: grid !important;
@@ -5937,27 +5937,35 @@ body > .cdMediaOverlay .cdMediaModal {
 
 body > .cdMediaOverlay .cdMediaModal .cdEditForm {
   min-height: 0 !important;
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) !important;
-  grid-template-rows: minmax(0, 1fr) auto !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
   overflow: hidden !important;
   padding: 12px 18px 0 !important;
 }
 
 body > .cdMediaOverlay .cdMediaModal .imageLibraryPicker {
+  flex: 1 1 auto !important;
   min-height: 0 !important;
-  display: grid !important;
-  grid-template-rows: auto auto minmax(0, 1fr) !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
   gap: 12px !important;
   overflow: hidden !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain !important;
   padding: 0 !important;
 }
 
 body > .cdMediaOverlay .cdMediaModal .imageLibraryPicker__grid {
+  flex: 1 1 auto !important;
   min-height: 0 !important;
+  max-height: 100% !important;
   overflow-y: auto !important;
+  overflow-x: hidden !important;
   overscroll-behavior: contain !important;
-  padding: 0 4px 14px 0 !important;
+  padding: 0 6px 16px 0 !important;
   scrollbar-gutter: stable !important;
 }
 
@@ -5974,5 +5982,38 @@ body > .cdMediaOverlay .cdMediaModal .cdEditActions {
   body > .cdMediaOverlay .cdMediaModal {
     height: calc(100dvh - 32px) !important;
     max-height: calc(100dvh - 32px) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body > .cdMediaOverlay {
+    align-items: stretch !important;
+    padding: 12px !important;
+  }
+
+  body > .cdMediaOverlay .cdMediaModal {
+    width: 100% !important;
+    height: calc(100dvh - 24px) !important;
+    max-width: none !important;
+    max-height: calc(100dvh - 24px) !important;
+  }
+
+  body > .cdMediaOverlay .cdMediaModal .cdEditForm {
+    padding-inline: 14px !important;
+  }
+
+  body > .cdMediaOverlay .cdMediaModal .imageLibraryPicker__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  body > .cdMediaOverlay .cdMediaModal .cdEditActions {
+    margin-inline: -14px !important;
+    padding-inline: 14px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  body > .cdMediaOverlay .cdMediaModal .imageLibraryPicker__grid {
+    grid-template-columns: 1fr !important;
   }
 }

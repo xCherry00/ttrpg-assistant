@@ -25,6 +25,7 @@ const FriendsPage = lazy(() => import("./pages/FriendsPage"));
 const MessagesPage = lazy(() => import("./pages/MessagesPage"));
 const PublicUserPage = lazy(() => import("./pages/PublicUserPage"));
 const CharactersPage = lazy(() => import("./pages/CharactersPage"));
+const NotesPage = lazy(() => import("./pages/NotesPage"));
 
 function PageFallback() {
   return (
@@ -73,6 +74,7 @@ export default function App() {
             <Route path="/campaigns/:campaignId/sessions/:sessionId/live" element={<LiveSessionPage />} />
             <Route path="/characters" element={<CharactersPage />} />
             <Route path="/characters/:characterId" element={<CharactersPage />} />
+            <Route path="/notes" element={<NotesPage />} />
             <Route path="/friends" element={<FriendsPage />} />
             <Route path="/messages" element={<MessagesPage />} />
             <Route path="/users/:handle" element={<PublicUserPage />} />

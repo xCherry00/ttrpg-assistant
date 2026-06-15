@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { createCampaign, joinCampaign, listCampaigns, listPublicCampaigns, toggleCampaignFavorite } from "../api/campaigns";
+import AppIcon from "../components/common/AppIcon";
 import ImageLibraryPicker from "../components/common/ImageLibraryPicker";
 import { imagePlaceholder } from "../data/imageLibrary";
 import "../styles/campaigns.css";
@@ -432,15 +433,17 @@ export default function CampaignsPage() {
             <form className="campaignCreateForm" onSubmit={handleCreate}>
               <div className="campaignCoverInput">
                 <ImageLibraryPicker
+                  className="campaignCreateImagePicker"
                   type="campaignIcons"
                   label="Ikona kampanii"
                   value={createForm.coverImageUrl}
                   onChange={(url) => setCreateForm((prev) => ({ ...prev, coverImageUrl: url }))}
                   onRemove={() => setCreateForm((prev) => ({ ...prev, coverImageUrl: "" }))}
-                  previewAlt="Podglad ikony kampanii"
-                  helpText="Wybierz gotowa ikone kampanii z biblioteki."
+                  previewAlt="Podgląd ikony kampanii"
+                  helpText="Wybierz gotową ikonę kampanii z biblioteki."
                 />
                 <ImageLibraryPicker
+                  className="campaignCreateImagePicker"
                   type="campaignBanners"
                   label="Baner kampanii"
                   value={createForm.bannerImageUrl}
@@ -716,7 +719,7 @@ function CampaignMemberAvatars({ members, gmName }) {
 
 function CampaignMemberAvatarImage({ member, label = true }) {
   const avatar = memberAvatar(member);
-  const name = member?.displayName || member?.username || "Uzytkownik";
+  const name = member?.displayName || member?.username || "Użytkownik";
   if (!avatar) return memberInitial(member);
   return <img src={avatar} alt={label ? `Avatar ${name}` : ""} />;
 }
@@ -836,6 +839,22 @@ function PublicCampaignPanel({ playerRange, setPlayerRange, campaignKind, setCam
 }
 
 function CampaignIcon({ name }) {
+  const assetIcons = {
+    book: "campaign",
+    bookmark: "favorite",
+    calendar: "date",
+    globe: "public",
+    mail: "messages",
+    plus: "campaign",
+    search: "search",
+    user: "profile",
+    users: "friends",
+  };
+
+  if (assetIcons[name]) {
+    return <AppIcon name={assetIcons[name]} className="campaignIconAsset" />;
+  }
+
   const paths = {
     bell: <><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 7h18s-3 0-3-7" /><path d="M13.7 21a2 2 0 0 1-3.4 0" /></>,
     book: <><path d="M4 19a3 3 0 0 1 3-3h13" /><path d="M7 16V5a2 2 0 0 1 2-2h11v16H9a2 2 0 0 1-2-2Z" /></>,

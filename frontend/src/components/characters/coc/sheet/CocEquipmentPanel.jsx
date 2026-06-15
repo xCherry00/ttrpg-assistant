@@ -4,9 +4,9 @@ export default function CocEquipmentPanel({ equipment, inventory, onInventoryCha
     <section className="sheetSection">
       <h3>Ekwipunek</h3>
       <div className="sheetGrid">
-        <label className="sheetField"><span>Gotowka</span><input value={equipment?.cash ?? "-"} readOnly /></label>
-        <label className="sheetField"><span>Majatek</span><input value={equipment?.assets ?? "-"} readOnly /></label>
-        <label className="sheetField"><span>Poziom wydatkow</span><input value={equipment?.spendingLevel ?? "-"} readOnly /></label>
+        <label className="sheetField"><span>Gotówka</span><input value={equipment?.cash ?? "-"} readOnly /></label>
+        <label className="sheetField"><span>Majątek</span><input value={equipment?.assets ?? "-"} readOnly /></label>
+        <label className="sheetField"><span>Poziom wydatków</span><input value={equipment?.spendingLevel ?? "-"} readOnly /></label>
       </div>
       {items.length === 0 && <div className="sheetEmpty">Brak sugerowanego ekwipunku.</div>}
       {items.length > 0 && (

@@ -13,15 +13,15 @@ const RECENT_GENERATIONS_KEY = "ttrpg_recent_generations_v1";
 const MAX_PROFILE_SESSION_HOURS = 24;
 
 const TOOL_META = {
-  npc: { name: "Generator NPC", desc: "Postacie niezalezne do sesji" },
-  monster: { name: "Generator potworow", desc: "Spotkania i bestie" },
-  loot: { name: "Generator lupu", desc: "Nagrody i skarby" },
-  tavern: { name: "Generator karczm", desc: "Miejsca spotkan" },
+  npc: { name: "Generator NPC", desc: "Postacie niezależne do sesji" },
+  monster: { name: "Generator potworów", desc: "Spotkania i bestie" },
+  loot: { name: "Generator łupu", desc: "Nagrody i skarby" },
+  tavern: { name: "Generator karczm", desc: "Miejsca spotkań" },
   faction: { name: "Generator frakcji", desc: "Organizacje i konflikty" },
   settlement: { name: "Generator osad", desc: "Miasta i regiony" },
-  region: { name: "Generator regionow", desc: "Krainy i szlaki" },
+  region: { name: "Generator regionów", desc: "Krainy i szlaki" },
   poetry: { name: "Poezja i lore", desc: "Klimat i opisy" },
-  spellbook: { name: "Ksiega zaklec", desc: "Magia kampanii" },
+  spellbook: { name: "Księga zaklęć", desc: "Magia kampanii" },
   dungeon: { name: "Generator podziemi", desc: "Wyprawy i lokacje" },
 };
 
@@ -484,27 +484,27 @@ export default function ProfilePage() {
   const profileBio = profileDraft.bio?.trim() || "Ten użytkownik nie dodał jeszcze opisu.";
   const profileFavoriteSystem = safeText(profileDraft.favoriteSystem, "Brak");
   const profileTimezone = safeText(profileDraft.timezone, "Brak");
-  const imagePickerTitle = imagePicker === "banner" ? "Zmien baner profilu" : "Zmien avatar profilu";
+  const imagePickerTitle = imagePicker === "banner" ? "Zmień baner profilu" : "Zmień avatar profilu";
   const imagePickerType = imagePicker === "banner" ? "campaignBanners" : "avatars";
   const imagePickerPreviewAlt = imagePicker === "banner" ? "Baner profilu" : "Avatar profilu";
 
   return (
     <div className="page profileDesk">
-      {loading && <div className="profileState profileStateLight">Ladowanie profilu...</div>}
+      {loading && <div className="profileState profileStateLight">Ładowanie profilu...</div>}
       {error && <div className="profileState profileStateLight is-error">{error}</div>}
 
       {!loading && !error && (
         <div className="profileShell">
           <aside className="profileCardPanel">
-            <button type="button" className="profileBanner profileBanner--forest profileBannerUpload profileImageTrigger" onClick={() => openImagePicker("banner")} aria-label="Zmien baner profilu">
+            <button type="button" className="profileBanner profileBanner--forest profileBannerUpload profileImageTrigger" onClick={() => openImagePicker("banner")} aria-label="Zmień baner profilu">
               <img src={bannerSrc || imagePlaceholder("campaignBanners")} alt="Baner profilu" onError={() => setBannerSrc("")} />
-              <span>Zmien baner</span>
+              <span>Zmień baner</span>
             </button>
             <div className="profileAvatarRow">
-              <button type="button" className="profileAvatarLarge profileAvatarUpload profileImageTrigger" onClick={() => openImagePicker("avatar")} aria-label="Zmien avatar profilu">
-                <img src={avatarSrc || imagePlaceholder("avatars")} alt="Avatar uzytkownika" onError={() => setAvatarSrc("")} />
+              <button type="button" className="profileAvatarLarge profileAvatarUpload profileImageTrigger" onClick={() => openImagePicker("avatar")} aria-label="Zmień avatar profilu">
+                <img src={avatarSrc || imagePlaceholder("avatars")} alt="Avatar użytkownika" onError={() => setAvatarSrc("")} />
                 <i aria-hidden="true" />
-                <span>Zmien avatar</span>
+                <span>Zmień avatar</span>
               </button>
             </div>
 
@@ -537,7 +537,7 @@ export default function ProfilePage() {
               <StatCard icon="campaign" label="Kampanie" value={stats.campaignTotal} hint={`Aktywne: ${stats.campaignTotal}`} />
               <StatCard icon="session" label="Sesje" value={stats.sessionTotal} hint={`Jako MG: ${stats.mgCampaigns}`} />
               <StatCard icon="generator" label="Wygenerowane" value={stats.generatedTotal} hint={`NPC: ${stats.npcCount}`} />
-              <StatCard icon="friends" label="Znajomi" value={stats.friendsCount} hint="Spolecznosc" />
+              <StatCard icon="friends" label="Znajomi" value={stats.friendsCount} hint="Społeczność" />
               <StatCard icon="clock" label="Czas spędzony" value={`${stats.spentHours} h`} hint="Prowadzenie sesji" />
             </section>
 

@@ -30,13 +30,13 @@ public class StoryHookQuickGeneratorStrategy implements GeneratorStrategy {
         List<GeneratorOutputSection> sections = withRumorContext(randomChoice(storyType) ? randomType() : forType(storyType), reliability, source);
 
         return new GeneratorStructuredResultResponse(
-                null, GENERATOR, VARIANT, "Fabula i pogloski", "Haki fabularne i pogloski", sections, "seed", OffsetDateTime.now()
+                null, GENERATOR, VARIANT, "Fabula i pogłoski", "Haki fabularne i pogłoski", sections, "seed", OffsetDateTime.now()
         );
     }
 
     private List<GeneratorOutputSection> randomType() {
         return switch (random.nextInt(7)) {
-            case 0 -> forType("Pogloska");
+            case 0 -> forType("Pogłoska");
             case 1 -> forType("Zlecenie");
             case 2 -> forType("List gonczy");
             case 3 -> forType("Choroba");
@@ -48,18 +48,18 @@ public class StoryHookQuickGeneratorStrategy implements GeneratorStrategy {
 
     private List<GeneratorOutputSection> forType(String type) {
         return switch (normalize(type)) {
-            case "pogloska", "rumour", "rumor" -> List.of(
-                    section("Pogloska", "Podobno pod starym mostem spotykaja sie ludzie, ktorzy kupuja cudze nazwiska.")
+            case "pogłoska", "rumour", "rumor" -> List.of(
+                    section("Pogłoska", "Podobno pod starym mostem spotykaja sie ludzie, ktorzy kupuja cudze nazwiska.")
             );
             case "zlecenie", "bounty", "quest" -> List.of(
-                    section("Tresc", "Potrzebna dyskretna ochrona transportu bez pytan o ladunek."),
+                    section("Treść", "Potrzebna dyskretna ochrona transportu bez pytan o ladunek."),
                     section("Zleceniodawca", "Herta z cechu przewoznikow"),
-                    section("Nagroda", "120 gp oraz list polecajacy")
+                    section("Nagroda", "120 gp oraz list polecąjacy")
             );
             case "list gonczy", "wanted" -> List.of(
                     section("Cel", "Rivan Czarny Plaszcz"),
                     section("Przewinienie", "Napad na magazyn i porwanie ksiegowego"),
-                    section("Nagroda", "300 gp za zywego, 150 gp za potwierdzenie smierci")
+                    section("Nagroda", "300 gp za żywego, 150 gp za potwierdzenie śmierci")
             );
             case "choroba", "disease" -> List.of(
                     section("Nazwa", "Szary kaszel"),
@@ -72,29 +72,29 @@ public class StoryHookQuickGeneratorStrategy implements GeneratorStrategy {
                     section("Trop", "Na straganie zostal tylko urwany kawalek niebieskiej wstazki")
             );
             case "dziwne zjawisko", "strange phenomenon" -> List.of(
-                    section("Zjawisko", "W nocy slychac dzwony, mimo ze wieza jest zawalona"),
-                    section("Miejsce", "Stare nabrzeze przy zamknietej swiatyni"),
-                    section("Mozliwe wyjasnienie", "Ktos uruchamia ukryty mechanizm, by odstraszac swiadkow")
+                    section("Zjawisko", "W nocy słychać dzwony, mimo ze wieza jest zawalona"),
+                    section("Miejsce", "Stare nabrzeze przy zamknietej świątyni"),
+                    section("Możliwe wyjaśnienie", "Ktoś uruchamia ukryty mechanizm, by odstraszać świadków")
             );
             case "sekret frakcji", "faction secret" -> List.of(
                     section("Frakcja", "Bractwo Bialej Pieczeci"),
                     section("Sekret", "Od lat podmieniaja oficjalne dokumenty handlowe"),
-                    section("Konsekwencja", "Ujawnienie sekretu moze wywolac otwarty konflikt kupcow")
+                    section("Konsekwencja", "Ujawnienie sekretu może wywolac otwarty konflikt kupcow")
             );
-            default -> List.of(section("Pogloska", "W miescie krazy historia o czyms, co wraca zawsze przed nowiem."));
+            default -> List.of(section("Pogłoska", "W mieście krazy historia o czyms, co wraca zawsze przed nowiem."));
         };
     }
 
     private List<GeneratorOutputSection> withRumorContext(List<GeneratorOutputSection> base, String reliability, String source) {
-        String resolvedReliability = randomChoice(reliability) ? pick("Prawdziwa", "Przesadzona", "Falszywa", "Czesciowo prawdziwa", "Celowo rozsiana") : reliability;
-        String resolvedSource = randomChoice(source) ? pick("Karczma", "Straz miejska", "Dziecko", "Kupiec", "Kaplan", "List", "Tablica ogloszen", "Podsluchana rozmowa") : source;
+        String resólvedReliability = randomChoice(reliability) ? pick("Prawdziwa", "Przesadzona", "Fałszywa", "Częściowo prawdziwa", "Celowo rozsiana") : reliability;
+        String resólvedSource = randomChoice(source) ? pick("Karczma", "Straz miejska", "Dziecko", "Kupiec", "Kaplan", "List", "Tablica ogłoszen", "Podsluchana rozmowa") : source;
         return List.of(
-                section("Zrodlo", resolvedSource),
-                section("Poziom wiarygodnosci", resolvedReliability),
+                section("Źródło", resólvedSource),
+                section("Poziom wiarygodnosci", resólvedReliability),
                 base.get(0),
                 section("Co jest prawda", "W plotce jest przynajmniej jeden sprawdzalny szczegol: miejsce, nazwisko albo znak."),
-                section("Co jest znieksztalcone", "Skala problemu albo motyw osoby zaangazowanej zostaly opowiedziane wygodniej niz w rzeczywistosci."),
-                section("Jak gracze moga to sprawdzic", "Niech porownaja relacje z dokumentem, swiadkiem albo sladem w miejscu zdarzenia.")
+                section("Co jest znieksztalcone", "Skala problemu albo motyw osoby zaangazowanej zostały opowiedziane wygodniej niż w rzeczywistosci."),
+                section("Jak gracze mogą to sprawdzic", "Niech porownaja relacje z dokumentem, swiadkiem albo śladem w miejscu zdarzenia.")
         );
     }
 

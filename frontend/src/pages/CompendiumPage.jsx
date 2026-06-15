@@ -8,13 +8,13 @@ import {
 } from "../api/compendium";
 
 const DEFAULT_CATEGORIES = [
-  { code: "monsters", label: "Potwory", description: "CR, XP, statystyki i akcje potworow SRD." },
-  { code: "spells", label: "Zaklecia", description: "Poziom, szkola, komponenty i opis zaklec SRD." },
-  { code: "magic-items", label: "Magiczne przedmioty", description: "Magiczne przedmioty dostepne w SRD." },
-  { code: "equipment", label: "Ekwipunek", description: "Bronie, pancerze, sprzet i koszt." },
+  { code: "monsters", label: "Potwory", description: "CR, XP, statystyki i akcje potworów SRD." },
+  { code: "spells", label: "Zaklęcia", description: "Poziom, szkoła, komponenty i opis zaklęć SRD." },
+  { code: "magic-items", label: "Magiczne przedmioty", description: "Magiczne przedmioty dostępne w SRD." },
+  { code: "equipment", label: "Ekwipunek", description: "Bronie, pancerze, sprzęt i koszt." },
   { code: "conditions", label: "Stany", description: "Stany mechaniczne D&D 5E." },
-  { code: "skills", label: "Umiejetnosci", description: "Umiejetnosci i powiazane cechy." },
-  { code: "damage-types", label: "Typy obrazen", description: "Typy obrazen z opisami SRD." },
+  { code: "skills", label: "Umiejętności", description: "Umiejętności i powiązane cechy." },
+  { code: "damage-types", label: "Typy obrażeń", description: "Typy obrażeń z opisami SRD." },
 ];
 
 const ATTRIBUTE_LABELS = {
@@ -205,7 +205,7 @@ const CATEGORY_CONFIG = {
       buildField("Zasieg", "range"),
       buildField("Komponenty", (item) => formatComponents(item)),
       buildField("Czas trwania", "duration"),
-      buildField("Zrodlo", (item) => formatSource(item)),
+      buildField("Źródło", (item) => formatSource(item)),
     ],
     sections: [
       buildTextSection("Opis", "desc", "Brak opisu"),
@@ -223,7 +223,7 @@ const CATEGORY_CONFIG = {
     facts: [
       buildField("Typ / kategoria", ["equipment_category", "type", "gear_category"]),
       buildField("Rzadkosc", "rarity"),
-      buildField("Zrodlo", (item) => formatSource(item)),
+      buildField("Źródło", (item) => formatSource(item)),
     ],
     sections: [
       buildTextSection("Opis", "desc", "Brak opisu"),
@@ -242,7 +242,7 @@ const CATEGORY_CONFIG = {
       buildField("Kategoria", ["equipment_category", "gear_category", "weapon_category", "armor_category"]),
       buildField("Koszt", "cost", formatCost),
       buildField("Waga", "weight"),
-      buildField("Zrodlo", (item) => formatSource(item)),
+      buildField("Źródło", (item) => formatSource(item)),
     ],
     sections: [
       buildTextSection("Opis", "desc", "Brak opisu"),
@@ -255,7 +255,7 @@ const CATEGORY_CONFIG = {
       buildField("Nazwa", "name"),
       buildField("Krotki opis", "desc", (value) => shortText(value)),
     ],
-    facts: [buildField("Zrodlo", (item) => formatSource(item))],
+    facts: [buildField("Źródło", (item) => formatSource(item))],
     sections: [buildTextSection("Opis efektu", "desc", "Brak opisu")],
   },
   skills: {
@@ -267,7 +267,7 @@ const CATEGORY_CONFIG = {
     ],
     facts: [
       buildField("Powiazany atrybut", "ability_score"),
-      buildField("Zrodlo", (item) => formatSource(item)),
+      buildField("Źródło", (item) => formatSource(item)),
     ],
     sections: [buildTextSection("Opis", "desc", "Brak opisu")],
   },
@@ -277,7 +277,7 @@ const CATEGORY_CONFIG = {
       buildField("Nazwa", "name"),
       buildField("Krotki opis", "desc", (value) => shortText(value)),
     ],
-    facts: [buildField("Zrodlo", (item) => formatSource(item))],
+    facts: [buildField("Źródło", (item) => formatSource(item))],
     sections: [buildTextSection("Opis", "desc", "Brak opisu")],
   },
 };
@@ -288,7 +288,7 @@ const FALLBACK_CONFIG = {
     buildField("Nazwa", "name"),
     buildField("Opis", "desc", (value) => shortText(value)),
   ],
-  facts: [buildField("Zrodlo", (item) => formatSource(item))],
+  facts: [buildField("Źródło", (item) => formatSource(item))],
   sections: [buildTextSection("Opis", "desc", "Brak opisu")],
 };
 
@@ -367,7 +367,7 @@ export default function CompendiumPage() {
         setSystems(Array.isArray(systemItems) ? systemItems : []);
         setCategories(Array.isArray(categoryItems) && categoryItems.length ? categoryItems : DEFAULT_CATEGORIES);
       } catch {
-        if (!cancelled) setError("Nie udalo sie pobrac konfiguracji kompendium.");
+        if (!cancelled) setError("Nie udało się pobrać konfiguracji kompendium.");
       }
     }
     loadBase();
@@ -415,7 +415,7 @@ export default function CompendiumPage() {
           setListData({ results: [], count: 0 });
           setListNotice("Brak danych dla tej kategorii.");
           if (e?.status && Number(e.status) >= 500) {
-            setError("Nie udalo sie pobrac danych kompendium.");
+            setError("Nie udało się pobrać danych kompendium.");
           }
         }
       } finally {
@@ -458,7 +458,7 @@ export default function CompendiumPage() {
       setDetailCache((current) => ({ ...current, [item.index]: nextDetail }));
     } catch (e) {
       setDetail(item);
-      setError(e?.message || "Nie udalo sie pobrac szczegolow.");
+      setError(e?.message || "Nie udało się pobrać szczegółów.");
     } finally {
       setDetailLoading(false);
     }
@@ -485,7 +485,7 @@ export default function CompendiumPage() {
                 <path d="M11 19a8 8 0 1 1 5.7-2.4L21 21" />
               </svg>
             </span>
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Szukaj wpisow..." />
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Szukaj wpisów..." />
           </label>
           <div className="compendiumCategoryList">
             {categories.map((item) => (
@@ -501,13 +501,13 @@ export default function CompendiumPage() {
           <div className="compendiumPanelHeader">
             <div>
               <h2>{activeCategory?.label}</h2>
-              <p>{listData?.count ?? rows.length} wpisow</p>
+              <p>{listData?.count ?? rows.length} wpisów</p>
             </div>
           </div>
 
           {error && <div className="compendiumError">{error}</div>}
           {loading ? (
-            <div className="compendiumEmpty">Ladowanie danych...</div>
+            <div className="compendiumEmpty">Ładowanie danych...</div>
           ) : (
             <div className="compendiumTableWrap">
               <table className="compendiumTable">
@@ -537,7 +537,7 @@ export default function CompendiumPage() {
 
         <aside className="compendiumDetailPanel">
           {detailLoading ? (
-            <div className="compendiumEmpty">Ladowanie szczegolow...</div>
+            <div className="compendiumEmpty">Ładowanie szczegółów...</div>
           ) : detail ? (
             <>
               <div className="compendiumDetailTitle">

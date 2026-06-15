@@ -10,22 +10,15 @@ import {
 import { logout as logoutApi } from "../api/auth";
 import "../styles/settings.css";
 
-const THEME_STORAGE_KEY = "ttrpg_theme";
 const INITIATIVE_CACHE_KEY = "ttrpg_initiative_rows_v2";
 const INITIATIVE_SYSTEM_KEY = "ttrpg_initiative_system_v1";
 
 const NAV_SECTIONS = [
   { id: "account", label: "Konto", icon: "user" },
   { id: "security", label: "Bezpieczeństwo", icon: "lock" },
-  { id: "appearance", label: "Wygląd", icon: "palette" },
   { id: "local", label: "Dane lokalne", icon: "database" },
   { id: "danger", label: "Strefa ryzyka", icon: "trash" },
 ];
-
-function applyTheme(theme) {
-  document.documentElement.setAttribute("data-theme", theme);
-  localStorage.setItem(THEME_STORAGE_KEY, theme);
-}
 
 function Icon({ name, size = 18 }) {
   const common = {
@@ -59,15 +52,6 @@ function Icon({ name, size = 18 }) {
         <path d="M8 11V8a4 4 0 0 1 8 0v3" />
       </>
     ),
-    palette: (
-      <>
-        <circle cx="12" cy="12" r="10" />
-        <path d="M12 2a10 10 0 0 1 10 10c0 2.4-1.9 4.3-4.3 4.3H16a2 2 0 0 0-2 2A2.7 2.7 0 0 1 11.3 21 10 10 0 0 1 12 2Z" />
-        <circle cx="8" cy="10" r="1" fill="currentColor" />
-        <circle cx="12" cy="7" r="1" fill="currentColor" />
-        <circle cx="16" cy="10" r="1" fill="currentColor" />
-      </>
-    ),
     message: (
       <>
         <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" />
@@ -89,20 +73,6 @@ function Icon({ name, size = 18 }) {
         <path d="m19 6-1 14H6L5 6" />
         <path d="M10 11v5" />
         <path d="M14 11v5" />
-      </>
-    ),
-    moon: <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z" />,
-    sun: (
-      <>
-        <circle cx="12" cy="12" r="4" />
-        <path d="M12 2v2" />
-        <path d="M12 20v2" />
-        <path d="m4.9 4.9 1.4 1.4" />
-        <path d="m17.7 17.7 1.4 1.4" />
-        <path d="M2 12h2" />
-        <path d="M20 12h2" />
-        <path d="m4.9 19.1 1.4-1.4" />
-        <path d="m17.7 6.3 1.4-1.4" />
       </>
     ),
     sparkles: (
@@ -175,11 +145,6 @@ export default function SettingsPage() {
   const [emailPassword, setEmailPassword] = useState("");
   const [deletePassword, setDeletePassword] = useState("");
   const [activeSection, setActiveSection] = useState("account");
-  const [theme, setTheme] = useState(() => localStorage.getItem(THEME_STORAGE_KEY) || "dark");
-
-  useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
 
   useEffect(() => {
     let cancelled = false;
@@ -402,39 +367,6 @@ export default function SettingsPage() {
                 </div>
               </form>
           </section>
-
-          <section id="settings-appearance" className={`settingsPanel${activeSection === "appearance" ? " is-active" : ""}`}>
-              <div className="settingsPanelHead">
-                <span className="settingsPanelIcon">
-                  <Icon name="palette" />
-                </span>
-                <div>
-                  <h2>Wygląd</h2>
-                  <p>Wybierz motyw aplikacji.</p>
-                </div>
-              </div>
-              <div className="settingsChoiceGrid">
-                <button
-                  type="button"
-                  className={`settingsThemeCard${theme === "dark" ? " is-active" : ""}`}
-                  onClick={() => setTheme("dark")}
-                >
-                  <Icon name="moon" />
-                  <strong>Ciemny</strong>
-                  <span>Motyw ciemny</span>
-                </button>
-                <button
-                  type="button"
-                  className={`settingsThemeCard${theme === "light" ? " is-active" : ""}`}
-                  onClick={() => setTheme("light")}
-                >
-                  <Icon name="sun" />
-                  <strong>Jasny</strong>
-                  <span>Motyw jasny</span>
-                </button>
-              </div>
-          </section>
-
 
           <section id="settings-local" className={`settingsPanel${activeSection === "local" ? " is-active" : ""}`}>
               <div className="settingsPanelHead">

@@ -74,7 +74,7 @@ export function useCampaignDetailWorkspace() {
         try {
           attendanceData = await getSessionAttendance(token, campaignId, availabilitySession.id);
         } catch (attendanceErr) {
-          setAvailabilityError(attendanceErr?.message || "Nie udalo sie pobrac dostepnosci.");
+          setAvailabilityError(attendanceErr?.message || "Nie udało się pobrać dostępności.");
         }
       }
       setCampaign(campaignData);
@@ -84,7 +84,7 @@ export function useCampaignDetailWorkspace() {
       setSessions(normalizedSessions);
       setAvailabilityAttendance(attendanceData);
     } catch (err) {
-      setError(err?.message || "Nie udalo sie pobrac workspace kampanii.");
+      setError(err?.message || "Nie udało się pobrać workspace kampanii.");
     } finally {
       setLoading(false);
     }
@@ -102,7 +102,7 @@ export function useCampaignDetailWorkspace() {
       await action();
       await loadAll();
     } catch (err) {
-      setError(err?.message || "Operacja nie powiodla sie.");
+      setError(err?.message || "Operacja nie powiodła się.");
     } finally {
       setBusy(false);
     }
@@ -119,7 +119,7 @@ export function useCampaignDetailWorkspace() {
   const actions = useMemo(() => ({
     handleUpdateCampaign: (payload) => runAction(async () => {
       await updateCampaign(token, campaignId, payload);
-      setNotice("Zapisano kampanie.");
+      setNotice("Zapisano kampanię.");
     }),
     handleLeaveCampaign: () => runAction(async () => {
       await leaveCampaign(token, campaignId);
@@ -131,29 +131,29 @@ export function useCampaignDetailWorkspace() {
     }),
     handleAssignCharacter: (characterId) => runAction(async () => {
       await assignCharacterToCampaign(token, campaignId, characterId);
-      setNotice("Przypisano postac.");
+      setNotice("Przypisano postać.");
     }),
     handleDetachCharacter: (characterId) => runAction(async () => {
       await detachCharacterFromCampaign(token, campaignId, characterId);
-      setNotice("Odpieto postac.");
+      setNotice("Odpięto postać.");
     }),
     handleCreateSession: (payload) => runAction(async () => {
       await createCampaignSession(token, campaignId, payload);
-      setNotice("Utworzono sesje.");
+      setNotice("Utworzono sesję.");
     }),
     handleStartSession: (sessionId) => runAction(async () => {
       await startCampaignSession(token, campaignId, sessionId);
-      setNotice("Sesja rozpoczeta.");
+      setNotice("Sesja rozpoczęta.");
       navigate(`/campaigns/${campaignId}/sessions/${sessionId}/live`);
     }),
     handleFinishSession: (sessionId) => runAction(async () => {
       await finishCampaignSession(token, campaignId, sessionId);
-      setNotice("Sesja zakonczona.");
+      setNotice("Sesja zakończona.");
     }),
     handleUpdateAvailability: (sessionId, payload) => runAction(async () => {
       const data = await updateMySessionAttendance(token, campaignId, sessionId, payload);
       setAvailabilityAttendance(data);
-      setNotice("Zapisano dostepnosc.");
+      setNotice("Zapisano dostępność.");
     }),
     loadFriendCandidates,
     handleInviteFriend: (friendUserId) => runAction(async () => {

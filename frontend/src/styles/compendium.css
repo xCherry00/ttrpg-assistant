@@ -77,13 +77,17 @@
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr) 380px;
   gap: 18px;
-  align-items: start;
+  align-items: stretch;
+  height: min(720px, calc(100dvh - 170px));
+  min-height: 620px;
 }
 
 .compendiumCategories,
 .compendiumTablePanel,
 .compendiumDetailPanel {
   border-radius: 16px;
+  min-height: 0;
+  height: 100%;
 }
 
 .compendiumCategories {
@@ -198,8 +202,10 @@
 
 .compendiumTablePanel,
 .compendiumDetailPanel {
-  min-height: 620px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   padding: 16px;
+  overflow: hidden;
 }
 
 .compendiumPanelHeader {
@@ -228,7 +234,8 @@
 }
 
 .compendiumTableWrap {
-  max-height: 560px;
+  min-height: 0;
+  max-height: none;
   overflow: auto;
   border: 1px solid rgba(161, 173, 204, 0.1);
   border-radius: 12px;
@@ -294,7 +301,8 @@
 .compendiumDetailContent {
   display: grid;
   gap: 10px;
-  max-height: 540px;
+  min-height: 0;
+  max-height: none;
   overflow: auto;
   padding-right: 4px;
 }

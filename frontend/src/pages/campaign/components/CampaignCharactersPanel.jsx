@@ -72,7 +72,7 @@ export default function CampaignCharactersPanel({
                 <span>Przypisano: {character.assignedAt ? new Date(character.assignedAt).toLocaleString("pl-PL") : "-"}</span>
               </div>
               {!isOwner && Number(character.userId) === Number(myUserId) ? <Link className="campaignDetailsGhostBtn" to={`/characters/${character.characterId}`}>Otwórz moją kartę</Link> : null}
-              {isOwner ? <Link className="campaignDetailsGhostBtn" to={`/characters/${character.characterId}?mode=preview`}>Podglad karty</Link> : null}
+              {isOwner ? <Link className="campaignDetailsGhostBtn" to={`/characters/${character.characterId}?mode=preview`}>Podgląd karty</Link> : null}
               {canManage && (
                 <button className="campaignDetailsGhostBtn" type="button" disabled={busy} onClick={() => onDetach(character.characterId)}>
                   Odepnij

@@ -12,7 +12,7 @@ export default function CocCharacteristicsPanel({ characteristics }) {
       {rows.length > 0 && (
         <table className="sheetTable">
           <thead>
-            <tr><th>Cecha</th><th>Wartosc</th><th>1/2</th><th>1/5</th></tr>
+            <tr><th>Cecha</th><th>Wartość</th><th>1/2</th><th>1/5</th></tr>
           </thead>
           <tbody>
             {rows.map(([key, value]) => (

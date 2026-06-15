@@ -57,6 +57,32 @@ public interface CampaignRepository extends JpaRepository<CampaignEntity, Long> 
     long countSharedCampaigns(@Param("leftUserId") Long leftUserId, @Param("rightUserId") Long rightUserId);
 
     @Query(value = """
+            select distinct c.*
+            from campaigns c
+            where c.deleted_at is null
+              and (
+                  c.owner_user_id = :leftUserId
+                  or exists (
+                      select 1
+                      from campaign_members left_member
+                      where left_member.campaign_id = c.id
+                        and left_member.user_id = :leftUserId
+                  )
+              )
+              and (
+                  c.owner_user_id = :rightUserId
+                  or exists (
+                      select 1
+                      from campaign_members right_member
+                      where right_member.campaign_id = c.id
+                        and right_member.user_id = :rightUserId
+                  )
+              )
+            order by c.updated_at desc, c.created_at desc
+            """, nativeQuery = true)
+    List<CampaignEntity> findSharedCampaigns(@Param("leftUserId") Long leftUserId, @Param("rightUserId") Long rightUserId);
+
+    @Query(value = """
             select count(distinct c.id)
             from campaigns c
             left join campaign_members cm on cm.campaign_id = c.id

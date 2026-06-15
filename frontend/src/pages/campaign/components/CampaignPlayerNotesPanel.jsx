@@ -24,9 +24,9 @@ export default function CampaignPlayerNotesPanel({ notes, busy, isOwner = false,
           event.currentTarget.reset();
         }}
       >
-        <label className="campaignField"><span>Tytul</span><input aria-label="Tytul" name="title" maxLength={160} required /></label>
-        <label className="campaignField"><span>Tresc</span><textarea aria-label="Tresc" name="content" rows={3} maxLength={10000} required /></label>
-        <button className="campaignDetailsPrimaryBtn" type="submit" disabled={busy}>Dodaj notatke</button>
+        <label className="campaignField"><span>Tytuł</span><input aria-label="Tytuł" name="title" maxLength={160} required /></label>
+        <label className="campaignField"><span>Treść</span><textarea aria-label="Treść" name="content" rows={3} maxLength={10000} required /></label>
+        <button className="campaignDetailsPrimaryBtn" type="submit" disabled={busy}>Dodaj notatkę</button>
       </form>
 
       {isOwner && hasOnlyOwnNotesForOwner ? (
@@ -54,8 +54,8 @@ export default function CampaignPlayerNotesPanel({ notes, busy, isOwner = false,
                       setEditingId(null);
                     }}
                   >
-                    <label className="campaignField"><span>Tytul</span><input aria-label="Tytul" name="title" defaultValue={note.title} maxLength={160} required /></label>
-                    <label className="campaignField"><span>Tresc</span><textarea aria-label="Tresc" name="content" defaultValue={note.content} rows={4} maxLength={10000} required /></label>
+                    <label className="campaignField"><span>Tytuł</span><input aria-label="Tytuł" name="title" defaultValue={note.title} maxLength={160} required /></label>
+                    <label className="campaignField"><span>Treść</span><textarea aria-label="Treść" name="content" defaultValue={note.content} rows={4} maxLength={10000} required /></label>
                     <div style={{ display: "flex", gap: 8 }}>
                       <button className="campaignDetailsPrimaryBtn" type="submit" disabled={busy}>Zapisz</button>
                       <button className="campaignDetailsGhostBtn" type="button" onClick={() => setEditingId(null)}>Anuluj</button>

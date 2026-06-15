@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import AppIcon from "../components/common/AppIcon";
 import { imagePlaceholder } from "../data/imageLibrary";
 import {
   acceptFriendRequest,
@@ -68,6 +69,24 @@ function suggestionReason(user) {
 }
 
 function Icon({ name }) {
+  const assetIcons = {
+    search: "search",
+    plus: "addFriend",
+    users: "friends",
+    inbox: "messages",
+    send: "send",
+    block: "blocked",
+    message: "sendMessage",
+    profile: "profile",
+    clock: "time",
+    calendar: "date",
+    note: "file",
+  };
+
+  if (assetIcons[name]) {
+    return <AppIcon name={assetIcons[name]} className="friendsIcon" />;
+  }
+
   const paths = {
     search: "M11 19a8 8 0 1 1 5.7-2.4L21 21",
     plus: "M12 5v14M5 12h14",
@@ -399,7 +418,7 @@ export default function FriendsPage() {
 
         {!loading && !search.trim() && filter === "suggested" && (
           <div className="friendsContactList">
-            {suggestions.length === 0 && <div className="friendsState"><p>Brak propozycji</p><p>Sugestie pojawia sie dla znajomych znajomych oraz osob ze wspolnych kampanii.</p></div>}
+            {suggestions.length === 0 && <div className="friendsState"><p>Brak propozycji</p><p>Sugestie pojawią się dla znajomych znajomych oraz osób ze wspólnych kampanii.</p></div>}
             {suggestions.map((user) => (
               <ContactCard
                 key={user.id}

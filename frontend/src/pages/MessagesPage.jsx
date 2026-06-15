@@ -2,6 +2,7 @@
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { discoverUsers } from "../api/social";
+import AppToast from "../components/common/AppToast";
 import {
   acceptConversationRequest,
   downloadAttachment,
@@ -35,8 +36,8 @@ function formatDateLabel(value) {
 }
 
 function statusLabel(status) {
-  if (status === "incoming_request") return "Prosba o kontakt";
-  if (status === "outgoing_request") return "Oczekuje na akceptacje";
+  if (status === "incoming_request") return "Prośba o kontakt";
+  if (status === "outgoing_request") return "Oczekuje na akceptację";
   return "Aktywna rozmowa";
 }
 
@@ -140,7 +141,7 @@ export default function MessagesPage() {
         setActiveConversationId(rows[0].id);
       }
     } catch (err) {
-      setError(err?.message || "Nie udalo sie pobrac listy rozmow.");
+      setError(err?.message || "Nie udało się pobrać listy rozmów.");
     } finally {
       setLoadingConversations(false);
     }
@@ -159,7 +160,7 @@ export default function MessagesPage() {
       }
       setHasOlder((rows || []).length >= 40);
     } catch (err) {
-      setError(err?.message || "Nie udalo sie pobrac wiadomosci.");
+      setError(err?.message || "Nie udało się pobrać wiadomości.");
     } finally {
       if (!appendOlder) setLoadingMessages(false);
     }
@@ -194,7 +195,7 @@ export default function MessagesPage() {
         const results = await discoverUsers(token, peopleQuery);
         setPeople(results || []);
       } catch (err) {
-        setError(err?.message || "Nie udalo sie wyszukac graczy.");
+        setError(err?.message || "Nie udało się wyszukać graczy.");
       } finally {
         setLoadingPeople(false);
       }
@@ -219,7 +220,7 @@ export default function MessagesPage() {
       setFiles([]);
       await Promise.all([loadMessages(activeConversationId), loadConversations(filter)]);
     } catch (err) {
-      setError(err?.message || "Nie udalo sie wyslac wiadomosci.");
+      setError(err?.message || "Nie udało się wysłać wiadomości.");
     } finally {
       setSending(false);
     }
@@ -236,7 +237,7 @@ export default function MessagesPage() {
       await loadConversations("all");
       setActiveConversationId(row.id);
     } catch (err) {
-      setError(err?.message || "Nie udalo sie rozpoczac rozmowy.");
+      setError(err?.message || "Nie udało się rozpocząć rozmowy.");
     } finally {
       setBusyAction("");
     }
@@ -250,7 +251,7 @@ export default function MessagesPage() {
       await acceptConversationRequest(token, activeConversationId);
       await Promise.all([loadConversations(filter), loadMessages(activeConversationId)]);
     } catch (err) {
-      setError(err?.message || "Nie udalo sie zaakceptowac prosby.");
+      setError(err?.message || "Nie udało się zaakceptować prośby.");
     } finally {
       setBusyAction("");
     }
@@ -265,7 +266,7 @@ export default function MessagesPage() {
       await loadConversations(filter);
       setMessages([]);
     } catch (err) {
-      setError(err?.message || "Nie udalo sie odrzucic prosby.");
+      setError(err?.message || "Nie udało się odrzucić prośby.");
     } finally {
       setBusyAction("");
     }
@@ -283,7 +284,7 @@ export default function MessagesPage() {
       anchor.remove();
       URL.revokeObjectURL(url);
     } catch (err) {
-      setError(err?.message || "Nie udalo sie pobrac zalacznika.");
+      setError(err?.message || "Nie udało się pobrać załącznika.");
     }
   }
 
@@ -293,8 +294,8 @@ export default function MessagesPage() {
         <section className="messagesSidebar panel-soft">
           <header className="messagesSidebar__header">
             <div>
-              <h2>Wiadomosci</h2>
-              <p>{conversations.length} rozmow</p>
+              <h2>Wiadomości</h2>
+              <p>{conversations.length} rozmów</p>
             </div>
             <span>{conversations.length}</span>
           </header>
@@ -312,16 +313,16 @@ export default function MessagesPage() {
               <span aria-hidden="true" className="messagesSearchIcon">
                 <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
               </span>
-              <input id="messages-discover" value={peopleQuery} onChange={(event) => setPeopleQuery(event.target.value)} placeholder="Szukaj uzytkownika..." />
+              <input id="messages-discover" value={peopleQuery} onChange={(event) => setPeopleQuery(event.target.value)} placeholder="Szukaj użytkownika..." />
               <button type="button" className="messagesNewButton" onClick={handleNewConversationFocus} aria-label="Nowa rozmowa">+</button>
             </div>
-            {loadingPeople && <div className="messagesHint">Szukam uzytkownikow...</div>}
-            {!loadingPeople && peopleQuery.trim() && people.length === 0 && <div className="messagesHint">Brak wynikow wyszukiwania.</div>}
+            {loadingPeople && <div className="messagesHint">Szukam użytkowników...</div>}
+            {!loadingPeople && peopleQuery.trim() && people.length === 0 && <div className="messagesHint">Brak wyników wyszukiwania.</div>}
             {!loadingPeople && people.length > 0 && (
               <div className="messagesDiscoverList">
                 {people.slice(0, 5).map((user) => (
                   <button key={user.id} type="button" className="messagesDiscoverItem" onClick={() => handleStartConversation(user.id)} disabled={busyAction === `start-${user.id}`}>
-                    <span>{user.displayName || "Uzytkownik"}</span>
+                    <span>{user.displayName || "Użytkownik"}</span>
                     <small>{peerTag(user)}</small>
                   </button>
                 ))}
@@ -330,8 +331,8 @@ export default function MessagesPage() {
           </div>
 
           <div className="messagesConversationList">
-            {loadingConversations && <div className="messagesHint">Ladowanie rozmow...</div>}
-            {!loadingConversations && conversations.length === 0 && <div className="messagesHint">Brak rozmow. Zacznij nowa rozmowe powyzej.</div>}
+            {loadingConversations && <div className="messagesHint">Ładowanie rozmów...</div>}
+            {!loadingConversations && conversations.length === 0 && <div className="messagesHint">Brak rozmów. Zacznij nową rozmowę powyżej.</div>}
             {!loadingConversations && conversations.map((conversation) => (
               <button key={conversation.id} type="button" className={`messagesConversationItem${activeConversationId === conversation.id ? " is-active" : ""}`} onClick={() => setActiveConversationId(conversation.id)}>
                 <PeerAvatar conversation={conversation} className="messagesConversationItem__avatar" />
@@ -353,8 +354,8 @@ export default function MessagesPage() {
         <section className="messagesMain panel-soft">
           {!activeConversation && (
             <div className="messagesPlaceholder">
-              <strong>Wybierz rozmowe z listy</strong>
-              <span>Po wybraniu rozmowy zobaczysz tutaj wiadomosci i pole odpowiedzi.</span>
+              <strong>Wybierz rozmowę z listy</strong>
+              <span>Po wybraniu rozmowy zobaczysz tutaj wiadomości i pole odpowiedzi.</span>
             </div>
           )}
           {activeConversation && (
@@ -371,7 +372,7 @@ export default function MessagesPage() {
                   {activeConversation.status === "incoming_request" && (
                     <div className="messagesMain__requestActions">
                       <button type="button" className="btn btn-primary" disabled={busyAction === "accept"} onClick={handleAcceptRequest}>Akceptuj</button>
-                      <button type="button" className="btn btn-ghost" disabled={busyAction === "reject"} onClick={handleRejectRequest}>Odrzuc</button>
+                      <button type="button" className="btn btn-ghost" disabled={busyAction === "reject"} onClick={handleRejectRequest}>Odrzuć</button>
                     </div>
                   )}
                   <button type="button" aria-label="Menu rozmowy">...</button>
@@ -379,10 +380,10 @@ export default function MessagesPage() {
               </header>
 
               <div className="messagesThread">
-                {hasOlder && <button type="button" className="messagesOlderBtn" onClick={() => loadMessages(activeConversation.id, { beforeId: messages[0]?.id, appendOlder: true })}>Pokaz starsze wiadomosci</button>}
+                {hasOlder && <button type="button" className="messagesOlderBtn" onClick={() => loadMessages(activeConversation.id, { beforeId: messages[0]?.id, appendOlder: true })}>Pokaż starsze wiadomości</button>}
                 <div className="messagesDateDivider"><span>{formatDateLabel(messages[0]?.createdAt)}</span></div>
-                {loadingMessages && <div className="messagesHint">Ladowanie wiadomosci...</div>}
-                {!loadingMessages && messages.length === 0 && <div className="messagesHint messagesHint--empty">Brak wiadomosci. Napisz pierwsza wiadomosc.</div>}
+                {loadingMessages && <div className="messagesHint">Ładowanie wiadomości...</div>}
+                {!loadingMessages && messages.length === 0 && <div className="messagesHint messagesHint--empty">Brak wiadomości. Napisz pierwszą wiadomość.</div>}
 
                 {messages.map((message) => (
                   <article key={message.id} className={`messageRow${message.own ? " is-own" : ""}`}>
@@ -403,7 +404,7 @@ export default function MessagesPage() {
                             <button key={attachment.id} type="button" className="messageAttachment" onClick={() => handleDownloadAttachment(attachment)}>
                               <span className="messageAttachment__icon" aria-hidden="true">F</span>
                               <span className="messageAttachment__body">
-                                <strong>{attachment.originalName || "Zalacznik"}</strong>
+                                <strong>{attachment.originalName || "Załącznik"}</strong>
                                 <small>{formatBytes(attachment.sizeBytes)} - {fileTypeLabel(attachment)}</small>
                               </span>
                               <span className="messageAttachment__download" aria-hidden="true">v</span>
@@ -411,7 +412,7 @@ export default function MessagesPage() {
                           ))}
                         </div>
                       )}
-                      {message.own && <span className="messageReadState">wyslano</span>}
+                      {message.own && <span className="messageReadState">wysłano</span>}
                     </div>
                   </article>
                 ))}
@@ -431,10 +432,10 @@ export default function MessagesPage() {
                   <textarea
                     value={draft}
                     onChange={(event) => setDraft(event.target.value)}
-                    placeholder={activeConversation.status === "incoming_request" ? "Najpierw zaakceptuj prosbe o kontakt." : "Napisz wiadomosc..."}
+                    placeholder={activeConversation.status === "incoming_request" ? "Najpierw zaakceptuj prośbę o kontakt." : "Napisz wiadomość..."}
                     disabled={activeConversation.status === "incoming_request" || sending}
                   />
-                  <button type="button" className="btn btn-primary messagesSendButton" disabled={sending || activeConversation.status === "incoming_request" || (!draft.trim() && files.length === 0)} onClick={handleSend}>Wyslij</button>
+                  <button type="button" className="btn btn-primary messagesSendButton" disabled={sending || activeConversation.status === "incoming_request" || (!draft.trim() && files.length === 0)} onClick={handleSend}>Wyślij</button>
                 </div>
               </div>
             </>
@@ -452,21 +453,21 @@ export default function MessagesPage() {
                 <h3>{activeConversation.peer.displayName}</h3>
                 <p>{peerTag(activeConversation.peer)}</p>
                 <span>{activeConversation.peer.activityLabel || "Aktywna rozmowa"}</span>
-                <Link className="btn btn-ghost messagesProfileButton" to={`/users/${activeConversation.peer.handle}`}>Otworz profil</Link>
+                <Link className="btn btn-ghost messagesProfileButton" to={`/users/${activeConversation.peer.handle}`}>Otwórz profil</Link>
               </div>
 
               <div className="messagesInfoBlock">
                 <h4>Rozmowa</h4>
                 <dl>
-                  <div><dt>Rozpoczeta</dt><dd>{formatDateLabel(activeConversation.createdAt || activeConversation.lastMessageAt)}</dd></div>
-                  <div><dt>Wiadomosci</dt><dd>{messages.length}</dd></div>
+                  <div><dt>Rozpoczęta</dt><dd>{formatDateLabel(activeConversation.createdAt || activeConversation.lastMessageAt)}</dd></div>
+                  <div><dt>Wiadomości</dt><dd>{messages.length}</dd></div>
                   <div><dt>Status</dt><dd>{statusLabel(activeConversation.status)}</dd></div>
                 </dl>
               </div>
 
               {messages.some((message) => message.attachments?.length) && (
                 <div className="messagesInfoBlock">
-                  <h4>Zalaczniki w rozmowie</h4>
+                  <h4>Załączniki w rozmowie</h4>
                   <div className="messagesDetailsFiles">
                     {messages.flatMap((message) => message.attachments || []).map((attachment) => (
                       <button key={attachment.id} type="button" onClick={() => handleDownloadAttachment(attachment)}>
@@ -482,12 +483,12 @@ export default function MessagesPage() {
             <div className="messagesDetails__content messagesDetails__empty">
               <div className="messagesDetails__avatar" aria-hidden="true">?</div>
               <h3>Informacje o rozmowcy</h3>
-              <p>Wybierz rozmowe, aby zobaczyc profil i ostatnie zalaczniki.</p>
+              <p>Wybierz rozmowę, aby zobaczyć profil i ostatnie załączniki.</p>
             </div>
           )}
         </aside>
 
-        {error && <div className="messagesGlobalError">{error}</div>}
+        {error && <AppToast message={error} onClose={() => setError("")} />}
       </div>
     </div>
   );

@@ -44,8 +44,8 @@ export default function CharacterSidebar({
 
       <div className="charactersList">
         {loading && <div className="charactersState">Ładowanie listy postaci...</div>}
-        {!loading && items.length === 0 && <div className="charactersEmptyRow">Nie masz jeszcze zadnej postaci.</div>}
-        {filtered.length === 0 && <div className="charactersEmptyRow">Brak wynikow.</div>}
+        {!loading && items.length === 0 && <div className="charactersEmptyRow">Nie masz jeszcze żadnej postaci.</div>}
+        {filtered.length === 0 && <div className="charactersEmptyRow">Brak wyników.</div>}
         {!loading && filtered.map((item) => (
           <div key={item.id} className={`charactersCard${item.id === selectedId ? " is-active" : ""}`}>
             <button

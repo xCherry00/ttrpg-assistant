@@ -13,6 +13,7 @@ import {
 import { listCampaigns } from "../api/campaigns";
 import CharacterCreatorRouter from "../components/characters/CharacterCreatorRouter";
 import CharacterSystemSelector from "../components/characters/CharacterSystemSelector";
+import AppToast from "../components/common/AppToast";
 import ImageLibraryPicker from "../components/common/ImageLibraryPicker";
 import { imagePlaceholder } from "../data/imageLibrary";
 import "../styles/characters.css";
@@ -343,7 +344,7 @@ function CharacterPortrait({ character, size = "md", onClick }) {
 
   if (onClick) {
     return (
-      <button type="button" className={`charactersPortrait charactersPortrait--${size} charactersPortraitButton`} onClick={onClick} aria-label={`Zmien avatar postaci ${name}`}>
+      <button type="button" className={`charactersPortrait charactersPortrait--${size} charactersPortraitButton`} onClick={onClick} aria-label={`Zmień avatar postaci ${name}`}>
         {content}
       </button>
     );
@@ -409,7 +410,7 @@ function NewCharacterModal({ creating, campaignOptions, onClose, onCreate }) {
     if (hasValue(form.level)) {
       const level = Number(form.level);
       if (!Number.isInteger(level) || level < 0 || level > 20) {
-        nextErrors.level = "Poziom musi byc liczba od 0 do 20.";
+        nextErrors.level = "Poziom musi być liczbą od 0 do 20.";
       }
     }
     setErrors(nextErrors);
@@ -436,8 +437,8 @@ function NewCharacterModal({ creating, campaignOptions, onClose, onCreate }) {
       <section className="charactersModal" role="dialog" aria-modal="true" aria-labelledby="newCharacterTitle" onMouseDown={(event) => event.stopPropagation()}>
         <header className="charactersModalHeader">
           <div>
-            <h2 id="newCharacterTitle">Nowa postac</h2>
-            <p>Utworz podstawowa karte postaci i uzupelnij szczegoly pozniej.</p>
+            <h2 id="newCharacterTitle">Nowa postać</h2>
+            <p>Utwórz podstawową kartę postaci i uzupełnij szczegóły później.</p>
           </div>
           <button type="button" className="charactersModalClose" aria-label="Zamknij modal" onClick={onClose} disabled={creating}>
             <Icon name="x" />
@@ -483,7 +484,7 @@ function NewCharacterModal({ creating, campaignOptions, onClose, onCreate }) {
 
           <div className="charactersPortraitDropzonePanel">
             <div className="charactersPortraitPreview charactersPortraitPreview--modal">
-              <img src={form.portraitUrl || imagePlaceholder("characterAvatars")} alt="Podglad portretu postaci" />
+              <img src={form.portraitUrl || imagePlaceholder("characterAvatars")} alt="Podgląd portretu postaci" />
             </div>
             <div className="charactersPortraitDropzoneCopy">
               <span className="charactersEyebrow">Portret postaci</span>
@@ -503,7 +504,7 @@ function NewCharacterModal({ creating, campaignOptions, onClose, onCreate }) {
 
           <footer className="charactersModalFooter">
             <button type="button" className="charactersGhostBtn" onClick={onClose} disabled={creating}>Anuluj</button>
-            <button type="submit" className="charactersPrimaryBtn" disabled={creating}>{creating ? "Tworzenie..." : "Utworz postac"}</button>
+            <button type="submit" className="charactersPrimaryBtn" disabled={creating}>{creating ? "Tworzenie..." : "Utwórz postać"}</button>
           </footer>
         </form>
       </section>
@@ -567,10 +568,10 @@ function EditCharacterModal({ detail, saving, campaigns, onClose, onSave }) {
     if (!form.name.trim()) nextErrors.name = "Nazwa postaci jest wymagana.";
     if (hasValue(form.level)) {
       const level = Number(form.level);
-      if (!Number.isInteger(level) || level < 0) nextErrors.level = "Poziom nie moze byc ujemny.";
+      if (!Number.isInteger(level) || level < 0) nextErrors.level = "Poziom nie może być ujemny.";
     }
     if (form.campaignName && !campaignOptions.some((campaign) => (campaign.title || campaign.name) === form.campaignName)) {
-      nextErrors.campaignName = "Wybierz poprawna kampanie albo Brak kampanii.";
+      nextErrors.campaignName = "Wybierz poprawną kampanię albo Brak kampanii.";
     }
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -606,8 +607,8 @@ function EditCharacterModal({ detail, saving, campaigns, onClose, onSave }) {
       <section className="charactersModal characterEditModal" role="dialog" aria-modal="true" aria-labelledby="editCharacterTitle" onMouseDown={(event) => event.stopPropagation()}>
         <header className="charactersModalHeader">
           <div>
-            <h2 id="editCharacterTitle">Edytuj postac</h2>
-            <p>Zmien podstawowe informacje widoczne na karcie postaci.</p>
+            <h2 id="editCharacterTitle">Edytuj postać</h2>
+            <p>Zmień podstawowe informacje widoczne na karcie postaci.</p>
           </div>
           <button type="button" className="charactersModalClose" aria-label="Zamknij modal" onClick={onClose} disabled={saving}>
             <Icon name="x" />
@@ -657,7 +658,7 @@ function EditCharacterModal({ detail, saving, campaigns, onClose, onSave }) {
                   value={form.level}
                   onChange={(event) => updateField("level", event.target.value)}
                   onBlur={() => {
-                    if (hasValue(form.level) && Number(form.level) < 0) setErrors((current) => ({ ...current, level: "Poziom nie moze byc ujemny." }));
+                    if (hasValue(form.level) && Number(form.level) < 0) setErrors((current) => ({ ...current, level: "Poziom nie może być ujemny." }));
                   }}
                   placeholder="1"
                   aria-invalid={Boolean(errors.level)}
@@ -679,7 +680,7 @@ function EditCharacterModal({ detail, saving, campaigns, onClose, onSave }) {
           </div>
 
           <footer className="charactersModalFooter characterEditModalFooter">
-            <span>Zmiany beda widoczne na karcie postaci.</span>
+            <span>Zmiany będą widoczne na karcie postaci.</span>
             <div>
               <button type="button" className="charactersGhostBtn" onClick={onClose} disabled={saving}>Anuluj</button>
               <button type="submit" className="charactersPrimaryBtn" disabled={saving || !form.name.trim()}>
@@ -811,9 +812,9 @@ function CharacterLibraryView({
           <div className="charactersEmpty charactersLibraryEmpty">
             <span><Icon name="user" /></span>
             <strong>Brak postaci</strong>
-            <p>Utworz pierwsza postac albo zaimportuj ja z pliku JSON.</p>
+            <p>Utwórz pierwszą postać albo zaimportuj ją z pliku JSON.</p>
             <div className="charactersActionsFooter">
-              <button type="button" className="charactersPrimaryBtn" onClick={onCreate}><Icon name="plus" /> + Nowa postac</button>
+              <button type="button" className="charactersPrimaryBtn" onClick={onCreate}><Icon name="plus" /> + Nowa postać</button>
               <button type="button" className="charactersGhostBtn" onClick={onImport}><Icon name="upload" /> Importuj JSON</button>
             </div>
           </div>
@@ -822,9 +823,9 @@ function CharacterLibraryView({
           <div className="charactersEmpty charactersLibraryEmpty">
             <span><Icon name="search" /></span>
             <strong>Brak postaci</strong>
-            <p>Utworz pierwsza postac albo zaimportuj ja z pliku JSON.</p>
+            <p>Utwórz pierwszą postać albo zaimportuj ją z pliku JSON.</p>
             <div className="charactersActionsFooter">
-              <button type="button" className="charactersPrimaryBtn" onClick={onCreate}><Icon name="plus" /> + Nowa postac</button>
+              <button type="button" className="charactersPrimaryBtn" onClick={onCreate}><Icon name="plus" /> + Nowa postać</button>
               <button type="button" className="charactersGhostBtn" onClick={onImport}><Icon name="upload" /> Importuj JSON</button>
             </div>
           </div>
@@ -888,8 +889,8 @@ function CharacterAvatarPickerModal({ detail, saving, onClose, onSave }) {
       <section className="charactersModal characterAvatarPickerModal" role="dialog" aria-modal="true" aria-labelledby="characterAvatarPickerTitle" onMouseDown={(event) => event.stopPropagation()}>
         <header className="charactersModalHeader">
           <div>
-            <h2 id="characterAvatarPickerTitle">Zmien avatar postaci</h2>
-            <p>Wybierz portret z biblioteki avatarow postaci.</p>
+            <h2 id="characterAvatarPickerTitle">Zmień avatar postaci</h2>
+            <p>Wybierz portret z biblioteki avatarów postaci.</p>
           </div>
           <button type="button" className="charactersModalClose" aria-label="Zamknij modal" onClick={onClose} disabled={saving}>
             <Icon name="x" />
@@ -903,7 +904,7 @@ function CharacterAvatarPickerModal({ detail, saving, onClose, onSave }) {
             onChange={setValue}
             onRemove={() => setValue("")}
             previewAlt="Portret postaci"
-            helpText="Wybrany avatar pojawi sie w naglowku i na listach postaci."
+            helpText="Wybrany avatar pojawi się w nagłówku i na listach postaci."
           />
         </div>
         <footer className="charactersModalFooter">
@@ -965,7 +966,7 @@ function AttributeGrid({ items, empty = "Brak danych." }) {
   );
 }
 
-function EditableAttributeGrid({ value, empty = "Brak atrybutow.", onChange, onSave }) {
+function EditableAttributeGrid({ value, empty = "Brak atrybutów.", onChange, onSave }) {
   const attributes = linesToEntries(value);
 
   function updateEntry(index, field, nextValue) {
@@ -989,7 +990,7 @@ function EditableAttributeGrid({ value, empty = "Brak atrybutow.", onChange, onS
       <div className="characterSheetCardHead">
         <div>
           <h3>Atrybuty</h3>
-          <p>Zmieniaj nazwy i wartosci atrybutow bezposrednio na kafelkach.</p>
+          <p>Zmieniaj nazwy i wartości atrybutów bezpośrednio na kafelkach.</p>
         </div>
         <button type="button" className="charactersGhostBtn" onClick={addAttribute}>Dodaj atrybut</button>
       </div>
@@ -1004,12 +1005,12 @@ function EditableAttributeGrid({ value, empty = "Brak atrybutow.", onChange, onS
                 onBlur={onSave}
               />
               <input
-                aria-label={`Wartosc atrybutu ${titleCaseLabel(item.label) || index + 1}`}
+                aria-label={`Wartość atrybutu ${titleCaseLabel(item.label) || index + 1}`}
                 value={String(item.value ?? "")}
                 onChange={(event) => updateEntry(index, "value", event.target.value)}
                 onBlur={onSave}
               />
-              <button type="button" className="characterAttributeRemove" onClick={() => removeAttribute(index)} aria-label={`Usun atrybut ${titleCaseLabel(item.label) || index + 1}`}>
+              <button type="button" className="characterAttributeRemove" onClick={() => removeAttribute(index)} aria-label={`Usuń atrybut ${titleCaseLabel(item.label) || index + 1}`}>
                 <Icon name="x" />
               </button>
             </article>
@@ -1123,7 +1124,7 @@ function CharacterTabContent({ detail, activeTab, draft, onDraftChange, onDraftS
     return (
       <EditableAttributeGrid
         value={draft.attributesText ?? entriesToLines(attributes)}
-        empty="Brak atrybutow."
+        empty="Brak atrybutów."
         onChange={(value) => onDraftChange("attributesText", value)}
         onSave={onDraftSave}
       />
@@ -1513,6 +1514,7 @@ export default function CharactersPage() {
         campaignName: payload.campaignName || "",
       };
       const imported = await importCharacter(token, {
+        exportVersion: "1.0",
         character: {
           name: payload.name,
           systemCode: payload.systemCode,
@@ -1540,9 +1542,9 @@ export default function CharactersPage() {
       await loadList();
       const nextId = imported?.characterId || imported?.id;
       if (nextId) navigate(`/characters/${nextId}`);
-      showNotice("success", "Postac utworzona.");
+      showNotice("success", "Postać utworzona.");
     } catch (err) {
-      const message = err?.message || "Nie udalo sie utworzyc postaci.";
+      const message = err?.message || "Nie udało się utworzyć postaci.";
       setError(message);
       showNotice("error", message);
     } finally {
@@ -1672,8 +1674,9 @@ export default function CharactersPage() {
         onChange={handleImportFile}
       />
 
-      {notice && <div className={`charactersNotice${notice.type === "error" ? " is-error" : ""}`}>{notice.text}</div>}
-      {error && <div className="charactersError">{error}</div>}
+      {notice?.type === "error" && <AppToast message={notice.text} onClose={() => setNotice(null)} />}
+      {notice && notice.type !== "error" && <div className="charactersNotice">{notice.text}</div>}
+      {error && <AppToast message={error} onClose={() => setError("")} />}
 
       {!isDetailRoute && (
         <CharacterLibraryView

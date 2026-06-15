@@ -25,11 +25,11 @@ export default function CocInvestigatorHeader({ identity, name, onNameChange, po
               />
             </div>
           )}
-          <label className="sheetField"><span>Imie</span><input value={identity?.firstName || "-"} readOnly /></label>
+          <label className="sheetField"><span>Imię</span><input value={identity?.firstName || "-"} readOnly /></label>
           <label className="sheetField"><span>Nazwisko</span><input value={identity?.lastName || "-"} readOnly /></label>
           <label className="sheetField"><span>Wiek</span><input value={identity?.age ?? "-"} readOnly /></label>
-          <label className="sheetField"><span>Plec</span><input value={identity?.sex || "-"} readOnly /></label>
-          <label className="sheetField"><span>Zawod</span><input value={identity?.occupation || "-"} readOnly /></label>
+          <label className="sheetField"><span>Płeć</span><input value={identity?.sex || "-"} readOnly /></label>
+          <label className="sheetField"><span>Zawód</span><input value={identity?.occupation || "-"} readOnly /></label>
         </div>
       </div>
     </section>

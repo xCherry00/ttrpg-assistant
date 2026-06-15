@@ -10,7 +10,7 @@ export default function CocCombatPanel({ combat }) {
       {weapons.length > 0 && (
         <table className="sheetTable">
           <thead>
-            <tr><th>Bron</th><th>Umiejetnosc</th><th>Obrazenia</th></tr>
+            <tr><th>Broń</th><th>Umiejętność</th><th>Obrażenia</th></tr>
           </thead>
           <tbody>
             {weapons.map((weapon, index) => (

@@ -3,10 +3,12 @@ package pl.ttrpgassistant.backend.social;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.ttrpgassistant.backend.campaign.CampaignEntity;
 import pl.ttrpgassistant.backend.campaign.CampaignMemberRepository;
 import pl.ttrpgassistant.backend.campaign.CampaignRepository;
 import pl.ttrpgassistant.backend.common.error.DuplicateResourceException;
 import pl.ttrpgassistant.backend.common.error.ResourceNotFoundException;
+import pl.ttrpgassistant.backend.social.dto.PublicProfileCampaignResponse;
 import pl.ttrpgassistant.backend.social.dto.PublicProfileResponse;
 import pl.ttrpgassistant.backend.social.dto.SocialOverviewResponse;
 import pl.ttrpgassistant.backend.social.dto.SocialRequestResponse;
@@ -150,11 +152,20 @@ public class SocialService {
             throw new ResourceNotFoundException("User not found");
         }
 
+        List<PublicProfileCampaignResponse> sharedCampaigns = isOwner
+                ? List.of()
+                : campaignRepository.findSharedCampaigns(viewerUserId, target.getId()).stream()
+                        .map(campaign -> toPublicProfileCampaign(campaign, target.getId()))
+                        .toList();
+        List<SocialUserCardResponse> mutualFriends = isOwner ? List.of() : findMutualFriends(viewer, target.getId());
+
         return new PublicProfileResponse(
-                withSuggestion(buildUserCard(viewer, target), null, viewerUserId.equals(target.getId()) ? 0 : countMutualFriends(viewerUserId, target.getId())),
+                withSuggestion(buildUserCard(viewer, target), null, mutualFriends.size()),
                 friendshipRepository.countByIdUserId(target.getId()),
                 campaignRepository.countVisibleForUser(target.getId()),
-                campaignRepository.countByOwnerUserIdAndDeletedAtIsNull(target.getId())
+                campaignRepository.countByOwnerUserIdAndDeletedAtIsNull(target.getId()),
+                sharedCampaigns,
+                mutualFriends
         );
     }
 
@@ -325,6 +336,35 @@ public class SocialService {
                 .collect(java.util.stream.Collectors.toSet());
         candidateFriends.retainAll(viewerFriends);
         return candidateFriends.size();
+    }
+
+    private List<SocialUserCardResponse> findMutualFriends(UserEntity viewer, Long targetUserId) {
+        Set<Long> viewerFriends = friendshipRepository.findByIdUserIdOrderByCreatedAtDesc(viewer.getId()).stream()
+                .map(link -> link.getId().getFriendUserId())
+                .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
+        if (viewerFriends.isEmpty()) {
+            return List.of();
+        }
+
+        return friendshipRepository.findByIdUserIdOrderByCreatedAtDesc(targetUserId).stream()
+                .map(link -> link.getId().getFriendUserId())
+                .filter(viewerFriends::contains)
+                .distinct()
+                .map(this::getUser)
+                .map(friend -> buildUserCard(viewer, friend))
+                .toList();
+    }
+
+    private PublicProfileCampaignResponse toPublicProfileCampaign(CampaignEntity campaign, Long targetUserId) {
+        String role = campaign.getOwnerUserId().equals(targetUserId) ? "MG" : "Gracz";
+        return new PublicProfileCampaignResponse(
+                campaign.getId(),
+                campaign.getTitle(),
+                campaign.getSystemCode(),
+                campaign.getCoverImageUrl(),
+                campaign.getBannerImageUrl(),
+                role
+        );
     }
 
     private String relationshipFor(Long viewerUserId, Long targetUserId) {

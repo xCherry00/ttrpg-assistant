@@ -90,7 +90,7 @@ export default function CampaignOverviewPanel({ campaign, isOwner, busy, onUpdat
             onChange={(url) => setForm((prev) => ({ ...prev, coverImageUrl: url }))}
             onRemove={() => setForm((prev) => ({ ...prev, coverImageUrl: "" }))}
             previewAlt="Ikona kampanii"
-            helpText="Wybierz gotowa ikone kampanii z biblioteki."
+            helpText="Wybierz gotową ikonę kampanii z biblioteki."
           />
           <div style={{ display: "flex", gap: 8 }}>
             <button className="campaignDetailsPrimaryBtn" type="submit" disabled={busy || !dirty}>Zapisz</button>

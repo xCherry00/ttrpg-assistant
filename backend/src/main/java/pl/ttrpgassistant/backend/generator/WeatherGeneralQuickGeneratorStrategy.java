@@ -88,12 +88,12 @@ public class WeatherGeneralQuickGeneratorStrategy implements GeneratorStrategy {
             return expandedDescription(climate, season, wind);
         }
         if (wind.speedKmh() >= 55) {
-            return pick(List.of("silny wiatr i rwane chmury", "porywisty wiatr pod czystym niebem", "gwałtowne podmuchy i zmienna widoczność", "ostry wiatr niosący pył i drobne śmieci"));
+            return pick(List.of("silny wiatr i rwane chmury", "porywisty wiatr pod czystym niebem", "gwałtowne podmuchy i zmieńna widoczność", "ostry wiatr niosący pył i drobne śmieci"));
         }
         if (wind.speedKmh() >= 35) {
             return pick(List.of("wietrznie i sucho", "chmury przesuwane silniejszym wiatrem", "jasno, ale wyraźnie wietrznie", "zimniejsze podmuchy między krótkimi przejaśnieniami"));
         }
-        List<String> clear = List.of("bezchmurnie", "częściowe zachmurzenie", "jasno i sucho", "cienkie chmury", "blade słońce", "suchy poranek");
+        List<String> clear = List.of("bezchmurnie", "częściowe zachmurzenie", "jasno i sucho", "cienkie chmury", "błąde słońce", "suchy poranek");
         List<String> wet = List.of("lekki deszcz", "ciężkie chmury", "przelotne opady", "wilgotno i pochmurno", "niska mgła po deszczu", "mżawka i błoto");
         List<String> harsh = List.of("zimna mgła", "przelotny śnieg", "mroźny wiatr", "niskie szare niebo", "szron i śliska droga", "mokry śnieg");
         if ("Zima".equals(season) || "Zimny".equals(climate)) return pick(harsh);
@@ -101,7 +101,7 @@ public class WeatherGeneralQuickGeneratorStrategy implements GeneratorStrategy {
             return pick(List.of("ciepły deszcz", "wilgotne chmury", "nagła ulewa", "parna mgiełka", "duszne powietrze przed burzą"));
         }
         if ("Suchy".equals(climate)) {
-            return pick(List.of("bezchmurnie", "suchy upał", "pylisty wiatr", "blade niebo", "gorący wiatr i kurz"));
+            return pick(List.of("bezchmurnie", "suchy upał", "pyłisty wiatr", "błąde niebo", "gorący wiatr i kurz"));
         }
         if ("Nadmorski".equals(climate)) {
             return pick(List.of("wilgotny wiatr od wody", "niskie chmury nad wybrzeżem", "słona mgła", "krótkie przejaśnienia i chłodny wiatr"));
@@ -128,39 +128,39 @@ public class WeatherGeneralQuickGeneratorStrategy implements GeneratorStrategy {
     }
 
     private List<String> windyStormDescriptions() {
-        return List.of("silny wiatr i rwane chmury", "porywisty wiatr pod czystym niebem", "gwaltowne podmuchy i zmienna widocznosc", "ostry wiatr niosacy pyl i drobne smieci", "wiatr szarpiacy plaszczami i latarniami", "ciemne chmury pedzone szybciej niz zwykle", "suche galezie trzaskaja pod naporem wichru", "zimny front uderza naglymi podmuchami", "piasek albo kurz tnie po twarzach", "powietrze dudni w kominach i szczelinach", "chmury rozrywane przez ostre swiatlo", "wiatr niesie odlegly zapach deszczu", "dachy i szyldy skrzypia niepokojaco", "podmuchy gasza slabe plomienie", "liscie i papier wiruja przy ziemi", "przeciag niesie echo z pustych ulic", "niebo przesuwa sie warstwami szarosci", "powietrze jest suche, ale niespokojne", "wiatr wciska kurz w kazda szczeline", "daleki pomruk burzy miesza sie z wichrem");
+        return List.of("silny wiatr i rwane chmury", "porywisty wiatr pod czystym niebem", "gwałtowne podmuchy i zmieńna widoczność", "ostry wiatr niosący pył i drobne śmieci", "wiatr szarpiący płaszczami i latarniami", "ciemne chmury pędzone szybciej niż zwykle", "suche gałęzie trzaskają pod naporem wichru", "zimny front uderza nagłymi podmuchami", "piasek albo kurz tnie po twarzach", "powietrze dudni w kominach i szczelinach", "chmury rozrywane przez ostre światło", "wiatr niesie odległy zapach deszczu", "dachy i szyldy skrzypia niepokojaco", "podmuchy gasza słabe płomienie", "liście i papier wirują przy ziemi", "przeciąg niesie echo z pustych ulic", "niebo przesuwa sie warstwami szarości", "powietrze jest suche, ale niespokojne", "wiatr wciska kurz w każda szczelinę", "daleki pomruk burzy miesza sie z wichrem");
     }
 
     private List<String> windyDescriptions() {
-        return List.of("wietrznie i sucho", "chmury przesuwane silniejszym wiatrem", "jasno, ale wyraznie wietrznie", "zimniejsze podmuchy miedzy krotkimi przejasnieniami", "lekki pyl unosi sie przy drogach", "wiatr porusza trawy jak fale", "niebo szybko zmienia odcienie", "chlodne powietrze splywa z wyzyn", "podmuchy niosa zapach dymu", "liscie ukladaja sie w waskie smugi", "w oddali widac poszarpane chmury", "wiatr utrudnia utrzymanie kapturow", "powietrze jest rzeske i niespokojne", "nad horyzontem zbieraja sie szare pasma", "ptaki leca nisko nad ziemia", "latarnie i szyldy kolysza sie miarowo", "zimny powiew poprzedza kazda chmure", "wiatr czysci droge z lekkiego kurzu", "przejasnienia trwaja tylko kilka minut", "podmuchy niosa wilgoc albo sol");
+        return List.of("wietrznie i sucho", "chmury przesuwane silniejszym wiatrem", "jasno, ale wyraźnie wietrznie", "zimniejsze podmuchy między krotkimi przejaśnieniami", "lekki pył unosi sie przy drogach", "wiatr porusza trawy jak fale", "niebo szybko zmienia odcienie", "chłodne powietrze spływa z wyżyn", "podmuchy niosą zapach dymu", "liście układają sie w wąskie smugi", "w oddali widać poszarpane chmury", "wiatr utrudnia utrzymanie kapturow", "powietrze jest rześkie i niespokojne", "nad horyzontem zbierają sie szare pasma", "ptaki lecą nisko nad ziemią", "latarnie i szyldy kołyszą sie miarowo", "zimny powiew poprzedza każda chmure", "wiatr czyści drogę z lekkiego kurzu", "przejasnienia trwaja tylko kilka minut", "podmuchy niosą wilgoć albo sól");
     }
 
     private List<String> clearDescriptions() {
-        return List.of("bezchmurnie", "czesciowe zachmurzenie", "jasno i sucho", "cienkie chmury", "blade slonce", "suchy poranek", "cieple swiatlo po chlodnej nocy", "lagodne niebo bez zapowiedzi burzy", "wysokie chmury jak smugi kredy", "spokojne powietrze i dobra widocznosc", "slonce przebija sie przez lekka mgielke", "jasne niebo z chlodnym cieniem", "sucha droga i lekki kurz", "miekki blask przed poludniem", "powietrze czyste po nocnym wietrze", "cieply dzien bez opadow", "jasne chmury na dalekim horyzoncie", "pogodnie, ale bez upalu", "rzeski poranek z dobrym tropem", "spokojne popoludnie pod wysokim niebem");
+        return List.of("bezchmurnie", "częściowe zachmurzenie", "jasno i sucho", "cienkie chmury", "błąde słońce", "suchy poranek", "cieple światło po chłodnej nocy", "lagodne niebo bez zapowiedzi burzy", "wysokie chmury jak smugi kredy", "spokojne powietrze i dobra widoczność", "słońce przebija sie przez lekka mgielke", "jasne niebo z chlodnym cieniem", "sucha droga i lekki kurz", "miekki blask przed poludniem", "powietrze czyste po nocnym wietrze", "cieply dzien bez opadow", "jasne chmury na dalekim horyzoncie", "pogodnie, ale bez upalu", "rzeski poranek z dobrym tropem", "spokojne popoludnie pod wysokim niebem");
     }
 
     private List<String> wetDescriptions() {
-        return List.of("lekki deszcz", "ciezkie chmury", "przelotne opady", "wilgotno i pochmurno", "niska mgla po deszczu", "mzawka i bloto", "mokre kamienie i zimny zapach ziemi", "krotkie ulewy przerywane cisza", "krople spadaja z dachow dlugo po opadzie", "srebrna mgielka nad droga", "wilgoc osiada na ubraniach", "rozmokly trakt i ciche niebo", "ciemne kaluze odbijaja chmury", "deszcz przechodzi w drobna mgielke", "powietrze jest ciezkie od wilgoci", "chmury wisza nisko nad ziemia", "wiatr niesie zapach mokrego drewna", "deszcz stuka rowno o okiennice", "droga klei sie do butow", "mgla zaslania dalsze zabudowania");
+        return List.of("lekki deszcz", "ciężkie chmury", "przelotne opady", "wilgotno i pochmurno", "niska mgła po deszczu", "mzawka i błoto", "mokre kamienie i zimny zapach ziemi", "krótkie ulewy przerywane ciszą", "krople spadają z dachów długo po opadzie", "srebrna mgielka nad droga", "wilgoć osiada na ubraniach", "rozmokly trakt i ciche niebo", "ciemne kałuże odbijają chmury", "deszcz przechodzi w drobna mgielke", "powietrze jest ciężkie od wilgoći", "chmury wiszą nisko nad ziemią", "wiatr niesie zapach mokrego drewna", "deszcz stuka równo o okiennice", "droga klei sie do butów", "mgła zasłania dalsze zabudowania");
     }
 
     private List<String> harshDescriptions() {
-        return List.of("zimna mgla", "przelotny snieg", "mrozny wiatr", "niskie szare niebo", "szron i sliska droga", "mokry snieg", "zamarzajacy deszcz na kamieniach", "ostre zimno wciska sie pod ubranie", "bialy pyl sniegu niesiony przy ziemi", "lodowe grudki trzeszcza pod stopami", "ciemny poranek bez ciepla", "sople kapia mimo mrozu", "szare chmury tlumia dzwieki", "szklisty lod na koleinach", "snieg przykrywa stare slady", "powietrze szczypie w gardlo", "wiatr niesie drobny lodowy pyl", "zmarzniete bloto utrudnia marsz", "cienkie platki sniegu wiruja bez przerwy", "dzien jest jasny, ale bezlitosnie zimny");
+        return List.of("zimna mgła", "przelotny snieg", "mrozny wiatr", "niskie szare niebo", "szron i sliska droga", "mokry snieg", "zamarzajacy deszcz na kamieniach", "ostre zimno wciska sie pod ubranie", "bialy pył sniegu niesiony przy ziemi", "lodowe grudki trzeszcza pod stopami", "ciemny poranek bez ciepla", "sople kapia mimo mrozu", "szare chmury tlumia dzwieki", "szklisty lod na koleinach", "snieg przykrywa stare ślady", "powietrze szczypie w gardlo", "wiatr niesie drobny lodowy pył", "zmarzniete błoto utrudnia marsz", "cienkie platki sniegu wirują bez przerwy", "dzien jest jasny, ale bezlitosnie zimny");
     }
 
     private List<String> tropicalDescriptions() {
-        return List.of("cieply deszcz", "wilgotne chmury", "nagla ulewa", "parna mgielka", "duszne powietrze przed burza", "goraca mzawka nad blotem", "ciezka wilgoc i zapach roslin", "krotki deszcz pod jasnym niebem", "para unosi sie z kamieni", "powietrze drzy przed tropikalna burza", "zielony zapach po nocnej ulewie", "wilgotny upal oblepia ubrania", "cieply wiatr niesie krople z lisci", "mgla zbiera sie pod koronami drzew", "deszcz spada grubymi, leniwymi kroplami", "slonce wraca zaraz po scianie deszczu", "oddalone grzmoty dudnia za wzgorzami", "parne powietrze utrudnia oddech", "mokre liscie tlumia kazdy krok", "burzowe chmury rosna bardzo szybko");
+        return List.of("cieply deszcz", "wilgotne chmury", "nagla ulewa", "parna mgielka", "duszne powietrze przed burza", "goraca mzawka nad blotem", "ciezka wilgoć i zapach roslin", "krotki deszcz pod jasnym niebem", "para unosi sie z kamieni", "powietrze drzy przed tropikalna burza", "zielony zapach po nocnej ulewie", "wilgotny upal oblepia ubrania", "cieply wiatr niesie krople z lisci", "mgła zbiera sie pod koronami drzew", "deszcz spada grubymi, leniwymi kroplami", "słońce wraca zaraz po scianie deszczu", "oddalone grzmoty dudnią za wzgorzami", "parne powietrze utrudnia oddech", "mokre liście tlumia kazdy krok", "burzowe chmury rosna bardzo szybko");
     }
 
     private List<String> aridDescriptions() {
-        return List.of("bezchmurnie", "suchy upal", "pylisty wiatr", "blade niebo", "goracy wiatr i kurz", "powietrze pachnie rozgrzanym kamieniem", "horyzont drga od goraca", "cien jest krotki i twardy", "kurz osiada na jezyku", "niebo jest puste i jasne", "wiatr niesie drobny piasek", "ziemia peka pod stopami", "slonce odbija sie od jasnych skal", "sucha cisza przerywa tylko szelest piasku", "widocznosc faluje nad droga", "cieplo zostaje w murach po zmroku", "chmury sa cienkie i bezdeszczowe", "powietrze jest ostre i czyste", "pyl tworzy smugi za kazdym ruchem", "dalekie wzgorza zlewaja sie z niebem");
+        return List.of("bezchmurnie", "suchy upal", "pyłisty wiatr", "błąde niebo", "goracy wiatr i kurz", "powietrze pachnie rozgrzanym kamieniem", "horyzont drga od goraca", "cien jest krotki i twardy", "kurz osiada na języku", "niebo jest puste i jasne", "wiatr niesie drobny piasek", "ziemią peka pod stopami", "słońce odbija sie od jasnych skal", "sucha ciszą przerywa tylko szelest piasku", "widoczność faluje nad droga", "cieplo zostaje w murach po zmroku", "chmury sa cienkie i bezdeszczowe", "powietrze jest ostre i czyste", "pył tworzy smugi za kazdym ruchem", "dalekie wzgorza zlewaja sie z niebem");
     }
 
     private List<String> coastalDescriptions() {
-        return List.of("wilgotny wiatr od wody", "niskie chmury nad wybrzezem", "slona mgla", "krotkie przejasnienia i chlodny wiatr", "mewa krzyczy nad szarymi falami", "mokra bryza osiada na skorze", "dalekie fale dudnia jednostajnie", "chmury ciagna sie pasami znad morza", "powietrze pachnie sola i glonami", "mgla zakrywa latarnie na horyzoncie", "deszcz przychodzi bokiem od wody", "slonce przebija sie przez wilgotny opal", "wiatr niesie drobna sol na ubrania", "morze jest ciche, ale niepokojace", "fala chlodnego powietrza splywa na brzeg", "na kamieniach zostaje biala skorupa soli", "chmury nisko zaslaniaja klify", "piasek jest zimny i ciezki", "przejasnienia odbijaja sie w mokrych deskach", "powietrze zmienia zapach przed przyplywem");
+        return List.of("wilgotny wiatr od wody", "niskie chmury nad wybrzeżem", "słona mgła", "krótkie przejasnienia i chlodny wiatr", "mewa krzyczy nad szarymi falami", "mokra bryza osiada na skórze", "dalekie fale dudnią jednostajnie", "chmury ciągną sie pasami znad morza", "powietrze pachnie sóla i glonami", "mgła zakrywa latarnie na horyzoncie", "deszcz przychodzi bokiem od wody", "słońce przebija sie przez wilgotny opal", "wiatr niesie drobna sól na ubrania", "morze jest ciche, ale niepokojące", "fala chłodnego powietrza spływa na brzeg", "na kamieniach zostaje biała skorupa sóli", "chmury nisko zasłaniaja klify", "piasek jest zimny i ciężki", "przejasnienia odbijają sie w mokrych deskach", "powietrze zmienia zapach przed przypływem");
     }
 
     private List<String> swampDescriptions() {
-        return List.of("ciezka mgla i mokre powietrze", "lepka wilgoc", "ciepla mzawka", "nisko wiszace chmury nad mokradlami", "para stoi nad ciemna woda", "zimne krople spadaja z trzcin", "powietrze pachnie torfem", "mgla tlumi glosy juz po kilku krokach", "komary zbieraja sie w nieruchomym powietrzu", "bloto polyskuje pod cienka warstwa wody", "cieply wiatr niesie zapach gnijacych lisci", "szare niebo odbija sie w bajorach", "mokre trawy zaslaniaja stare slady", "cisza robi sie ciezka przed opadem", "krople wisza na pajeczynach", "niska mgla pelznie po ziemi", "podmuchy sa rzadkie i wilgotne", "chmury stoja nisko jak dym", "woda paruje po krotkim deszczu", "nocna wilgoc utrzymuje sie do poludnia");
+        return List.of("ciezka mgła i mokre powietrze", "lepka wilgoć", "ciepla mzawka", "nisko wiszące chmury nad mokradlami", "para stoi nad ciemna woda", "zimne krople spadają z trzcin", "powietrze pachnie torfem", "mgła tlumi głosy juz po kilku krokach", "komary zbierają sie w nieruchomym powietrzu", "błoto polyskuje pod cienka warstwa wody", "cieply wiatr niesie zapach gnijacych lisci", "szare niebo odbija sie w bajorach", "mokre trawy zasłaniaja stare ślady", "ciszą robi sie ciezka przed opadem", "krople wiszą na pajeczynach", "niska mgła pelznie po ziemi", "podmuchy sa rzadkie i wilgotne", "chmury stoja nisko jak dym", "woda paruje po krotkim deszczu", "nocna wilgoć utrzymuje sie do poludnia");
     }
 
     private String tableUse(String description, WindRoll wind) {
@@ -178,7 +178,7 @@ public class WeatherGeneralQuickGeneratorStrategy implements GeneratorStrategy {
 
     private WindRoll wind() {
         int roll = random.nextInt(100);
-        if (roll < 30) return new WindRoll("cisza", random.nextInt(5));
+        if (roll < 30) return new WindRoll("ciszą", random.nextInt(5));
         if (roll < 68) return new WindRoll("lekki", 6 + random.nextInt(12));
         if (roll < 90) return new WindRoll("umiarkowany", 18 + random.nextInt(17));
         if (roll < 98) return new WindRoll("silny", 35 + random.nextInt(20));

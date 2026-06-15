@@ -2,9 +2,9 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 
 function statusLabel(status) {
-  if (status === "IN_PROGRESS") return "IN_PROGRESS";
-  if (status === "FINISHED") return "FINISHED";
-  return "PLANNED";
+  if (status === "IN_PROGRESS") return "Trwa";
+  if (status === "FINISHED") return "Zakończona";
+  return "Zaplanowana";
 }
 
 export default function CampaignSessionsPanel({
@@ -38,7 +38,7 @@ export default function CampaignSessionsPanel({
       const note = await onGetMySessionNote?.(session.id);
       setNoteForm({ title: note?.title || "", content: note?.content || "" });
     } catch (err) {
-      setNoteError(err?.message || "Nie udało się pobrac notatki.");
+      setNoteError(err?.message || "Nie udało się pobrać notatki.");
     } finally {
       setNoteLoading(false);
     }
@@ -60,7 +60,7 @@ export default function CampaignSessionsPanel({
         title: noteForm.title,
         content: noteForm.content,
       });
-      setNoteNotice("Zapisano notatke.");
+      setNoteNotice("Zapisano notatkę.");
     } catch (err) {
       setNoteError(err?.message || "Nie udało się zapisać notatki.");
     } finally {
@@ -76,7 +76,7 @@ export default function CampaignSessionsPanel({
     try {
       await onDeleteMySessionNote?.(noteModal.session.id);
       setNoteForm({ title: "", content: "" });
-      setNoteNotice("Usuńieto notatke.");
+      setNoteNotice("Usunięto notatkę.");
     } catch (err) {
       setNoteError(err?.message || "Nie udało się usunąć notatki.");
     } finally {
@@ -103,7 +103,7 @@ export default function CampaignSessionsPanel({
               event.currentTarget.reset();
             }}
           >
-            <label className="campaignField"><span>Tytul</span><input name="title" required /></label>
+            <label className="campaignField"><span>Tytuł</span><input name="title" required /></label>
             <label className="campaignField"><span>Opis</span><input name="description" /></label>
             <label className="campaignField"><span>Termin</span><input name="scheduledFor" type="datetime-local" /></label>
             <button className="campaignDetailsPrimaryBtn" type="submit" disabled={busy}>Utwórz sesję</button>
@@ -145,10 +145,10 @@ export default function CampaignSessionsPanel({
                     </>
                   )}
                   {isOwner && session.status === "PLANNED" && (
-                    <button className="campaignDetailsPrimaryBtn" type="button" disabled={busy} onClick={() => onStart(session.id)}>Start</button>
+                    <button className="campaignDetailsPrimaryBtn" type="button" disabled={busy} onClick={() => onStart(session.id)}>Rozpocznij</button>
                   )}
                   {isOwner && session.status === "IN_PROGRESS" && (
-                    <button className="campaignDetailsDangerBtn" type="button" disabled={busy} onClick={() => onFinish(session.id)}>Finish</button>
+                    <button className="campaignDetailsDangerBtn" type="button" disabled={busy} onClick={() => onFinish(session.id)}>Zakończ</button>
                   )}
                 </div>
               </article>
@@ -172,7 +172,7 @@ export default function CampaignSessionsPanel({
             {!noteLoading && (
               <div style={{ display: "grid", gap: 10 }}>
                 <label className="campaignField">
-                  <span>Tytul notatki</span>
+                  <span>Tytuł notatki</span>
                   <input
                     value={noteForm.title}
                     maxLength={120}
@@ -195,7 +195,7 @@ export default function CampaignSessionsPanel({
                 Zamknij
               </button>
               <button className="initiativeBtn initiativeBtn--ghost" type="button" onClick={deleteMyNotes} disabled={noteSaving || noteLoading}>
-                Usuń notatke
+                Usuń notatkę
               </button>
               <button className="initiativeBtn initiativeBtn--primary" type="button" onClick={saveMyNotes} disabled={noteSaving || noteLoading}>
                 {noteSaving ? "Zapisywanie..." : "Zapisz"}

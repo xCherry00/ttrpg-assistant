@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { http } from "../api/http";
 import "../styles/glossary.css";
 
@@ -21,8 +21,8 @@ function detailExample(term) {
   const explicitExample = term?.example || term?.usageExample || term?.exampleUsage;
   if (explicitExample) return explicitExample;
 
-  const firstSentence = splitSentences(term?.definition)[0] || "wybrane pojecie jest uzywane podczas rozmowy przy stole";
-  return `Przy stole: "${term?.termPl || "Haslo"}" - ${firstSentence}`;
+  const firstSentence = splitSentences(term?.definition)[0] || "wybrane pojęcie jest używane podczas rozmowy przy stole";
+  return `Przy stole: "${term?.termPl || "Hasło"}" - ${firstSentence}`;
 }
 
 export default function GlossaryPage() {
@@ -46,7 +46,7 @@ export default function GlossaryPage() {
           setSelectedId(arr[0]?.id ?? null);
         }
       } catch (e) {
-        if (!cancelled) setError(e?.message || "Nie udalo sie pobrac slownika.");
+        if (!cancelled) setError(e?.message || "Nie udało się pobrać słownika.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -85,21 +85,21 @@ export default function GlossaryPage() {
     <div className="page glossaryPage">
       {loading && (
         <div className="glossaryState">
-          <strong>Ladowanie...</strong>
-          <span>Pobieram pojecia z bazy danych.</span>
+          <strong>Ładowanie...</strong>
+          <span>Pobieram pojęcia z bazy danych.</span>
         </div>
       )}
 
       {!loading && error && (
         <div className="glossaryState">
-          <strong>Blad ladowania</strong>
+          <strong>Błąd ładowania</strong>
           <span>{error}</span>
         </div>
       )}
 
       {!loading && !error && (
         <div className="glossarySplit">
-          <aside className="glossaryLeft" aria-label="Lista pojec">
+          <aside className="glossaryLeft" aria-label="Lista pojęć">
             <div className="glossarySearch">
               <svg className="glossarySearchIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <circle cx="11" cy="11" r="8" />
@@ -109,26 +109,26 @@ export default function GlossaryPage() {
                 className="glossarySearchInput"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Szukaj pojecia..."
-                aria-label="Szukaj pojecia"
+                placeholder="Szukaj pojęcia..."
+                aria-label="Szukaj pojęcia"
               />
               {query ? (
                 <button
                   className="glossarySearchClear"
                   onClick={() => setQuery("")}
                   type="button"
-                  aria-label="Wyczysc wyszukiwanie"
+                  aria-label="Wyczyść wyszukiwanie"
                 >
                   x
                 </button>
               ) : null}
             </div>
 
-            <div className="glossaryList" role="listbox" aria-label="Lista pojec">
+            <div className="glossaryList" role="listbox" aria-label="Lista pojęć">
               {filteredTerms.length === 0 ? (
                 <div className="glossaryEmpty">
-                  <strong>Brak wynikow</strong>
-                  <span>Zmien fraze wyszukiwania.</span>
+                  <strong>Brak wyników</strong>
+                  <span>Zmień frazę wyszukiwania.</span>
                 </div>
               ) : filteredTerms.map((term) => {
                 const active = term.id === (selected?.id ?? null);
@@ -149,11 +149,11 @@ export default function GlossaryPage() {
             </div>
           </aside>
 
-          <section className="glossaryRight" aria-label="Tresci hasla">
+          <section className="glossaryRight" aria-label="Treść hasła">
             {!selected ? (
               <div className="glossaryState">
-                <strong>Wybierz pojecie</strong>
-                <span>Kliknij haslo na liscie po lewej.</span>
+                <strong>Wybierz pojęcie</strong>
+                <span>Kliknij hasło na liście po lewej.</span>
               </div>
             ) : (
               <article className="glossaryDetail">
@@ -167,7 +167,7 @@ export default function GlossaryPage() {
                 </section>
 
                 <section className="glossaryDetailSection">
-                  <h3>Przyklad uzycia</h3>
+                  <h3>Przykład użycia</h3>
                   <blockquote>{detailExample(selected)}</blockquote>
                 </section>
               </article>

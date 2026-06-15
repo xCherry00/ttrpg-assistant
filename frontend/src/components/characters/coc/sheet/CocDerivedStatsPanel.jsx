@@ -3,8 +3,8 @@ export default function CocDerivedStatsPanel({ derived }) {
     ["HP", derived?.hp],
     ["MP", derived?.mp],
     ["SAN", derived?.san],
-    ["Szczescie", derived?.luck],
-    ["Premia do obrazen", derived?.damageBonus],
+    ["Szczęście", derived?.luck],
+    ["Premia do obrażeń", derived?.damageBonus],
     ["Build", derived?.build],
     ["Move", derived?.move],
   ];

@@ -350,7 +350,7 @@ function SceneFormFields({ draft, setDraft }) {
   return (
     <div className="liveSessionSceneForm">
       <label className="campaignField">
-        <span>Tytul sceny</span>
+        <span>Tytuł sceny</span>
         <input
           value={draft.title}
           onChange={(event) => update("title", event.target.value)}

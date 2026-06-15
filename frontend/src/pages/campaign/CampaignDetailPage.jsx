@@ -117,7 +117,7 @@ function MemberAvatar({ member, className = "cdMemberAvatar" }) {
 
 function CharacterPortrait({ character }) {
   const portrait = character?.portraitUrl || "";
-  const name = character?.characterName || "Postac";
+  const name = character?.characterName || "Postać";
   return (
     <div className={`cdCharacterPortrait${portrait ? " has-image" : ""}`}>
       {portrait ? <img src={portrait} alt={`Portret postaci ${name}`} /> : name.slice(0, 1)}
@@ -463,7 +463,7 @@ function CampaignAdminHeader({ campaign, campaignId, activeSession, upcomingSess
     <header className="cdAdminHero">
       <div className={`cdAdminHero__main${campaignBannerUrl(campaign) ? " has-banner" : ""}`} style={coverStyle(campaignBannerUrl(campaign))}>
         {isOwner ? (
-          <button type="button" className="cdAdminCover cdAdminCoverButton" style={coverStyle(imageOrPlaceholder(campaign.coverImageUrl, "campaignIcons"))} onClick={onEditIcon} aria-label="Zmien ikone kampanii" />
+          <button type="button" className="cdAdminCover cdAdminCoverButton" style={coverStyle(imageOrPlaceholder(campaign.coverImageUrl, "campaignIcons"))} onClick={onEditIcon} aria-label="Zmień ikonę kampanii" />
         ) : (
           <div className="cdAdminCover" style={coverStyle(imageOrPlaceholder(campaign.coverImageUrl, "campaignIcons"))} aria-hidden="true" />
         )}
@@ -494,11 +494,11 @@ function CampaignAdminHeader({ campaign, campaignId, activeSession, upcomingSess
             </button>
           )}
           {isOwner ? <button type="button" className="cdAdminPrimaryBtn" onClick={onEditCampaign}><CampaignAdminIcon name="edit" />Edytuj kampanię</button> : null}
-          {isOwner ? <button type="button" className="cdAdminBannerButton cdAdminBannerButton--inline" onClick={onEditBanner}><CampaignAdminIcon name="image" />Zmien baner</button> : null}
+          {isOwner ? <button type="button" className="cdAdminBannerButton cdAdminBannerButton--inline" onClick={onEditBanner}><CampaignAdminIcon name="image" />Zmień baner</button> : null}
         </div>
         {isOwner ? (
           <button type="button" className="cdAdminBannerButton" onClick={onEditBanner}>
-            <CampaignAdminIcon name="image" /> Zmien baner
+            <CampaignAdminIcon name="image" /> Zmień baner
           </button>
         ) : null}
       </div>
@@ -510,7 +510,7 @@ function CampaignMediaModal({ campaign, mode, busy, onClose, onSave }) {
   const isBanner = mode === "banner";
   const [value, setValue] = useState(isBanner ? campaign.bannerImageUrl || "" : campaign.coverImageUrl || "");
   const type = isBanner ? "campaignBanners" : "campaignIcons";
-  const title = isBanner ? "Zmien baner kampanii" : "Zmien ikone kampanii";
+  const title = isBanner ? "Zmień baner kampanii" : "Zmień ikonę kampanii";
   const preview = isBanner ? value || campaign.coverImageUrl || imagePlaceholder("campaignBanners") : imageOrPlaceholder(value, "campaignIcons");
 
   async function submit(event) {
@@ -526,7 +526,7 @@ function CampaignMediaModal({ campaign, mode, busy, onClose, onSave }) {
         </button>
         <h2 id="cdMediaTitle">{title}</h2>
         <form className="cdEditForm" onSubmit={submit}>
-          <div className={isBanner ? "cdEditBannerPreview" : "cdEditCoverPreview"} style={coverStyle(preview)} aria-label="Podglad wybranej grafiki" />
+          <div className={isBanner ? "cdEditBannerPreview" : "cdEditCoverPreview"} style={coverStyle(preview)} aria-label="Podgląd wybranej grafiki" />
           <ImageLibraryPicker
             type={type}
             label={isBanner ? "Baner kampanii" : "Ikona kampanii"}
@@ -534,12 +534,12 @@ function CampaignMediaModal({ campaign, mode, busy, onClose, onSave }) {
             onChange={setValue}
             onRemove={() => setValue("")}
             previewAlt={isBanner ? "Baner kampanii" : "Ikona kampanii"}
-            helpText={isBanner ? "Wybierz gotowy baner z biblioteki." : "Wybierz gotowa ikone kampanii z biblioteki."}
+            helpText={isBanner ? "Wybierz gotowy baner z biblioteki." : "Wybierz gotową ikonę kampanii z biblioteki."}
             disabled={busy}
           />
           <div className="cdEditActions">
             <button type="button" className="cdAdminSecondaryBtn" disabled={busy} onClick={onClose}>Anuluj</button>
-            <button type="submit" className="cdAdminPrimaryBtn" disabled={busy}>Zapisz grafike</button>
+            <button type="submit" className="cdAdminPrimaryBtn" disabled={busy}>Zapisz grafikę</button>
           </div>
         </form>
       </section>
@@ -640,7 +640,7 @@ function CampaignEditModal({ campaign, busy, onClose, onSave }) {
                 onChange={(url) => setForm((prev) => ({ ...prev, coverImageUrl: url }))}
                 onRemove={() => setForm((prev) => ({ ...prev, coverImageUrl: "" }))}
                 previewAlt="Ikona kampanii"
-                helpText="Wybierz gotowa ikone kampanii z biblioteki."
+                helpText="Wybierz gotową ikonę kampanii z biblioteki."
                 disabled={busy}
               />
             </div>
@@ -1086,9 +1086,9 @@ function SettingsWorkspace({ campaign, busy, onUpdate, onLeave, onDelete }) {
       onConfirm: onLeave,
     },
     archive: {
-      title: "Zarchiwizowac kampanie?",
-      text: "Kampania zostanie ukryta na listach aktywnych kampanii, ale zachowa swoje dane i bedzie mozna ja przywrocic przez zmiane statusu.",
-      confirmLabel: "Archiwizuj kampanie",
+      title: "Zarchiwizować kampanię?",
+      text: "Kampania zostanie ukryta na listach aktywnych kampanii, ale zachowa swoje dane i będzie można ją przywrócić przez zmianę statusu.",
+      confirmLabel: "Archiwizuj kampanię",
       onConfirm: () => onUpdate?.(campaignUpdatePayload(campaign, { status: "archived" })),
     },
     delete: {
@@ -1122,7 +1122,7 @@ function SettingsWorkspace({ campaign, busy, onUpdate, onLeave, onDelete }) {
                 onChange={(url) => setForm((prev) => ({ ...prev, coverImageUrl: url }))}
                 onRemove={() => setForm((prev) => ({ ...prev, coverImageUrl: "" }))}
                 previewAlt="Ikona kampanii"
-                helpText="Wybierz gotowa ikone kampanii z biblioteki."
+                helpText="Wybierz gotową ikonę kampanii z biblioteki."
                 disabled={busy}
               />
             </div>
@@ -1143,7 +1143,7 @@ function SettingsWorkspace({ campaign, busy, onUpdate, onLeave, onDelete }) {
       <aside className="cdAdminSideStack">
         <article className="cdAdminCard cdDangerZone">
           <h2><CampaignAdminIcon name="warning" />Strefa ryzyka</h2>
-          <DangerAction title="Archiwizuj kampanie" text="Zarchiwizowane kampanie sa ukryte, ale mozna je przywrocic." action="Archiwizuj" disabled={busy} onClick={() => setConfirmAction("archive")} />
+          <DangerAction title="Archiwizuj kampanię" text="Zarchiwizowane kampanie są ukryte, ale można je przywrócić." action="Archiwizuj" disabled={busy} onClick={() => setConfirmAction("archive")} />
           <DangerAction title="Opuść kampanię" text="Opuść kampanię i usuń ją z listy swoich kampanii." action="Opuść" disabled={busy} onClick={() => setConfirmAction("leave")} />
           <DangerAction title="Archiwizuj kampanię" text="Zarchiwizowane kampanie są ukryte, ale można je przywrócić." action="Archiwizuj" />
           <DangerAction title="Usuń kampanię" text="Trwale usuń kampanię i wszystkie jej dane." action="Usuń" danger disabled={busy} onClick={() => setConfirmAction("delete")} />

@@ -4,11 +4,11 @@
   --settings-muted: var(--r-muted, #718078);
   --settings-line: var(--r-line, #d5dfd8);
   --settings-line-strong: var(--r-line-strong, #b9c8bf);
-  --settings-surface: #ffffff;
-  --settings-panel: #f7faf7;
+  --settings-surface: var(--r-surface-solid, #ffffff);
+  --settings-panel: var(--r-panel, #f7faf7);
   --settings-primary: var(--r-primary, #1f765f);
   --settings-primary-2: var(--r-primary-2, #155844);
-  --settings-primary-soft: rgba(31, 118, 95, 0.1);
+  --settings-primary-soft: var(--r-primary-soft, rgba(31, 118, 95, 0.1));
   --settings-danger: #b42318;
   --settings-danger-soft: rgba(180, 35, 24, 0.09);
   --settings-warning: #b88734;
@@ -182,14 +182,14 @@
   border-radius: 9px;
   padding: 0 13px;
   color: var(--settings-ink);
-  background: #ffffff;
+  background: var(--settings-surface);
   font: inherit;
   outline: none;
   transition: border-color 0.16s ease, box-shadow 0.16s ease;
 }
 
 .settingsInput::placeholder {
-  color: #8a9891;
+  color: var(--settings-muted);
 }
 
 .settingsInput:focus {
@@ -270,7 +270,7 @@
 .settingsBtnGhost {
   border-color: var(--settings-line);
   color: var(--settings-primary-2);
-  background: #ffffff;
+  background: var(--settings-surface);
 }
 
 .settingsBtnGhost:hover {
@@ -337,60 +337,6 @@
 
 .settingsWarningBox strong {
   color: var(--settings-danger);
-}
-
-.settingsChoiceGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px;
-}
-
-.settingsThemeCard {
-  position: relative;
-  min-height: 124px;
-  display: grid;
-  align-content: center;
-  justify-items: start;
-  gap: 10px;
-  border: 1px solid var(--settings-line);
-  border-radius: 12px;
-  padding: 22px;
-  color: var(--settings-soft);
-  background: #ffffff;
-  text-align: left;
-  cursor: pointer;
-}
-
-.settingsThemeCard strong {
-  color: var(--settings-ink);
-  font-size: 1.02rem;
-}
-
-.settingsThemeCard span {
-  color: var(--settings-muted);
-  font-size: 0.9rem;
-}
-
-.settingsThemeCard::after {
-  content: "";
-  position: absolute;
-  top: 22px;
-  right: 22px;
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--settings-line-strong);
-  border-radius: 50%;
-}
-
-.settingsThemeCard.is-active {
-  border-color: rgba(31, 118, 95, 0.58);
-  background: linear-gradient(135deg, rgba(31, 118, 95, 0.04), #ffffff);
-}
-
-.settingsThemeCard.is-active::after {
-  border-color: var(--settings-primary);
-  box-shadow: inset 0 0 0 4px #ffffff;
-  background: var(--settings-primary);
 }
 
 .settingsChatPreview {
@@ -481,8 +427,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .settingsFormGrid,
-  .settingsChoiceGrid {
+  .settingsFormGrid {
     grid-template-columns: 1fr;
   }
 

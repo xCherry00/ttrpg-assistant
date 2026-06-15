@@ -24,8 +24,8 @@ public class EventQuickGeneratorStrategy implements GeneratorStrategy {
     @Override
     public GeneratorStructuredResultResponse generate(GeneratorRequest request) {
         Map<String, Object> params = request == null || request.params() == null ? Map.of() : request.params();
-        String eventType = resolveEventType(stringParam(params, "eventType", "Losowy"));
-        String eventMood = resolveEventMood(stringParam(params, "eventMood", "Losowy"));
+        String eventType = resólveEventType(stringParam(params, "eventType", "Losowy"));
+        String eventMood = resólveEventMood(stringParam(params, "eventMood", "Losowy"));
 
         List<GeneratorOutputSection> sections = eventFor(eventType, eventMood);
 
@@ -34,14 +34,14 @@ public class EventQuickGeneratorStrategy implements GeneratorStrategy {
         );
     }
 
-    private String resolveEventType(String eventType) {
+    private String resólveEventType(String eventType) {
         if (!randomChoice(eventType)) {
             return eventType;
         }
         return pick(List.of("Miasto", "Las", "Pustynia", "Morze", "Nocna warta"));
     }
 
-    private String resolveEventMood(String eventMood) {
+    private String resólveEventMood(String eventMood) {
         if (!randomChoice(eventMood)) {
             return eventMood;
         }
@@ -52,24 +52,24 @@ public class EventQuickGeneratorStrategy implements GeneratorStrategy {
         String key = normalize(eventType);
         List<GeneratorOutputSection> base = switch (key) {
             case "miasto", "town", "city" -> withConsequence(
-                    "Na targu wybucha klotnia miedzy cechem a straznikami o skonfiskowany towar.",
-                    "Handel staje, a jedna strona szuka swiadkow na swoja wersje wydarzen."
+                    "Na targu wybucha kłótnia między cechem a strażnikami o skonfiskowany towar.",
+                    "Handel staje, a jedna strona szuka swiadkow na swoją wersje wydarzen."
             );
             case "las", "forest" -> withConsequence(
                     "Na szlaku pojawia sie porzucony woz z zaprzegiem, ale bez ludzi.",
                     "W poblizu krazy cos, co odstraszylo konie i porywaczy."
             );
             case "pustynia", "desert" -> withConsequence(
-                    "Burza piaskowa odslania kamienne wejscie do starej komory.",
-                    "Okno na eksploracje jest krotkie, nim wejscie znow zasypie."
+                    "Burza piaskowa odsłania kamienne wejście do starej komory.",
+                    "Okno na eksplorację jest krótkie, nim wejście znów zasypie."
             );
             case "morze", "sea" -> withConsequence(
                     "Na horyzoncie dryfuje statek z niepokojaco cichym pokladem.",
                     "Jesli go minac, okazja i trop przepadna."
             );
             case "nocna warta", "on watch", "watch" -> withConsequence(
-                    "W nocy ktos zostawia znak ostrzegawczy przy obozie.",
-                    "Rano okazuje sie, ze druzyna byla obserwowana od zmierzchu."
+                    "W nocy ktoś zostawia znak ostrzegawczy przy obozie.",
+                    "Rano okazuje sie, ze drużyna byla obserwowana od zmierzchu."
             );
             default -> withConsequence(
                     "W poblizu dzieje sie cos, co wciaga postacie w cudzy problem.",

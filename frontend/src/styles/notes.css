@@ -1,0 +1,342 @@
+.notesPage {
+  --notes-ink: #17231e;
+  --notes-soft: #5c6d65;
+  --notes-muted: #81918a;
+  --notes-line: #d8e5de;
+  --notes-primary: #1d8066;
+  --notes-primary-soft: #e7f5ef;
+  --notes-danger: #d83232;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 14px;
+  min-height: 0;
+  color: var(--notes-ink);
+}
+
+.notesToolbar {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.25fr) repeat(3, minmax(170px, 0.65fr)) auto;
+  align-items: end;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--notes-line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.notesToolbar label,
+.notesField {
+  display: grid;
+  gap: 7px;
+  color: var(--notes-soft);
+  font-weight: 850;
+}
+
+.notesToolbar span,
+.notesField span {
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.notesToolbar input,
+.notesToolbar select,
+.notesField input,
+.notesField select,
+.notesField textarea {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid var(--notes-line);
+  border-radius: 12px;
+  padding: 10px 13px;
+  color: var(--notes-ink);
+  background: #ffffff;
+  font-weight: 750;
+}
+
+.notesToolbar input:focus,
+.notesToolbar select:focus,
+.notesField input:focus,
+.notesField select:focus,
+.notesField textarea:focus {
+  border-color: var(--notes-primary);
+  box-shadow: 0 0 0 3px rgba(29, 128, 102, 0.12);
+}
+
+.notesListPanel {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  border: 1px solid var(--notes-line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.97);
+  overflow: hidden;
+}
+
+.notesPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--notes-line);
+}
+
+.notesPanelHeader h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.notesPanelHeader p {
+  margin: 3px 0 0;
+  color: var(--notes-soft);
+}
+
+.notesList {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  align-content: start;
+  gap: 12px;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.notesListItem {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  width: 100%;
+  min-height: 142px;
+  border: 1px solid var(--notes-line);
+  border-radius: 14px;
+  padding: 14px;
+  color: var(--notes-ink);
+  background: #ffffff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.notesListItem:focus-visible {
+  border-color: rgba(29, 128, 102, 0.48);
+  outline: 2px solid rgba(29, 128, 102, 0.18);
+  outline-offset: 2px;
+}
+
+.notesListItem__type {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 4px 9px;
+  color: var(--notes-primary);
+  background: var(--notes-primary-soft);
+  font-size: 0.76rem;
+  font-weight: 950;
+}
+
+.notesListItem strong {
+  font-size: 1.05rem;
+}
+
+.notesListItem small,
+.notesListItem em {
+  color: var(--notes-soft);
+  font-style: normal;
+}
+
+.notesEmpty {
+  min-height: 340px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  margin: 16px;
+  border: 1px dashed rgba(139, 181, 166, 0.65);
+  border-radius: 16px;
+  color: var(--notes-soft);
+  text-align: center;
+}
+
+.notesEmpty strong {
+  color: var(--notes-ink);
+  font-size: 1.1rem;
+}
+
+.notesModalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2200;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: transparent;
+}
+
+.notesModal {
+  width: min(980px, calc(100vw - 48px));
+  height: min(760px, calc(100dvh - 48px));
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  border: 1px solid var(--notes-line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 28px 70px rgba(23, 35, 30, 0.22);
+  overflow: hidden;
+}
+
+.notesModalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid var(--notes-line);
+}
+
+.notesModalHeader h2 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.notesModalHeader p {
+  margin: 6px 0 0;
+  color: var(--notes-soft);
+}
+
+.notesModalClose {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--notes-line);
+  border-radius: 999px;
+  color: var(--notes-ink);
+  background: #ffffff;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.notesForm {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: 18px 24px;
+  overflow-y: auto;
+}
+
+.notesFormGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.notesField--content {
+  min-height: 0;
+}
+
+.notesField--content textarea {
+  min-height: 260px;
+  height: 100%;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.notesFormActions {
+  position: sticky;
+  bottom: -18px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: 0 -24px -18px;
+  padding: 14px 24px;
+  border-top: 1px solid var(--notes-line);
+  background: rgba(255, 255, 255, 0.97);
+}
+
+.notesPrimaryButton,
+.notesGhostButton,
+.notesDangerButton {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--notes-line);
+  border-radius: 11px;
+  padding: 10px 16px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.notesPrimaryButton {
+  border-color: var(--notes-primary);
+  color: #ffffff;
+  background: var(--notes-primary);
+  box-shadow: 0 16px 30px rgba(29, 128, 102, 0.18);
+}
+
+.notesToolbarAction {
+  align-self: end;
+  white-space: nowrap;
+}
+
+.notesGhostButton {
+  color: var(--notes-ink);
+  background: #ffffff;
+}
+
+.notesDangerButton {
+  border-color: rgba(216, 50, 50, 0.28);
+  color: var(--notes-danger);
+  background: #fff4f2;
+}
+
+.notesPrimaryButton:disabled,
+.notesGhostButton:disabled,
+.notesDangerButton:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1180px) {
+  .notesToolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .notesToolbarAction {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 700px) {
+  .notesPage {
+    gap: 12px;
+  }
+
+  .notesToolbar,
+  .notesFormGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .notesModalOverlay {
+    padding: 14px;
+  }
+
+  .notesModal {
+    width: calc(100vw - 28px);
+    height: calc(100dvh - 28px);
+  }
+
+  .notesModalHeader,
+  .notesFormActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .notesPrimaryButton,
+  .notesGhostButton,
+  .notesDangerButton {
+    width: 100%;
+  }
+}

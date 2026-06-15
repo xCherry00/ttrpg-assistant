@@ -5,9 +5,9 @@ export function formatHpText(currentHp, maxHp) {
 }
 
 export function formatParticipantStatus(participant) {
-  if (!participant?.isActive) return "INACTIVE";
-  if (participant?.isDefeated) return "DEFEATED";
-  return "ACTIVE";
+  if (!participant?.isActive) return "Nieaktywny";
+  if (participant?.isDefeated) return "Pokonany";
+  return "Aktywny";
 }
 
 export function formatRollSummary(roll) {

@@ -5,16 +5,16 @@ import "../styles/rules.css";
 
 const SECTION_DEFS = [
   { key: "overview", label: "Czym jest ten system?" },
-  { key: "core-test", label: "Podstawowa mechanika testow" },
+  { key: "core-test", label: "Podstawowa mechanika testów" },
   { key: "character-creation", label: "Tworzenie postaci w skrócie" },
-  { key: "combat", label: "Walka w skrocie" },
-  { key: "health", label: "Zdrowie i obrazenia" },
+  { key: "combat", label: "Walka w skrócie" },
+  { key: "health", label: "Zdrowie i obrażenia" },
   { key: "progression", label: "Rozwój postaci" },
   { key: "game-flow", label: "Minimalny flow gry" },
 ];
 
 function shortDescription(profile) {
-  return profile.sections?.overview || profile.legalNote || "Krotki opis systemu RPG i jego podstawowego stylu gry.";
+  return profile.sections?.overview || profile.legalNote || "Krótki opis systemu RPG i jego podstawowego stylu gry.";
 }
 
 function legalResources(profile, starterResources) {
@@ -87,7 +87,7 @@ export default function RulesPage() {
   return (
     <div className="page rulesPage">
       <div className="rulesContainer">
-        <aside className="rulesSystemFilter" aria-label="Lista systemow">
+        <aside className="rulesSystemFilter" aria-label="Lista systemów">
           <div className="rulesSearchBox">
             <svg className="rulesSearchIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <circle cx="11" cy="11" r="8" />
@@ -101,7 +101,7 @@ export default function RulesPage() {
               aria-label="Szukaj systemu"
             />
             {query ? (
-              <button className="rulesSearchClear" type="button" onClick={() => setQuery("")} aria-label="Wyczysc wyszukiwanie">
+              <button className="rulesSearchClear" type="button" onClick={() => setQuery("")} aria-label="Wyczyść wyszukiwanie">
                 x
               </button>
             ) : null}
@@ -109,7 +109,7 @@ export default function RulesPage() {
 
           <div className="rulesSystemList" role="listbox" aria-label="Systemy RPG">
             {filteredSystems.length === 0 ? (
-              <div className="rulesEmpty">Brak systemow dla tej frazy.</div>
+              <div className="rulesEmpty">Brak systemów dla tej frazy.</div>
             ) : filteredSystems.map((system) => {
               const active = selectedSystem === system.rulesApiCode;
               return (
@@ -159,10 +159,10 @@ export default function RulesPage() {
               })}
             </section>
 
-            <section className="rulesLegalBox" aria-label="Legalne zrodla">
-              <h3>Legalne zrodla</h3>
+            <section className="rulesLegalBox" aria-label="Legalne źródła">
+              <h3>Legalne źródła</h3>
               {resources.length === 0 ? (
-                <p>Brak zdefiniowanych zrodel dla tego systemu.</p>
+                <p>Brak zdefiniowanych źródeł dla tego systemu.</p>
               ) : (
                 <ul>
                   {resources.map((resource) => (

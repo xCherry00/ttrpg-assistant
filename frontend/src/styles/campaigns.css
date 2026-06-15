@@ -45,6 +45,13 @@
   height: 18px;
 }
 
+.campaignIconAsset {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
 .campaignsSaas button,
 .campaignsSaas input,
 .campaignsSaas select,
@@ -1964,20 +1971,21 @@
 
 /* Compact create-campaign modal so desktop users can see the whole form at once. */
 .campaignModalBack:has(.campaignCreateForm) {
-  place-items: start center;
-  padding: 18px 18px 22px;
+  place-items: center;
+  padding: 28px 18px;
 }
 
 .campaignModal:has(.campaignCreateForm) {
-  width: min(1040px, calc(100vw - 36px));
-  max-height: calc(100vh - 40px);
+  width: min(900px, calc(100vw - 36px));
+  height: min(760px, calc(100dvh - 56px));
+  max-height: calc(100dvh - 56px);
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   overflow: hidden;
 }
 
 .campaignModal:has(.campaignCreateForm) .campaignModal__head {
-  padding: 22px 32px 12px;
+  padding: 20px 28px 12px;
 }
 
 .campaignModal:has(.campaignCreateForm) .campaignModal__head h2 {
@@ -1985,17 +1993,68 @@
 }
 
 .campaignCreateForm {
+  min-height: 0;
   max-height: none !important;
-  overflow: visible !important;
+  overflow: auto !important;
   display: grid;
-  grid-template-columns: minmax(280px, 0.75fr) minmax(0, 1fr);
-  gap: 20px;
+  grid-template-columns: minmax(260px, 0.72fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 18px;
   margin: 0 !important;
-  padding: 16px 32px 18px;
+  padding: 16px 28px 18px;
+}
+
+.campaignCreateForm::-webkit-scrollbar,
+.campaignCreateImagePicker .imageLibraryPicker__grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.campaignCreateForm::-webkit-scrollbar-thumb,
+.campaignCreateImagePicker .imageLibraryPicker__grid::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: rgba(31, 118, 95, 0.28);
+  background-clip: padding-box;
 }
 
 .campaignCoverInput {
-  gap: 8px !important;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr !important;
+  gap: 12px !important;
+  align-items: start;
+}
+
+.campaignCreateImagePicker {
+  min-height: 0;
+}
+
+.campaignCreateImagePicker .imageLibraryPicker__head {
+  min-height: auto;
+}
+
+.campaignCreateImagePicker .imageLibraryPicker__preview {
+  min-height: 62px;
+  padding: 8px;
+}
+
+.campaignCreateImagePicker .imageLibraryPicker__preview img {
+  width: 72px;
+  height: 46px;
+}
+
+.campaignCreateImagePicker .imageLibraryPicker__grid {
+  max-height: 170px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.campaignCreateImagePicker .imageLibraryPicker__grid button {
+  min-height: 84px;
+}
+
+.campaignCreateImagePicker .imageLibraryPicker__grid img {
+  height: 54px;
 }
 
 .campaignCreateFields {
@@ -2014,8 +2073,8 @@
 }
 
 .campaignCreateFields textarea {
-  min-height: 104px !important;
-  resize: none;
+  min-height: 118px !important;
+  resize: vertical;
 }
 
 .campaignCreateFields .campaignVisibilityOption {
@@ -2071,30 +2130,27 @@
   padding: 8px 11px !important;
 }
 
-.campaignModal__actions {
+.campaignModal:has(.campaignCreateForm) .campaignModal__actions {
+  position: sticky;
+  bottom: -18px;
   align-self: end;
-  margin: 0 !important;
-  padding: 10px 0 0 !important;
+  margin: 0 -28px -18px !important;
+  padding: 12px 28px !important;
+  border-top: 1px solid var(--r-line);
+  background: rgba(255, 255, 255, 0.98);
 }
 
 @media (min-width: 900px) {
   .campaignModal:has(.campaignCreateForm) {
-    width: min(1040px, calc(100vw - 330px));
-  }
-
-  .campaignCoverInput {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
-  }
-
-  .campaignCoverInput > label {
-    grid-row: 2;
+    width: min(900px, calc(100vw - 240px));
   }
 }
 
 @media (max-width: 900px) {
   .campaignModal:has(.campaignCreateForm) {
-    max-height: calc(100vh - 28px);
+    width: calc(100vw - 28px);
+    height: calc(100dvh - 28px);
+    max-height: calc(100dvh - 28px);
   }
 
   .campaignCreateForm {

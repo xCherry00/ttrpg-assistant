@@ -15,12 +15,12 @@ export default function SkillsTable({ skills }) {
   const rows = normalizeSkills(skills);
   return (
     <section className="sheetSection">
-      <h3>Umiejetnosci</h3>
-      {rows.length === 0 && <div className="sheetEmpty">Brak danych umiejetnosci.</div>}
+      <h3>Umiejętności</h3>
+      {rows.length === 0 && <div className="sheetEmpty">Brak danych umiejętności.</div>}
       {rows.length > 0 && (
         <table className="sheetTable">
           <thead>
-            <tr><th>Umiejetnosc</th><th>Wartosc</th></tr>
+            <tr><th>Umiejętność</th><th>Wartość</th></tr>
           </thead>
           <tbody>
             {rows.map((row, index) => (

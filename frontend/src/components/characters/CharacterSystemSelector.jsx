@@ -3,7 +3,7 @@ export const CHARACTER_SYSTEMS = [
     code: "dnd5e",
     name: "D&D 5e",
     status: "ready",
-    description: "Szybki kreator postaci poziomu 1 z karta startowa.",
+    description: "Szybki kreator postaci poziomu 1 z kartą startową.",
     enabled: true,
   },
   {
@@ -17,7 +17,7 @@ export const CHARACTER_SYSTEMS = [
 
 function statusLabel(status) {
   if (status === "ready") return "Gotowe";
-  return "Wkrotce";
+  return "Wkrótce";
 }
 
 export default function CharacterSystemSelector({ systems = CHARACTER_SYSTEMS, onSelect }) {
