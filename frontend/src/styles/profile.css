@@ -1357,6 +1357,22 @@
   resize: vertical;
 }
 
+.profileEditForm label.is-invalid input,
+.profileEditForm label.is-invalid select,
+.profileEditForm label.is-invalid textarea,
+.profileEditForm input[aria-invalid="true"],
+.profileEditForm textarea[aria-invalid="true"] {
+  border-color: rgba(180, 35, 24, 0.68) !important;
+  box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.1);
+}
+
+.profileFieldError {
+  color: var(--profile-danger);
+  font-size: 0.8rem;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
 .profileFormActions {
   grid-column: 1 / -1;
   justify-content: flex-end;

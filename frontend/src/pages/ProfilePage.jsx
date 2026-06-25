@@ -186,6 +186,7 @@ export default function ProfilePage() {
   const [displayNameInput, setDisplayNameInput] = useState("");
   const [nameSaving, setNameSaving] = useState(false);
   const [nameError, setNameError] = useState("");
+  const [profileFieldErrors, setProfileFieldErrors] = useState({});
   const [nameSuccess, setNameSuccess] = useState("");
   const [avatarSrc, setAvatarSrc] = useState("");
   const [bannerSrc, setBannerSrc] = useState("");
@@ -202,6 +203,7 @@ export default function ProfilePage() {
     if (nameSaving && !force) return;
     setIsEditModalOpen(false);
     setNameError("");
+    setProfileFieldErrors({});
     setAvatarError("");
   }, [nameSaving]);
 
@@ -388,6 +390,7 @@ export default function ProfilePage() {
 
   function openEditModal() {
     setNameError("");
+    setProfileFieldErrors({});
     setNameSuccess("");
     setAvatarError("");
     setDisplayNameInput(displayName);
@@ -440,21 +443,24 @@ export default function ProfilePage() {
   async function handleSaveProfile(event) {
     event.preventDefault();
     setNameError("");
+    setProfileFieldErrors({});
     setNameSuccess("");
     setAvatarError("");
 
     const trimmed = displayNameInput.trim();
     const trimmedBio = (modalDraft.bio || "").trim();
+    const nextErrors = {};
     if (!trimmed) {
-      setNameError("Nazwa publiczna nie może być pusta.");
-      return;
+      nextErrors.displayName = "Nazwa publiczna nie może być pusta.";
     }
     if (trimmed.length > 120) {
-      setNameError("Nazwa publiczna może mieć maksymalnie 120 znaków.");
-      return;
+      nextErrors.displayName = "Nazwa publiczna może mieć maksymalnie 120 znaków.";
     }
     if (trimmedBio.length > 300) {
-      setNameError("Opis może mieć maksymalnie 300 znaków.");
+      nextErrors.bio = "Opis może mieć maksymalnie 300 znaków.";
+    }
+    if (Object.keys(nextErrors).length > 0) {
+      setProfileFieldErrors(nextErrors);
       return;
     }
 
@@ -675,19 +681,44 @@ export default function ProfilePage() {
                 <section className="profileModalSection">
                   <h3>Dane publiczne</h3>
                   <div className="profileEditForm">
-                    <label>
+                    <label className={profileFieldErrors.displayName ? "is-invalid" : ""}>
                       <span>Nazwa publiczna</span>
-                      <input value={displayNameInput} onChange={(event) => setDisplayNameInput(event.target.value)} maxLength={120} placeholder="Nazwa wyświetlana" />
+                      <input
+                        value={displayNameInput}
+                        onChange={(event) => {
+                          setDisplayNameInput(event.target.value);
+                          setProfileFieldErrors((current) => ({ ...current, displayName: "" }));
+                        }}
+                        maxLength={120}
+                        placeholder="Nazwa wyświetlana"
+                        aria-invalid={profileFieldErrors.displayName ? "true" : "false"}
+                        aria-describedby={profileFieldErrors.displayName ? "profile-display-name-error" : undefined}
+                      />
+                      {profileFieldErrors.displayName ? (
+                        <small id="profile-display-name-error" className="profileFieldError" role="alert">
+                          {profileFieldErrors.displayName}
+                        </small>
+                      ) : null}
                     </label>
-                    <label>
+                    <label className={profileFieldErrors.bio ? "is-invalid" : ""}>
                       <span>Opis / bio</span>
                       <textarea
                         value={modalDraft.bio}
-                        onChange={(event) => setModalDraft((draft) => ({ ...draft, bio: event.target.value.slice(0, 300) }))}
+                        onChange={(event) => {
+                          setModalDraft((draft) => ({ ...draft, bio: event.target.value.slice(0, 300) }));
+                          setProfileFieldErrors((current) => ({ ...current, bio: "" }));
+                        }}
                         maxLength={300}
                         placeholder="Napisz kilka zdań o swoim stylu gry, postaciach albo kampaniach."
+                        aria-invalid={profileFieldErrors.bio ? "true" : "false"}
+                        aria-describedby={profileFieldErrors.bio ? "profile-bio-error" : undefined}
                       />
                       <small>{(modalDraft.bio || "").length}/300</small>
+                      {profileFieldErrors.bio ? (
+                        <small id="profile-bio-error" className="profileFieldError" role="alert">
+                          {profileFieldErrors.bio}
+                        </small>
+                      ) : null}
                     </label>
                     <label>
                       <span>Ulubiony system</span>

@@ -89,12 +89,12 @@ describe("CharactersPage", () => {
   it("creates D&D character and CoC character", async () => {
     renderPage("/characters");
 
-    fireEvent.click((await screen.findAllByRole("button", { name: /\+ Nowa postać/i }))[0]);
+    fireEvent.click((await screen.findAllByRole("button", { name: /Nowa postać/i }))[0]);
     fireEvent.click(screen.getByRole("button", { name: "wybierz-dnd" }));
     fireEvent.click(screen.getByRole("button", { name: "submit-dnd" }));
     await waitFor(() => expect(charactersApi.quickCreateCharacter).toHaveBeenCalled());
 
-    fireEvent.click((await screen.findAllByRole("button", { name: /\+ Nowa postać/i }))[0]);
+    fireEvent.click((await screen.findAllByRole("button", { name: /Nowa postać/i }))[0]);
     fireEvent.click(await screen.findByRole("button", { name: "wybierz-coc" }));
     fireEvent.click(screen.getByRole("button", { name: "submit-coc" }));
     await waitFor(() => expect(charactersApi.quickCreateCocCharacter).toHaveBeenCalled());

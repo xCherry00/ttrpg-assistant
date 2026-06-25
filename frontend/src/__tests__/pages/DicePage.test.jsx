@@ -1,7 +1,12 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, vi } from "vitest";
 import DicePage from "../../pages/DicePage";
 
 describe("DicePage", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("renders standard roll type controls", () => {
     render(<DicePage />);
 
@@ -52,5 +57,23 @@ describe("DicePage", () => {
     expect(finalValue).toBeTruthy();
     expect(finalValue.textContent).not.toBe("-");
     expect(screen.queryByText(/Historia rzut/i)).not.toBeInTheDocument();
+  });
+
+  it("locks advantage to two d20 and chooses the higher die instead of summing", () => {
+    const randomSpy = vi.spyOn(Math, "random");
+    randomSpy.mockReturnValueOnce(0.95).mockReturnValueOnce(0.45);
+    const { container } = render(<DicePage />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Advantage" }));
+
+    const numberInputs = container.querySelectorAll('input[type="number"]');
+    expect(numberInputs[5]).toHaveValue(2);
+    expect(numberInputs[0]).toBeDisabled();
+    expect(numberInputs[5]).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: /Rzu/i }));
+
+    expect(container.querySelector(".diceBigNumber")).toHaveTextContent("20");
+    expect(container.querySelector(".diceBreakdown")).toHaveTextContent("odrzucono 10");
   });
 });

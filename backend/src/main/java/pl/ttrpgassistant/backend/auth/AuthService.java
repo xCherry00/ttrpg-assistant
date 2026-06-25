@@ -35,6 +35,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final PasswordResetMailService passwordResetMailService;
 
     @Value("${app.auth.reset-token-ttl-minutes:60}")
     private long resetTokenTtlMinutes;
@@ -109,6 +110,7 @@ public class AuthService {
                     .createdAt(Instant.now())
                     .build();
             passwordResetTokenRepository.save(resetToken);
+            passwordResetMailService.sendResetToken(normalizedEmail, rawToken);
             log.info("Password reset token generated for userId={}", user.getId());
         }
 

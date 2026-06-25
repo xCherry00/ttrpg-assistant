@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import PublicTopbar from "../components/PublicTopbar";
 import { IMAGE_LIBRARY } from "../data/imageLibrary";
 import "../styles/home.css";
 
@@ -18,47 +19,12 @@ const MODULES = [
   { label: "Notatki", value: "Sesje, NPC, tropy" },
 ];
 
-function BrandMark() {
-  return (
-    <span className="homeLogoMark" aria-hidden="true">
-      <span />
-    </span>
-  );
-}
-
 function ArrowIcon() {
   return (
     <svg className="homeArrowIcon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
       <path d="M4 10h11" />
       <path d="m11 5 5 5-5 5" />
     </svg>
-  );
-}
-
-function Navbar({ primaryTarget, primaryLabel, isLoggedIn }) {
-  return (
-    <header className="homeNavbar" aria-label="Główna nawigacja">
-      <Link to="/" className="homeBrand" aria-label="TTRPG Assistant - strona główna">
-        <BrandMark />
-        <span>
-          <strong>TTRPG</strong> Assistant
-        </span>
-      </Link>
-
-      <nav className="homeNavbarActions" aria-label="Akcje konta">
-        <Link to="/legal" className="homeTextLink">
-          Licencje i źródła
-        </Link>
-        {!isLoggedIn && (
-          <Link to="/login" className="homeTextLink">
-            Zaloguj się
-          </Link>
-        )}
-        <Link to={primaryTarget} className="homeButton homeButton--small">
-          {primaryLabel}
-        </Link>
-      </nav>
-    </header>
   );
 }
 
@@ -103,7 +69,7 @@ export default function HomePage() {
   return (
     <div className="homePage">
       <div className="homeShell">
-        <Navbar primaryTarget={primaryTarget} primaryLabel={primaryLabel} isLoggedIn={isLoggedIn} />
+        <PublicTopbar />
 
         <main className="homeOneScreen">
           <section className="homeHeroCopy" aria-labelledby="homeHeroTitle">

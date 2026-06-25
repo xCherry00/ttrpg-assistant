@@ -52,6 +52,7 @@ export default function NotesPage() {
   const [editingNote, setEditingNote] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [formErrors, setFormErrors] = useState({});
   const [filters, setFilters] = useState({
     search: "",
     type: "ALL",
@@ -84,6 +85,12 @@ export default function NotesPage() {
 
   function updateForm(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
+    setFormErrors((current) => {
+      if (!current[field]) return current;
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
   }
 
   function updateFilter(field, value) {
@@ -93,6 +100,8 @@ export default function NotesPage() {
   function openCreateModal() {
     setEditingNote(null);
     setForm(EMPTY_FORM);
+    setFormErrors({});
+    setError("");
     setModalOpen(true);
   }
 
@@ -105,6 +114,8 @@ export default function NotesPage() {
       characterId: note.characterId ? String(note.characterId) : "",
       content: note.content || "",
     });
+    setFormErrors({});
+    setError("");
     setModalOpen(true);
   }
 
@@ -113,6 +124,8 @@ export default function NotesPage() {
     setModalOpen(false);
     setEditingNote(null);
     setForm(EMPTY_FORM);
+    setFormErrors({});
+    setError("");
   }
 
   async function handleSubmit(event) {
@@ -126,12 +139,14 @@ export default function NotesPage() {
     };
 
     if (!payload.title) {
-      setError("Podaj nazwę notatki.");
+      setFormErrors({ title: "Podaj nazwę notatki." });
+      setError("");
       return;
     }
 
     setSaving(true);
     setError("");
+    setFormErrors({});
     try {
       const saved = editingNote
         ? await updateNote(token, editingNote.id, payload)
@@ -143,6 +158,7 @@ export default function NotesPage() {
       setModalOpen(false);
       setEditingNote(null);
       setForm(EMPTY_FORM);
+      setFormErrors({});
     } catch (err) {
       setError(err?.message || "Nie udało się zapisać notatki.");
     } finally {
@@ -188,7 +204,7 @@ export default function NotesPage() {
 
   return (
     <div className="page notesPage">
-      <section className="notesToolbar panel-soft">
+      <section className="notesToolbar">
         <label className="notesSearch">
           <span>Szukaj</span>
           <input
@@ -225,7 +241,7 @@ export default function NotesPage() {
         </button>
       </section>
 
-      <section className="notesListPanel panel-soft">
+      <section className="notesListPanel">
         <div className="notesPanelHeader">
           <div>
             <h2>Lista notatek</h2>
@@ -267,6 +283,7 @@ export default function NotesPage() {
         <NoteModal
           form={form}
           editingNote={editingNote}
+          errors={formErrors}
           campaigns={campaigns}
           characters={characters}
           saving={saving}
@@ -282,7 +299,7 @@ export default function NotesPage() {
   );
 }
 
-function NoteModal({ form, editingNote, campaigns, characters, saving, onClose, onDelete, onSubmit, onUpdate }) {
+function NoteModal({ form, editingNote, errors = {}, campaigns, characters, saving, onClose, onDelete, onSubmit, onUpdate }) {
   return (
     <div className="notesModalOverlay" role="presentation" onMouseDown={onClose}>
       <section className="notesModal" role="dialog" aria-modal="true" aria-labelledby="notesModalTitle" onMouseDown={(event) => event.stopPropagation()}>
@@ -297,15 +314,22 @@ function NoteModal({ form, editingNote, campaigns, characters, saving, onClose, 
         </header>
 
         <form className="notesForm" onSubmit={onSubmit}>
-          <label className="notesField notesField--title">
+          <label className={`notesField notesField--title${errors.title ? " is-invalid" : ""}`}>
             <span>Nazwa notatki *</span>
             <input
               value={form.title}
               onChange={(event) => onUpdate("title", event.target.value)}
               maxLength={120}
               placeholder="Np. Tajemnica ruin pod miastem"
+              aria-invalid={errors.title ? "true" : "false"}
+              aria-describedby={errors.title ? "note-title-error" : undefined}
               autoFocus
             />
+            {errors.title ? (
+              <small id="note-title-error" className="notesFieldError" role="alert">
+                {errors.title}
+              </small>
+            ) : null}
           </label>
 
           <div className="notesFormGrid">

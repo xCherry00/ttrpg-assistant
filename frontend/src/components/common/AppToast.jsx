@@ -8,9 +8,13 @@ export default function AppToast({ message, type = "error", onClose }) {
       onClose?.();
     }
 
-    window.addEventListener("pointerdown", closeOnInteraction);
-    window.addEventListener("keydown", closeOnInteraction);
+    const attachTimer = window.setTimeout(() => {
+      window.addEventListener("pointerdown", closeOnInteraction);
+      window.addEventListener("keydown", closeOnInteraction);
+    }, 100);
+
     return () => {
+      window.clearTimeout(attachTimer);
       window.removeEventListener("pointerdown", closeOnInteraction);
       window.removeEventListener("keydown", closeOnInteraction);
     };

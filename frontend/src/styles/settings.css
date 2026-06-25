@@ -197,6 +197,20 @@
   box-shadow: 0 0 0 3px rgba(31, 118, 95, 0.14);
 }
 
+.settingsField.is-invalid .settingsInput,
+.settingsDangerPassword.is-invalid .settingsInput,
+.settingsInput[aria-invalid="true"] {
+  border-color: rgba(180, 35, 24, 0.68);
+  box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.1);
+}
+
+.settingsFieldError {
+  color: var(--settings-danger);
+  font-size: 0.8rem;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
 .settingsInput:disabled {
   color: var(--settings-muted);
   background: var(--settings-panel);
@@ -395,8 +409,14 @@
 }
 
 .chatColorCustomRow .settingsInput,
-.settingsDangerRow .settingsPasswordControl {
+.settingsDangerRow .settingsPasswordControl,
+.settingsDangerPassword {
   flex: 1;
+}
+
+.settingsDangerPassword {
+  display: grid;
+  gap: 8px;
 }
 
 @media (max-width: 1040px) {

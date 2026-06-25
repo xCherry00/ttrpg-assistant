@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import PublicTopbar from "../components/PublicTopbar";
 
 const SOURCES = [
   {
@@ -6,14 +6,16 @@ const SOURCES = [
     owner: "Wizards of the Coast LLC",
     license: "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     url: "https://www.dndbeyond.com/srd",
-    scope: "Bazowe dane D&D 5E/SRD: reguly referencyjne, potwory, czary, przedmioty, stany i mechaniki udostepnione w SRD.",
+    scope:
+      "Bazowe dane D&D 5E/SRD: reguły referencyjne, potwory, czary, przedmioty, stany i mechaniki udostępnione w SRD.",
   },
   {
     name: "5e-bits / D&D 5e API",
     owner: "5e-bits community",
-    license: "Projekt open-source; dane pochodza z SRD i sa udostepniane przez publiczne API.",
+    license: "Projekt open-source; dane pochodzą z SRD i są udostępniane przez publiczne API.",
     url: "https://www.dnd5eapi.co/",
-    scope: "Techniczne źródło API dla kompendium: listy i szczegóły encji takich jak monsters, spells, equipment, magic-items, conditions i skills.",
+    scope:
+      "Techniczne źródło API dla kompendium: listy i szczegóły encji takich jak monsters, spells, equipment, magic-items, conditions i skills.",
   },
 ];
 
@@ -23,12 +25,69 @@ const ATTRIBUTIONS = [
   "API data is requested from the public D&D 5e API / 5e-bits project. The application keeps source attribution visible so generated and displayed compendium data can be traced back to its legal source.",
 ];
 
+const LEGAL_PAGE_OVERRIDES = `
+.legalPage {
+  min-height: 100vh !important;
+  height: 100vh !important;
+  overflow: auto !important;
+  color: #1d2722 !important;
+  background:
+    linear-gradient(90deg, rgba(22, 33, 29, 0.035) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(22, 33, 29, 0.035) 1px, transparent 1px),
+    #f4faf7 !important;
+  background-size: 32px 32px, 32px 32px, auto !important;
+  padding: 18px 24px 56px !important;
+}
+.legalSectionLabel {
+  color: #1f765f !important;
+}
+.legalHero h1,
+.legalPanel h2,
+.legalSourceCard h2 {
+  color: #1d2722 !important;
+}
+.legalHero p,
+.legalPanel p,
+.legalAttributionList li {
+  color: #4e6058 !important;
+}
+.legalPanel,
+.legalSourceCard {
+  border: 1px solid rgba(31, 118, 95, 0.16) !important;
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.86) !important;
+  box-shadow: 0 16px 44px rgba(31, 39, 34, 0.1) !important;
+  backdrop-filter: none !important;
+}
+.legalPanel--intro {
+  border-color: rgba(31, 118, 95, 0.28) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(241, 248, 243, 0.92)) !important;
+}
+.legalSourceCard dt {
+  color: #65766e !important;
+}
+.legalSourceCard dd {
+  color: #25332d !important;
+}
+.legalSourceCard a {
+  color: #155844 !important;
+  font-weight: 800 !important;
+}
+.legalAttributionList li {
+  border: 1px solid rgba(31, 118, 95, 0.12) !important;
+  border-radius: 10px !important;
+  background: rgba(247, 250, 247, 0.9) !important;
+}
+`;
+
 export default function LegalPage() {
   return (
     <div className="legalPage">
+      <style>{LEGAL_PAGE_OVERRIDES}</style>
+      <div className="legalPublicNav">
+        <PublicTopbar />
+      </div>
       <header className="legalHero">
-        <Link to="/" className="legalBack">← Strona główna</Link>
-        <span className="legalEyebrow">TTRPG Assistant</span>
         <h1>Licencje i źródła danych</h1>
         <p>
           Ta strona opisuje, z jakich legalnych źródeł korzysta moduł kompendium
@@ -37,7 +96,7 @@ export default function LegalPage() {
       </header>
 
       <main className="legalMain">
-        <section className="legalPanel">
+        <section className="legalPanel legalPanel--intro">
           <div>
             <span className="legalSectionLabel">Zakres projektu</span>
             <h2>Projekt akademicki bez komercyjnego użycia</h2>
@@ -50,7 +109,7 @@ export default function LegalPage() {
           </p>
         </section>
 
-        <section className="legalGrid">
+        <section className="legalGrid" aria-label="Źródła danych">
           {SOURCES.map((source) => (
             <article key={source.name} className="legalSourceCard">
               <div>
@@ -91,24 +150,6 @@ export default function LegalPage() {
           </ul>
         </section>
 
-        <section className="legalPanel legalPanel--split">
-          <div>
-            <span className="legalSectionLabel">Czego nie zawieramy</span>
-            <h2>Granice bezpieczeństwa licencyjnego</h2>
-          </div>
-          <div className="legalColumns">
-            <p>
-              Kompendium nie powinno importować zamkniętych treści z podręczników,
-              settingów, przygód, grafik, opisów fabularnych ani nazw własnych,
-              które nie są częścią SRD albo osobno udostępnionej licencji.
-            </p>
-            <p>
-              Jeśli w przyszłości pojawi się nowe źródło danych, przed podłączeniem
-              powinno zostać dopisane tutaj razem z nazwą licencji, linkiem źródłowym
-              i zakresem użycia w aplikacji.
-            </p>
-          </div>
-        </section>
       </main>
     </div>
   );

@@ -106,6 +106,7 @@ export default function CampaignsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState("");
+  const [createFieldErrors, setCreateFieldErrors] = useState({});
   const [createForm, setCreateForm] = useState({ title: "", systemCode: "dnd5e", description: "", coverImageUrl: "", bannerImageUrl: "", visibility: "PRIVATE" });
 
   const [joinCode, setJoinCode] = useState("");
@@ -195,13 +196,25 @@ export default function CampaignsPage() {
 
   function openCreate() {
     setCreateError("");
+    setCreateFieldErrors({});
     setShowCreate(true);
   }
 
   function closeCreate() {
     setShowCreate(false);
     setCreateError("");
+    setCreateFieldErrors({});
     setCreateForm({ title: "", systemCode: "dnd5e", description: "", coverImageUrl: "", bannerImageUrl: "", visibility: "PRIVATE" });
+  }
+
+  function updateCreateForm(field, value) {
+    setCreateForm((prev) => ({ ...prev, [field]: value }));
+    setCreateFieldErrors((current) => {
+      if (!current[field]) return current;
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
   }
 
   function openJoinModal() {
@@ -221,11 +234,12 @@ export default function CampaignsPage() {
     setCreateError("");
     const title = createForm.title.trim();
     if (title.length < 3) {
-      setCreateError("Nazwa kampanii musi mieć minimum 3 znaki.");
+      setCreateFieldErrors({ title: "Nazwa kampanii musi mieć minimum 3 znaki." });
       return;
     }
 
     setCreateLoading(true);
+    setCreateFieldErrors({});
     try {
       const created = await createCampaign(token, {
         title,
@@ -252,6 +266,11 @@ export default function CampaignsPage() {
     const code = normalizeCode(codeOverride || joinCode);
     if (!code) {
       setJoinError("Dołączenie wymaga kodu zaproszenia.");
+      return;
+    }
+
+    if (!/^[A-Z0-9-]+$/.test(code)) {
+      setJoinError("Kod może zawierać tylko litery, cyfry i myślniki.");
       return;
     }
 
@@ -437,8 +456,8 @@ export default function CampaignsPage() {
                   type="campaignIcons"
                   label="Ikona kampanii"
                   value={createForm.coverImageUrl}
-                  onChange={(url) => setCreateForm((prev) => ({ ...prev, coverImageUrl: url }))}
-                  onRemove={() => setCreateForm((prev) => ({ ...prev, coverImageUrl: "" }))}
+                  onChange={(url) => updateCreateForm("coverImageUrl", url)}
+                  onRemove={() => updateCreateForm("coverImageUrl", "")}
                   previewAlt="Podgląd ikony kampanii"
                   helpText="Wybierz gotową ikonę kampanii z biblioteki."
                 />
@@ -447,33 +466,46 @@ export default function CampaignsPage() {
                   type="campaignBanners"
                   label="Baner kampanii"
                   value={createForm.bannerImageUrl}
-                  onChange={(url) => setCreateForm((prev) => ({ ...prev, bannerImageUrl: url }))}
-                  onRemove={() => setCreateForm((prev) => ({ ...prev, bannerImageUrl: "" }))}
+                  onChange={(url) => updateCreateForm("bannerImageUrl", url)}
+                  onRemove={() => updateCreateForm("bannerImageUrl", "")}
                   previewAlt="Podgląd banera"
                   helpText="Wybierz gotowy baner kampanii z biblioteki."
                 />
               </div>
 
               <div className="campaignCreateFields">
-                <label>
+                <label className={createFieldErrors.title ? "is-invalid" : ""}>
                   <span>Nazwa kampanii</span>
-                  <input value={createForm.title} onChange={(event) => setCreateForm((prev) => ({ ...prev, title: event.target.value }))} placeholder="np. Cienie nad Doliną Burz" maxLength={200} autoFocus />
+                  <input
+                    value={createForm.title}
+                    onChange={(event) => updateCreateForm("title", event.target.value)}
+                    placeholder="np. Cienie nad Doliną Burz"
+                    maxLength={200}
+                    aria-invalid={createFieldErrors.title ? "true" : "false"}
+                    aria-describedby={createFieldErrors.title ? "campaign-create-title-error" : undefined}
+                    autoFocus
+                  />
+                  {createFieldErrors.title ? (
+                    <small id="campaign-create-title-error" className="campaignFieldError" role="alert">
+                      {createFieldErrors.title}
+                    </small>
+                  ) : null}
                 </label>
                 <label>
                   <span>System RPG</span>
-                  <select value={createForm.systemCode} onChange={(event) => setCreateForm((prev) => ({ ...prev, systemCode: event.target.value }))}>
+                  <select value={createForm.systemCode} onChange={(event) => updateCreateForm("systemCode", event.target.value)}>
                     {SYSTEM_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
                   </select>
                 </label>
                 <label>
                   <span>Opis</span>
-                  <textarea value={createForm.description} onChange={(event) => setCreateForm((prev) => ({ ...prev, description: event.target.value }))} rows={5} maxLength={2000} placeholder="Krótki opis klimatu kampanii." />
+                  <textarea value={createForm.description} onChange={(event) => updateCreateForm("description", event.target.value)} rows={5} maxLength={2000} placeholder="Krótki opis klimatu kampanii." />
                 </label>
                 <label className="campaignVisibilityOption">
                   <input
                     type="checkbox"
                     checked={createForm.visibility === "PUBLIC"}
-                    onChange={(event) => setCreateForm((prev) => ({ ...prev, visibility: event.target.checked ? "PUBLIC" : "PRIVATE" }))}
+                    onChange={(event) => updateCreateForm("visibility", event.target.checked ? "PUBLIC" : "PRIVATE")}
                   />
                   <span>
                     <strong>Kampania publiczna</strong>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import {
   deleteCharacter,
@@ -28,6 +28,7 @@ const TABS = [
 ];
 
 const CHARACTER_DRAFT_STORAGE = "ttrpg_character_sheet_drafts_v1";
+const CHARACTER_NOTICE_STORAGE = "ttrpg_character_notice";
 
 function safeText(value, fallback = "-") {
   if (value === null || value === undefined) return fallback;
@@ -792,7 +793,7 @@ function CharacterLibraryView({
           <option value="system">Sortowanie: System</option>
         </select>
         <button type="button" className="charactersGhostBtn charactersToolbarBtn" onClick={onImport}><Icon name="upload" /> Importuj JSON</button>
-        <button type="button" className="charactersPrimaryBtn charactersToolbarBtn" onClick={onCreate}><Icon name="plus" /> + Nowa postać</button>
+        <button type="button" className="charactersPrimaryBtn charactersToolbarBtn" onClick={onCreate}><Icon name="plus" /> Nowa postać</button>
       </div>
 
       {creatorOpen && <NewCharacterModal {...creatorProps} campaignOptions={campaignOptions} />}
@@ -814,7 +815,7 @@ function CharacterLibraryView({
             <strong>Brak postaci</strong>
             <p>Utwórz pierwszą postać albo zaimportuj ją z pliku JSON.</p>
             <div className="charactersActionsFooter">
-              <button type="button" className="charactersPrimaryBtn" onClick={onCreate}><Icon name="plus" /> + Nowa postać</button>
+              <button type="button" className="charactersPrimaryBtn" onClick={onCreate}><Icon name="plus" /> Nowa postać</button>
               <button type="button" className="charactersGhostBtn" onClick={onImport}><Icon name="upload" /> Importuj JSON</button>
             </div>
           </div>
@@ -825,7 +826,7 @@ function CharacterLibraryView({
             <strong>Brak postaci</strong>
             <p>Utwórz pierwszą postać albo zaimportuj ją z pliku JSON.</p>
             <div className="charactersActionsFooter">
-              <button type="button" className="charactersPrimaryBtn" onClick={onCreate}><Icon name="plus" /> + Nowa postać</button>
+              <button type="button" className="charactersPrimaryBtn" onClick={onCreate}><Icon name="plus" /> Nowa postać</button>
               <button type="button" className="charactersGhostBtn" onClick={onImport}><Icon name="upload" /> Importuj JSON</button>
             </div>
           </div>
@@ -1377,7 +1378,13 @@ function CharacterSheetView({
               </button>
             </header>
             <div className="characterDeleteConfirmBody">
-              <p>Czy na pewno chcesz usunąć postać: <strong>{getCharacterName(detail)}</strong>?</p>
+              <span className="characterDeleteConfirmIcon" aria-hidden="true">
+                <Icon name="trash" />
+              </span>
+              <div>
+                <p>Czy na pewno chcesz usunąć postać <strong>{getCharacterName(detail)}</strong>?</p>
+                <small>Tej operacji nie można cofnąć. Karta postaci zniknie z Twojej listy.</small>
+              </div>
             </div>
             <footer className="charactersModalFooter characterDeleteConfirmFooter">
               <button type="button" className="charactersGhostBtn" disabled={deleting} onClick={() => setConfirmDeleteOpen(false)}>Anuluj</button>
@@ -1393,6 +1400,7 @@ function CharacterSheetView({
 export default function CharactersPage() {
   const { token } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { characterId: routeCharacterId } = useParams();
   const [searchParams] = useSearchParams();
   const [items, setItems] = useState([]);
@@ -1481,6 +1489,19 @@ export default function CharactersPage() {
     const timer = setTimeout(() => setNotice(null), 3500);
     return () => clearTimeout(timer);
   }, [notice]);
+
+  useEffect(() => {
+    const rawNotice = window.sessionStorage.getItem(CHARACTER_NOTICE_STORAGE);
+    if (!rawNotice) return;
+
+    window.sessionStorage.removeItem(CHARACTER_NOTICE_STORAGE);
+    try {
+      const routedNotice = JSON.parse(rawNotice);
+      if (routedNotice?.text) showNotice(routedNotice.type || "success", routedNotice.text);
+    } catch {
+      showNotice("success", rawNotice);
+    }
+  }, [location.pathname, showNotice]);
 
   async function onCreateCoc(payload) {
     setCreating(true);
@@ -1581,9 +1602,12 @@ export default function CharactersPage() {
       setDetail(null);
       setSelectedId(null);
       await loadList();
-      navigate("/characters");
       setConfirmDeleteOpen(false);
-      showNotice("success", "Postać usunięta.");
+      window.sessionStorage.setItem(
+        CHARACTER_NOTICE_STORAGE,
+        JSON.stringify({ type: "success", text: "Postać usunięta." }),
+      );
+      navigate("/characters");
     } catch (err) {
       const message = err?.message || "Nie udało się usunąć postaci.";
       setError(message);
@@ -1674,8 +1698,7 @@ export default function CharactersPage() {
         onChange={handleImportFile}
       />
 
-      {notice?.type === "error" && <AppToast message={notice.text} onClose={() => setNotice(null)} />}
-      {notice && notice.type !== "error" && <div className="charactersNotice">{notice.text}</div>}
+      {notice && <AppToast message={notice.text} type={notice.type} onClose={() => setNotice(null)} />}
       {error && <AppToast message={error} onClose={() => setError("")} />}
 
       {!isDetailRoute && (
@@ -1719,3 +1742,4 @@ export default function CharactersPage() {
     </div>
   );
 }
+

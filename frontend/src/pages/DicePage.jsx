@@ -25,6 +25,7 @@ const FATE_LADDER = {
 };
 
 const DEFAULT_STANDARD_POOL = Object.fromEntries(STANDARD_DICE.map((die) => [die, die === 20 ? 1 : 0]));
+const ADVANTAGE_STANDARD_POOL = Object.fromEntries(STANDARD_DICE.map((die) => [die, die === 20 ? 2 : 0]));
 
 const GENESYS_DICE = {
   ability: [{}, { success: 1 }, { success: 1 }, { advantage: 1 }, { advantage: 1 }, { success: 1, advantage: 1 }, { advantage: 2 }, { success: 2 }],
@@ -94,6 +95,10 @@ function modeLabel(mode) {
 
 function rollTypeLabel(rollType) {
   return ROLL_TYPES.find((item) => item.value === rollType)?.label || rollType;
+}
+
+function isD20ChoiceRoll(rollType) {
+  return rollType === "advantage" || rollType === "disadvantage";
 }
 
 function signed(value) {
@@ -220,24 +225,56 @@ export default function DicePage() {
 
   function rollStandard() {
     const modifier = clampInt(standard.modifier, -9999, 9999);
-    const dicePool = Object.fromEntries(STANDARD_DICE.map((die) => [die, clampInt(standard.dicePool?.[die] || 0, 0, 100)]));
+    const isAdv = isD20ChoiceRoll(standard.rollType);
+    const dicePool = isAdv
+      ? ADVANTAGE_STANDARD_POOL
+      : Object.fromEntries(STANDARD_DICE.map((die) => [die, clampInt(standard.dicePool?.[die] || 0, 0, 100)]));
     const poolEntries = standardDicePoolEntries(dicePool);
     if (!poolEntries.length) return;
-    const isAdv = standard.rollType === "advantage" || standard.rollType === "disadvantage";
+
+    if (isAdv) {
+      const rolls = [
+        { die: 20, value: rollDie(20) },
+        { die: 20, value: rollDie(20) },
+      ];
+      const selectedIndex = standard.rollType === "advantage"
+        ? (rolls[0].value >= rolls[1].value ? 0 : 1)
+        : (rolls[0].value <= rolls[1].value ? 0 : 1);
+      const droppedIndex = selectedIndex === 0 ? 1 : 0;
+      const diceTotal = rolls[selectedIndex].value;
+
+      completeRoll({
+        id: id(),
+        mode: "standard",
+        modeLabel: "Standard",
+        formula: formatStandardFormula(dicePool, modifier, standard.rollType),
+        dicePool,
+        rolls,
+        selectedRollIndex: selectedIndex,
+        droppedRolls: [rolls[droppedIndex]],
+        modifier,
+        rollType: standard.rollType,
+        selectedTotal: diceTotal,
+        droppedTotal: rolls[droppedIndex].value,
+        diceTotal,
+        total: diceTotal + modifier,
+        isCritical: diceTotal === 20,
+        isFumble: diceTotal === 1,
+        timestamp: nowLabel(),
+      });
+      return;
+    }
+
     const rollPool = () => poolEntries.flatMap(({ die, count }) => (
       Array.from({ length: count }, () => ({ die, value: rollDie(die) }))
     ));
-    const rollSets = isAdv ? [rollPool(), rollPool()] : [rollPool()];
+    const rollSets = [rollPool()];
     const setTotals = rollSets.map((set) => set.reduce((sum, item) => sum + item.value, 0));
-    const selectedIndex = isAdv
-      ? standard.rollType === "advantage"
-        ? (setTotals[0] >= setTotals[1] ? 0 : 1)
-        : (setTotals[0] <= setTotals[1] ? 0 : 1)
-      : 0;
-    const droppedIndex = isAdv ? (selectedIndex === 0 ? 1 : 0) : null;
+    const selectedIndex = 0;
+    const droppedIndex = null;
     const rolls = rollSets[selectedIndex];
     const droppedRolls = droppedIndex === null ? [] : rollSets[droppedIndex];
-    const selectedTotal = isAdv ? setTotals[selectedIndex] : null;
+    const selectedTotal = null;
     const droppedTotal = droppedIndex === null ? null : setTotals[droppedIndex];
     const diceTotal = setTotals[selectedIndex];
     const total = diceTotal + modifier;
@@ -369,6 +406,8 @@ function DiceCommandBar({ formula, mode, setMode, onRoll, onClear }) {
 }
 
 function StandardRollView({ config, roll }) {
+  const displayPool = isD20ChoiceRoll(config.rollType) ? ADVANTAGE_STANDARD_POOL : config.dicePool;
+
   return (
     <section className="diceCard diceResultPanel">
       <ResultHeader title="Wynik" subtitle="Standardowy rzut kośćmi" />
@@ -378,12 +417,12 @@ function StandardRollView({ config, roll }) {
       </div>
       <div className="diceDiceStage">
         {roll ? roll.rolls.map((item, index) => (
-          <StandardDie key={`${item.die}-${item.value}-${index}`} value={item.value} die={item.die} selected />
+          <StandardDie key={`${item.die}-${item.value}-${index}`} value={item.value} die={item.die} selected={!isD20ChoiceRoll(roll.rollType) || roll.selectedRollIndex === index} />
         )) : <div className="diceEmptyStage">Brak rzutu.</div>}
       </div>
       <SummaryGrid items={[
-        ["Pula kości", formatStandardDicePool(config.dicePool)],
-        ["Liczba kości", standardDicePoolEntries(config.dicePool).reduce((sum, item) => sum + item.count, 0)],
+        ["Pula kości", formatStandardDicePool(displayPool)],
+        ["Liczba kości", standardDicePoolEntries(displayPool).reduce((sum, item) => sum + item.count, 0)],
         ["Modyfikator", signed(config.modifier)],
         ["Typ rzutu", rollTypeLabel(config.rollType)],
       ]} />
@@ -482,6 +521,8 @@ function SummaryGrid({ items }) {
 }
 
 function DiceConfigPanel({ mode, setMode, standard, setStandard, fate, setFate, genesysPool, setGenesysPool }) {
+  const standardPoolLocked = isD20ChoiceRoll(standard.rollType);
+
   return (
     <section className="diceCard diceConfigPanel">
       <div className="diceSideHeader">
@@ -506,13 +547,23 @@ function DiceConfigPanel({ mode, setMode, standard, setStandard, fate, setFate, 
                   ...current,
                   dicePool: { ...current.dicePool, [die]: value },
                 }))}
+                disabled={standardPoolLocked}
               />
             ))}
           </div>
           <NumberStepper label="Modyfikator" value={standard.modifier} min={-9999} max={9999} onChange={(value) => setStandard((current) => ({ ...current, modifier: value }))} />
           <div className="diceRollTypeGrid">
             {ROLL_TYPES.map((item) => (
-              <button key={item.value} type="button" className={standard.rollType === item.value ? "is-active" : ""} onClick={() => setStandard((current) => ({ ...current, rollType: item.value }))}>
+              <button
+                key={item.value}
+                type="button"
+                className={standard.rollType === item.value ? "is-active" : ""}
+                onClick={() => setStandard((current) => ({
+                  ...current,
+                  rollType: item.value,
+                  dicePool: isD20ChoiceRoll(item.value) ? ADVANTAGE_STANDARD_POOL : current.dicePool,
+                }))}
+              >
                 {item.label}
               </button>
             ))}
@@ -536,25 +587,25 @@ function DiceConfigPanel({ mode, setMode, standard, setStandard, fate, setFate, 
   );
 }
 
-function StandardDieControl({ die, value, onChange }) {
+function StandardDieControl({ die, value, onChange, disabled = false }) {
   return (
     <div className="diceStandardDieControl">
       <span className="diceStandardDieBadge">k{die}</span>
       <strong>k{die}</strong>
-      <NumberStepper label="" ariaLabel={`k${die}`} value={value} min={0} max={100} onChange={onChange} />
+      <NumberStepper label="" ariaLabel={`k${die}`} value={value} min={0} max={100} onChange={onChange} disabled={disabled} />
     </div>
   );
 }
 
-function NumberStepper({ label, ariaLabel, value, min, max, onChange }) {
+function NumberStepper({ label, ariaLabel, value, min, max, onChange, disabled = false }) {
   const controlLabel = ariaLabel || label || "wartość";
   return (
     <div className="diceStepper">
       <span>{label}</span>
       <div>
-        <button type="button" aria-label={`Zmniejsz ${controlLabel}`} onClick={() => onChange(clampInt(value - 1, min, max))} disabled={value <= min}>-</button>
-        <input type="number" value={value} min={min} max={max} onChange={(event) => onChange(clampInt(event.target.value, min, max))} />
-        <button type="button" aria-label={`Zwiększ ${controlLabel}`} onClick={() => onChange(clampInt(value + 1, min, max))} disabled={value >= max}>+</button>
+        <button type="button" aria-label={`Zmniejsz ${controlLabel}`} onClick={() => onChange(clampInt(value - 1, min, max))} disabled={disabled || value <= min}>-</button>
+        <input type="number" value={value} min={min} max={max} onChange={(event) => onChange(clampInt(event.target.value, min, max))} disabled={disabled} />
+        <button type="button" aria-label={`Zwiększ ${controlLabel}`} onClick={() => onChange(clampInt(value + 1, min, max))} disabled={disabled || value >= max}>+</button>
       </div>
     </div>
   );

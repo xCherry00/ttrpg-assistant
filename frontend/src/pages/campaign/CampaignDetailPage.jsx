@@ -993,7 +993,6 @@ function PlayersWorkspace({ members, campaignCharacters, playerCount, playerLimi
       <article className="cdAdminCard">
         <div className="cdAdminRowBetween">
           <div><h2>Gracze kampanii <span className="cdCountPill">{playerCount} / {playerLimit}</span></h2><p className="cdAdminLead">{isOwner ? "Zarządzaj członkami kampanii, ich rolami i dostępem." : "Lista uczestników tej kampanii."}</p></div>
-          {isOwner ? <button type="button" className="cdAdminSecondaryBtn"><CampaignAdminIcon name="user-plus" />Zarządzaj rolami</button> : null}
         </div>
         {members.length === 0 ? (
           <EmptyState icon="users" title="Brak graczy" text={isOwner ? "Zaproś pierwszego gracza, aby rozpocząć zarządzanie drużyną." : "Lista graczy jest jeszcze pusta."} />

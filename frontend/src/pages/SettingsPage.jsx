@@ -92,16 +92,17 @@ function Icon({ name, size = 18 }) {
   return <svg {...common}>{paths[name] || paths.user}</svg>;
 }
 
-function Field({ label, children }) {
+function Field({ label, error, errorId, children }) {
   return (
-    <label className="settingsField">
+    <label className={`settingsField${error ? " is-invalid" : ""}`}>
       <span>{label}</span>
       {children}
+      {error ? <small id={errorId} className="settingsFieldError" role="alert">{error}</small> : null}
     </label>
   );
 }
 
-function PasswordInput({ value, onChange, placeholder, autoComplete }) {
+function PasswordInput({ value, onChange, placeholder, autoComplete, invalid, describedBy }) {
   const [visible, setVisible] = useState(false);
   return (
     <div className="settingsPasswordControl">
@@ -112,6 +113,8 @@ function PasswordInput({ value, onChange, placeholder, autoComplete }) {
         onChange={onChange}
         placeholder={placeholder}
         autoComplete={autoComplete}
+        aria-invalid={invalid ? "true" : "false"}
+        aria-describedby={describedBy}
       />
       <button type="button" onClick={() => setVisible((current) => !current)} aria-label={visible ? "Ukryj hasło" : "Pokaż hasło"}>
         <Icon name="eye" size={16} />
@@ -131,10 +134,13 @@ export default function SettingsPage() {
 
   const [loading, setLoading] = useState(true);
   const [emailError, setEmailError] = useState("");
+  const [emailFieldErrors, setEmailFieldErrors] = useState({});
   const [emailSuccess, setEmailSuccess] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [passwordFieldErrors, setPasswordFieldErrors] = useState({});
   const [passwordSuccess, setPasswordSuccess] = useState("");
   const [deleteError, setDeleteError] = useState("");
+  const [deleteFieldErrors, setDeleteFieldErrors] = useState({});
   const [miscSuccess, setMiscSuccess] = useState("");
 
   const [email, setEmail] = useState("");
@@ -171,17 +177,22 @@ export default function SettingsPage() {
   async function handleChangeEmail(e) {
     e.preventDefault();
     setEmailError("");
+    setEmailFieldErrors({});
     setEmailSuccess("");
+    const nextErrors = {};
     if (!newEmail.trim()) {
-      setEmailError("Podaj nowy email.");
-      return;
+      nextErrors.newEmail = "Podaj nowy email.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail.trim())) {
+      nextErrors.newEmail = "Podaj poprawny adres email.";
     }
     if (!emailPassword) {
-      setEmailError("Podaj obecne hasło.");
-      return;
+      nextErrors.emailPassword = "Podaj obecne hasło.";
     }
     if (newEmail.trim().toLowerCase() === email.toLowerCase()) {
-      setEmailError("Nowy email musi być inny niż obecny.");
+      nextErrors.newEmail = "Nowy email musi być inny niż obecny.";
+    }
+    if (Object.keys(nextErrors).length > 0) {
+      setEmailFieldErrors(nextErrors);
       return;
     }
     try {
@@ -199,17 +210,24 @@ export default function SettingsPage() {
   async function handleChangePassword(e) {
     e.preventDefault();
     setPasswordError("");
+    setPasswordFieldErrors({});
     setPasswordSuccess("");
+    const nextErrors = {};
     if (!currentPassword) {
-      setPasswordError("Podaj obecne hasło.");
-      return;
+      nextErrors.currentPassword = "Podaj obecne hasło.";
     }
-    if (newPassword.length < 6) {
-      setPasswordError("Nowe hasło musi mieć co najmniej 6 znaków.");
-      return;
+    if (!newPassword) {
+      nextErrors.newPassword = "Podaj nowe hasło.";
+    } else if (newPassword.length < 6) {
+      nextErrors.newPassword = "Nowe hasło musi mieć co najmniej 6 znaków.";
     }
-    if (newPassword !== confirmPassword) {
-      setPasswordError("Nowe hasła nie są takie same.");
+    if (!confirmPassword) {
+      nextErrors.confirmPassword = "Powtórz nowe hasło.";
+    } else if (newPassword !== confirmPassword) {
+      nextErrors.confirmPassword = "Nowe hasła nie są takie same.";
+    }
+    if (Object.keys(nextErrors).length > 0) {
+      setPasswordFieldErrors(nextErrors);
       return;
     }
     try {
@@ -236,8 +254,9 @@ export default function SettingsPage() {
 
   async function handleDeleteAccount() {
     setDeleteError("");
+    setDeleteFieldErrors({});
     if (!deletePassword) {
-      setDeleteError("Podaj hasło, aby usunąć konto.");
+      setDeleteFieldErrors({ deletePassword: "Podaj hasło, aby usunąć konto." });
       return;
     }
     const confirmed = window.confirm("Czy na pewno chcesz usunąć konto? Tej operacji nie da się cofnąć.");
@@ -296,21 +315,31 @@ export default function SettingsPage() {
                 <Field label="Obecny email">
                   <input className="settingsInput" value={email} readOnly disabled />
                 </Field>
-                <Field label="Nowy email">
+                <Field label="Nowy email" error={emailFieldErrors.newEmail} errorId="settings-new-email-error">
                   <input
                     className="settingsInput"
                     type="email"
                     value={newEmail}
-                    onChange={(e) => setNewEmail(e.target.value)}
+                    onChange={(e) => {
+                      setNewEmail(e.target.value);
+                      setEmailFieldErrors((current) => ({ ...current, newEmail: "" }));
+                    }}
                     autoComplete="email"
+                    aria-invalid={emailFieldErrors.newEmail ? "true" : "false"}
+                    aria-describedby={emailFieldErrors.newEmail ? "settings-new-email-error" : undefined}
                   />
                 </Field>
-                <Field label="Obecne hasło">
+                <Field label="Obecne hasło" error={emailFieldErrors.emailPassword} errorId="settings-email-password-error">
                   <PasswordInput
                     value={emailPassword}
-                    onChange={(e) => setEmailPassword(e.target.value)}
+                    onChange={(e) => {
+                      setEmailPassword(e.target.value);
+                      setEmailFieldErrors((current) => ({ ...current, emailPassword: "" }));
+                    }}
                     placeholder="Wpisz obecne hasło"
                     autoComplete="current-password"
+                    invalid={Boolean(emailFieldErrors.emailPassword)}
+                    describedBy={emailFieldErrors.emailPassword ? "settings-email-password-error" : undefined}
                   />
                 </Field>
                 <div className="settingsFormAction">
@@ -335,28 +364,43 @@ export default function SettingsPage() {
               <Message type="error">{passwordError}</Message>
               <Message type="success">{passwordSuccess}</Message>
               <form className="settingsFormGrid" onSubmit={handleChangePassword}>
-                <Field label="Obecne hasło">
+                <Field label="Obecne hasło" error={passwordFieldErrors.currentPassword} errorId="settings-current-password-error">
                   <PasswordInput
                     value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    onChange={(e) => {
+                      setCurrentPassword(e.target.value);
+                      setPasswordFieldErrors((current) => ({ ...current, currentPassword: "" }));
+                    }}
                     placeholder="Wpisz obecne hasło"
                     autoComplete="current-password"
+                    invalid={Boolean(passwordFieldErrors.currentPassword)}
+                    describedBy={passwordFieldErrors.currentPassword ? "settings-current-password-error" : undefined}
                   />
                 </Field>
-                <Field label="Nowe hasło">
+                <Field label="Nowe hasło" error={passwordFieldErrors.newPassword} errorId="settings-new-password-error">
                   <PasswordInput
                     value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
+                    onChange={(e) => {
+                      setNewPassword(e.target.value);
+                      setPasswordFieldErrors((current) => ({ ...current, newPassword: "" }));
+                    }}
                     placeholder="Wpisz nowe hasło"
                     autoComplete="new-password"
+                    invalid={Boolean(passwordFieldErrors.newPassword)}
+                    describedBy={passwordFieldErrors.newPassword ? "settings-new-password-error" : undefined}
                   />
                 </Field>
-                <Field label="Powtórz nowe hasło">
+                <Field label="Powtórz nowe hasło" error={passwordFieldErrors.confirmPassword} errorId="settings-confirm-password-error">
                   <PasswordInput
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      setPasswordFieldErrors((current) => ({ ...current, confirmPassword: "" }));
+                    }}
                     placeholder="Powtórz nowe hasło"
                     autoComplete="new-password"
+                    invalid={Boolean(passwordFieldErrors.confirmPassword)}
+                    describedBy={passwordFieldErrors.confirmPassword ? "settings-confirm-password-error" : undefined}
                   />
                 </Field>
                 <div className="settingsFormAction">
@@ -401,12 +445,24 @@ export default function SettingsPage() {
               </div>
               <Message type="error">{deleteError}</Message>
               <div className="settingsDangerRow">
-                <PasswordInput
-                  value={deletePassword}
-                  onChange={(e) => setDeletePassword(e.target.value)}
-                  placeholder="Podaj hasło, aby usunąć konto..."
-                  autoComplete="current-password"
-                />
+                <div className={`settingsDangerPassword${deleteFieldErrors.deletePassword ? " is-invalid" : ""}`}>
+                  <PasswordInput
+                    value={deletePassword}
+                    onChange={(e) => {
+                      setDeletePassword(e.target.value);
+                      setDeleteFieldErrors((current) => ({ ...current, deletePassword: "" }));
+                    }}
+                    placeholder="Podaj hasło, aby usunąć konto..."
+                    autoComplete="current-password"
+                    invalid={Boolean(deleteFieldErrors.deletePassword)}
+                    describedBy={deleteFieldErrors.deletePassword ? "settings-delete-password-error" : undefined}
+                  />
+                  {deleteFieldErrors.deletePassword ? (
+                    <small id="settings-delete-password-error" className="settingsFieldError" role="alert">
+                      {deleteFieldErrors.deletePassword}
+                    </small>
+                  ) : null}
+                </div>
                 <button type="button" className="settingsBtn settingsBtnDanger" onClick={handleDeleteAccount}>
                   Usuń konto
                 </button>

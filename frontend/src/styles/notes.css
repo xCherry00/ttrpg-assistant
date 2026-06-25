@@ -63,6 +63,20 @@
   box-shadow: 0 0 0 3px rgba(29, 128, 102, 0.12);
 }
 
+.notesField.is-invalid input,
+.notesField.is-invalid select,
+.notesField.is-invalid textarea {
+  border-color: rgba(216, 50, 50, 0.72);
+  box-shadow: 0 0 0 3px rgba(216, 50, 50, 0.1);
+}
+
+.notesFieldError {
+  color: var(--notes-danger);
+  font-size: 0.78rem;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
 .notesListPanel {
   min-height: 0;
   display: grid;
@@ -71,6 +85,12 @@
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.97);
   overflow: hidden;
+}
+
+.notesToolbar.panel-soft:hover,
+.notesListPanel.panel-soft:hover {
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 .notesPanelHeader {

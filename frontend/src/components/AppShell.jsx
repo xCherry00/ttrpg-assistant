@@ -9,7 +9,7 @@ const PAGE_META = [
   { match: (path) => path === "/dashboard", title: "Dashboard", description: "Panel główny aplikacji TTRPG Assistant.", icon: "dashboard" },
   { match: (path) => path.startsWith("/campaigns"), title: "Kampanie", description: "Zarządzanie kampaniami i światami gry.", icon: "campaign" },
   { match: (path) => path.startsWith("/characters"), title: "Postacie", description: "Zarządzanie kartami postaci i danymi bohaterów.", icon: "characters" },
-  { match: (path) => path === "/notes", title: "Notatki", description: "Proste zapiski z sesji, kampanii, postaci i pomysłów.", icon: "file" },
+  { match: (path) => path === "/notes", title: "Notatki", description: "Proste zapiski z sesji, kampanii, postaci i pomysłów.", icon: "notes" },
   { match: (path) => path === "/initiative", title: "Tracker inicjatywy", description: "Zarządzanie walką, turami i uczestnikami.", icon: "initiative" },
   { match: (path) => path.includes("/sessions/"), title: "Sesje", description: "Planowanie i prowadzenie sesji RPG.", icon: "sessions" },
   { match: (path) => path.startsWith("/generators"), title: "Generatory", description: "Narzędzia do tworzenia treści RPG.", icon: "generators" },

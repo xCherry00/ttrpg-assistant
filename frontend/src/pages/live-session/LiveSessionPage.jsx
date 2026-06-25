@@ -342,52 +342,34 @@ function PlayerStrip({ characters, members, attendance, selectedCharacterId, cur
   );
 }
 
-function SceneFormFields({ draft, setDraft }) {
+function SceneFormFields({ draft, setDraft, errors = {}, setErrors }) {
   function update(field, value) {
     setDraft((prev) => ({ ...prev, [field]: value }));
+    setErrors?.((current) => {
+      if (!current[field]) return current;
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
   }
 
   return (
     <div className="liveSessionSceneForm">
-      <label className="campaignField">
-        <span>Tytuł sceny</span>
+      <label className={`campaignField${errors.title ? " is-invalid" : ""}`}>
+        <span>Nazwa sceny</span>
         <input
           value={draft.title}
           onChange={(event) => update("title", event.target.value)}
           maxLength={160}
           placeholder="Np. Brama do podziemi"
-          required
+          aria-invalid={errors.title ? "true" : "false"}
+          aria-describedby={errors.title ? "live-session-scene-title-error" : undefined}
         />
-      </label>
-      <div className="liveSessionTwoCols">
-        <label className="campaignField">
-          <span>Lokacja</span>
-          <input
-            value={draft.location}
-            onChange={(event) => update("location", event.target.value)}
-            maxLength={120}
-            placeholder="Np. Stare ruiny"
-          />
-        </label>
-        <label className="campaignField">
-          <span>Nastroj</span>
-          <input
-            value={draft.mood}
-            onChange={(event) => update("mood", event.target.value)}
-            maxLength={120}
-            placeholder="Np. Niepokoj"
-          />
-        </label>
-      </div>
-      <label className="campaignField">
-        <span>Opis sceny</span>
-        <textarea
-          value={draft.description}
-          onChange={(event) => update("description", event.target.value)}
-          rows={4}
-          maxLength={1000}
-          placeholder="Krotki opis tego, co widza gracze..."
-        />
+        {errors.title ? (
+          <small id="live-session-scene-title-error" className="liveSessionFieldError" role="alert">
+            {errors.title}
+          </small>
+        ) : null}
       </label>
       <ImageUpload
         value={draft.imageUrl}
@@ -397,25 +379,17 @@ function SceneFormFields({ draft, setDraft }) {
         previewAlt="Obraz sceny"
         autoUpload
       />
-      <label className="liveSessionCheckbox">
-        <input
-          type="checkbox"
-          checked={draft.visibleToPlayers}
-          onChange={(event) => update("visibleToPlayers", event.target.checked)}
-        />
-        <span>Widoczna dla graczy</span>
-      </label>
     </div>
   );
 }
 
-function SceneModal({ mode, draft, setDraft, scenes, activeSceneId, saving, onClose, onSave, onSelect, onDelete, onAddFromEmpty }) {
+function SceneModal({ mode, draft, setDraft, errors, setErrors, scenes, activeSceneId, saving, onClose, onSave, onSelect, onDelete, onAddFromEmpty }) {
   if (!mode) return null;
   const title = mode === "add" ? "Dodaj scenę" : "Zmień scenę";
 
   return (
     <div className="liveSessionModalOverlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-      <section className="liveSessionModal" role="dialog" aria-modal="true" aria-labelledby="scene-modal-title">
+      <section className={`liveSessionModal liveSessionSceneModal liveSessionSceneModal--${mode}`} role="dialog" aria-modal="true" aria-labelledby="scene-modal-title">
         <div className="liveSessionModalHeader">
           <h2 id="scene-modal-title">{title}</h2>
           <button type="button" className="liveSessionCloseButton" onClick={onClose} aria-label="Zamknij">×</button>
@@ -450,7 +424,7 @@ function SceneModal({ mode, draft, setDraft, scenes, activeSceneId, saving, onCl
           )
         ) : (
           <form onSubmit={onSave}>
-            <SceneFormFields draft={draft} setDraft={setDraft} />
+            <SceneFormFields draft={draft} setDraft={setDraft} errors={errors} setErrors={setErrors} />
             <div className="liveSessionModalActions">
               <button className="campaignDetailsGhostBtn" type="button" onClick={onClose}>Anuluj</button>
               <button className="campaignDetailsPrimaryBtn" type="submit" disabled={saving}>Zapisz scenę</button>
@@ -504,6 +478,7 @@ export default function LiveSessionPage() {
   const [activeScene, setActiveScene] = useState(null);
   const [sceneModal, setSceneModal] = useState(null);
   const [sceneDraft, setSceneDraft] = useState(EMPTY_SCENE_DRAFT);
+  const [sceneFormErrors, setSceneFormErrors] = useState({});
   const [savingScene, setSavingScene] = useState(false);
   const [selectedSessionCharacterId, setSelectedSessionCharacterId] = useState(() => {
     if (typeof window === "undefined") return "";
@@ -647,7 +622,13 @@ export default function LiveSessionPage() {
 
   function openAddScene() {
     setSceneDraft({ ...EMPTY_SCENE_DRAFT, id: makeSceneId() });
+    setSceneFormErrors({});
     setSceneModal("add");
+  }
+
+  function closeSceneModal() {
+    setSceneModal(null);
+    setSceneFormErrors({});
   }
 
   function handleSelectSessionCharacter(characterId) {
@@ -660,9 +641,14 @@ export default function LiveSessionPage() {
   async function handleSaveScene(event) {
     event.preventDefault();
     const scene = normalizeSceneDraft(sceneDraft);
+    if (!scene.title) {
+      setSceneFormErrors({ title: "Podaj nazwę sceny." });
+      return;
+    }
     setSavingScene(true);
     setNotice("");
     setError("");
+    setSceneFormErrors({});
     try {
       if (sceneModal === "add") {
         const visibleScene = { ...scene, visibleToPlayers: true };
@@ -699,7 +685,7 @@ export default function LiveSessionPage() {
     setError("");
     try {
       await syncActiveScene(scene, true);
-      setSceneModal(null);
+      closeSceneModal();
     } catch (err) {
       setError(err?.message || "Nie udało się zmienić sceny.");
     } finally {
@@ -801,8 +787,10 @@ export default function LiveSessionPage() {
         setDraft={setSceneDraft}
         scenes={sceneLibrary}
         activeSceneId={activeSceneId}
+        errors={sceneFormErrors}
+        setErrors={setSceneFormErrors}
         saving={savingScene}
-        onClose={() => setSceneModal(null)}
+        onClose={closeSceneModal}
         onSave={handleSaveScene}
         onSelect={handleSelectScene}
         onDelete={handleDeleteScene}

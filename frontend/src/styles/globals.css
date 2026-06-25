@@ -510,6 +510,7 @@ select:focus-visible {
 }
 
 .notificationItem__dot {
+  grid-column: 1;
   width: 7px;
   height: 7px;
   margin-top: 0;
@@ -529,6 +530,7 @@ select:focus-visible {
 }
 
 .notificationItem__avatar {
+  grid-column: 2;
   width: 42px;
   height: 42px;
   display: grid;
@@ -557,8 +559,11 @@ select:focus-visible {
 }
 
 .notificationItem__copy {
+  grid-column: 3;
+  min-width: 0;
   display: grid;
   gap: 3px;
+  overflow-wrap: anywhere;
 }
 
 .notificationItem__copy strong {

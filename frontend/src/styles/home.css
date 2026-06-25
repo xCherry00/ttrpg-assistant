@@ -36,6 +36,16 @@
 }
 
 .homeNavbar {
+  --home-bg: #f4faf7;
+  --home-grid: rgba(15, 26, 26, 0.055);
+  --home-ink: #111d1b;
+  --home-muted: #5f6f6b;
+  --home-soft: #eef7f3;
+  --home-surface: rgba(255, 255, 255, 0.92);
+  --home-border: #d9e7e1;
+  --home-primary: #208b66;
+  --home-primary-dark: #146f53;
+  --home-shadow: 0 22px 54px rgba(15, 26, 26, 0.1);
   min-height: 66px;
   display: flex;
   align-items: center;
@@ -46,6 +56,10 @@
   border-radius: 18px;
   background: var(--home-surface);
   box-shadow: 0 16px 36px rgba(15, 26, 26, 0.07);
+}
+
+.homeNavbar a {
+  text-decoration: none;
 }
 
 .homeBrand,
@@ -61,6 +75,7 @@
 
 .homeBrand {
   gap: 14px;
+  color: var(--home-ink);
   font-size: 1.15rem;
   font-weight: 850;
 }
@@ -104,6 +119,10 @@
   font-weight: 800;
 }
 
+.homeNavbar .homeTextLink {
+  color: var(--home-muted);
+}
+
 .homeTextLink:hover {
   color: var(--home-primary);
   background: var(--home-soft);
@@ -118,6 +137,10 @@
   background: linear-gradient(180deg, #24966f, var(--home-primary-dark));
   box-shadow: 0 13px 25px rgba(32, 139, 102, 0.23);
   font-weight: 850;
+}
+
+.homeNavbar .homeButton {
+  color: #fff;
 }
 
 .homeButton:hover,

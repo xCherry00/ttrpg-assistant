@@ -2,12 +2,27 @@ import { useEffect, useState } from "react";
 import { register } from "../api/auth";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import PublicTopbar from "../components/PublicTopbar";
+import AppIcon from "../components/common/AppIcon";
 
 const AUTH_BENEFITS = [
-  { icon: "campaigns", text: "Kampanie, postacie i notatki w jednym miejscu" },
-  { icon: "tools", text: "Generatory, kości i inicjatywa pod ręką" },
-  { icon: "players", text: "Panel dla graczy i Mistrzów Gry" },
+  { icon: "campaign", text: "Kampanie, postacie i notatki w jednym miejscu" },
+  { icon: "generators", text: "Generatory, kości i inicjatywa pod ręką" },
+  { icon: "friends", text: "Panel dla graczy i Mistrzów Gry" },
 ];
+
+function getRegisterErrorMessage(err) {
+  if (err?.status === 409) {
+    return "Konto z tym adresem email już istnieje.";
+  }
+  if (err?.status === 400 || err?.status === 422) {
+    return "Sprawdź dane w formularzu i spróbuj ponownie.";
+  }
+  if (err?.message?.includes("Brak po")) {
+    return err.message;
+  }
+  return "Nie udało się utworzyć konta. Spróbuj ponownie za chwilę.";
+}
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -17,6 +32,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -27,15 +43,19 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
 
-    if (password !== password2) {
-      setError("Hasła nie są identyczne");
-      return;
-    }
+    const nextErrors = {};
+    if (!email.trim()) nextErrors.email = "Podaj adres email.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) nextErrors.email = "Podaj poprawny adres email.";
+    if (!password) nextErrors.password = "Podaj hasło.";
+    else if (password.length < 6) nextErrors.password = "Hasło musi mieć co najmniej 6 znaków.";
+    if (!password2) nextErrors.password2 = "Powtórz hasło.";
+    else if (password !== password2) nextErrors.password2 = "Hasła nie są identyczne.";
 
-    if (password.length < 6) {
-      setError("Hasło musi mieć co najmniej 6 znaków");
+    if (Object.keys(nextErrors).length > 0) {
+      setFieldErrors(nextErrors);
       return;
     }
+    setFieldErrors({});
 
     setLoading(true);
 
@@ -43,7 +63,13 @@ export default function RegisterPage() {
       await register(email, password);
       navigate("/login", { replace: true });
     } catch (err) {
-      setError(err.message || "Rejestracja nie powiodła się");
+      const message = getRegisterErrorMessage(err);
+      if (err?.status === 409) {
+        setFieldErrors((current) => ({ ...current, email: message }));
+        setError("");
+      } else {
+        setError(message);
+      }
       console.error("Registration error:", err);
     } finally {
       setLoading(false);
@@ -52,12 +78,13 @@ export default function RegisterPage() {
 
   return (
     <div className="authPage">
-      <AuthTopbar />
+      <div className="authPublicNav">
+        <PublicTopbar />
+      </div>
 
       <main className="authWrap">
         <section className="authPanel" aria-labelledby="registerTitle">
           <div className="authIntro">
-            <span className="authMark" aria-hidden="true" />
             <h1 id="registerTitle" className="authTitle">Utwórz konto</h1>
             <p className="authSubtitle">
               Zacznij organizować kampanie, postacie i materiały w jednym miejscu.
@@ -66,43 +93,61 @@ export default function RegisterPage() {
           </div>
 
           <form onSubmit={onSubmit} className="authForm">
-          <div className="authField">
-            <label className="authLabel">Email</label>
+          <div className={`authField${fieldErrors.email ? " is-invalid" : ""}`}>
+            <label className="authLabel" htmlFor="register-email">Email</label>
             <input
+              id="register-email"
               className="authInput"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setFieldErrors((current) => ({ ...current, email: "" }));
+              }}
               autoComplete="email"
               placeholder="twoj@email.pl"
-              required
+              aria-invalid={fieldErrors.email ? "true" : "false"}
+              aria-describedby={fieldErrors.email ? "register-email-error" : undefined}
             />
+            {fieldErrors.email ? <small id="register-email-error" className="authFieldError" role="alert">{fieldErrors.email}</small> : null}
           </div>
 
-          <div className="authField">
-            <label className="authLabel">Hasło</label>
+          <div className={`authField${fieldErrors.password ? " is-invalid" : ""}`}>
+            <label className="authLabel" htmlFor="register-password">Hasło</label>
             <input
+              id="register-password"
               className="authInput"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setFieldErrors((current) => ({ ...current, password: "" }));
+              }}
               type="password"
               autoComplete="new-password"
               placeholder="Minimum 6 znaków"
-              required
+              aria-invalid={fieldErrors.password ? "true" : "false"}
+              aria-describedby={fieldErrors.password ? "register-password-error" : undefined}
             />
+            {fieldErrors.password ? <small id="register-password-error" className="authFieldError" role="alert">{fieldErrors.password}</small> : null}
           </div>
 
-          <div className="authField">
-            <label className="authLabel">Powtórz hasło</label>
+          <div className={`authField${fieldErrors.password2 ? " is-invalid" : ""}`}>
+            <label className="authLabel" htmlFor="register-password-repeat">Powtórz hasło</label>
             <input
+              id="register-password-repeat"
               className="authInput"
               value={password2}
-              onChange={(e) => setPassword2(e.target.value)}
+              onChange={(e) => {
+                setPassword2(e.target.value);
+                setFieldErrors((current) => ({ ...current, password2: "" }));
+              }}
               type="password"
               autoComplete="new-password"
               placeholder="Powtórz hasło"
-              required
+              aria-invalid={fieldErrors.password2 ? "true" : "false"}
+              aria-describedby={fieldErrors.password2 ? "register-password-repeat-error" : undefined}
             />
+            {fieldErrors.password2 ? <small id="register-password-repeat-error" className="authFieldError" role="alert">{fieldErrors.password2}</small> : null}
           </div>
 
           {error && <div className="authError">{error}</div>}
@@ -128,71 +173,17 @@ export default function RegisterPage() {
   );
 }
 
-function AuthTopbar() {
-  return (
-    <header className="authTopbar">
-      <Link to="/" className="authBrand" aria-label="TTRPG Assistant">
-        <span className="authLogo" aria-hidden="true" />
-        <span><strong>TTRPG</strong> Assistant</span>
-      </Link>
-      <div className="authTopbar__actions">
-        <Link to="/login" className="authTopbarLink">Zaloguj się</Link>
-        <Link to="/register" className="authTopbarCta">Rozpocznij za darmo</Link>
-      </div>
-    </header>
-  );
-}
-
 function AuthBenefitList() {
   return (
     <ul className="authBenefitList">
       {AUTH_BENEFITS.map((item) => (
         <li key={item.text}>
           <span className="authBenefitIcon" aria-hidden="true">
-            <AuthBenefitIcon name={item.icon} />
+            <AppIcon name={item.icon} />
           </span>
           <span>{item.text}</span>
         </li>
       ))}
     </ul>
   );
-}
-
-function AuthBenefitIcon({ name }) {
-  const common = {
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: "2",
-    strokeLinecap: "round",
-    strokeLinejoin: "round",
-  };
-  const icons = {
-    campaigns: (
-      <>
-        <path d="M6 4h10a2 2 0 0 1 2 2v14H8a2 2 0 0 1-2-2V4Z" />
-        <path d="M9 8h6" />
-        <path d="M9 12h5" />
-      </>
-    ),
-    tools: (
-      <>
-        <path d="M5 19 19 5" />
-        <path d="m14 5 5 5" />
-        <path d="M4 8h4" />
-        <path d="M16 20h4" />
-        <path d="M8 4v4" />
-        <path d="M20 16v4" />
-      </>
-    ),
-    players: (
-      <>
-        <circle cx="9" cy="8" r="3" />
-        <path d="M3.5 19c.5-3.2 2.4-5 5.5-5s5 1.8 5.5 5" />
-        <path d="M16 11a2.5 2.5 0 1 0 0-5" />
-        <path d="M17 14c2 .4 3.2 1.9 3.5 5" />
-      </>
-    ),
-  };
-  return <svg {...common}>{icons[name] || icons.campaigns}</svg>;
 }

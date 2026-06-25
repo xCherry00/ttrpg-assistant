@@ -1133,6 +1133,19 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--workbench-accent) 18%, transparent 82%);
 }
 
+.generatorField.is-invalid .generatorInput,
+.generatorInput[aria-invalid="true"] {
+  border-color: rgba(255, 120, 132, 0.78);
+  box-shadow: 0 0 0 3px rgba(255, 120, 132, 0.12);
+}
+
+.generatorFieldError {
+  color: #ff9ba7;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
 .generatorCheckField {
   min-height: 46px;
   display: flex;

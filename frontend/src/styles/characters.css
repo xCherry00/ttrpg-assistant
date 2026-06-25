@@ -1824,27 +1824,63 @@
 
 .characterDeleteConfirmModal {
   width: min(520px, calc(100vw - 48px));
+  height: auto;
+  min-height: 0;
+  max-height: calc(100dvh - 48px);
   grid-template-rows: auto auto auto;
+  border-radius: 20px;
+  box-shadow: 0 22px 70px rgba(18, 31, 25, 0.2);
 }
 
 .characterDeleteConfirmBody {
-  padding: 22px;
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+  margin: 0 22px 20px;
+  padding: 18px;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(254, 242, 242, 0.96), rgba(255, 255, 255, 0.9));
 }
 
 .characterDeleteConfirmBody p {
   margin: 0;
-  color: var(--chars-soft);
+  color: var(--chars-ink);
   line-height: 1.6;
+}
+
+.characterDeleteConfirmBody small {
+  display: block;
+  margin-top: 6px;
+  color: #8a4b4b;
+  line-height: 1.5;
 }
 
 .characterDeleteConfirmBody strong {
   color: var(--chars-ink);
 }
 
-.characterDeleteConfirmFooter {
-  position: static;
-  margin: 0;
-  padding: 14px 22px;
+.characterDeleteConfirmIcon {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(239, 68, 68, 0.24);
+  border-radius: 16px;
+  background: rgba(254, 226, 226, 0.8);
+  color: #b91c1c;
+}
+
+.characterDeleteConfirmIcon .charactersIcon {
+  width: 24px;
+  height: 24px;
+}
+
+.characterDeleteConfirmFooter .charactersGhostBtn,
+.characterDeleteConfirmFooter .charactersDangerBtn {
+  min-height: 46px;
+  padding: 0 18px;
 }
 
 .characterAvatarPickerModal {
@@ -1982,6 +2018,16 @@
   padding: 12px 34px 12px 22px;
   border-top: 1px solid var(--chars-line);
   background: rgba(255, 255, 255, 0.97);
+}
+
+.characterDeleteConfirmFooter {
+  position: static;
+  margin: 0;
+  padding: 18px 22px 22px;
+  gap: 12px;
+  justify-content: flex-end;
+  border-top: 1px solid rgba(199, 216, 207, 0.72);
+  background: #fff;
 }
 
 .charactersModalBody .imageLibraryPicker__grid {
@@ -2132,6 +2178,17 @@
     width: calc(100vw - 20px);
     height: calc(100dvh - 38px);
     max-height: calc(100dvh - 38px);
+  }
+
+  .characterDeleteConfirmModal {
+    width: calc(100vw - 20px);
+    height: auto;
+    max-height: calc(100dvh - 32px);
+  }
+
+  .characterDeleteConfirmBody {
+    grid-template-columns: 1fr;
+    margin-inline: 16px;
   }
 
   .charactersModalHeader,

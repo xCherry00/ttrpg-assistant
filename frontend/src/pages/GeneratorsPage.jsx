@@ -810,20 +810,22 @@ function GeneratorIcon({ name }) {
   );
 }
 
-function Field({ param, value, onChange }) {
+function Field({ param, value, onChange, error }) {
   const inputType = normalizedInputType(param);
   const min = param.min ?? undefined;
   const max = param.max ?? undefined;
+  const errorId = error ? `generator-field-${param.key}-error` : undefined;
 
   if (inputType === "select") {
     return (
-      <div className="generatorField">
+      <div className={`generatorField${error ? " is-invalid" : ""}`}>
         <label className="generatorLabel">{param.label}</label>
-        <select className="generatorInput" value={value ?? ""} onChange={(event) => onChange(param.key, event.target.value)}>
+        <select className="generatorInput" value={value ?? ""} onChange={(event) => onChange(param.key, event.target.value)} aria-invalid={error ? "true" : "false"} aria-describedby={errorId}>
           {(param.options || []).map((option) => (
             <option key={option} value={option}>{option}</option>
           ))}
         </select>
+        {error ? <small id={errorId} className="generatorFieldError" role="alert">{error}</small> : null}
       </div>
     );
   }
@@ -838,7 +840,7 @@ function Field({ param, value, onChange }) {
   }
 
   return (
-    <div className="generatorField">
+    <div className={`generatorField${error ? " is-invalid" : ""}`}>
       <label className="generatorLabel">{param.label}</label>
       <input
         className="generatorInput"
@@ -846,6 +848,8 @@ function Field({ param, value, onChange }) {
         min={min}
         max={max}
         value={value ?? ""}
+        aria-invalid={error ? "true" : "false"}
+        aria-describedby={errorId}
         onChange={(event) => {
           const nextValue = inputType === "number" && min !== undefined && max !== undefined
             ? clampNumberValue(event.target.value, min, max)
@@ -853,6 +857,7 @@ function Field({ param, value, onChange }) {
           onChange(param.key, nextValue);
         }}
       />
+      {error ? <small id={errorId} className="generatorFieldError" role="alert">{error}</small> : null}
     </div>
   );
 }
@@ -1460,6 +1465,7 @@ export default function GeneratorsPage() {
   const [loading, setLoading] = useState(false);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [error, setError] = useState("");
+  const [generatorFieldErrors, setGeneratorFieldErrors] = useState({});
   const [catalogFallback, setCatalogFallback] = useState(false);
   const [catalogError, setCatalogError] = useState("");
   const [catalogReloadKey, setCatalogReloadKey] = useState(0);
@@ -1632,6 +1638,13 @@ export default function GeneratorsPage() {
   }, [activeDefinition, activeKey, token]);
 
   function setFieldValue(key, value) {
+    setGeneratorFieldErrors((current) => {
+      const scoped = current[activeKey] || {};
+      if (!scoped[key]) return current;
+      const nextScoped = { ...scoped };
+      delete nextScoped[key];
+      return { ...current, [activeKey]: nextScoped };
+    });
     setForms((prev) => {
       const current = {
         ...(prev[activeKey] || {}),
@@ -1659,6 +1672,33 @@ export default function GeneratorsPage() {
 
   function activeGeneratorCode() {
     return activeDefinition?.kind === "variant" ? activeDefinition.generatorCode : activeDefinition?.type;
+  }
+
+  function validateGeneratorFields(target, values) {
+    const nextErrors = {};
+    for (const param of scopedParams(target?.params, values, target?.kind === "variant" ? target.generatorCode : target?.type)) {
+      const inputType = normalizedInputType(param);
+      const value = values?.[param.key];
+      const isBlank = value == null || (typeof value === "string" && value.trim() === "");
+      if (param.required && inputType !== "checkbox" && inputType !== "toggle" && isBlank) {
+        nextErrors[param.key] = `Uzupełnij pole "${param.label}".`;
+        continue;
+      }
+      if (inputType === "number" && !isBlank) {
+        const numberValue = Number(value);
+        if (!Number.isFinite(numberValue)) {
+          nextErrors[param.key] = `Pole "${param.label}" musi być liczbą.`;
+          continue;
+        }
+        if (param.min != null && numberValue < Number(param.min)) {
+          nextErrors[param.key] = `Minimalna wartość: ${param.min}.`;
+        }
+        if (param.max != null && numberValue > Number(param.max)) {
+          nextErrors[param.key] = `Maksymalna wartość: ${param.max}.`;
+        }
+      }
+    }
+    return nextErrors;
   }
 
   function rememberResult(target, generated, values) {
@@ -1711,6 +1751,13 @@ export default function GeneratorsPage() {
       if (JSON.stringify(values) !== JSON.stringify(rawValues)) {
         setForms((previous) => ({ ...previous, [key]: values }));
       }
+      const nextFieldErrors = validateGeneratorFields(target, values);
+      if (Object.keys(nextFieldErrors).length > 0) {
+        setGeneratorFieldErrors((previous) => ({ ...previous, [key]: nextFieldErrors }));
+        setLoading(false);
+        return;
+      }
+      setGeneratorFieldErrors((previous) => ({ ...previous, [key]: {} }));
       const generated = target.kind === "variant"
         ? await generateVariantContent(token, target.generatorCode, target.variantCode, values)
         : await generateContent(token, target.system, target.type, values);
@@ -1755,7 +1802,13 @@ export default function GeneratorsPage() {
               <div className="generatorWindowFields">
                 {currentParams.length ? (
                   currentParams.map((param) => (
-                    <Field key={param.key} param={param} value={activeValues[param.key]} onChange={setFieldValue} />
+                    <Field
+                      key={param.key}
+                      param={param}
+                      value={activeValues[param.key]}
+                      error={(generatorFieldErrors[activeKey] || {})[param.key]}
+                      onChange={setFieldValue}
+                    />
                   ))
                 ) : (
                   <p className="generatorCatalogEmpty">Ten generator nie wymaga dodatkowych ustawien.</p>

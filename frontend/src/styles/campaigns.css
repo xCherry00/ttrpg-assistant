@@ -34,7 +34,7 @@
   display: grid !important;
   justify-content: start;
   grid-template-columns: max-content minmax(0, 1fr);
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: auto auto auto minmax(0, 1fr);
   gap: 14px;
   color: var(--campaign-ink);
   overflow: hidden !important;
@@ -86,6 +86,11 @@
   box-shadow: none;
   font-weight: 850;
   cursor: pointer;
+}
+
+.campaignListTabs button svg {
+  width: 22px;
+  height: 22px;
 }
 
 .campaignListTabs button.is-active {
@@ -263,6 +268,7 @@
 .campaignError,
 .campaignLoading,
 .campaignJoinError {
+  grid-column: 1 / -1;
   border-radius: 12px;
   padding: 12px 14px;
   font-weight: 700;
@@ -289,7 +295,7 @@
 
 .campaignsLayout {
   grid-column: 1 / -1;
-  grid-row: 3;
+  grid-row: 4;
   min-height: 0;
   display: block;
   gap: 16px;
@@ -1333,6 +1339,20 @@
   outline: 0;
 }
 
+.campaignCreateFields label.is-invalid input,
+.campaignCreateFields label.is-invalid select,
+.campaignCreateFields label.is-invalid textarea {
+  border-color: rgba(216, 50, 50, 0.72);
+  box-shadow: 0 0 0 3px rgba(216, 50, 50, 0.1);
+}
+
+.campaignFieldError {
+  color: #b42318;
+  font-size: 0.78rem;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
 .campaignCreateFields textarea {
   min-height: 132px;
   resize: vertical;
@@ -1460,7 +1480,7 @@
 /* QA repair pass: keep the current direction, but make layout stable and non-clipping. */
 .campaignsSaas {
   grid-template-columns: max-content minmax(0, 1fr) !important;
-  grid-template-rows: auto auto minmax(0, 1fr) !important;
+  grid-template-rows: auto auto auto minmax(0, 1fr) !important;
   gap: 12px !important;
 }
 
@@ -1475,6 +1495,7 @@
 .campaignsLayout {
   position: relative;
   z-index: 1;
+  grid-row: 4;
   align-items: stretch;
   padding-top: 2px;
 }
@@ -1816,8 +1837,16 @@
 
 .appContentInner:has(.campaignsSaas) .campaignsSaas {
   grid-template-columns: max-content minmax(0, 1fr) !important;
-  grid-template-rows: auto auto minmax(0, 1fr) !important;
+  grid-template-rows: auto auto auto minmax(0, 1fr) !important;
   gap: 12px !important;
+}
+
+.appContentInner:has(.campaignsSaas) .campaignNotice,
+.appContentInner:has(.campaignsSaas) .campaignError,
+.appContentInner:has(.campaignsSaas) .campaignLoading {
+  grid-column: 1 / -1 !important;
+  grid-row: 3 !important;
+  margin: 0 !important;
 }
 
 .appContentInner:has(.campaignsSaas) .campaignToolbar {
@@ -1828,6 +1857,7 @@
 
 .appContentInner:has(.campaignsSaas) .campaignsLayout {
   display: block !important;
+  grid-row: 4 !important;
   grid-template-columns: minmax(0, 1fr) !important;
   gap: 14px !important;
 }
