@@ -5,7 +5,6 @@ import { AuthProvider } from "./auth/AuthContext";
 import AppErrorBoundary from "./components/AppErrorBoundary";
 
 import "./styles/globals.css";
-import "./styles/ui.css";
 import "./styles/topnav.css";
 import "./styles/sidebar.css";
 import "./styles/redesign.css";

@@ -1,2 +1,0 @@
-ALTER TABLE users
-    ADD COLUMN IF NOT EXISTS chat_nick_color VARCHAR(20) NOT NULL DEFAULT '';

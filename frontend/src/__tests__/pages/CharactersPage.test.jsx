@@ -28,10 +28,6 @@ vi.mock("../../components/characters/CharacterCreatorRouter", () => ({
   ),
 }));
 
-vi.mock("../../components/characters/CharacterSheetRouter", () => ({
-  default: ({ onSave }) => <button type="button" onClick={() => onSave({ name: "After Save" })}>save-sheet</button>,
-}));
-
 vi.mock("../../components/characters/CharacterSystemSelector", () => ({
   default: ({ onSelect }) => (
     <div>
@@ -102,7 +98,7 @@ describe("CharactersPage", () => {
 
   it("supports save and delete flow", async () => {
     renderPage();
-    fireEvent.click(await screen.findByRole("button", { name: "save-sheet" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Zapisz zmiany" }));
     await waitFor(() => expect(charactersApi.updateCharacterSheet).toHaveBeenCalled());
 
     fireEvent.click(screen.getByRole("button", { name: "Usuń postać" }));

@@ -73,6 +73,7 @@ function Icon({ name }) {
     search: "search",
     plus: "addFriend",
     users: "friends",
+    dot: "time",
     inbox: "messages",
     send: "send",
     block: "blocked",

@@ -84,7 +84,7 @@ export default function AppShell() {
                     <Link className="appPageHeaderBack" to="/campaigns">← Powrót do kampanii</Link>
                   ) : (
                     <div className="appPageHeader__main">
-                      <span className="appPageHeader__icon" aria-hidden="true">
+                      <span className={`appPageHeader__icon appPageHeader__icon--${pageMeta.icon}`} aria-hidden="true">
                         <AppIcon name={pageMeta.icon} />
                       </span>
                       <span className="appPageHeader__copy">

@@ -45,11 +45,10 @@ public class SecurityConfig {
                 .requestMatchers("/v3/api-docs/**").permitAll()
                 .requestMatchers("/swagger-ui/**").permitAll()
                 .requestMatchers("/swagger-ui.html").permitAll()
-                .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/uploads/images/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/generators/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/generator-results/recent").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/generators/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/compendium/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/glossary/**").permitAll()
 

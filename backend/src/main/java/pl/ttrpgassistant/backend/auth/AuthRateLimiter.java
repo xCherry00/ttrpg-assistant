@@ -13,7 +13,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class AuthRateLimiter {
 
-    private final Map<String, Deque<Instant>> attemptsByKey = new ConcurrentHashMap<>();
+    private static final int MAX_TRACKED_KEYS = 10_000;
+
+    private final Map<String, AttemptBucket> attemptsByKey = new ConcurrentHashMap<>();
 
     public void checkLogin(String clientKey) {
         check("login:" + clientKey, 10, Duration.ofMinutes(1), "Za dużo prób logowania. Spróbuj ponownie za chwilę.");
@@ -34,7 +36,13 @@ public class AuthRateLimiter {
     private void check(String key, int maxAttempts, Duration window, String message) {
         Instant now = Instant.now();
         Instant cutoff = now.minus(window);
-        Deque<Instant> attempts = attemptsByKey.computeIfAbsent(key, ignored -> new ArrayDeque<>());
+        cleanupExpiredBuckets(now);
+        if (!attemptsByKey.containsKey(key) && attemptsByKey.size() >= MAX_TRACKED_KEYS) {
+            throw new RateLimitExceededException("Za dużo prób uwierzytelniania. Spróbuj ponownie za chwilę.");
+        }
+
+        AttemptBucket bucket = attemptsByKey.computeIfAbsent(key, ignored -> new AttemptBucket());
+        Deque<Instant> attempts = bucket.attempts();
 
         synchronized (attempts) {
             while (!attempts.isEmpty() && attempts.peekFirst().isBefore(cutoff)) {
@@ -44,6 +52,28 @@ public class AuthRateLimiter {
                 throw new RateLimitExceededException(message);
             }
             attempts.addLast(now);
+            bucket.expiresAt(now.plus(window));
+        }
+    }
+
+    private void cleanupExpiredBuckets(Instant now) {
+        attemptsByKey.entrySet().removeIf(entry -> entry.getValue().isExpired(now));
+    }
+
+    private static final class AttemptBucket {
+        private final Deque<Instant> attempts = new ArrayDeque<>();
+        private volatile Instant expiresAt = Instant.EPOCH;
+
+        Deque<Instant> attempts() {
+            return attempts;
+        }
+
+        void expiresAt(Instant expiresAt) {
+            this.expiresAt = expiresAt;
+        }
+
+        boolean isExpired(Instant now) {
+            return expiresAt.isBefore(now);
         }
     }
 }

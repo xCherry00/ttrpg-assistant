@@ -169,6 +169,12 @@
   object-fit: contain;
 }
 
+.authBenefitIcon--friends svg,
+.authBenefitIcon--friends .appIconAsset {
+  width: 29px;
+  height: 29px;
+}
+
 .authForm {
   display: grid;
   align-content: center;

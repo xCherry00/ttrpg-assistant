@@ -178,7 +178,7 @@ function AuthBenefitList() {
     <ul className="authBenefitList">
       {AUTH_BENEFITS.map((item) => (
         <li key={item.text}>
-          <span className="authBenefitIcon" aria-hidden="true">
+          <span className={`authBenefitIcon authBenefitIcon--${item.icon}`} aria-hidden="true">
             <AppIcon name={item.icon} />
           </span>
           <span>{item.text}</span>

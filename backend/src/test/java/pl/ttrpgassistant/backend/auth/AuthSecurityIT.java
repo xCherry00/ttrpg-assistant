@@ -138,6 +138,25 @@ class AuthSecurityIT {
     }
 
     @Test
+    void generatorPostShouldRequireToken() throws Exception {
+        Map<String, Object> request = Map.of("params", Map.of("setting", "Fantasy"));
+
+        mockMvc.perform(post("/api/generators/any/name/generate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+
+        UserEntity user = createUser(uniqueEmail("generator-token"), "password-123");
+        String token = jwtService.createToken(user.getId(), "PLAYER", false);
+
+        mockMvc.perform(post("/api/generators/any/name/generate")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void userShouldNotReadOrDeleteOtherUsersCharacter() throws Exception {
         UserEntity owner = createUser(uniqueEmail("char-owner"), "password-123");
         UserEntity attacker = createUser(uniqueEmail("char-attacker"), "password-123");

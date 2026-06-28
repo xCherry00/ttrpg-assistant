@@ -136,6 +136,11 @@ select {
   height: 24px;
 }
 
+.appPageHeader__icon--friends .appIconAsset {
+  width: 28px;
+  height: 28px;
+}
+
 .appPageHeader__copy {
   min-width: 0;
   display: block;

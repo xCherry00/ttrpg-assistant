@@ -291,10 +291,4 @@ BEGIN
         (marta_id, varella_id, 'npc', 'dnd5e-tavern-contact', '{"tone":"mroczny","role":"informator"}'::jsonb, '{"name":"Runa od Mostu","hook":"Zna droge pod stara wieze, ale boi sie zielonego ognia."}'::jsonb, 'Runa od Mostu', 'Kontakt karczemny dla Varelli.', now() - interval '2 days'),
         (tomek_id, arkham_id, 'clue', 'coc7e-archive', '{"place":"hotel","era":"1920"}'::jsonb, '{"title":"Paragon z pralni","detail":"Na odwrocie zapisano numer pokoju, ktory oficjalnie nie istnieje."}'::jsonb, 'Paragon z pralni', 'Poszlaka do sledztwa w Arkham.', now() - interval '1 day');
 
-    INSERT INTO user_tool_usage (user_id, tool_key, usage_count, last_used_at, created_at, updated_at) VALUES
-        (marta_id, 'campaigns', 18, now() - interval '8 minutes', now() - interval '42 days', now() - interval '8 minutes'),
-        (marta_id, 'generators', 11, now() - interval '2 days', now() - interval '30 days', now() - interval '2 days'),
-        (arek_id, 'dice', 27, now() - interval '20 minutes', now() - interval '35 days', now() - interval '20 minutes'),
-        (kasia_id, 'notes', 16, now() - interval '7 hours', now() - interval '22 days', now() - interval '7 hours'),
-        (ola_id, 'characters', 5, now() - interval '2 days', now() - interval '8 days', now() - interval '2 days');
 END $$;

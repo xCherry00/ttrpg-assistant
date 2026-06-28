@@ -46,7 +46,7 @@ describe("LiveSessionPage", () => {
     seedDefaults();
   });
 
-  it("renders the live scene workspace without requested-roll controls", async () => {
+  it("renders the live scene workspace without legacy roll request controls", async () => {
     renderPage();
 
     expect(await screen.findByRole("heading", { name: /Panel sceny/i })).toBeInTheDocument();
